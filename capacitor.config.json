@@ -1,0 +1,9 @@
+{
+  "appId": "com.antigravity.spacesurvivor",
+  "appName": "Neon Space Survivor",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

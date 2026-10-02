@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Neon Space Survivor</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Oyun Canvası -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Oyun İçi HUD (Arayüz) -->
+    <div id="hud" class="hud-overlay hidden">
+      <!-- Üst XP Çizgisi (Ultra İnce Flush Bar) -->
+      <div class="xp-bar-track">
+        <div id="xp-bar-fill" class="xp-bar-fill" style="width: 0%;"></div>
+      </div>
+
+      <!-- Tek Satır Kompakt Üst Panel (Görüş Alanını Asla Kapatmaz) -->
+      <div class="hud-top-ribbon">
+        <!-- Sol: Level & Can / Kalkan Mini Çubukları -->
+        <div class="hud-left-group">
+          <span class="level-badge" id="level-badge">LV.1</span>
+          <div class="compact-status-bars">
+            <div class="bar-wrapper hp-wrapper" title="Can">
+              <span class="bar-icon"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 1h3v2H2zM7 1h3v2H7zM1 3h10v3H1zM2 6h8v2H2zM3 8h6v2H3zM4 10h4v1H4zM5 11h2v1H5z" fill="#ff0055"/><rect x="3" y="2" width="1" height="1" fill="#fff"/></svg></span>
+              <div class="bar-track">
+                <div id="hp-bar-fill" class="bar-fill hp-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+            <div class="bar-wrapper shield-wrapper" id="shield-wrapper" title="Kalkan">
+              <span class="bar-icon"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 1h8v2H2zM1 3h10v4H1zM2 7h8v2H2zM3 9h6v1H3zM4 10h4v1H4zM5 11h2v1H5z" fill="#00f0ff"/><path d="M3 3h6v4H3z" fill="#0077ff"/><rect x="4" y="4" width="4" height="2" fill="#e0f7fa"/></svg></span>
+              <div class="bar-track">
+                <div id="shield-bar-fill" class="bar-fill shield-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orta: Kombo ve Rekor (Yalnızca aktifken hafif belirir) -->
+        <div class="hud-center-group">
+          <span id="combo-display" class="combo-badge hidden"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:2px"><path d="M6 0h4v3H6zM4 3h5v2H4zM2 5h6v2H2zM1 7h5v2H1zM3 9h2v1H3zM4 10h1v2H4z" fill="#ffbe0b"/></svg><span id="combo-text">2x</span></span>
+          <span id="overload-badge" class="overload-hud-badge hidden"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:3px"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/><path d="M5 4c0 1-1 1.2-1 2 0 0.8 0.5 1 1 1s1-0.2 1-1c0-0.8-1-1-1-2z" fill="#ffe600"/></svg>AŞIRI YÜKLEME</span>
+          <span class="score-display hidden" id="score-display">0</span>
+        </div>
+
+        <!-- Sağ: Yalnızca Sade Duraklatma Butonu (Görüşü asla engellemez) -->
+        <div class="hud-right-group">
+          <div class="hud-buttons">
+            <button id="btn-pause" class="sound-icon-btn minimal-pause-btn" aria-label="Duraklat" title="Duraklat">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><rect x="2" y="2" width="3" height="8" fill="#ffffff"/><rect x="7" y="2" width="3" height="8" fill="#ffffff"/></svg>
+            </button>
+          </div>
+          <!-- Gizli yedek elemanlar (hata almamak için) -->
+          <div class="wave-info hidden" style="display:none;">
+            <span id="level-hud-display">B.1</span>
+            <span id="wave-display">D.1</span>
+            <span id="timer-display">00:00</span>
+            <div id="record-badge"></div>
+            <button id="btn-sound-toggle"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Boss Sağlık Barı -->
+      <div id="boss-bar-container" class="boss-bar-container hidden">
+        <div class="boss-title">AMİRAL GEMİSİ</div>
+        <div class="boss-bar-track">
+          <div id="boss-bar-fill" class="boss-bar-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- Rastgele Uzay Olayı Bildirim Başlığı -->
+      <div id="event-banner" class="event-banner hidden">
+        <span id="event-banner-text"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px"><path d="M2 1h3v2H2zM1 3h5v3H1zM4 6h4v2H4zM7 8h3v2H7zM9 10h3v2H9z" fill="#ff5500"/></svg>ASTEROİT SAĞANAĞI!</span>
+      </div>
+
+      <!-- Kozmik Sektör Anomalisi Bannerı -->
+      <div id="anomaly-banner" class="anomaly-banner hidden">
+        <span class="anomaly-icon" id="anomaly-icon"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M5 0h2v12H5zM0 5h12v2H0zM2 2l8 8-1.4 1.4-8-8zM10 2l-8 8 1.4 1.4 8-8z" fill="#00f0ff"/></svg></span>
+        <span class="anomaly-text" id="anomaly-text">SEKTÖR ANOMALİSİ: KRİYOJENİK NEBULA</span>
+      </div>
+
+
+
+      <!-- Aktif Nihai Güç Butonu (Neon Ultimate Button) -->
+      <div id="ultimate-btn-container" class="ultimate-btn-container hidden">
+        <button id="btn-ultimate" class="btn-ultimate" aria-label="Nihai Güç" title="Nihai Güç">
+          <div class="ultimate-glow-ring"></div>
+          <div class="ultimate-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M7 0L2 6h4l-1 6 5-6H6l1-6z" fill="#00f0ff"/></svg></div>
+          <span class="ultimate-label" id="ultimate-label">ULTIMATE</span>
+          <div id="ultimate-charge-fill" class="ultimate-charge-fill"></div>
+        </button>
+      </div>
+
+
+      <!-- Boss Sinematik Acil Durum Uyarısı -->
+      <div id="boss-warning-overlay" class="boss-warning-overlay hidden">
+        <div class="boss-warning-box">
+          <div class="boss-warning-icon">
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M6 1L1 11h10L6 1z" fill="#ff0055"/><rect x="5.5" y="4" width="1" height="4" fill="#ffffff"/><rect x="5.5" y="9" width="1" height="1" fill="#ffffff"/></svg>
+            <svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12" style="margin: 0 4px;"><path d="M6 1L1 11h10L6 1z" fill="#ffbe0b"/><rect x="5.5" y="4" width="1" height="4" fill="#ffffff"/><rect x="5.5" y="9" width="1" height="1" fill="#ffffff"/></svg>
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M6 1L1 11h10L6 1z" fill="#ff0055"/><rect x="5.5" y="4" width="1" height="4" fill="#ffffff"/><rect x="5.5" y="9" width="1" height="1" fill="#ffffff"/></svg>
+          </div>
+          <div class="boss-warning-title">DİKKAT: AMİRAL GEMİSİ YAKLAŞIYOR</div>
+          <div class="boss-warning-sub" id="boss-warning-name">KARA MUHAFIZ FİLOSU</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modern Cyberpunk Ana Menü (Main Menu Hub) -->
+    <div id="start-screen" class="main-menu-overlay">
+      <!-- Üst Durum & Kaynak Çubuğu (Top Bar) -->
+      <div class="menu-top-bar">
+        <div class="pilot-rank-badge" id="menu-rank-badge">
+          <span class="rank-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM3 3h6v2H3zM2 5h8v2H2zM3 7h6v2H3zM4 9h4v2H4z" fill="#00f0ff"/><rect x="5" y="4" width="2" height="2" fill="#fff"/></svg></span>
+          <div class="rank-info">
+            <span class="rank-name" id="menu-pilot-rank">ACEMİ PİLOT</span>
+            <span class="rank-sub" id="menu-pilot-flights">0 Uçuş</span>
+          </div>
+        </div>
+
+        <div class="menu-top-right">
+          <div class="crystals-pill clickable-pill" id="btn-menu-crystals" title="Pilot Atölyesi">
+            <span class="crystal-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M4 1h4v1H4zM2 2h8v2H2zM1 4h10v2H1zM2 6h8v2H2zM3 8h6v2H3zM4 10h4v1H4zM5 11h2v1H5z" fill="#00f0ff"/><path d="M4 3h4v4H4z" fill="#ffffff"/></svg></span>
+            <strong id="total-crystals-display">0</strong>
+            <span class="plus-mini">+</span>
+          </div>
+          <button id="btn-sound-menu" class="sound-icon-btn menu-header-btn" title="Sesi Aç/Kapat" aria-label="Sesi Aç/Kapat">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg>
+          </button>
+          <button id="btn-vibrate-menu" class="sound-icon-btn menu-header-btn" title="Titreşimi Aç/Kapat" aria-label="Titreşimi Aç/Kapat">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><rect x="3" y="1" width="6" height="10" rx="1" fill="#00f0ff"/><line x1="1" y1="4" x2="1" y2="8" stroke="#00f0ff" stroke-width="1.2"/><line x1="11" y1="4" x2="11" y2="8" stroke="#00f0ff" stroke-width="1.2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Marka / Logo Başlığı -->
+      <div class="menu-hero-branding">
+        <h1 class="hero-title">NEON SPACE</h1>
+        <div class="hero-subtitle-row">
+          <span class="laser-line"></span>
+          <span class="hero-subtitle">SURVIVOR</span>
+          <span class="laser-line"></span>
+        </div>
+      </div>
+
+      <!-- Sade & Net Gemi/Jet Vitrini (Jet Showcase & Clear Stats) -->
+      <div class="menu-ship-showcase">
+        <button id="btn-prev-ship" class="ship-nav-arrow" aria-label="Önceki Gemi">◀</button>
+        
+        <div class="ship-display-info" id="menu-ship-card">
+          <div class="menu-ship-header-row">
+            <div class="menu-ship-visual" id="menu-ship-visual"></div>
+            <div class="ship-main-meta">
+              <div class="ship-name-row">
+                <span id="menu-ship-name" class="menu-ship-name">SİBERPUNK</span>
+                <span id="menu-ship-status" class="menu-ship-status equipped">AKTİF</span>
+              </div>
+              <div id="menu-ship-class" class="menu-ship-class">Dengeli Saldırı Jeti</div>
+            </div>
+          </div>
+
+          <!-- Jet İstatistik Karşılaştırma Çubukları (Stat Bars) -->
+          <div class="menu-ship-stats-grid">
+            <div class="jet-stat-item">
+              <span class="jet-stat-lbl">HASAR</span>
+              <div class="jet-stat-track"><div id="jet-bar-dmg" class="jet-stat-fill stat-dmg" style="width: 100%;"></div></div>
+              <span id="jet-val-dmg" class="jet-stat-val">%100</span>
+            </div>
+            <div class="jet-stat-item">
+              <span class="jet-stat-lbl">KALKAN</span>
+              <div class="jet-stat-track"><div id="jet-bar-shield" class="jet-stat-fill stat-shield" style="width: 100%;"></div></div>
+              <span id="jet-val-shield" class="jet-stat-val">%100</span>
+            </div>
+            <div class="jet-stat-item">
+              <span class="jet-stat-lbl">HIZ</span>
+              <div class="jet-stat-track"><div id="jet-bar-speed" class="jet-stat-fill stat-speed" style="width: 100%;"></div></div>
+              <span id="jet-val-speed" class="jet-stat-val">%100</span>
+            </div>
+            <div class="jet-stat-item">
+              <span class="jet-stat-lbl">ÇEKİM</span>
+              <div class="jet-stat-track"><div id="jet-bar-magnet" class="jet-stat-fill stat-magnet" style="width: 100%;"></div></div>
+              <span id="jet-val-magnet" class="jet-stat-val">%100</span>
+            </div>
+          </div>
+
+          <!-- Özel Yetenek & Pasif Açıklaması -->
+          <div class="menu-ship-perk-box">
+            <div class="perk-badge-title">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:4px;"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff"/></svg>
+              <strong id="menu-ship-perk-title">AŞIRI İTKİ</strong>
+            </div>
+            <span id="menu-ship-perk" class="menu-ship-perk">Mermi sıyırmada (graze) anında +%35 seri atış hızı kazanır.</span>
+          </div>
+        </div>
+
+        <button id="btn-next-ship" class="ship-nav-arrow" aria-label="Sonraki Gemi">▶</button>
+      </div>
+
+      <!-- Oyun Modu Seçici & En Yüksek Skorlar -->
+      <div class="menu-center-controls">
+        <div class="mode-selector-cyber">
+          <button id="mode-classic" class="cyber-mode-card active" data-mode="classic">
+            <div class="mode-card-header">
+              <span class="mode-card-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9zM5 9h2v3H5z" fill="#00f0ff"/></svg></span>
+              <strong class="mode-card-title">SEFER (1-38)</strong>
+            </div>
+            <span class="mode-card-desc" id="mode-stage-desc">Bölüm 1 • Seviye Seç ▾</span>
+            <div class="mode-card-score">
+              <span>SEÇİLİ:</span> <strong id="score-val-classic" style="color:#00f0ff;">BÖLÜM 1</strong>
+            </div>
+          </button>
+
+          <button id="mode-storm" class="cyber-mode-card" data-mode="storm">
+            <div class="mode-card-header">
+              <span class="mode-card-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M6 0h4v3H6zM4 3h5v2H4zM2 5h6v2H2zM1 7h5v2H1zM3 9h2v1H3zM4 10h1v2H4z" fill="#ffbe0b"/></svg></span>
+              <strong class="mode-card-title">FIRTINA</strong>
+            </div>
+            <span class="mode-card-desc">Sonsuz Asteroid & Kombo</span>
+            <div class="mode-card-score">
+              <span>EN İYİ:</span> <strong id="score-val-storm">0</strong>
+            </div>
+          </button>
+        </div>
+
+        <!-- Dev Başlatma Butonu -->
+        <button id="btn-start" class="cyber-launch-btn pulse">
+          <span class="launch-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9zM5 9h2v3H5z" fill="#030816"/></svg></span>
+          <span class="launch-text">GÖREVE BAŞLA</span>
+          <span class="launch-sheen"></span>
+        </button>
+      </div>
+
+      <!-- Alt Hızlı Erişim Çubuğu (4 Ferah Buton - Sade ve Net) -->
+      <div class="menu-bottom-dock">
+        <button id="btn-hangar" class="dock-btn highlight-dock-btn">
+          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M8 1h3v3H8zM7 3h1v1H7zM6 4h1v1H6zM5 5h1v1H5zM4 6h1v1H4zM3 7h1v1H3zM2 8h1v1H2zM1 9h2v2H1z" fill="#00f0ff"/><rect x="9" y="2" width="1" height="1" fill="#030816"/></svg></span>
+          <span class="dock-label">HANGAR & ATÖLYE</span>
+        </button>
+        <button id="btn-missions" class="dock-btn relative-btn">
+          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><rect x="5" y="0" width="2" height="3" fill="#ffbe0b"/><rect x="5" y="9" width="2" height="3" fill="#ffbe0b"/><rect x="0" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="9" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="4" y="4" width="4" height="4" fill="none" stroke="#ffbe0b" stroke-width="1"/></svg></span>
+          <span class="dock-label">GÖREVLER</span>
+          <span id="missions-badge-dot" class="badge-dot hidden"></span>
+        </button>
+        <button id="btn-daily-reward" class="dock-btn relative-btn highlight-dock-btn">
+          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M1 2h10v8H1z" fill="#05ffa1"/><rect x="2" y="3" width="8" height="6" fill="#064e3b"/><line x1="6" y1="2" x2="6" y2="10" stroke="#05ffa1" stroke-width="1.5"/><line x1="1" y1="6" x2="11" y2="6" stroke="#05ffa1" stroke-width="1.5"/></svg></span>
+          <span class="dock-label">İKMAL</span>
+          <span id="daily-reward-dot" class="badge-dot hidden"></span>
+        </button>
+        <button id="btn-stats" class="dock-btn">
+          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><rect x="1" y="7" width="2" height="4" fill="#00f0ff"/><rect x="4" y="4" width="2" height="7" fill="#05ffa1"/><rect x="7" y="2" width="2" height="9" fill="#ffbe0b"/><rect x="10" y="5" width="2" height="6" fill="#bf5af2"/></svg></span>
+          <span class="dock-label">İSTATİSTİK</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Günlük İkmal Sandığı Modalı (7 Günlük Giriş Serisi) -->
+    <div id="daily-reward-modal" class="modal-overlay hidden">
+      <div class="modal-card daily-card" style="max-width: 360px;">
+        <div class="modal-icon" style="margin-bottom: 6px;">
+          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M2 3h12v4H2z" fill="#05ffa1"/><rect x="7" y="1" width="2" height="14" fill="#ffffff"/><path d="M3 7h10v8H3z" fill="#064e3b"/><rect x="1" y="7" width="14" height="1" fill="#05ffa1"/></svg>
+        </div>
+        <h2 class="game-title" style="color: #05ffa1; text-shadow: 0 0 16px rgba(5, 255, 161, 0.7); font-size: 1.35rem; margin-bottom: 2px;">7 GÜNLÜK PİLOT İKMALİ</h2>
+        <div id="daily-streak-badge" class="missions-reset-hint" style="color: #ffbe0b; font-weight: 700; margin: 2px 0 10px;">GİRİŞ SERİSİ</div>
+        
+        <div id="daily-streak-grid" class="daily-streak-grid"></div>
+
+        <button id="btn-claim-daily" class="neon-btn pulse" style="background: linear-gradient(135deg, #05ffa1, #00b4d8); color: #030816; font-weight: 900; margin-top: 14px;">
+          ÖDÜLÜ KASAYA AKTAR
+        </button>
+        <button id="btn-close-daily" class="neon-btn-secondary" style="margin-top: 8px;">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Seviye Atlama (Roguelite Yükseltme) Modalı -->
+    <div id="level-modal" class="modal-overlay hidden">
+      <div class="modal-card upgrade-card">
+        <div class="upgrade-header">
+          <div class="upgrade-stars">
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#ffbe0b"/></svg>
+            <svg class="pixel-icon pixel-icon-lg" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#ffe600"/></svg>
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#ffbe0b"/></svg>
+          </div>
+          <h2>SEVİYE ATLADIN!</h2>
+          <p>Gemine bir yükseltme seç</p>
+        </div>
+
+        <div id="cards-container" class="cards-container">
+          <!-- Dinamik Kartlar JS ile doldurulacak -->
+        </div>
+
+        <div class="upgrade-footer-actions" style="margin-top: 10px; display: flex; justify-content: center;">
+          <button id="btn-reroll-cards" class="neon-btn-secondary" style="font-size: 0.82rem; padding: 6px 14px;">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px"><path d="M1 4h2V2h6v2h2v6H9v2H3v-2H1V4z" fill="#1e293b" stroke="#00f0ff" stroke-width="1"/><circle cx="4" cy="5" r="1" fill="#fff"/><circle cx="8" cy="5" r="1" fill="#fff"/><circle cx="6" cy="7" r="1" fill="#fff"/><circle cx="4" cy="9" r="1" fill="#fff"/><circle cx="8" cy="9" r="1" fill="#fff"/></svg> KARTLARI YENİLE (<span id="reroll-count-val">0</span>)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Altın Uzay Sandığı (Lucky Chest) Modalı -->
+    <div id="lucky-chest-modal" class="modal-overlay hidden">
+      <div class="modal-card lucky-chest-card" style="position: relative; overflow: hidden;">
+        <div class="chest-sunburst-backdrop"></div>
+        <div class="modal-icon chest-jackpot-icon" style="margin-bottom: 6px;">
+          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M2 3h12v4H2z" fill="#ffbe0b"/><rect x="7" y="1" width="2" height="14" fill="#ff0055"/><path d="M3 7h10v8H3z" fill="#ff5500"/><rect x="1" y="7" width="14" height="1" fill="#ffe600"/></svg>
+        </div>
+        <div id="jackpot-badge" class="jackpot-tier-badge hidden">BÜYÜK İKRAMİYE!</div>
+        <h2 id="lucky-chest-title" class="game-title" style="color: #ffbe0b; text-shadow: 0 0 16px rgba(255, 190, 11, 0.7); font-size: 1.4rem; margin-bottom: 2px;">ŞANSLI UZAY SANDIĞI!</h2>
+        <div id="lucky-chest-subtitle" class="missions-reset-hint" style="color: #ffe600; margin-bottom: 12px;">Boss ganimeti açıldı!</div>
+        <div id="lucky-chest-container" class="lucky-chest-items-grid">
+          <!-- Dinamik Sandık Ödülleri -->
+        </div>
+        <button id="btn-claim-chest" class="neon-btn pulse" style="background: linear-gradient(135deg, #ffbe0b, #ff5500); color: #000; margin-top: 14px; font-weight: 900; box-shadow: 0 0 18px rgba(255, 190, 11, 0.6);">
+          GANİMETLERİ AL VE DEVAM ET
+        </button>
+      </div>
+    </div>
+
+    <!-- Gezici Uzay Tüccarı / Kaçakçı İstasyonu Modalı -->
+    <div id="merchant-modal" class="modal-overlay hidden">
+      <div class="modal-card merchant-card">
+        <div class="merchant-header">
+          <div class="modal-icon" style="margin-bottom: 6px;">
+            <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="7" ry="3" fill="#38bdf8"/><circle cx="8" cy="6" r="3" fill="#00f0ff"/><circle cx="8" cy="6" r="1.5" fill="#ffffff"/><circle cx="4" cy="9" r="1" fill="#ffe600"/><circle cx="8" cy="9.5" r="1" fill="#ffe600"/><circle cx="12" cy="9" r="1" fill="#ffe600"/></svg>
+          </div>
+          <h2 class="game-title" style="color: #ffd700; font-size: 1.4rem; margin-bottom: 2px;">UZAY KAÇAKÇISI</h2>
+          <div class="merchant-sub" style="color: #cbd5e1; font-size: 0.85rem;">Kozmik kristallerinle özel takviyeler satın al!</div>
+          <div class="crystals-pill" style="margin-top: 6px;">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff" stroke="#ffffff" stroke-width="0.8"/></svg>
+            <span id="merchant-crystals-display">0</span> Kristal
+          </div>
+        </div>
+        <div class="merchant-items-grid" id="merchant-items-container">
+          <!-- Dinamik Kaçakçı Kartları -->
+        </div>
+        <button id="btn-merchant-close" class="neon-btn" style="margin-top: 14px;">YOLA DEVAM ET</button>
+      </div>
+    </div>
+
+    <!-- Duraklatma Modalı -->
+    <div id="pause-modal" class="modal-overlay hidden">
+      <div class="modal-card pause-card">
+        <div class="modal-icon" style="margin-bottom: 6px;">
+          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><rect x="4" y="3" width="3" height="10" fill="#00f0ff"/><rect x="9" y="3" width="3" height="10" fill="#00f0ff"/></svg>
+        </div>
+        <h2 class="gameover-title" style="margin-bottom: 8px;">OYUN DURAKLATILDI</h2>
+        
+        <!-- Üst Görev & Durum Kartı (HUD'dan Taşınan Bilgiler) -->
+        <div class="pause-mission-banner">
+          <div class="pause-stat-chip">
+            <span class="pause-stat-lbl">SEFER</span>
+            <strong id="pause-stage-text">BÖLÜM 1</strong>
+          </div>
+          <div class="pause-stat-chip">
+            <span class="pause-stat-lbl">DALGA</span>
+            <strong id="pause-wave-text">DALGA 1</strong>
+          </div>
+          <div class="pause-stat-chip">
+            <span class="pause-stat-lbl">SÜRE</span>
+            <strong id="pause-time-text">00:00</strong>
+          </div>
+          <div class="pause-stat-chip">
+            <span class="pause-stat-lbl">SKOR</span>
+            <strong id="pause-score-text">0</strong>
+          </div>
+        </div>
+
+        <!-- Aktif Teçhizat ve Donanım (Active Build Loadout) -->
+        <div class="pause-inventory-section">
+          <div class="pause-codex-title">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM2 3h8v6H2zM4 9h4v2H4z" fill="#00f0ff"/></svg>
+            AKTİF SİSTEMLER VE DONANIM
+          </div>
+          <div id="pause-inventory-grid" class="pause-inventory-grid">
+            <!-- Dinamik Yükseltme ve Evrim Listesi -->
+          </div>
+        </div>
+
+        <div class="pause-codex-section">
+          <div class="pause-codex-title">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 0h4v3H6zM4 3h5v2H4zM2 5h6v2H2zM1 7h5v2H1zM3 9h2v1H3zM4 10h1v2H4z" fill="#ffbe0b"/></svg>
+            SİNERJİ & EFSANEVİ EVRİM REHBERİ
+          </div>
+          <div id="pause-codex-grid" class="pause-codex-grid">
+            <!-- Dinamik Sinerji Matrisi -->
+          </div>
+        </div>
+
+        <div class="pause-codex-section">
+          <div class="pause-codex-title">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M3 1h6v2H3zM2 3h8v6H2zM4 9h4v2H4z" fill="#ff0055"/></svg>
+            DÜŞMAN KODEKSİ
+          </div>
+          <div id="pause-bestiary-grid" class="pause-codex-grid">
+            <!-- Dinamik düşman kayıtları -->
+          </div>
+        </div>
+        <div class="menu-btn-group" style="margin-top: 14px;">
+          <button id="btn-resume" class="neon-btn pulse">DEVAM ET</button>
+          <div class="pause-audio-row">
+            <button id="btn-pause-sound" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg> <span id="pause-sound-text">SES: AÇIK</span></button>
+            <button id="btn-pause-vibrate" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><rect x="3" y="1" width="6" height="10" rx="1" fill="#00f0ff"/><line x1="1" y1="4" x2="1" y2="8" stroke="#00f0ff" stroke-width="1.2"/><line x1="11" y1="4" x2="11" y2="8" stroke="#00f0ff" stroke-width="1.2"/></svg> <span id="pause-vibrate-text">TİTREŞİM: AÇIK</span></button>
+          </div>
+
+          <!-- Aktif Koşu Görevi (Pause Menüsü İçi Özel Bölüm) -->
+          <div id="pause-quest-section" class="pause-quest-section">
+            <div class="pause-quest-header">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:5px;"><rect x="1" y="1" width="10" height="10" fill="none" stroke="#00f0ff" stroke-width="1.5"/><rect x="4" y="4" width="4" height="4" fill="#ff0055"/></svg>
+              <span>AKTİF MEYDAN OKUMA GÖREVİ</span>
+            </div>
+            <div id="pause-quest-content" class="pause-quest-content">
+              <div class="pause-quest-title-row">
+                <span id="pause-quest-title" class="pause-quest-title">25 Düşman Yok Et (0/25)</span>
+                <span id="pause-quest-reward" class="pause-quest-reward">+45 Kristal</span>
+              </div>
+              <div class="pause-quest-bar-track">
+                <div id="pause-quest-bar-fill" class="pause-quest-bar-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-quit-menu" class="neon-btn-secondary">ANA MENÜYE DÖN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hangar & Kostüm Seçim Modalı -->
+    <div id="hangar-modal" class="modal-overlay hidden">
+      <div class="modal-card hangar-card">
+        <div class="hangar-header">
+          <div class="modal-icon" style="margin-bottom: 6px;">
+            <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M4 1h8v3H4zM2 4h12v7H2zM4 11h8v2H4z" fill="#1e293b" stroke="#00f0ff" stroke-width="1.2"/><rect x="4" y="5" width="2" height="2" fill="#ff0055"/><rect x="10" y="5" width="2" height="2" fill="#00f0ff"/><rect x="7" y="8" width="2" height="2" fill="#ffbe0b"/></svg>
+          </div>
+          <h2 class="game-title" style="font-size: 1.5rem; margin-bottom: 4px;">UZAY HANGARI</h2>
+          <div class="crystals-pill">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff" stroke="#ffffff" stroke-width="0.8"/></svg>
+            <span id="hangar-crystals-val">0</span> Kristal
+          </div>
+        </div>
+        <!-- Hangar Sekmeleri -->
+        <div class="hangar-tabs">
+          <button id="tab-btn-skins" class="hangar-tab-btn active">KOSTÜMLER</button>
+          <button id="tab-btn-tech" class="hangar-tab-btn">PİLOT ATÖLYESİ</button>
+          <button id="tab-btn-trophies" class="hangar-tab-btn">BAŞARIMLAR</button>
+        </div>
+
+        <div id="skins-container" class="skins-grid">
+          <!-- Dinamik Kostüm Kartları -->
+        </div>
+
+        <div id="tech-tab-view" class="tech-tab-view hidden">
+          <!-- Başlangıç Pilot Arketipleri & Aşırı Yükleme Protokolü (Atölye İçi Taktik) -->
+          <div class="archetype-selector-box hangar-archetype-box">
+            <div class="archetype-title">UÇUŞ DOKTRİNİ:</div>
+            <div class="archetype-tabs">
+              <button class="archetype-btn active" data-archetype="interceptor">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#00f0ff"/></svg> AVCI
+              </button>
+              <button class="archetype-btn" data-archetype="dreadnought">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M1 2h8v3c0 2.5-4 4-4 4s-4-1.5-4-4V2z" fill="#00f0ff"/></svg> KUŞATMA
+              </button>
+              <button class="archetype-btn" data-archetype="technician">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><circle cx="5" cy="5" r="3" fill="#00f0ff"/><rect x="0" y="4" width="3" height="2" fill="#00f0ff"/><rect x="7" y="4" width="3" height="2" fill="#00f0ff"/></svg> MÜHENDİS
+              </button>
+            </div>
+            <div id="archetype-desc" class="archetype-desc">+%15 Atış Hızı & Çift Namlu Refleksi</div>
+          </div>
+
+          <div class="overload-toggle-row hangar-overload-row">
+            <label class="overload-toggle-label">
+              <input type="checkbox" id="toggle-overload-protocol">
+              <span class="overload-slider"></span>
+              <span class="overload-text"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:3px"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/></svg> AŞIRI YÜKLEME (+%50 KRİSTAL)</span>
+            </label>
+          </div>
+
+          <div id="tech-container" class="tech-grid">
+            <!-- Dinamik Kalıcı Teknoloji Kartları -->
+          </div>
+
+          <!-- Kalıcı Pilot Ustalık Ağacı (Mastery Tree) -->
+          <div id="mastery-tree-section" class="mastery-tree-section">
+            <div class="mastery-title">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 0l2 4h4l-3 3 1 5-4-2-4 2 1-5-3-3h4z" fill="#ffbe0b"/></svg>
+              PİLOT USTALIK AĞACI
+            </div>
+            <div id="mastery-grid" class="mastery-grid">
+              <!-- Dinamik olarak game.js'den doldurulacak -->
+            </div>
+          </div>
+        </div>
+
+        <div id="trophies-tab-view" class="trophies-tab-view hidden">
+          <div id="trophies-grid" class="trophies-grid">
+            <!-- Dinamik rozet kartları -->
+          </div>
+        </div>
+
+        <button id="btn-hangar-close" class="neon-btn" style="margin-top: 14px;">KAYDET VE ÇIK</button>
+      </div>
+    </div>
+
+    <!-- Günlük Görevler Modalı -->
+    <div id="missions-modal" class="modal-overlay hidden">
+      <div class="modal-card missions-card">
+        <div class="missions-header">
+          <div class="modal-icon" style="margin-bottom: 6px;">
+            <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" fill="none" stroke="#00f0ff" stroke-width="1.8"/><rect x="6" y="6" width="4" height="4" fill="#ff0055"/><rect x="7" y="7" width="2" height="2" fill="#ffffff"/></svg>
+          </div>
+          <h2 class="game-title" style="font-size: 1.45rem; margin-bottom: 2px;">GÜNLÜK GÖREVLER</h2>
+          <div class="missions-reset-hint">Her gece yarısı otomatik yenilenir</div>
+        </div>
+
+        <div id="missions-container" class="missions-grid">
+          <!-- Dinamik Görev Kartları -->
+        </div>
+
+        <button id="btn-missions-close" class="neon-btn" style="margin-top: 14px;">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Pilot İstatistikleri Modalı -->
+    <div id="stats-modal" class="modal-overlay hidden">
+      <div class="modal-card stats-card">
+        <div class="stats-header">
+          <div class="modal-icon" style="margin-bottom: 6px;">
+            <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><rect x="2" y="9" width="3" height="5" fill="#00f0ff"/><rect x="6" y="5" width="3" height="9" fill="#05ffa1"/><rect x="10" y="2" width="3" height="12" fill="#ffbe0b"/></svg>
+          </div>
+          <h2 class="game-title" style="font-size: 1.45rem; margin-bottom: 2px;">PİLOT İSTATİSTİKLERİ</h2>
+          <div class="missions-reset-hint">Kariyer boyunca kaydedilen veriler</div>
+        </div>
+
+        <div class="pilot-stats-grid">
+          <div class="stat-badge">
+            <span class="stat-badge-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9z" fill="#00f0ff"/></svg></span>
+            <div class="stat-badge-info">
+              <span class="stat-badge-label">Toplam Uçuş</span>
+              <strong id="stat-flights">0</strong>
+            </div>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-badge-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M3 1h6v2H3zM1 3h10v6H1zM3 9h6v2H3z" fill="#94a3b8"/></svg></span>
+            <div class="stat-badge-info">
+              <span class="stat-badge-label">Yok Edilen Meteor</span>
+              <strong id="stat-asteroids">0</strong>
+            </div>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-badge-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M2 1h2v3H2zM8 1h2v3H8zM1 4h10v6H1zM3 10h6v1H3z" fill="#ff0055"/><rect x="3" y="6" width="2" height="2" fill="#fff"/><rect x="7" y="6" width="2" height="2" fill="#fff"/></svg></span>
+            <div class="stat-badge-info">
+              <span class="stat-badge-label">İmhâ Edilen Boss</span>
+              <strong id="stat-bosses">0</strong>
+            </div>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-badge-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M7 0L2 6h4l-1 6 5-6H6l1-6z" fill="#ffbe0b"/></svg></span>
+            <div class="stat-badge-info">
+              <span class="stat-badge-label">En Yüksek Kombo</span>
+              <strong id="stat-combo">0x</strong>
+            </div>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-badge-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="#38bdf8" stroke-width="1.5"/><rect x="5.5" y="3" width="1" height="3.5" fill="#38bdf8"/><rect x="5.5" y="5.5" width="3" height="1" fill="#38bdf8"/></svg></span>
+            <div class="stat-badge-info">
+              <span class="stat-badge-label">En Uzun Dayanma</span>
+              <strong id="stat-time">00:00</strong>
+            </div>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-badge-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 10 10"><polygon points="5,1 9,4 5,9 1,4" fill="#05ffa1" stroke="#ffffff" stroke-width="0.8"/></svg></span>
+            <div class="stat-badge-info">
+              <span class="stat-badge-label">Ömür Boyu Kristal</span>
+              <strong id="stat-crystals">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-stats-close" class="neon-btn" style="margin-top: 14px;">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Oyun Bitti (Game Over) Modalı -->
+    <div id="gameover-modal" class="modal-overlay hidden">
+      <div class="modal-card gameover-card" style="max-width: 380px;">
+        <div class="modal-icon" style="margin-bottom: 6px;">
+          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M7 1h2v3H7zM3 3h3v2H3zM10 3h3v2h-3zM1 7h3v2H1zM12 7h3v2h-3zM3 11h3v2H3zM10 11h3v2h-3zM7 12h2v3H7z" fill="#ff0055"/><rect x="5" y="5" width="6" height="6" fill="#ffe600"/><rect x="6" y="6" width="4" height="4" fill="#ffffff"/></svg>
+        </div>
+        <h2 class="gameover-title" style="color: #ff0055; text-shadow: 0 0 18px rgba(255, 0, 85, 0.7); font-size: 1.5rem; margin-bottom: 2px; font-family: var(--font-display); font-weight: 900; letter-spacing: 1px;">SİNYAL KESİLDİ</h2>
+        <div class="gameover-subtitle" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 14px;">Gemin derin uzayda imhâ edildi!</div>
+
+        <!-- İstatistik Tablosu -->
+        <div class="gameover-stats-grid">
+          <div class="go-stat-box">
+            <span class="go-stat-label">SKOR</span>
+            <strong id="final-score" class="go-stat-val" style="color: #00f0ff;">0</strong>
+          </div>
+          <div class="go-stat-box">
+            <span class="go-stat-label">REKOR</span>
+            <strong id="final-high-score" class="go-stat-val" style="color: #ffbe0b;">0</strong>
+          </div>
+          <div class="go-stat-box">
+            <span class="go-stat-label">SÜRE</span>
+            <strong id="final-time" class="go-stat-val">00:00</strong>
+          </div>
+          <div class="go-stat-box">
+            <span class="go-stat-label">SEVİYE</span>
+            <strong id="final-level" class="go-stat-val" style="color: #bf5af2;">1</strong>
+          </div>
+        </div>
+
+        <div class="go-crystals-earned" style="margin: 12px 0 16px; padding: 10px 14px; background: rgba(5, 255, 161, 0.1); border: 1px solid rgba(5, 255, 161, 0.35); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.85rem; color: #cbd5e1; font-weight: 700;">KAZANILAN GANİMET</span>
+          <strong id="final-crystals" style="color: #05ffa1; font-size: 1.1rem; text-shadow: 0 0 10px #05ffa1;">+0 <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-left:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#05ffa1" stroke="#ffffff" stroke-width="0.8"/></svg></strong>
+        </div>
+
+        <!-- Aksiyon Butonları -->
+        <div class="gameover-actions">
+          <button id="btn-restart" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9z" fill="#030816"/></svg>
+            YENİDEN DOĞ
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-gameover-hangar" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM4 9h4v2H4zM1 4h2v4H1zM9 4h2v4H9z" fill="#00f0ff"/><rect x="4" y="4" width="4" height="4" fill="#ffbe0b"/></svg>
+              ATÖLYE & HANGAR
+            </button>
+            <button id="btn-gameover-menu" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#00f0ff"/></svg>
+              ANA MENÜ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 38 Seviyeli Sefer (Bölüm Seçim) Modalı -->
+    <div id="level-select-modal" class="modal-overlay hidden">
+      <div class="modal-card level-select-card" style="max-width: 440px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="level-select-header">
+          <div class="modal-icon" style="margin-bottom: 4px;">
+            <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M5 1h6v2H5zM4 3h8v3H4zM3 6h10v3H3zM1 8h14v2H1zM0 10h4v2H0zM12 10h4v2h-4zM6 9h4v3H6z" fill="#00f0ff"/></svg>
+          </div>
+          <h2 class="game-title" style="font-size: 1.45rem; color: #00f0ff; margin-bottom: 2px;">SEFER BÖLÜMLERİ (1 - 38)</h2>
+          <div class="level-select-sub" style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 12px;">Göreve başlamak için açık bir bölüm seç</div>
+        </div>
+
+        <div id="level-grid-container" class="level-grid-container">
+          <!-- 38 Seviye Izgarası JS ile oluşturulacak -->
+        </div>
+
+        <button id="btn-close-level-select" class="neon-btn-secondary" style="margin-top: 14px;">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Seviye Tamamlandı (Zafer / Victory) Modalı -->
+    <div id="level-complete-modal" class="modal-overlay hidden">
+      <div class="modal-card victory-card" style="max-width: 380px;">
+        <div class="victory-sunburst"></div>
+        <div class="modal-icon victory-icon" style="margin-bottom: 6px;">
+          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,10 13,15 8,12 3,15 5,10 1,6 6,6" fill="#ffd700" stroke="#ffbe0b" stroke-width="0.8"/></svg>
+        </div>
+        <h2 id="victory-title" class="victory-title">BÖLÜM TAMAMLANDI!</h2>
+        <div id="victory-subtitle" class="victory-subtitle">Bölüm 1 Başarıyla Temizlendi</div>
+
+        <div class="victory-stars-row" id="victory-stars-row">
+          <svg class="pixel-icon pixel-icon-xl star-icon filled" viewBox="0 0 12 12"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="#ffbe0b"/></svg>
+          <svg class="pixel-icon pixel-icon-xxl star-icon filled" viewBox="0 0 12 12" style="margin: 0 6px;"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="#ffd700"/></svg>
+          <svg class="pixel-icon pixel-icon-xl star-icon filled" viewBox="0 0 12 12"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="#ffbe0b"/></svg>
+        </div>
+
+        <div class="victory-rewards-box" style="margin: 14px 0; padding: 12px 14px; background: rgba(5, 255, 161, 0.12); border: 1.5px solid #05ffa1; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.85rem; color: #cbd5e1; font-weight: 700;">İLK GEÇİŞ GANİMETİ</span>
+          <strong id="victory-reward-crystals" style="color: #05ffa1; font-size: 1.15rem; text-shadow: 0 0 12px #05ffa1;">+350 <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-left:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#05ffa1" stroke="#ffffff" stroke-width="0.8"/></svg></strong>
+        </div>
+
+        <div class="victory-actions">
+          <button id="btn-next-level" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #05ffa1, #00b4d8); color: #030816; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><polygon points="3,1 10,6 3,11" fill="#030816"/></svg>
+            SONRAKİ BÖLÜM ▶
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-victory-hangar" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM4 9h4v2H4zM1 4h2v4H1zM9 4h2v4H9z" fill="#00f0ff"/><rect x="4" y="4" width="4" height="4" fill="#ffbe0b"/></svg>
+              ATÖLYE & HANGAR
+            </button>
+            <button id="btn-victory-menu" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#00f0ff"/></svg>
+              ANA MENÜ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/game.js"></script>
+</body>
+</html>

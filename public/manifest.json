@@ -1,0 +1,17 @@
+{
+  "name": "Neon Space Survivor",
+  "short_name": "SpaceSurvivor",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070714",
+  "theme_color": "#00f0ff",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

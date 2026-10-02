@@ -1,0 +1,23 @@
+{
+  "name": "neon-space-survivor",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "cap:open": "cap open android"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.1",
+    "@capacitor/cli": "^7.0.1",
+    "@capacitor/android": "^7.0.1",
+    "@capacitor/haptics": "^7.0.0"
+  }
+}
