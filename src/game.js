@@ -373,7 +373,7 @@ class Game {
       tilt: 0,
       maxHp: 100,
       hp: 100,
-      shield: 40,
+      shield: 0,
       maxShield: 40,
       shieldRegenTimer: 0,
       speed: 12,
@@ -3124,7 +3124,7 @@ class Game {
       missiles: 0,
       drones: 0,
       emp: 0,
-      shield: 1,
+      shield: 0, // Kalkan geliştirmesiyle veya sandıktan sonradan açılır
       magnet: 1,
       tesla: 0,
       hull: 0
@@ -3269,7 +3269,11 @@ class Game {
       else overloadBadge.classList.add('hidden');
     }
 
+    this._hudHpPct = -1;
+    this._hudShieldPct = -1;
+    this._hudLvl = -1;
     this.updateHUD();
+    this.updateStatusBarsOnly();
   }
 
   updateStatusBarsOnly() {
