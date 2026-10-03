@@ -3063,51 +3063,144 @@ html, body {
   margin-top: 2px;
 }
 
-/* === BAŞARIM ROZETLERİ === */
+/* === BAŞARIM ROZETLERİ (30 KADEMELİ SİSTEM) === */
 .trophies-tab-view {
   width: 100%;
+  max-height: 56vh;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .trophies-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .trophy-card {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 10px 8px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  transition: all 0.2s ease;
 }
 
-.trophy-card.earned {
-  border-color: #ffd700;
-  background: rgba(255, 215, 0, 0.08);
+.trophy-card.maxed {
+  border-color: rgba(5, 255, 161, 0.45);
+  background: rgba(5, 255, 161, 0.06);
+}
+
+.trophy-card.claimable {
+  border-color: rgba(255, 190, 11, 0.6);
+  background: rgba(255, 190, 11, 0.08);
+  box-shadow: 0 0 12px rgba(255, 190, 11, 0.15);
 }
 
 .trophy-icon {
-  font-size: 22px;
-  margin-bottom: 4px;
+  font-size: 24px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.trophy-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.trophy-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 2px;
 }
 
 .trophy-name {
   font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trophy-level-badge {
+  font-family: var(--font-display);
   font-size: 9.5px;
-  font-weight: 700;
-  color: #e2e8f0;
-  margin-bottom: 2px;
+  font-weight: 900;
+  color: #ffbe0b;
+  background: rgba(255, 190, 11, 0.15);
+  border: 1px solid rgba(255, 190, 11, 0.35);
+  padding: 1px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.trophy-card.maxed .trophy-level-badge {
+  color: #05ffa1;
+  background: rgba(5, 255, 161, 0.15);
+  border-color: rgba(5, 255, 161, 0.4);
 }
 
 .trophy-desc {
-  font-size: 8px;
+  font-size: 10px;
   color: #94a3b8;
+  margin-bottom: 6px;
+  line-height: 1.25;
 }
 
-.trophy-reward {
-  font-size: 8px;
-  color: #ffd700;
-  margin-top: 3px;
+.trophy-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+
+.trophy-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f0ff, #05ffa1);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.trophy-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9.5px;
+  color: #cbd5e1;
+}
+
+.trophy-claim-btn {
+  background: linear-gradient(135deg, #ffbe0b, #ff9100);
+  color: #030816;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 190, 11, 0.4);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.trophy-claim-btn:active {
+  transform: scale(0.95);
 }
