@@ -860,6 +860,31 @@ class Game {
       });
     }
 
+    // Ücretsiz Altın / Kristal Reklam Butonları (Ana Menü & Hangar)
+    const btnFreeGoldMenu = document.getElementById('btn-free-gold-menu');
+    if (btnFreeGoldMenu) {
+      btnFreeGoldMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.init();
+        sounds.playCardSelect();
+        if (window.watchAdForGold) {
+          window.watchAdForGold();
+        }
+      });
+    }
+
+    const btnFreeGoldHangar = document.getElementById('btn-free-gold-hangar');
+    if (btnFreeGoldHangar) {
+      btnFreeGoldHangar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.init();
+        sounds.playCardSelect();
+        if (window.watchAdForGold) {
+          window.watchAdForGold();
+        }
+      });
+    }
+
     // Ana Menü Canlı Gemi Vitrini Butonları
     if (btnPrevShip) {
       btnPrevShip.addEventListener('click', (e) => {
@@ -1654,6 +1679,82 @@ class Game {
   updateCrystalsDisplay() {
     if (totalCrystalsDisplay) totalCrystalsDisplay.textContent = this.totalCrystals.toLocaleString();
     if (hangarCrystalsVal) hangarCrystalsVal.textContent = this.totalCrystals.toLocaleString();
+  }
+
+  updateGoldDisplay() {
+    this.updateCrystalsDisplay();
+  }
+
+  saveGold(val) {
+    this.totalCrystals = val;
+    localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+    this.updateCrystalsDisplay();
+  }
+
+  addGoldReward(amount = 50) {
+    this.totalCrystals += amount;
+    if (this.pilotStats) {
+      this.pilotStats.lifetimeCrystals = (this.pilotStats.lifetimeCrystals || 0) + amount;
+      this.savePilotStats();
+    }
+    this.saveGold(this.totalCrystals);
+
+    // Ses ve görsel efekt
+    sounds.playLevelUp();
+    if (sounds.playPowerup) sounds.playPowerup();
+    sounds.playJackpot();
+    vibrate.success();
+
+    // Ekranda kayan yazı ve şok dalgası
+    this.showToast(`🪙 +${amount} Altın / Kristal Kazanıldı!`, '#ffbe0b');
+    if (this.particles) {
+      const centerX = this.width / 2;
+      const centerY = this.height * 0.35;
+      this.particles.spawnFloatingText(centerX, centerY, `🪙 +${amount} ALTIN!`, '#ffbe0b', 22);
+      this.particles.spawnShockwave(centerX, centerY, '#ffd700', 250);
+      this.particles.spawnExplosion(centerX, centerY, '#ffbe0b', 20, 3);
+    }
+  }
+
+  showToast(message, color = '#00f0ff') {
+    const existing = document.getElementById('floating-game-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'floating-game-toast';
+    toast.style.cssText = `
+      position: fixed;
+      top: 55px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(12, 18, 36, 0.95);
+      border: 1.5px solid ${color};
+      color: ${color};
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-family: var(--font-display, monospace);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 20px rgba(255, 190, 11, 0.45);
+      z-index: 999999;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.style.opacity = '1';
+    });
+
+    setTimeout(() => {
+      toast.style.transform = 'translateX(-50%) translateY(-20px)';
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 250);
+    }, 2400);
   }
 
   renderHangarSkins() {

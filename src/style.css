@@ -3204,3 +3204,54 @@ html, body {
 .trophy-claim-btn:active {
   transform: scale(0.95);
 }
+
+/* === ÜCRETSİZ ALTIN / KRİSTAL REKLAM BUTONU (FREE GOLD REWARDED AD) === */
+.btn-free-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: linear-gradient(135deg, rgba(255, 190, 11, 0.25), rgba(255, 107, 0, 0.35));
+  border: 1.5px solid #ffbe0b;
+  border-radius: 9999px;
+  padding: 5px 11px;
+  color: #ffbe0b;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 900;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 14px rgba(255, 190, 11, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-free-gold:hover {
+  background: linear-gradient(135deg, rgba(255, 190, 11, 0.4), rgba(255, 107, 0, 0.5));
+  box-shadow: 0 0 20px rgba(255, 190, 11, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-free-gold:active {
+  transform: scale(0.94);
+}
+
+.btn-free-gold:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-free-gold .gold-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.btn-free-gold .gold-label {
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px rgba(255, 190, 11, 0.6);
+}
+

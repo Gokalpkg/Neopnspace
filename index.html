@@ -131,6 +131,10 @@
         </div>
 
         <div class="menu-top-right">
+          <button id="btn-free-gold-menu" class="btn-free-gold pulse" title="Reklam İzle ve +50 Altın/Kristal Kazan">
+            <span class="gold-icon">🪙</span>
+            <span class="gold-label">+50</span>
+          </button>
           <div class="crystals-pill clickable-pill" id="btn-menu-crystals" title="Pilot Atölyesi">
             <span class="crystal-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M4 1h4v1H4zM2 2h8v2H2zM1 4h10v2H1zM2 6h8v2H2zM3 8h6v2H3zM4 10h4v1H4zM5 11h2v1H5z" fill="#00f0ff"/><path d="M4 3h4v4H4z" fill="#ffffff"/></svg></span>
             <strong id="total-crystals-display">0</strong>
@@ -435,9 +439,15 @@
             <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M4 1h8v3H4zM2 4h12v7H2zM4 11h8v2H4z" fill="#1e293b" stroke="#00f0ff" stroke-width="1.2"/><rect x="4" y="5" width="2" height="2" fill="#ff0055"/><rect x="10" y="5" width="2" height="2" fill="#00f0ff"/><rect x="7" y="8" width="2" height="2" fill="#ffbe0b"/></svg>
           </div>
           <h2 class="game-title" style="font-size: 1.5rem; margin-bottom: 4px;">UZAY HANGARI</h2>
-          <div class="crystals-pill">
-            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff" stroke="#ffffff" stroke-width="0.8"/></svg>
-            <span id="hangar-crystals-val">0</span> Kristal
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <div class="crystals-pill">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff" stroke="#ffffff" stroke-width="0.8"/></svg>
+              <span id="hangar-crystals-val">0</span> Kristal
+            </div>
+            <button id="btn-free-gold-hangar" class="btn-free-gold pulse" title="Reklam İzle ve +50 Altın/Kristal Kazan">
+              <span class="gold-icon">🪙</span>
+              <span class="gold-label">+50 Altın</span>
+            </button>
           </div>
         </div>
         <!-- Hangar Sekmeleri -->
@@ -712,33 +722,171 @@
   <script>
     window.ADMOB_CONFIG = {
       appId: 'ca-app-pub-9505724609102225~7806689394',
-      rewardedAdUnitId: 'ca-app-pub-9505724609102225/7675750898'
+      reviveAdUnitId: 'ca-app-pub-9505724609102225/7675750898',
+      goldAdUnitId: 'ca-app-pub-9505724609102225/4609680419'
     };
 
-    window.showRewardedAd = async function(onReward, onError) {
-      const adUnitId = window.ADMOB_CONFIG.rewardedAdUnitId;
+    window._admobPreloaded = false;
+
+    // Arka planda yeni reklamı önceden yükle (preloadRewardVideo)
+    window.preloadRewardVideo = async function(adId) {
+      const targetId = adId || window.ADMOB_CONFIG.goldAdUnitId;
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+        try {
+          await window.Capacitor.Plugins.AdMob.prepareRewardVideoAd({ adId: targetId });
+          window._admobPreloaded = true;
+          console.log('AdMob: Reklam önceden başarıyla yüklendi.');
+        } catch (e) {
+          console.warn('AdMob preload uyarısı:', e);
+        }
+      }
+    };
+
+    // Genel Ödüllü Reklam Gösterici
+    window.showRewardedAd = async function(onReward, onError, specificAdUnitId) {
+      const adUnitId = specificAdUnitId || window.ADMOB_CONFIG.reviveAdUnitId;
       console.log('AdMob Ödüllü Reklam Çağrılıyor... AdUnitID:', adUnitId);
 
-      // Capacitor AdMob eklentisi mevcutsa
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         try {
           const AdMob = window.Capacitor.Plugins.AdMob;
           await AdMob.prepareRewardVideoAd({ adId: adUnitId });
           const reward = await AdMob.showRewardVideoAd();
           if (onReward) onReward(reward);
+          // İzlendikten sonra bir sonraki kullanım için arka planda yeni reklamı yükle
+          window.preloadRewardVideo(adUnitId);
           return;
         } catch (err) {
-          console.warn('AdMob eklenti hatası:', err);
+          console.warn('AdMob reklam hatası:', err);
           if (onError) onError(err);
           else if (onReward) onReward({ fallback: true });
           return;
         }
       }
 
-      // Web / Test Simülasyonu (veya eklenti hazır değilken güvenli ödül akışı)
+      // Web / Test Simülasyonu
       console.log('AdMob yerel eklenti bulunamadı, simülasyon ödülü veriliyor.');
-      if (onReward) onReward({ type: 'revive', amount: 1 });
+      if (onReward) onReward({ type: 'reward', amount: 1 });
     };
+
+    // Altın / Kristal Reklamı İzleme ve Ödül Fonksiyonu (watchAdForGold)
+    window.watchAdForGold = async function() {
+      const btnMenu = document.getElementById('btn-free-gold-menu');
+      const btnHangar = document.getElementById('btn-free-gold-hangar');
+      const setButtonsState = (disabled, text) => {
+        if (btnMenu) {
+          btnMenu.disabled = disabled;
+          if (text) btnMenu.querySelector('.gold-label').textContent = text;
+        }
+        if (btnHangar) {
+          btnHangar.disabled = disabled;
+          if (text) btnHangar.querySelector('.gold-label').textContent = text;
+        }
+      };
+
+      // Cooldown / Süre Kontrolü (60 saniye geri sayım)
+      const lastWatch = parseInt(localStorage.getItem('neon_ad_gold_time') || '0', 10);
+      const now = Date.now();
+      const cooldownMs = 60 * 1000;
+      if (now - lastWatch < cooldownMs) {
+        const remainingSec = Math.ceil((cooldownMs - (now - lastWatch)) / 1000);
+        if (window.game && window.game.showToast) {
+          window.game.showToast(`Lütfen ${remainingSec} sn bekleyin!`, '#ffbe0b');
+        } else {
+          alert(`Bir sonraki ödül için ${remainingSec} saniye beklemelisiniz.`);
+        }
+        return;
+      }
+
+      // Çift tıklamayı engelle ve yükleniyor durumuna geçir
+      setButtonsState(true, 'Yükleniyor...');
+
+      window.showRewardedAd((reward) => {
+        // Reklam Başarıyla İzlendi: +50 Altın / Kristal Ver
+        localStorage.setItem('neon_ad_gold_time', Date.now().toString());
+
+        if (window.game) {
+          window.game.addGoldReward(50);
+        } else {
+          // Doğrudan fallback
+          let currentCrystals = parseInt(localStorage.getItem('neon_total_crystals') || '0', 10);
+          currentCrystals += 50;
+          localStorage.setItem('neon_total_crystals', currentCrystals.toString());
+          const d1 = document.getElementById('total-crystals-display');
+          const d2 = document.getElementById('hangar-crystals-val');
+          if (d1) d1.textContent = currentCrystals.toLocaleString();
+          if (d2) d2.textContent = currentCrystals.toLocaleString();
+        }
+
+        // 60 saniyelik geri sayım başlat
+        window.startGoldAdCooldown(60);
+      }, (err) => {
+        // Reklam yarıda kapatıldı veya yüklenemedi
+        console.warn('Reklam tamamlanamadı:', err);
+        setButtonsState(false, '+50');
+        if (window.game && window.game.showToast) {
+          window.game.showToast('Reklam tamamlanmadı, ödül verilemedi.', '#ff0055');
+        } else {
+          alert('Reklam tamamlanmadığı için ödül verilemedi.');
+        }
+      }, window.ADMOB_CONFIG.goldAdUnitId);
+    };
+
+    window.startGoldAdCooldown = function(seconds) {
+      let remaining = seconds;
+      const btnMenu = document.getElementById('btn-free-gold-menu');
+      const btnHangar = document.getElementById('btn-free-gold-hangar');
+
+      const updateUI = () => {
+        if (btnMenu) {
+          btnMenu.disabled = true;
+          btnMenu.classList.remove('pulse');
+          const lbl = btnMenu.querySelector('.gold-label');
+          if (lbl) lbl.textContent = `${remaining}s`;
+        }
+        if (btnHangar) {
+          btnHangar.disabled = true;
+          btnHangar.classList.remove('pulse');
+          const lbl = btnHangar.querySelector('.gold-label');
+          if (lbl) lbl.textContent = `${remaining}s`;
+        }
+      };
+
+      updateUI();
+      const interval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          if (btnMenu) {
+            btnMenu.disabled = false;
+            btnMenu.classList.add('pulse');
+            const lbl = btnMenu.querySelector('.gold-label');
+            if (lbl) lbl.textContent = '+50';
+          }
+          if (btnHangar) {
+            btnHangar.disabled = false;
+            btnHangar.classList.add('pulse');
+            const lbl = btnHangar.querySelector('.gold-label');
+            if (lbl) lbl.textContent = '+50 Altın';
+          }
+        } else {
+          updateUI();
+        }
+      }, 1000);
+    };
+
+    // Sayfa açıldığında var olan cooldown'ı ve reklam ön yüklemesini kontrol et
+    window.addEventListener('DOMContentLoaded', () => {
+      const lastWatch = parseInt(localStorage.getItem('neon_ad_gold_time') || '0', 10);
+      const diff = Date.now() - lastWatch;
+      const cooldownMs = 60 * 1000;
+      if (diff < cooldownMs) {
+        window.startGoldAdCooldown(Math.ceil((cooldownMs - diff) / 1000));
+      }
+      setTimeout(() => {
+        if (window.preloadRewardVideo) window.preloadRewardVideo();
+      }, 3000);
+    });
   </script>
 
   <script type="module" src="/src/game.js"></script>
