@@ -832,6 +832,34 @@ class Game {
       });
     }
 
+    const btnAdRevive = document.getElementById('btn-ad-revive');
+    if (btnAdRevive) {
+      btnAdRevive.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        if (window.showRewardedAd) {
+          window.showRewardedAd(() => {
+            // Ödül: Oyuncuyu canlandır ve devam ettir
+            if (gameoverModal) gameoverModal.classList.add('hidden');
+            this.state = 'PLAYING';
+            this.lastTime = performance.now();
+            if (this.player) {
+              this.player.hp = Math.round(this.player.maxHp * 0.6);
+              this.player.shield = this.player.maxShield;
+              this.player.invulnerableTimer = 180; // 3 saniye dokunulmazlık
+              this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 300);
+              this.particles.spawnFloatingText(this.player.x, this.player.y - 40, '⚡ YENİDEN CANLANDIN! ⚡', '#ffd700', 18);
+            }
+            sounds.playJackpot();
+            sounds.startBGM();
+            vibrate.success();
+          }, (err) => {
+            console.error('Reklam yüklenemedi:', err);
+          });
+        }
+      });
+    }
+
     // Ana Menü Canlı Gemi Vitrini Butonları
     if (btnPrevShip) {
       btnPrevShip.addEventListener('click', (e) => {

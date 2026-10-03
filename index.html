@@ -626,7 +626,11 @@
 
         <!-- Aksiyon Butonları -->
         <div class="gameover-actions">
-          <button id="btn-restart" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button id="btn-ad-revive" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #030816; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><polygon points="3,1 10,6 3,11" fill="#030816"/></svg>
+            REKLAM İZLE: CANLAN & DEVAM ET
+          </button>
+          <button id="btn-restart" class="neon-btn" style="width: 100%; font-size: 1.0rem; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9z" fill="#030816"/></svg>
             YENİDEN DOĞ
           </button>
@@ -703,6 +707,39 @@
       </div>
     </div>
   </div>
+
+  <!-- Google AdMob Ödüllü Reklam Entegrasyonu -->
+  <script>
+    window.ADMOB_CONFIG = {
+      appId: 'ca-app-pub-9505724609102225~7806689394',
+      rewardedAdUnitId: 'ca-app-pub-9505724609102225/7675750898'
+    };
+
+    window.showRewardedAd = async function(onReward, onError) {
+      const adUnitId = window.ADMOB_CONFIG.rewardedAdUnitId;
+      console.log('AdMob Ödüllü Reklam Çağrılıyor... AdUnitID:', adUnitId);
+
+      // Capacitor AdMob eklentisi mevcutsa
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+        try {
+          const AdMob = window.Capacitor.Plugins.AdMob;
+          await AdMob.prepareRewardVideoAd({ adId: adUnitId });
+          const reward = await AdMob.showRewardVideoAd();
+          if (onReward) onReward(reward);
+          return;
+        } catch (err) {
+          console.warn('AdMob eklenti hatası:', err);
+          if (onError) onError(err);
+          else if (onReward) onReward({ fallback: true });
+          return;
+        }
+      }
+
+      // Web / Test Simülasyonu (veya eklenti hazır değilken güvenli ödül akışı)
+      console.log('AdMob yerel eklenti bulunamadı, simülasyon ödülü veriliyor.');
+      if (onReward) onReward({ type: 'revive', amount: 1 });
+    };
+  </script>
 
   <script type="module" src="/src/game.js"></script>
 </body>
