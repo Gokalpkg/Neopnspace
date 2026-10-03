@@ -39,6 +39,7 @@ const tabBtnTech = document.getElementById('tab-btn-tech');
 const tabBtnTrophies = document.getElementById('tab-btn-trophies');
 const techContainer = document.getElementById('tech-container');
 const techTabView = document.getElementById('tech-tab-view');
+const btnResetTech = document.getElementById('btn-reset-tech');
 const trophiesTabView = document.getElementById('trophies-tab-view');
 const bossWarningOverlay = document.getElementById('boss-warning-overlay');
 const bossWarningName = document.getElementById('boss-warning-name');
@@ -516,7 +517,7 @@ class Game {
         name: 'GÜNEŞ FIRTINASI',
         title: 'Ağır Taarruz Jeti',
         primary: '#ffbe0b', secondary: '#ff5722', cockpit: '#ff9100', flame: '#ff3d00',
-        cost: 1500,
+        cost: 4500,
         stats: { dmg: 135, shield: 80, speed: 85, magnet: 75 },
         dmgMult: 1.35, shieldMult: 0.8, speedMult: 0.85, magnetMult: 0.75,
         perkTitle: 'GÜNEŞ PATLAMASI',
@@ -527,7 +528,7 @@ class Game {
         name: 'ZEHİR NEON',
         title: 'Gözcü & Hasatçı',
         primary: '#05ffa1', secondary: '#7209b7', cockpit: '#b5179e', flame: '#05ffa1',
-        cost: 3500,
+        cost: 9500,
         stats: { dmg: 85, shield: 85, speed: 125, magnet: 160 },
         dmgMult: 0.85, shieldMult: 0.85, speedMult: 1.25, magnetMult: 1.6,
         perkTitle: 'ZÜMRÜT SÜZÜLME',
@@ -538,7 +539,7 @@ class Game {
         name: 'HAYALET PLAZMA',
         title: 'Kuantum Savunma Jeti',
         primary: '#e0f7fa', secondary: '#00e5ff', cockpit: '#80deea', flame: '#00e5ff',
-        cost: 6000,
+        cost: 18000,
         stats: { dmg: 90, shield: 150, speed: 95, magnet: 90 },
         dmgMult: 0.9, shieldMult: 1.5, speedMult: 0.95, magnetMult: 0.9,
         perkTitle: 'FAZ KALKANI',
@@ -1042,6 +1043,13 @@ class Game {
         this.renderTechUpgrades();
       });
 
+      if (btnResetTech) {
+        btnResetTech.addEventListener('click', () => {
+          sounds.init();
+          this.resetTechUpgrades();
+        });
+      }
+
       if (tabBtnTrophies) {
         tabBtnTrophies.addEventListener('click', () => {
           sounds.init();
@@ -1349,12 +1357,12 @@ class Game {
     const grid = document.getElementById('mastery-grid');
     if (!grid) return;
     const nodes = [
-      { id: 'magnet', name: 'MIKNATIS', icon: '⚓', max: 5, cost: 40, desc: '+%10 Menzil/Lv' },
-      { id: 'critDmg', name: 'KRİTİK', icon: '⚡', max: 5, cost: 50, desc: '+%8 Hasar/Lv' },
-      { id: 'startShield', name: 'KALKAN', icon: '🛡️', max: 3, cost: 60, desc: '+10 Kalkan/Lv' },
-      { id: 'xpBonus', name: 'DEN. BON.', icon: '⭐', max: 5, cost: 35, desc: '+%10 XP/Lv' },
-      { id: 'crystalBonus', name: 'KRİSTAL', icon: '💎', max: 4, cost: 45, desc: '+%12 Kristal/Lv' },
-      { id: 'rerollStart', name: 'YENİDEN', icon: '🎲', max: 2, cost: 80, desc: '+1 Reroll/Lv' }
+      { id: 'magnet', name: 'MIKNATIS', icon: '⚓', max: 5, cost: 200, desc: '+%10 Menzil/Lv' },
+      { id: 'critDmg', name: 'KRİTİK', icon: '⚡', max: 5, cost: 250, desc: '+%8 Hasar/Lv' },
+      { id: 'startShield', name: 'KALKAN', icon: '🛡️', max: 3, cost: 300, desc: '+10 Kalkan/Lv' },
+      { id: 'xpBonus', name: 'DEN. BON.', icon: '⭐', max: 5, cost: 180, desc: '+%10 XP/Lv' },
+      { id: 'crystalBonus', name: 'KRİSTAL', icon: '💎', max: 4, cost: 240, desc: '+%12 Kristal/Lv' },
+      { id: 'rerollStart', name: 'YENİDEN', icon: '🎲', max: 2, cost: 500, desc: '+1 Reroll/Lv' }
     ];
     grid.innerHTML = '';
     for (const node of nodes) {
@@ -1532,7 +1540,7 @@ class Game {
         name: 'Plazma Rezonansı',
         desc: 'Tüm silahlara her seviyede kalıcı +%6 hasar artışı sağlar',
         maxLevel: 10,
-        costs: [120, 260, 480, 850, 1400, 2300, 3800, 6200, 9800, 15000],
+        costs: [300, 650, 1200, 2100, 3600, 5800, 9200, 14000, 21000, 32000],
         formatVal: (lvl) => `+%${lvl * 6} Hasar`
       },
       {
@@ -1541,7 +1549,7 @@ class Game {
         name: 'Gövde Kalkanı',
         desc: 'Her seviyede +12 maksimum başlangıç kalkanı kazandırır',
         maxLevel: 10,
-        costs: [100, 220, 420, 750, 1250, 2100, 3500, 5600, 8800, 13500],
+        costs: [250, 550, 1050, 1900, 3200, 5200, 8400, 13000, 19500, 29000],
         formatVal: (lvl) => `+${lvl * 12} Kalkan`
       },
       {
@@ -1550,7 +1558,7 @@ class Game {
         name: 'Titanyum Zırh',
         desc: 'Gemi maksimum gövde canını her kademede +15 artırır',
         maxLevel: 10,
-        costs: [90, 200, 380, 680, 1150, 1900, 3100, 5000, 8000, 12500],
+        costs: [220, 500, 950, 1700, 2900, 4800, 7600, 11800, 17800, 26500],
         formatVal: (lvl) => `+${lvl * 15} Can`
       },
       {
@@ -1559,7 +1567,7 @@ class Game {
         name: 'Kritik Odak',
         desc: 'Her seviyede +%2.5 kalıcı kritik vuruş şansı sağlar',
         maxLevel: 10,
-        costs: [110, 240, 450, 800, 1350, 2200, 3600, 5800, 9200, 14000],
+        costs: [280, 600, 1150, 2050, 3500, 5600, 8800, 13600, 20500, 30500],
         formatVal: (lvl) => `+%${(lvl * 2.5).toFixed(1)} Kritik`
       },
       {
@@ -1568,7 +1576,7 @@ class Game {
         name: 'Kristal Çekici',
         desc: 'Kristalleri ve ganimetleri çekme menzilini +18 artırır',
         maxLevel: 8,
-        costs: [80, 180, 350, 620, 1100, 1850, 3000, 5000],
+        costs: [200, 450, 900, 1600, 2800, 4600, 7400, 11500],
         formatVal: (lvl) => `+${lvl * 18} Menzil`
       },
       {
@@ -1577,7 +1585,7 @@ class Game {
         name: 'Plazma Reaktörü',
         desc: 'Süper Güç (Overdrive) dolum hızını kalıcı %8 artırır',
         maxLevel: 6,
-        costs: [130, 290, 580, 1100, 2100, 3800],
+        costs: [350, 800, 1600, 3000, 5500, 9800],
         formatVal: (lvl) => `+%${lvl * 8} Şarj`
       },
       {
@@ -1586,7 +1594,7 @@ class Game {
         name: 'Kristal Madenciliği',
         desc: 'Toplanan her kristalden kalıcı %8 daha fazla kaynak sağlar',
         maxLevel: 8,
-        costs: [150, 320, 600, 1050, 1800, 3000, 5000, 8200],
+        costs: [400, 900, 1800, 3200, 5500, 9000, 14500, 22000],
         formatVal: (lvl) => `+%${lvl * 8} Kristal`
       },
       {
@@ -1595,7 +1603,7 @@ class Game {
         name: 'Taktiksel Analiz',
         desc: 'Her oyunda seviye atlama kartlarını +1 yenileme hakkı verir',
         maxLevel: 4,
-        costs: [250, 600, 1400, 3200],
+        costs: [600, 1500, 3500, 7800],
         formatVal: (lvl) => `${lvl} Reroll`
       },
       {
@@ -1604,10 +1612,43 @@ class Game {
         name: 'Anka Protokolü',
         desc: 'Ölümcül hasarda dev süpernova şok dalgasıyla dirilme sağlar',
         maxLevel: 3,
-        costs: [1200, 3200, 7500],
+        costs: [2500, 6500, 15000],
         formatVal: (lvl) => lvl >= 1 ? `Kademe ${lvl}` : 'Kilitli'
       }
     ];
+  }
+
+  resetTechUpgrades() {
+    const catalog = this.getTechCatalog();
+    let refundAmount = 0;
+    let upgradedCount = 0;
+
+    catalog.forEach(item => {
+      const lvl = this.techUpgrades[item.id] || 0;
+      if (lvl > 0) {
+        upgradedCount += lvl;
+        for (let i = 0; i < lvl; i++) {
+          refundAmount += item.costs[i] || 0;
+        }
+        this.techUpgrades[item.id] = 0;
+      }
+    });
+
+    if (refundAmount === 0 && upgradedCount === 0) {
+      if (typeof vibrate !== 'undefined' && vibrate.light) vibrate.light();
+      return;
+    }
+
+    this.totalCrystals += refundAmount;
+    localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+    this.saveTechUpgrades();
+
+    if (sounds.playJackpot) sounds.playJackpot();
+    else if (sounds.playLevelUp) sounds.playLevelUp();
+    if (typeof vibrate !== 'undefined' && vibrate.success) vibrate.success();
+
+    this.updateCrystalsDisplay();
+    this.renderTechUpgrades();
   }
 
   renderTechUpgrades() {
@@ -1675,12 +1716,12 @@ class Game {
 
     if (!this.dailyMissions || this.dailyMissions.length === 0) {
       const pool = [
-        { id: 'kill_asteroids', icon: 'target', name: 'Asteroit Avcısı', desc: '35 adet meteor yok et', goal: 35, progress: 0, reward: 250, claimed: false },
-        { id: 'collect_crystals', icon: 'crystal', name: 'Kristal Madencisi', desc: '100 kristal topla', goal: 100, progress: 0, reward: 300, claimed: false },
-        { id: 'survive_time', icon: 'speed', name: 'Hayatta Kalan', desc: 'Tek oyunda 75 saniye dayan', goal: 75, progress: 0, reward: 350, claimed: false },
-        { id: 'reach_combo', icon: 'energy', name: 'Kombo Ustası', desc: '10x veya üzeri kombo yap', goal: 10, progress: 0, reward: 250, claimed: false },
-        { id: 'defeat_boss', icon: 'skull', name: 'Amiral Avcısı', desc: '1 Amiral Boss yok et', goal: 1, progress: 0, reward: 500, claimed: false },
-        { id: 'detonate_bomb', icon: 'bomb', name: 'Patlayıcı Uzmanı', desc: '6 bomba asteroid patlat', goal: 6, progress: 0, reward: 300, claimed: false }
+        { id: 'kill_asteroids', icon: 'target', name: 'Asteroit Avcısı', desc: '35 adet meteor yok et', goal: 35, progress: 0, reward: 80, claimed: false },
+        { id: 'collect_crystals', icon: 'crystal', name: 'Kristal Madencisi', desc: '100 kristal topla', goal: 100, progress: 0, reward: 90, claimed: false },
+        { id: 'survive_time', icon: 'speed', name: 'Hayatta Kalan', desc: 'Tek oyunda 75 saniye dayan', goal: 75, progress: 0, reward: 100, claimed: false },
+        { id: 'reach_combo', icon: 'energy', name: 'Kombo Ustası', desc: '10x veya üzeri kombo yap', goal: 10, progress: 0, reward: 75, claimed: false },
+        { id: 'defeat_boss', icon: 'skull', name: 'Amiral Avcısı', desc: '1 Amiral Boss yok et', goal: 1, progress: 0, reward: 150, claimed: false },
+        { id: 'detonate_bomb', icon: 'bomb', name: 'Patlayıcı Uzmanı', desc: '6 bomba asteroid patlat', goal: 6, progress: 0, reward: 85, claimed: false }
       ];
 
       this.dailyMissions = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
@@ -2301,13 +2342,13 @@ class Game {
     try { history.pushState({ modal: 'daily_reward' }, ''); } catch(e) {}
     const info = this.getDailyStreakInfo();
     const rewards = [
-      { day: 1, crystals: 100, label: '1. GÜN' },
-      { day: 2, crystals: 150, label: '2. GÜN' },
-      { day: 3, crystals: 220, label: '3. GÜN' },
-      { day: 4, crystals: 300, label: '4. GÜN' },
-      { day: 5, crystals: 400, label: '5. GÜN' },
-      { day: 6, crystals: 550, label: '6. GÜN' },
-      { day: 7, crystals: 1000, label: '7. GÜN [MAKS]' }
+      { day: 1, crystals: 30, label: '1. GÜN' },
+      { day: 2, crystals: 50, label: '2. GÜN' },
+      { day: 3, crystals: 75, label: '3. GÜN' },
+      { day: 4, crystals: 100, label: '4. GÜN' },
+      { day: 5, crystals: 130, label: '5. GÜN' },
+      { day: 6, crystals: 170, label: '6. GÜN' },
+      { day: 7, crystals: 250, label: '7. GÜN [MAKS]' }
     ];
 
     const streakBadge = document.getElementById('daily-streak-badge');
@@ -2367,7 +2408,7 @@ class Game {
     const info = this.getDailyStreakInfo();
     if (!info.canClaim) return;
 
-    const rewards = [100, 150, 220, 300, 400, 550, 1000];
+    const rewards = [30, 50, 75, 100, 130, 170, 250];
     const gain = rewards[info.streak - 1] || 150;
 
     this.totalCrystals += gain;
@@ -2466,10 +2507,10 @@ class Game {
 
   generateMiniQuest() {
     const quests = [
-      { type: 'kill', title: '25 Düşman Yok Et', current: 0, target: 25, reward: 45 },
-      { type: 'crystals', title: '40 Kristal Topla', current: 0, target: 40, reward: 35 },
-      { type: 'combo', title: '12x Kombo Serisi Yap', current: 0, target: 12, reward: 40 },
-      { type: 'dodge', title: '15 Sn Hasarsız Uç', current: 0, target: 15, reward: 50, dodgeTimer: 0 }
+      { type: 'kill', title: '25 Düşman Yok Et', current: 0, target: 25, reward: 12 },
+      { type: 'crystals', title: '40 Kristal Topla', current: 0, target: 40, reward: 10 },
+      { type: 'combo', title: '12x Kombo Serisi Yap', current: 0, target: 12, reward: 12 },
+      { type: 'dodge', title: '15 Sn Hasarsız Uç', current: 0, target: 15, reward: 15, dodgeTimer: 0 }
     ];
     const quest = quests[Math.floor(Math.random() * quests.length)];
     this.currentMiniQuest = quest;
@@ -4250,7 +4291,7 @@ class Game {
     vibrate.success();
 
     const isJackpot = this.pendingChestIsJackpot;
-    const bonusCrystals = isJackpot ? 120 : 50;
+    const bonusCrystals = isJackpot ? 25 : 10;
     this.totalCrystals += bonusCrystals;
     this.crystalsEarnedThisRun = (this.crystalsEarnedThisRun || 0) + bonusCrystals;
     localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
@@ -6641,8 +6682,10 @@ class Game {
         this.gemStreak = ((this.frames - (this.lastGemFrame || 0)) < 36) ? Math.min(16, (this.gemStreak || 0) + 1) : 0;
         this.lastGemFrame = this.frames;
         sounds.playCrystalPop(this.gemStreak);
-        vibrate.light();
-        const crystalGain = Math.round(gem.value * (this.player.crystalMultiplier || 1));
+        // Kalıcı Kristal Ekonomisi Dengesi (XP ile Kalıcı Para Birimi Ayrıldı):
+        // XP hızlı seviye atlamak için gem.value olarak aynen verilir, kalıcı kristal ise değerli ve zor kazanılır!
+        const rawGain = gem.value >= 3 ? 2 : 1; // Boss/elit taşlar 2, normal düşman taşları 1 kristal
+        const crystalGain = Math.max(1, Math.round(rawGain * (this.player.crystalMultiplier || 1)));
         this.player.xp += gem.value;
         this.player.score += gem.value * 10;
         this.totalCrystals += crystalGain;
