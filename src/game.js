@@ -1343,30 +1343,6 @@ class Game {
       `;
       codexGrid.appendChild(row);
     });
-
-    // 3. Düşman Kodeksi (Bestiary)
-    const bestiaryGrid = document.getElementById('pause-bestiary-grid');
-    if (bestiaryGrid) {
-      bestiaryGrid.innerHTML = '';
-      const BESTIARY = [
-        { name: 'KORSAN AVCI (SCOUT)', desc: 'Hızlı dalış yapar, hafif plazma sıkar. Zayıflık: Seri plazma ateşi.', icon: '🛸', color: '#ffbe0b' },
-        { name: 'AĞIR KRUVAZÖR', desc: 'Geniş mermi yelpazesi atar. Zayıflık: Arkadan ray tüfeği.', icon: '🛡️', color: '#ff0055' },
-        { name: 'KUANTUM IŞINLANICI', desc: 'Anlık yer değiştirir. Zayıflık: Güdümlü mikro-füzeler.', icon: '⚡', color: '#a855f7' },
-        { name: 'PATLAYICI ÇEKİRDEK', desc: 'Yok olunca şok dalgası saçar. Zayıflık: Uzak menzil.', icon: '💥', color: '#ff5500' },
-        { name: 'KARA MUHAFIZ BOSS', desc: 'Çift fazlı dev Dreadnought. Zayıflık: Kalkan parri ve ray.', icon: '💀', color: '#ef4444' }
-      ];
-      BESTIARY.forEach(b => {
-        const item = document.createElement('div');
-        item.className = 'codex-row unlocked';
-        item.style.borderColor = b.color;
-        item.innerHTML = '<div style="font-size:22px; width:38px; text-align:center;">' + b.icon + '</div>' +
-          '<div style="flex:1; margin-left:10px;">' +
-            '<span class="codex-name" style="color:' + b.color + '">' + b.name + '</span>' +
-            '<span class="codex-recipe">' + b.desc + '</span>' +
-          '</div>';
-        bestiaryGrid.appendChild(item);
-      });
-    }
   }
 
   renderMasteryTree() {
@@ -3036,229 +3012,447 @@ class Game {
   }
 
   getUpgradeSvg(id) {
+    const P = 'viewBox="0 0 32 32" width="100%" height="100%" style="shape-rendering:crispEdges;display:block;"';
     switch (id) {
       case 'laser':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glL"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <rect x="18" y="26" width="7" height="22" rx="2" fill="#1e293b" stroke="#00f0ff" stroke-width="1.6"/>
-          <rect x="35" y="26" width="7" height="22" rx="2" fill="#1e293b" stroke="#00f0ff" stroke-width="1.6"/>
-          <rect x="27" y="32" width="6" height="16" rx="2" fill="#0f172a" stroke="#38bdf8" stroke-width="1.4"/>
-          <line x1="21.5" y1="26" x2="21.5" y2="7" stroke="#00f0ff" stroke-width="4" stroke-linecap="round" filter="url(#glL)"/>
-          <line x1="21.5" y1="26" x2="21.5" y2="7" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="38.5" y1="26" x2="38.5" y2="7" stroke="#00f0ff" stroke-width="4" stroke-linecap="round" filter="url(#glL)"/>
-          <line x1="38.5" y1="26" x2="38.5" y2="7" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>
-          <circle cx="21.5" cy="7" r="4.5" fill="#ffffff" filter="url(#glL)"/>
-          <circle cx="38.5" cy="7" r="4.5" fill="#ffffff" filter="url(#glL)"/>
+        // Plazma Lazeri: İkiz lazer emitörü, mavi/cyan enerji çekirdeği ve odaklama kristalleri
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#070b19"/>
+          <!-- Emitör gövdesi -->
+          <rect x="8" y="14" width="6" height="15" fill="#1e293b"/>
+          <rect x="18" y="14" width="6" height="15" fill="#1e293b"/>
+          <rect x="10" y="16" width="2" height="11" fill="#334155"/>
+          <rect x="20" y="16" width="2" height="11" fill="#334155"/>
+          <rect x="13" y="21" width="6" height="8" fill="#0f172a"/>
+          <!-- Güç kabloları -->
+          <rect x="7" y="23" width="18" height="2" fill="#0284c7"/>
+          <!-- Plazma Odaklama Ağzı -->
+          <rect x="9" y="10" width="4" height="4" fill="#0ea5e9"/>
+          <rect x="19" y="10" width="4" height="4" fill="#0ea5e9"/>
+          <!-- Lazer Işınları -->
+          <rect x="10" y="2" width="2" height="8" fill="#38bdf8"/>
+          <rect x="11" y="1" width="1" height="9" fill="#ffffff"/>
+          <rect x="20" y="2" width="2" height="8" fill="#38bdf8"/>
+          <rect x="21" y="1" width="1" height="9" fill="#ffffff"/>
+          <!-- Işık Saçılması / Flare -->
+          <rect x="9" y="1" width="4" height="2" fill="#bae6fd"/>
+          <rect x="19" y="1" width="4" height="2" fill="#bae6fd"/>
         </svg>`;
+
       case 'fireRate':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glF"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="30" r="22" stroke="rgba(255, 190, 11, 0.35)" stroke-width="2" stroke-dasharray="6 4"/>
-          <circle cx="30" cy="30" r="14" fill="rgba(255, 190, 11, 0.15)" stroke="#ffbe0b" stroke-width="1.8"/>
-          <path d="M33 11L19 32H31L27 49L41 28H29L33 11Z" fill="#ffbe0b" stroke="#ffffff" stroke-width="1.4" filter="url(#glF)"/>
-          <circle cx="30" cy="30" r="3" fill="#ffffff"/>
+        // Hızlandırıcı / Aşırı Yükleme: Retro turbo takometre & şimşek aşırı voltajı
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#160e03"/>
+          <!-- Dış turbo çemberi -->
+          <rect x="8" y="4" width="16" height="2" fill="#d97706"/>
+          <rect x="8" y="26" width="16" height="2" fill="#d97706"/>
+          <rect x="4" y="8" width="2" height="16" fill="#d97706"/>
+          <rect x="26" y="8" width="2" height="16" fill="#d97706"/>
+          <rect x="6" y="6" width="2" height="2" fill="#f59e0b"/>
+          <rect x="24" y="6" width="2" height="2" fill="#f59e0b"/>
+          <rect x="6" y="24" width="2" height="2" fill="#f59e0b"/>
+          <rect x="24" y="24" width="2" height="2" fill="#f59e0b"/>
+          <!-- İç zemin -->
+          <rect x="8" y="8" width="16" height="16" fill="#291603"/>
+          <!-- Hız Şimşeği / Volt -->
+          <polygon points="18,5 11,16 16,16 13,27 23,14 17,14" fill="#fbbf24"/>
+          <polygon points="17,8 13,15 16,15 14,23 20,15 17,15" fill="#ffffff"/>
         </svg>`;
+
       case 'missiles':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glM"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="24" r="18" stroke="rgba(255, 85, 0, 0.35)" stroke-width="1.5" stroke-dasharray="4 4"/>
-          <path d="M12 24H18 M42 24H48 M30 6V12 M30 36V42" stroke="#ff5500" stroke-width="2"/>
-          <path d="M30 10L36 22V38L30 35L24 38V22L30 10Z" fill="#1e293b" stroke="#ff5500" stroke-width="1.8"/>
-          <polygon points="24,30 17,39 24,37" fill="#ff5500"/>
-          <polygon points="36,30 43,39 36,37" fill="#ff5500"/>
-          <path d="M27 38L30 52L33 38L30 43Z" fill="#ffe600" filter="url(#glM)"/>
-          <circle cx="30" cy="20" r="2.5" fill="#00f0ff"/>
+        // Güdümlü Mikro-Füze: Kırmızı savaş başlığı, kanatlar ve turbo itki dumanı
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#1c0a04"/>
+          <!-- Hedefleme radarı kılavuzları -->
+          <rect x="15" y="2" width="2" height="4" fill="#ef4444"/>
+          <rect x="15" y="26" width="2" height="4" fill="#ef4444"/>
+          <rect x="2" y="15" width="4" height="2" fill="#ef4444"/>
+          <rect x="26" y="15" width="4" height="2" fill="#ef4444"/>
+          <!-- Füze gövdesi -->
+          <rect x="14" y="5" width="4" height="3" fill="#dc2626"/>
+          <rect x="15" y="4" width="2" height="1" fill="#f87171"/>
+          <rect x="13" y="8" width="6" height="12" fill="#cbd5e1"/>
+          <rect x="15" y="8" width="2" height="12" fill="#f8fafc"/>
+          <!-- Kanatçıklar -->
+          <rect x="10" y="16" width="3" height="5" fill="#ea580c"/>
+          <rect x="19" y="16" width="3" height="5" fill="#ea580c"/>
+          <rect x="9" y="19" width="1" height="3" fill="#c2410c"/>
+          <rect x="22" y="19" width="1" height="3" fill="#c2410c"/>
+          <!-- Alev / İtki Püskürmesi -->
+          <rect x="14" y="20" width="4" height="3" fill="#f97316"/>
+          <rect x="15" y="23" width="2" height="4" fill="#fde047"/>
+          <rect x="15" y="27" width="2" height="2" fill="#ffffff"/>
         </svg>`;
+
       case 'tesla':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glT"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="19" r="9" fill="rgba(56, 189, 248, 0.25)" stroke="#38bdf8" stroke-width="2" filter="url(#glT)"/>
-          <circle cx="30" cy="19" r="4" fill="#ffffff"/>
-          <path d="M26 28H34L37 48H23L26 28Z" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
-          <line x1="22" y1="35" x2="38" y2="35" stroke="#38bdf8" stroke-width="1.5"/>
-          <line x1="20" y1="41" x2="40" y2="41" stroke="#38bdf8" stroke-width="1.5"/>
-          <path d="M22 16L10 12L15 21L7 27" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glT)"/>
-          <path d="M38 16L50 12L45 21L53 27" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glT)"/>
-          <path d="M30 10V4L34 7" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        // Tesla Bobini: Yüksek voltaj kulesi ve zikzak elektrik boşalması
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#04121e"/>
+          <!-- Bobin tabanı ve kafesi -->
+          <rect x="9" y="24" width="14" height="5" fill="#1e293b"/>
+          <rect x="11" y="22" width="10" height="2" fill="#334155"/>
+          <rect x="13" y="13" width="6" height="9" fill="#0284c7"/>
+          <rect x="12" y="14" width="8" height="2" fill="#38bdf8"/>
+          <rect x="12" y="17" width="8" height="2" fill="#38bdf8"/>
+          <rect x="12" y="20" width="8" height="2" fill="#38bdf8"/>
+          <!-- Tepe Küresi (Toroid) -->
+          <rect x="10" y="8" width="12" height="5" fill="#0ea5e9"/>
+          <rect x="12" y="7" width="8" height="7" fill="#38bdf8"/>
+          <rect x="14" y="9" width="4" height="3" fill="#ffffff"/>
+          <!-- Elektrik Arkları / Kıvılcımlar -->
+          <rect x="5" y="5" width="4" height="2" fill="#7dd3fc"/>
+          <rect x="7" y="7" width="3" height="3" fill="#38bdf8"/>
+          <rect x="23" y="5" width="4" height="2" fill="#7dd3fc"/>
+          <rect x="22" y="7" width="3" height="3" fill="#38bdf8"/>
+          <rect x="3" y="11" width="3" height="2" fill="#bae6fd"/>
+          <rect x="26" y="11" width="3" height="2" fill="#bae6fd"/>
         </svg>`;
+
       case 'drones':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glD"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <ellipse cx="30" cy="30" rx="24" ry="12" stroke="rgba(5, 255, 161, 0.35)" stroke-width="1.5" stroke-dasharray="5 4"/>
-          <circle cx="30" cy="30" r="5" fill="#0f172a" stroke="#05ffa1" stroke-width="1.5"/>
-          <g transform="translate(10, 24)">
-            <circle cx="6" cy="6" r="5" fill="#05ffa1" filter="url(#glD)"/>
-            <circle cx="6" cy="6" r="2" fill="#ffffff"/>
-            <line x1="0" y1="6" x2="12" y2="6" stroke="#05ffa1" stroke-width="1.2"/>
-          </g>
-          <g transform="translate(40, 30)">
-            <circle cx="6" cy="6" r="5" fill="#05ffa1" filter="url(#glD)"/>
-            <circle cx="6" cy="6" r="2" fill="#ffffff"/>
-            <line x1="6" y1="0" x2="6" y2="12" stroke="#05ffa1" stroke-width="1.2"/>
-          </g>
-          <line x1="16" y1="30" x2="46" y2="36" stroke="#05ffa1" stroke-width="1.8" stroke-dasharray="2 2" filter="url(#glD)"/>
+        // Koruyucu Savunma Dronu: Dört yönlü iticili minyatür askeri uydu
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#03160e"/>
+          <!-- Yörünge izi -->
+          <rect x="4" y="15" width="24" height="2" fill="#064e3b"/>
+          <!-- Drone Gövdesi -->
+          <rect x="11" y="11" width="10" height="10" fill="#0f172a"/>
+          <rect x="12" y="12" width="8" height="8" fill="#059669"/>
+          <!-- Sensör Gözü -->
+          <rect x="14" y="14" width="4" height="4" fill="#34d399"/>
+          <rect x="15" y="15" width="2" height="2" fill="#ffffff"/>
+          <!-- Güneş Panelleri / Kanatlar -->
+          <rect x="4" y="13" width="6" height="6" fill="#10b981"/>
+          <rect x="5" y="14" width="4" height="4" fill="#a7f3d0"/>
+          <rect x="22" y="13" width="6" height="6" fill="#10b981"/>
+          <rect x="23" y="14" width="4" height="4" fill="#a7f3d0"/>
+          <!-- Lazer Koruma Emitörü -->
+          <rect x="15" y="8" width="2" height="3" fill="#6ee7b7"/>
+          <rect x="15" y="21" width="2" height="3" fill="#6ee7b7"/>
         </svg>`;
+
       case 'emp':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glE"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="30" r="24" stroke="rgba(255, 0, 85, 0.25)" stroke-width="1.5"/>
-          <circle cx="30" cy="30" r="18" stroke="rgba(255, 0, 85, 0.5)" stroke-width="2" stroke-dasharray="6 3"/>
-          <circle cx="30" cy="30" r="11" fill="rgba(255, 0, 85, 0.2)" stroke="#ff0055" stroke-width="2"/>
-          <circle cx="30" cy="30" r="5" fill="#ffffff" filter="url(#glE)"/>
-          <line x1="30" y1="12" x2="30" y2="6" stroke="#ff0055" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="30" y1="48" x2="30" y2="54" stroke="#ff0055" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="12" y1="30" x2="6" y2="30" stroke="#ff0055" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="48" y1="30" x2="54" y2="30" stroke="#ff0055" stroke-width="2.5" stroke-linecap="round"/>
+        // EMP Şok Bombası: Neon patlama halkası ve iyon çekirdeği
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#1a0410"/>
+          <!-- Dış şok dalga pikselleri -->
+          <rect x="14" y="2" width="4" height="2" fill="#e11d48"/>
+          <rect x="14" y="28" width="4" height="2" fill="#e11d48"/>
+          <rect x="2" y="14" width="2" height="4" fill="#e11d48"/>
+          <rect x="28" y="14" width="2" height="4" fill="#e11d48"/>
+          <rect x="6" y="6" width="3" height="3" fill="#f43f5e"/>
+          <rect x="23" y="6" width="3" height="3" fill="#f43f5e"/>
+          <rect x="6" y="23" width="3" height="3" fill="#f43f5e"/>
+          <rect x="23" y="23" width="3" height="3" fill="#f43f5e"/>
+          <!-- Reaktör Çekirdeği -->
+          <rect x="10" y="10" width="12" height="12" fill="#881337"/>
+          <rect x="12" y="12" width="8" height="8" fill="#fb7185"/>
+          <rect x="14" y="14" width="4" height="4" fill="#ffffff"/>
         </svg>`;
+
       case 'shield':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glS"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <path d="M30 8L48 15V28C48 40 30 50 30 50C30 50 12 40 12 28V15L30 8Z" fill="rgba(0, 240, 255, 0.12)" stroke="#00f0ff" stroke-width="2" filter="url(#glS)"/>
-          <polygon points="30,16 41,22 41,34 30,40 19,34 19,22" stroke="#38bdf8" stroke-width="1.5" fill="none"/>
-          <circle cx="30" cy="28" r="4" fill="#ffffff" filter="url(#glS)"/>
-          <line x1="30" y1="16" x2="30" y2="24" stroke="#00f0ff" stroke-width="1.2"/>
-          <line x1="30" y1="32" x2="30" y2="40" stroke="#00f0ff" stroke-width="1.2"/>
+        // Enerji Kalkanı: Neon mavi siber kalkan amblemi ve parıltı
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#03121c"/>
+          <!-- Kalkan Silueti -->
+          <rect x="8" y="5" width="16" height="3" fill="#0284c7"/>
+          <rect x="6" y="8" width="20" height="10" fill="#0369a1"/>
+          <rect x="8" y="18" width="16" height="4" fill="#0284c7"/>
+          <rect x="10" y="22" width="12" height="3" fill="#0284c7"/>
+          <rect x="12" y="25" width="8" height="3" fill="#0284c7"/>
+          <rect x="14" y="28" width="4" height="2" fill="#0284c7"/>
+          <!-- Parlayan İç Katman -->
+          <rect x="10" y="8" width="12" height="8" fill="#38bdf8"/>
+          <rect x="12" y="16" width="8" height="4" fill="#38bdf8"/>
+          <rect x="14" y="20" width="4" height="3" fill="#38bdf8"/>
+          <!-- Merkez Güç Kristali -->
+          <rect x="14" y="10" width="4" height="5" fill="#ffffff"/>
         </svg>`;
+
       case 'magnet':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glMg"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <path d="M16 12V26C16 34 22 40 30 40C38 40 44 34 44 26V12" stroke="#a855f7" stroke-width="6.5" stroke-linecap="round" fill="none" filter="url(#glMg)"/>
-          <rect x="12" y="10" width="8" height="8" rx="1" fill="#ec4899"/>
-          <rect x="40" y="10" width="8" height="8" rx="1" fill="#38bdf8"/>
-          <polygon points="30,16 34,22 30,28 26,22" fill="#00f0ff" filter="url(#glMg)"/>
-          <polygon points="21,28 24,32 21,36 18,32" fill="#05ffa1"/>
-          <polygon points="39,28 42,32 39,36 36,32" fill="#ffbe0b"/>
+        // Kuantum Çekici / Çekim Alanı: Kırmızı-mavi kutuplu retro mıknatıs & yerçekimi dalgaları
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#13081e"/>
+          <!-- U-Mıknatıs Gövdesi -->
+          <rect x="7" y="6" width="5" height="15" fill="#7e22ce"/>
+          <rect x="20" y="6" width="5" height="15" fill="#7e22ce"/>
+          <rect x="7" y="20" width="18" height="6" fill="#6b21a8"/>
+          <rect x="12" y="16" width="8" height="6" fill="#13081e"/>
+          <!-- Kutuplar: Kuzey (Kırmızı) ve Güney (Mavi) -->
+          <rect x="7" y="5" width="5" height="5" fill="#ef4444"/>
+          <rect x="20" y="5" width="5" height="5" fill="#38bdf8"/>
+          <!-- Manyetik Çekim Kristalleri -->
+          <rect x="15" y="7" width="2" height="2" fill="#a855f7"/>
+          <rect x="14" y="10" width="4" height="4" fill="#c084fc"/>
+          <rect x="15" y="11" width="2" height="2" fill="#ffffff"/>
         </svg>`;
+
       case 'hull':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glH"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <rect x="10" y="10" width="40" height="40" rx="10" fill="rgba(16, 185, 129, 0.14)" stroke="#10b981" stroke-width="2" filter="url(#glH)"/>
-          <path d="M26 18H34V26H42V34H34V42H26V34H18V26H26V18Z" fill="#10b981"/>
-          <circle cx="30" cy="30" r="3.5" fill="#ffffff"/>
-          <circle cx="16" cy="16" r="2" fill="#34d399"/>
-          <circle cx="44" cy="16" r="2" fill="#34d399"/>
-          <circle cx="16" cy="44" r="2" fill="#34d399"/>
-          <circle cx="44" cy="44" r="2" fill="#34d399"/>
+        // Nanit Gövde: Yeşil tıbbi zırh plakası ve tamir nanobotları
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#031a10"/>
+          <!-- Zırh Plakası -->
+          <rect x="5" y="5" width="22" height="22" fill="#064e3b"/>
+          <rect x="6" y="6" width="20" height="20" fill="#047857"/>
+          <!-- Köşe Takviyeleri (Civata/Perçin) -->
+          <rect x="7" y="7" width="2" height="2" fill="#a7f3d0"/>
+          <rect x="23" y="7" width="2" height="2" fill="#a7f3d0"/>
+          <rect x="7" y="23" width="2" height="2" fill="#a7f3d0"/>
+          <rect x="23" y="23" width="2" height="2" fill="#a7f3d0"/>
+          <!-- Nanit Onarım Artısı (Cross) -->
+          <rect x="13" y="9" width="6" height="14" fill="#10b981"/>
+          <rect x="9" y="13" width="14" height="6" fill="#10b981"/>
+          <rect x="14" y="10" width="4" height="12" fill="#ffffff"/>
+          <rect x="10" y="14" width="12" height="4" fill="#ffffff"/>
         </svg>`;
+
       case 'evo_vortex':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glVx"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="30" r="23" stroke="#d946ef" stroke-width="2" stroke-dasharray="8 4" filter="url(#glVx)"/>
-          <ellipse cx="30" cy="30" rx="26" ry="10" transform="rotate(-30 30 30)" stroke="#f472b6" stroke-width="2.2" filter="url(#glVx)"/>
-          <circle cx="30" cy="30" r="12" fill="#05020a" stroke="#ffffff" stroke-width="2"/>
-          <circle cx="30" cy="30" r="5" fill="#d946ef"/>
+      case 'vortex':
+        // Vortex Karadelik Lazeri: Mor girdap & kara delik ufku
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#15021e"/>
+          <!-- Girdap kolları -->
+          <rect x="10" y="4" width="12" height="2" fill="#d946ef"/>
+          <rect x="22" y="6" width="4" height="6" fill="#d946ef"/>
+          <rect x="26" y="12" width="2" height="8" fill="#c026d3"/>
+          <rect x="22" y="20" width="4" height="6" fill="#d946ef"/>
+          <rect x="10" y="26" width="12" height="2" fill="#d946ef"/>
+          <rect x="6" y="20" width="4" height="6" fill="#c026d3"/>
+          <rect x="4" y="12" width="2" height="8" fill="#d946ef"/>
+          <rect x="6" y="6" width="4" height="6" fill="#c026d3"/>
+          <!-- Olay Ufku & Karadelik Çekirdeği -->
+          <rect x="10" y="10" width="12" height="12" fill="#fae8ff"/>
+          <rect x="11" y="11" width="10" height="10" fill="#86198f"/>
+          <rect x="13" y="13" width="6" height="6" fill="#000000"/>
         </svg>`;
+
       case 'evo_cluster':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glCl"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="30" r="24" stroke="#ffbe0b" stroke-width="2" stroke-dasharray="5 3" filter="url(#glCl)"/>
-          <circle cx="30" cy="30" r="6" fill="#ff3d00"/>
-          <path d="M30 18L36 9H24L30 18Z" fill="#ffbe0b" filter="url(#glCl)"/>
-          <path d="M39 34L48 40L42 50L35 38L39 34Z" fill="#ffbe0b" filter="url(#glCl)"/>
-          <path d="M21 34L12 40L18 50L25 38L21 34Z" fill="#ffbe0b" filter="url(#glCl)"/>
-          <circle cx="30" cy="30" r="3.2" fill="#ffffff"/>
+      case 'cluster':
+        // Nükleer Sürü Füzesi: Altın/Sarı mikro savaş başlıkları kümesi
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#1f1002"/>
+          <!-- 3x Mini Nükleer Savaş Başlığı -->
+          <!-- Orta füze -->
+          <rect x="14" y="3" width="4" height="4" fill="#eab308"/>
+          <rect x="15" y="2" width="2" height="1" fill="#ffffff"/>
+          <rect x="13" y="7" width="6" height="10" fill="#78350f"/>
+          <!-- Sol füze -->
+          <rect x="6" y="9" width="4" height="4" fill="#f59e0b"/>
+          <rect x="5" y="13" width="6" height="9" fill="#78350f"/>
+          <!-- Sağ füze -->
+          <rect x="22" y="9" width="4" height="4" fill="#f59e0b"/>
+          <rect x="21" y="13" width="6" height="9" fill="#78350f"/>
+          <!-- Atomik İkaz Deseni -->
+          <rect x="14" y="9" width="4" height="2" fill="#000000"/>
+          <rect x="14" y="12" width="4" height="2" fill="#000000"/>
+          <!-- Roket Alevleri -->
+          <rect x="7" y="22" width="2" height="5" fill="#f97316"/>
+          <rect x="15" y="17" width="2" height="8" fill="#ef4444"/>
+          <rect x="23" y="22" width="2" height="5" fill="#f97316"/>
         </svg>`;
+
       case 'evo_ion_storm':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glIon"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="30" r="23" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 3" filter="url(#glIon)"/>
-          <path d="M14 26C14 21 19 17 25 17C27 13 32 11 37 13C42 15 45 20 44 24C48 25 50 29 48 33C46 37 41 39 37 38H18C14 37 12 32 14 26Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.8"/>
-          <path d="M28 26L21 38H30L26 51L39 35H30L35 26H28Z" fill="#ffe600" stroke="#ffffff" stroke-width="1.2" filter="url(#glIon)"/>
-          <circle cx="21" cy="44" r="2.5" fill="#38bdf8" filter="url(#glIon)"/>
-          <circle cx="39" cy="44" r="2.5" fill="#38bdf8" filter="url(#glIon)"/>
+      case 'ion_storm':
+        // Tesla İyon Fırtınası: Şimşekli gök gürültüsü bulutu ve mavi arklar
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#051424"/>
+          <!-- İyonlaşmış Fırtına Bulutu -->
+          <rect x="8" y="7" width="16" height="7" fill="#1e293b"/>
+          <rect x="6" y="9" width="20" height="7" fill="#334155"/>
+          <rect x="9" y="6" width="7" height="3" fill="#64748b"/>
+          <rect x="17" y="5" width="6" height="4" fill="#94a3b8"/>
+          <!-- Çift İyon Yıldırımı -->
+          <polygon points="14,13 10,21 15,21 12,28 19,18 15,18" fill="#38bdf8"/>
+          <polygon points="21,14 18,20 22,20 19,27 25,18 22,18" fill="#fde047"/>
+          <rect x="13" y="15" width="1" height="4" fill="#ffffff"/>
         </svg>`;
-      case 'overload_reactor':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <circle cx="30" cy="30" r="22" stroke="#bf5af2" stroke-width="2.5" fill="rgba(191,90,242,0.2)"/>
-          <path d="M30 14 L30 46 M14 30 L46 30 M19 19 L41 41 M41 19 L19 41" stroke="#ffffff" stroke-width="2"/>
-        </svg>`;
-      case 'friction_dash':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <path d="M30 10 L38 28 L28 32 L34 50 L18 30 L26 26 Z" fill="#ff5500" stroke="#ffbe0b" stroke-width="2"/>
-        </svg>`;
-      case 'crystal_shrapnel':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <polygon points="30,12 44,24 38,48 22,48 16,24" fill="#05ffa1" stroke="#ffffff" stroke-width="2"/>
-        </svg>`;
+
       case 'evo_bastion':
       case 'evo_nano_bastion':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glNb"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="30" r="23" stroke="#05ffa1" stroke-width="2" stroke-dasharray="6 3" filter="url(#glNb)"/>
-          <polygon points="30,10 48,20 48,40 30,50 12,40 12,20" stroke="#00f0ff" stroke-width="2" fill="rgba(5,255,161,0.2)"/>
-          <circle cx="30" cy="10" r="3.5" fill="#ffffff" filter="url(#glNb)"/>
-          <circle cx="48" cy="30" r="3.5" fill="#ffffff" filter="url(#glNb)"/>
-          <circle cx="12" cy="30" r="3.5" fill="#ffffff" filter="url(#glNb)"/>
-          <circle cx="30" cy="30" r="7" fill="#05ffa1"/>
+      case 'bastion':
+        // Orbital Bastion Halkası: Dörtlü kalkan kalesi ve zümrüt bariyer
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#021a14"/>
+          <!-- Bastion Enerji Halkası -->
+          <rect x="8" y="4" width="16" height="2" fill="#05ffa1"/>
+          <rect x="8" y="26" width="16" height="2" fill="#05ffa1"/>
+          <rect x="4" y="8" width="2" height="16" fill="#05ffa1"/>
+          <rect x="26" y="8" width="2" height="16" fill="#05ffa1"/>
+          <!-- 4 Köşe Uydu Kaleleri -->
+          <rect x="5" y="5" width="4" height="4" fill="#10b981"/>
+          <rect x="23" y="5" width="4" height="4" fill="#10b981"/>
+          <rect x="5" y="23" width="4" height="4" fill="#10b981"/>
+          <rect x="23" y="23" width="4" height="4" fill="#10b981"/>
+          <!-- Merkez Bastion Çekirdeği -->
+          <rect x="12" y="12" width="8" height="8" fill="#0f172a"/>
+          <rect x="13" y="13" width="6" height="6" fill="#34d399"/>
+          <rect x="15" y="15" width="2" height="2" fill="#ffffff"/>
         </svg>`;
+
       case 'evo_cryo':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <circle cx="30" cy="30" r="23" stroke="#00f0ff" stroke-width="2" stroke-dasharray="6 3"/>
-          <path d="M30 12 L30 48 M12 30 L48 30 M17 17 L43 43 M43 17 L17 43" stroke="#ffffff" stroke-width="2.2"/>
-          <circle cx="30" cy="30" r="6" fill="#00f0ff"/>
+      case 'cryo':
+        // Mutlak Sıfır Kriyo-Blaster: Buz kristali / kar tanesi buz silahı
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#031624"/>
+          <!-- Kriyo Kristali Kollar (Kar Tanesi) -->
+          <rect x="15" y="4" width="2" height="24" fill="#38bdf8"/>
+          <rect x="4" y="15" width="24" height="2" fill="#38bdf8"/>
+          <rect x="9" y="9" width="3" height="3" fill="#0ea5e9"/>
+          <rect x="20" y="9" width="3" height="3" fill="#0ea5e9"/>
+          <rect x="9" y="20" width="3" height="3" fill="#0ea5e9"/>
+          <rect x="20" y="20" width="3" height="3" fill="#0ea5e9"/>
+          <!-- Buz Çekirdeği -->
+          <rect x="13" y="13" width="6" height="6" fill="#e0f2fe"/>
+          <rect x="14" y="14" width="4" height="4" fill="#ffffff"/>
         </svg>`;
+
       case 'evo_saws':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <circle cx="30" cy="30" r="20" stroke="#ff5500" stroke-width="2.5" stroke-dasharray="4 2"/>
-          <polygon points="30,10 34,22 46,18 40,28 50,34 38,38 42,50 32,44 26,50 26,38 12,38 20,30 14,20 26,24" fill="#ffbe0b" stroke="#ffffff" stroke-width="1.5"/>
-          <circle cx="30" cy="30" r="5" fill="#ff5500"/>
+      case 'saws':
+        // Plazma Testereleri: Dönen dişli turuncu/kırmızı testere bıçağı
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#200a02"/>
+          <!-- Dış Testere Dişleri -->
+          <polygon points="16,3 19,8 24,5 23,10 28,10 25,14 29,17 24,19 27,24 22,23 22,28 18,25 15,29 14,24 9,27 10,22 5,22 8,18 4,15 9,13 6,8 11,9 11,4 15,7" fill="#ea580c"/>
+          <!-- İç Plaka -->
+          <circle cx="16" cy="16" r="7" fill="#f97316"/>
+          <!-- Merkez Yuva -->
+          <circle cx="16" cy="16" r="3" fill="#ffedd5"/>
         </svg>`;
+
       case 'evo_supernova':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glSn"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <circle cx="30" cy="30" r="24" stroke="#ff3d00" stroke-width="2" stroke-dasharray="5 3" filter="url(#glSn)"/>
-          <circle cx="30" cy="30" r="16" fill="rgba(255, 61, 0, 0.25)" stroke="#ffbe0b" stroke-width="2"/>
-          <circle cx="30" cy="30" r="8" fill="#ffd700" filter="url(#glSn)"/>
-          <circle cx="30" cy="30" r="4" fill="#ffffff"/>
-          <path d="M30 6V14 M30 46V54 M6 30H14 M46 30H54" stroke="#ffbe0b" stroke-width="2.5" stroke-linecap="round"/>
+      case 'supernova':
+        // Süpernova Çekirdeği: Kızıl dev patlaması, alev tacı & pulsasyon
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#240502"/>
+          <!-- Taç Işınları -->
+          <rect x="15" y="1" width="2" height="6" fill="#f59e0b"/>
+          <rect x="15" y="25" width="2" height="6" fill="#f59e0b"/>
+          <rect x="1" y="15" width="6" height="2" fill="#f59e0b"/>
+          <rect x="25" y="15" width="6" height="2" fill="#f59e0b"/>
+          <rect x="5" y="5" width="4" height="4" fill="#ea580c"/>
+          <rect x="23" y="5" width="4" height="4" fill="#ea580c"/>
+          <rect x="5" y="23" width="4" height="4" fill="#ea580c"/>
+          <rect x="23" y="23" width="4" height="4" fill="#ea580c"/>
+          <!-- Süpernova Yıldız Çekirdeği -->
+          <rect x="9" y="9" width="14" height="14" fill="#dc2626"/>
+          <rect x="11" y="11" width="10" height="10" fill="#f97316"/>
+          <rect x="13" y="13" width="6" height="6" fill="#fef08a"/>
+          <rect x="15" y="15" width="2" height="2" fill="#ffffff"/>
         </svg>`;
+
       case 'evo_matrix':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glMx"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <polygon points="30,8 52,48 8,48" stroke="#bf5af2" stroke-width="2.2" fill="rgba(191, 90, 242, 0.15)" filter="url(#glMx)"/>
-          <line x1="30" y1="8" x2="30" y2="48" stroke="#00f0ff" stroke-width="1.5"/>
-          <circle cx="30" cy="8" r="4" fill="#ffffff" filter="url(#glMx)"/>
-          <circle cx="52" cy="48" r="4" fill="#ffffff" filter="url(#glMx)"/>
-          <circle cx="8" cy="48" r="4" fill="#ffffff" filter="url(#glMx)"/>
-          <circle cx="30" cy="32" r="6" fill="#bf5af2"/>
+      case 'matrix':
+        // Kıyamet Tesla Matrisi: Mor piramit & siber rezonans üçgeni
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#180424"/>
+          <!-- Dış Matris Hatları -->
+          <polygon points="16,4 28,26 4,26" fill="none" stroke="#a855f7" stroke-width="2"/>
+          <!-- İç Matris Kristali -->
+          <polygon points="16,9 25,24 7,24" fill="#581c87"/>
+          <!-- Düğümler (Nodes) -->
+          <rect x="14" y="4" width="4" height="4" fill="#e9d5ff"/>
+          <rect x="2" y="24" width="4" height="4" fill="#e9d5ff"/>
+          <rect x="26" y="24" width="4" height="4" fill="#e9d5ff"/>
+          <!-- Kıyamet Gözü / Ark -->
+          <rect x="14" y="16" width="4" height="4" fill="#38bdf8"/>
+          <rect x="15" y="17" width="2" height="2" fill="#ffffff"/>
         </svg>`;
+
       case 'evo_hyper_plasma':
       case 'evo_hyper_saber':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glSb"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <line x1="12" y1="48" x2="48" y2="12" stroke="#05ffa1" stroke-width="4.5" stroke-linecap="round" filter="url(#glSb)"/>
-          <line x1="12" y1="48" x2="48" y2="12" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
-          <circle cx="30" cy="30" r="7" fill="rgba(5, 255, 161, 0.3)" stroke="#00f0ff" stroke-width="1.8"/>
-          <path d="M22 18L16 12L28 10" stroke="#00f0ff" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M38 42L44 48L32 50" stroke="#00f0ff" stroke-width="1.8" stroke-linecap="round"/>
+      case 'hyper_plasma':
+        // Aşırı Yüklemeli Plazma: Yeşil hiper plazma enerjisi ve çift namlu
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#021a10"/>
+          <!-- Hiper Silah Kasası -->
+          <rect x="10" y="16" width="12" height="12" fill="#0f172a"/>
+          <!-- Çift Hiper Namlu -->
+          <rect x="9" y="8" width="4" height="10" fill="#059669"/>
+          <rect x="19" y="8" width="4" height="10" fill="#059669"/>
+          <!-- Parlayan Yeşil Plazma Alevi -->
+          <rect x="9" y="2" width="4" height="6" fill="#10b981"/>
+          <rect x="10" y="1" width="2" height="7" fill="#6ee7b7"/>
+          <rect x="19" y="2" width="4" height="6" fill="#10b981"/>
+          <rect x="20" y="1" width="2" height="7" fill="#6ee7b7"/>
+          <!-- Aşırı Yükleme Reaktörü -->
+          <rect x="13" y="19" width="6" height="6" fill="#34d399"/>
+          <rect x="15" y="21" width="2" height="2" fill="#ffffff"/>
         </svg>`;
+
       case 'evo_void_drones':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <defs><filter id="glVd"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <ellipse cx="30" cy="30" rx="22" ry="14" stroke="#ffd700" stroke-width="1.8" stroke-dasharray="5 3"/>
-          <circle cx="16" cy="24" r="5" fill="#ffbe0b" filter="url(#glVd)"/>
-          <circle cx="44" cy="36" r="5" fill="#ffbe0b" filter="url(#glVd)"/>
-          <polygon points="30,16 36,26 24,26" fill="#00f0ff" filter="url(#glVd)"/>
-          <circle cx="30" cy="30" r="4" fill="#ffffff"/>
+      case 'void_drones':
+        // Vakum Avcı Dronları: Altın rengi harvester ve karadelik emicisi
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#1c1602"/>
+          <!-- Altın Yörünge -->
+          <circle cx="16" cy="16" r="11" fill="none" stroke="#ca8a04" stroke-width="2"/>
+          <!-- 3 Harvester Dronu -->
+          <rect x="14" y="2" width="4" height="4" fill="#eab308"/>
+          <rect x="4" y="20" width="4" height="4" fill="#eab308"/>
+          <rect x="24" y="20" width="4" height="4" fill="#eab308"/>
+          <!-- Vakum Çekirdeği -->
+          <rect x="13" y="13" width="6" height="6" fill="#000000"/>
+          <rect x="14" y="14" width="4" height="4" fill="#a855f7"/>
+          <rect x="15" y="15" width="2" height="2" fill="#ffffff"/>
         </svg>`;
+
+      case 'overload_reactor':
+        // Aşırı Yükleme Reaktörü (Sinerji)
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#190426"/>
+          <rect x="6" y="6" width="20" height="20" fill="#3b0764"/>
+          <rect x="8" y="8" width="16" height="16" fill="#7e22ce"/>
+          <rect x="11" y="11" width="10" height="10" fill="#a855f7"/>
+          <rect x="13" y="13" width="6" height="6" fill="#ffffff"/>
+          <rect x="15" y="2" width="2" height="4" fill="#c084fc"/>
+          <rect x="15" y="26" width="2" height="4" fill="#c084fc"/>
+          <rect x="2" y="15" width="4" height="2" fill="#c084fc"/>
+          <rect x="26" y="15" width="4" height="2" fill="#c084fc"/>
+        </svg>`;
+
+      case 'apex_overdrive':
+      case 'apex_wiper':
+        // Apex Overdrive (Sinerji)
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#240410"/>
+          <polygon points="16,3 27,27 5,27" fill="#be123c"/>
+          <polygon points="16,8 24,24 8,24" fill="#f43f5e"/>
+          <polygon points="16,13 21,22 11,22" fill="#ffffff"/>
+        </svg>`;
+
+      case 'crystal_shrapnel':
+        // Kristal Şarapneli (Sinerji)
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#021a14"/>
+          <polygon points="16,4 26,12 21,27 11,27 6,12" fill="#059669"/>
+          <polygon points="16,8 23,14 19,24 13,24 9,14" fill="#34d399"/>
+          <rect x="14" y="13" width="4" height="6" fill="#ffffff"/>
+        </svg>`;
+
       case 'bonus_heal':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <circle cx="30" cy="30" r="22" stroke="#10b981" stroke-width="2" fill="rgba(16,185,129,0.18)"/>
-          <path d="M26 18H34V26H42V34H34V42H26V34H18V26H26V18Z" fill="#10b981" stroke="#ffffff" stroke-width="1.5"/>
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#031a10"/>
+          <rect x="6" y="6" width="20" height="20" rx="3" fill="#047857"/>
+          <rect x="13" y="9" width="6" height="14" fill="#ffffff"/>
+          <rect x="9" y="13" width="14" height="6" fill="#ffffff"/>
         </svg>`;
+
       case 'bonus_crystals':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <polygon points="30,12 46,24 38,48 22,48 14,24" fill="#ffbe0b" stroke="#ffffff" stroke-width="1.8"/>
-          <polygon points="30,16 41,25 35,44 25,44 19,25" fill="#ffd166"/>
-          <circle cx="30" cy="30" r="3" fill="#ffffff"/>
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#1c1602"/>
+          <polygon points="16,4 27,13 22,27 10,27 5,13" fill="#eab308"/>
+          <polygon points="16,8 23,15 19,24 13,24 9,15" fill="#fef08a"/>
+          <circle cx="16" cy="16" r="3" fill="#ffffff"/>
         </svg>`;
+
       case 'bonus_overdrive':
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
-          <circle cx="30" cy="30" r="22" stroke="#bf5af2" stroke-width="2" stroke-dasharray="5 3" fill="rgba(191,90,242,0.2)"/>
-          <path d="M30 12L36 24H44L34 32L38 46L30 38L22 46L26 32L16 24H24L30 12Z" fill="#bf5af2" stroke="#ffffff" stroke-width="1.5"/>
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#180424"/>
+          <polygon points="16,3 20,12 30,12 22,18 25,28 16,22 7,28 10,18 2,12 12,12" fill="#a855f7"/>
+          <polygon points="16,7 19,14 26,14 20,19 22,25 16,21 10,25 12,19 6,14 13,14" fill="#ffffff"/>
         </svg>`;
+
       default:
-        return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none"><circle cx="30" cy="30" r="15" fill="#00f0ff"/></svg>`;
+        return `<svg ${P}><rect width="32" height="32" fill="#0f172a"/><circle cx="16" cy="16" r="8" fill="#00f0ff"/></svg>`;
     }
   }
 

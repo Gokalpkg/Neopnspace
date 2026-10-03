@@ -1689,8 +1689,19 @@ html, body {
 
 /* Duraklatma Modalı */
 .pause-card {
-  max-width: 360px;
+  max-width: 380px;
   text-align: center;
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pause-primary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
 /* Görevler Bildirim Noktası & Buton */

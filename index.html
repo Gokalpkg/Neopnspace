@@ -356,7 +356,17 @@
         </div>
         <h2 class="gameover-title" style="margin-bottom: 8px;">OYUN DURAKLATILDI</h2>
         
-        <!-- Üst Görev & Durum Kartı (HUD'dan Taşınan Bilgiler) -->
+        <!-- 1. En Üst Aksiyon Butonları (DEVAM ET ve ANA MENÜYE DÖN) -->
+        <div class="menu-btn-group pause-primary-actions" style="margin-bottom: 12px; margin-top: 4px;">
+          <button id="btn-resume" class="neon-btn pulse">DEVAM ET</button>
+          <button id="btn-quit-menu" class="neon-btn-secondary">ANA MENÜYE DÖN</button>
+          <div class="pause-audio-row" style="margin-top: 4px;">
+            <button id="btn-pause-sound" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg> <span id="pause-sound-text">SES: AÇIK</span></button>
+            <button id="btn-pause-vibrate" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><rect x="3" y="1" width="6" height="10" rx="1" fill="#00f0ff"/><line x1="1" y1="4" x2="1" y2="8" stroke="#00f0ff" stroke-width="1.2"/><line x1="11" y1="4" x2="11" y2="8" stroke="#00f0ff" stroke-width="1.2"/></svg> <span id="pause-vibrate-text">TİTREŞİM: AÇIK</span></button>
+          </div>
+        </div>
+
+        <!-- Üst Sefer & Durum Bilgileri -->
         <div class="pause-mission-banner">
           <div class="pause-stat-chip">
             <span class="pause-stat-lbl">SEFER</span>
@@ -376,17 +386,35 @@
           </div>
         </div>
 
-        <!-- Aktif Teçhizat ve Donanım (Active Build Loadout) -->
+        <!-- Aktif Meydan Okuma Görevi -->
+        <div id="pause-quest-section" class="pause-quest-section" style="margin-bottom: 12px;">
+          <div class="pause-quest-header">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:5px;"><rect x="1" y="1" width="10" height="10" fill="none" stroke="#00f0ff" stroke-width="1.5"/><rect x="4" y="4" width="4" height="4" fill="#ff0055"/></svg>
+            <span>AKTİF MEYDAN OKUMA GÖREVİ</span>
+          </div>
+          <div id="pause-quest-content" class="pause-quest-content">
+            <div class="pause-quest-title-row">
+              <span id="pause-quest-title" class="pause-quest-title">25 Düşman Yok Et (0/25)</span>
+              <span id="pause-quest-reward" class="pause-quest-reward">+45 Kristal</span>
+            </div>
+            <div class="pause-quest-bar-track">
+              <div id="pause-quest-bar-fill" class="pause-quest-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Aktif Sistemler ve Donanım (Active Build Loadout) -->
         <div class="pause-inventory-section">
           <div class="pause-codex-title">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM2 3h8v6H2zM4 9h4v2H4z" fill="#00f0ff"/></svg>
             AKTİF SİSTEMLER VE DONANIM
           </div>
           <div id="pause-inventory-grid" class="pause-inventory-grid">
-            <!-- Dinamik Yükseltme ve Evrim Listesi -->
+            <!-- Dinamik Yükseltme ve Donanım Listesi -->
           </div>
         </div>
 
+        <!-- 3. Sinerji & Efsanevi Evrim Rehberi -->
         <div class="pause-codex-section">
           <div class="pause-codex-title">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 0h4v3H6zM4 3h5v2H4zM2 5h6v2H2zM1 7h5v2H1zM3 9h2v1H3zM4 10h1v2H4z" fill="#ffbe0b"/></svg>
@@ -395,42 +423,6 @@
           <div id="pause-codex-grid" class="pause-codex-grid">
             <!-- Dinamik Sinerji Matrisi -->
           </div>
-        </div>
-
-        <div class="pause-codex-section">
-          <div class="pause-codex-title">
-            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M3 1h6v2H3zM2 3h8v6H2zM4 9h4v2H4z" fill="#ff0055"/></svg>
-            DÜŞMAN KODEKSİ
-          </div>
-          <div id="pause-bestiary-grid" class="pause-codex-grid">
-            <!-- Dinamik düşman kayıtları -->
-          </div>
-        </div>
-        <div class="menu-btn-group" style="margin-top: 14px;">
-          <button id="btn-resume" class="neon-btn pulse">DEVAM ET</button>
-          <div class="pause-audio-row">
-            <button id="btn-pause-sound" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg> <span id="pause-sound-text">SES: AÇIK</span></button>
-            <button id="btn-pause-vibrate" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><rect x="3" y="1" width="6" height="10" rx="1" fill="#00f0ff"/><line x1="1" y1="4" x2="1" y2="8" stroke="#00f0ff" stroke-width="1.2"/><line x1="11" y1="4" x2="11" y2="8" stroke="#00f0ff" stroke-width="1.2"/></svg> <span id="pause-vibrate-text">TİTREŞİM: AÇIK</span></button>
-          </div>
-
-          <!-- Aktif Koşu Görevi (Pause Menüsü İçi Özel Bölüm) -->
-          <div id="pause-quest-section" class="pause-quest-section">
-            <div class="pause-quest-header">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:5px;"><rect x="1" y="1" width="10" height="10" fill="none" stroke="#00f0ff" stroke-width="1.5"/><rect x="4" y="4" width="4" height="4" fill="#ff0055"/></svg>
-              <span>AKTİF MEYDAN OKUMA GÖREVİ</span>
-            </div>
-            <div id="pause-quest-content" class="pause-quest-content">
-              <div class="pause-quest-title-row">
-                <span id="pause-quest-title" class="pause-quest-title">25 Düşman Yok Et (0/25)</span>
-                <span id="pause-quest-reward" class="pause-quest-reward">+45 Kristal</span>
-              </div>
-              <div class="pause-quest-bar-track">
-                <div id="pause-quest-bar-fill" class="pause-quest-bar-fill" style="width: 0%;"></div>
-              </div>
-            </div>
-          </div>
-
-          <button id="btn-quit-menu" class="neon-btn-secondary">ANA MENÜYE DÖN</button>
         </div>
       </div>
     </div>
