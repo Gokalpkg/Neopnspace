@@ -970,6 +970,14 @@ class Game {
       });
     }
 
+    const btnAdChestBonus = document.getElementById('btn-ad-chest-bonus');
+    if (btnAdChestBonus) {
+      btnAdChestBonus.addEventListener('click', () => {
+        sounds.init();
+        this.watchAdForChestBonus();
+      });
+    }
+
     // Mod Seçim Butonları
     if (modeClassic) {
       modeClassic.addEventListener('click', () => {
@@ -2897,7 +2905,7 @@ class Game {
     const catalog = [
       { id: 'repair', name: 'Nanobot Tamir Paketi', icon: 'repair', price: 25, desc: 'Tüm Can ve Kalkanı anında %100 tamir eder.' },
       { id: 'overdrive', name: 'Hiper Overdrive Şarjı', icon: 'energy', price: 35, desc: 'Nihai Güç (Ultimate) barını anında %100 doldurur.' },
-      { id: 'nuke', name: 'Kuantum Nükleer Bomba', icon: 'bomb', price: 30, desc: 'Ekrandaki tüm mermileri ve sıradan düşmanları buharlaştırır.' },
+      { id: 'emp_shield', name: 'Taktiksel EMP Kalkanı', icon: 'shield', price: 30, desc: 'Tüm düşman mermilerini anında siler ve 4 sn acil durum dokunulmazlığı verir.' },
       { id: 'damage', name: 'Plazma Katalizörü', icon: 'fire', price: 50, desc: 'Koşu boyunca silah hasarını kalıcı +%25 artırır.' },
       { id: 'shield_boost', name: 'Kalkan Çekirdeği', icon: 'shield', price: 40, desc: 'Maksimum Kalkanı +30 artırır ve anında tam doldurur.' },
       { id: 'magnet_storm', name: 'Kristal Vakum Dalgası', icon: 'magnet', price: 20, desc: '15 sn boyunca ekrandaki tüm kristalleri anında gemiye çeker.' },
@@ -2965,18 +2973,13 @@ class Game {
       if (ultimateLabel) ultimateLabel.textContent = 'HAZIR!';
       sounds.playUltimateReady();
       this.particles.spawnShockwave(this.player.x, this.player.y, '#ffbe0b', 200);
-    } else if (itemId === 'nuke') {
+    } else if (itemId === 'emp_shield' || itemId === 'nuke') {
       sounds.playNuke();
-      this.screenShake = 14;
-      this.whiteFlash = 0.8;
+      this.screenShake = 8;
       this.enemyProjectiles = [];
-      for (let enemy of this.enemies) {
-        if (enemy.isBoss || (enemy.type && enemy.type.startsWith('boss'))) {
-          enemy.hp -= 35;
-        } else {
-          enemy.hp = 0;
-        }
-      }
+      this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, 240);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 240);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 35, 'EMP MERMİ BARİYERİ AKTİF!', '#00f0ff', 16);
     } else if (itemId === 'damage') {
       this.player.damageMultiplier = (this.player.damageMultiplier || 1.0) * 1.25;
       this.particles.spawnShockwave(this.player.x, this.player.y, '#ff0055', 220);
@@ -3094,7 +3097,7 @@ class Game {
     this.player.hp = this.player.maxHp;
     this.player.critChance = 0.05 + (tech.critChance || 0) * 0.025;
     this.player.maxShield = Math.round((20 + (tech.shieldMax || 0) * 8) * (skinCfg.shieldMult || 1.0));
-    this.player.shield = this.player.maxShield;
+    this.player.shield = 0; // Kalkan ile başlama kapalı (kullanıcı talebi: 0 kalkanla başla)
     this.player.level = 1;
     this.player.xp = 0;
     this.player.nextXp = 5; // İlk yükseltme hızla gelsin (Vampire Survivors tarzı ilk seçim)
@@ -3138,7 +3141,6 @@ class Game {
     if (this.masteryTree) {
       this.player.magnetRange += this.masteryTree.magnet * 10;
       this.player.maxShield += this.masteryTree.startShield * 8;
-      this.player.shield = this.player.maxShield;
       this.player.rerollCount = (this.player.rerollCount || 0) + (this.masteryTree.rerollStart || 0);
     }
 
@@ -3146,7 +3148,6 @@ class Game {
       this.player.speedMultiplier = (this.player.speedMultiplier || 1.0) * 1.12;
     } else if (arch === 'dreadnought') {
       this.player.maxShield += 25;
-      this.player.shield = this.player.maxShield;
       this.player.maxHp += 15;
       this.player.hp = this.player.maxHp;
     } else if (arch === 'technician') {
@@ -4534,81 +4535,152 @@ class Game {
       { id: 'hull', name: 'Gövde Nanobotları', stat: '+15 CAN / +25 TAMİR', color: '#10b981', level: this.player.upgrades.hull || 0, maxLevel: 4, desc: 'Gemi canını ve acil tamir kapasitesini artırır.' }
     ].filter(u => u.level < u.maxLevel);
 
-    const roll = Math.random();
-    let isJackpot = false;
-    let rewardCount = 1;
-
-    // Şanslı Sandık Kademeleri:
-    // %28 İhtimal: 3 Ödül + JACKPOT! (veya hazır evrim varsa garanti jackpot)
-    // %48 İhtimal: 2 Ödül (Süper Sandık)
-    // %24 İhtimal: 1 Ödül
-    if (roll < 0.28 || evolutions.length > 0) {
-      isJackpot = true;
-      rewardCount = 3;
-    } else if (roll < 0.76) {
-      rewardCount = 2;
-    } else {
-      rewardCount = 1;
-    }
-
     const pool = [...evolutions, ...availableUpgrades.sort(() => 0.5 - Math.random())];
-    rewardCount = Math.min(pool.length, rewardCount);
-    this.pendingChestRewards = pool.slice(0, Math.max(1, rewardCount));
-    this.pendingChestIsJackpot = isJackpot;
+    
+    // Şanslı Sandık: 1 Adet Garanti Ganimet, 2. Ganimet İsteğe Bağlı Reklamla Açılır
+    this.pendingChestRewards = pool.length > 0 ? [pool[0]] : [];
+    this.pendingChestBonusReward = pool.length > 1 ? pool[1] : null;
+    this.pendingChestIsJackpot = pool[0] && pool[0].isEvolution;
 
     if (jackpotBadge) {
-      if (isJackpot) {
+      if (this.pendingChestIsJackpot) {
         jackpotBadge.classList.remove('hidden');
-        jackpotBadge.textContent = '★ BÜYÜK İKRAMİYE! (3X GANİMET) ★';
+        jackpotBadge.textContent = '★ EFSANEVİ EVRİM SANDIĞI! ★';
       } else {
         jackpotBadge.classList.add('hidden');
       }
     }
 
     if (luckyChestTitle) {
-      luckyChestTitle.textContent = isJackpot ? '★ BÜYÜK İKRAMİYE SANDIĞI! ★' : 'ŞANSLI UZAY SANDIĞI';
-      luckyChestTitle.style.color = isJackpot ? '#ffbe0b' : '#00f0ff';
+      luckyChestTitle.textContent = this.pendingChestIsJackpot ? '★ EFSANEVİ EVRİM SANDIĞI! ★' : 'ŞANSLI UZAY SANDIĞI';
+      luckyChestTitle.style.color = this.pendingChestIsJackpot ? '#ffbe0b' : '#00f0ff';
     }
 
     if (luckyChestSubtitle) {
-      luckyChestSubtitle.textContent = isJackpot
-        ? `★ MÜKEMMEL ŞANS! ${this.pendingChestRewards.length} adet ganimet + Kristal Yağmuru!`
-        : `Boss ganimeti açıldı! ${this.pendingChestRewards.length} adet yükseltme hazır!`;
+      luckyChestSubtitle.textContent = '1 adet garanti ganimet hazır! İkinciyi reklam izleyerek açabilirsin.';
     }
 
     if (luckyChestContainer) {
       luckyChestContainer.innerHTML = '';
       this.pendingChestRewards.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = `upgrade-item-card ${item.isEvolution ? 'evolution-card' : ''}`;
-        row.style.setProperty('--card-color', item.color || '#ffbe0b');
-        row.style.setProperty('--card-glow', `${item.color || '#ffbe0b'}55`);
-        row.style.pointerEvents = 'none';
-        row.style.animation = `jackpotCardPop 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${idx * 0.14}s backwards`;
-
-        const tag = item.isEvolution ? `<span class="card-level-badge evolution-tag">EFSANEVİ EVRİM</span>` : `<span class="card-level-badge">ÜCRETSİZ GELİŞTİRME</span>`;
-
-        row.innerHTML = `
-          <div class="card-art-box">
-            ${this.getUpgradeSvg(item.id)}
-          </div>
-          <div class="card-content">
-            <div class="card-header-row">
-              <span class="card-title">${item.name}</span>
-              <span class="card-stat-pill">${item.stat}</span>
-            </div>
-            <div class="card-meta-row">
-              ${tag}
-            </div>
-            <div class="card-desc">${item.desc}</div>
-          </div>
-        `;
+        const row = this.renderChestRewardCard(item, idx);
         luckyChestContainer.appendChild(row);
       });
     }
 
+    // 2. Ödül Reklam Butonu ve Slotu
+    const adSlot = document.getElementById('lucky-chest-ad-slot');
+    const adBtn = document.getElementById('btn-ad-chest-bonus');
+    const adBtnText = document.getElementById('btn-ad-chest-bonus-text');
+    if (adSlot) {
+      if (this.pendingChestBonusReward) {
+        adSlot.classList.remove('hidden');
+        if (adBtn) {
+          adBtn.disabled = false;
+          adBtn.classList.add('pulse');
+          adBtn.style.opacity = '1';
+          adBtn.style.background = 'linear-gradient(135deg, rgba(255, 190, 11, 0.22), rgba(255, 107, 0, 0.3))';
+          adBtn.style.borderColor = '#ffbe0b';
+        }
+        if (adBtnText) {
+          adBtnText.textContent = '2. Ganimeti Aç (Reklam İzle)';
+          adBtnText.style.color = '#ffbe0b';
+        }
+      } else {
+        adSlot.classList.add('hidden');
+      }
+    }
+
+    if (btnClaimChest) {
+      btnClaimChest.textContent = 'GANİMETİ AL VE DEVAM ET';
+    }
+
     try { history.pushState({ modal: 'lucky_chest' }, ''); } catch(e) {}
     if (luckyChestModal) luckyChestModal.classList.remove('hidden');
+  }
+
+  renderChestRewardCard(item, idx) {
+    const row = document.createElement('div');
+    row.className = `upgrade-item-card ${item.isEvolution ? 'evolution-card' : ''}`;
+    row.style.setProperty('--card-color', item.color || '#ffbe0b');
+    row.style.setProperty('--card-glow', `${item.color || '#ffbe0b'}55`);
+    row.style.pointerEvents = 'none';
+    row.style.animation = `jackpotCardPop 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${idx * 0.14}s backwards`;
+
+    const tag = item.isEvolution ? `<span class="card-level-badge evolution-tag">EFSANEVİ EVRİM</span>` : `<span class="card-level-badge">ÜCRETSİZ GELİŞTİRME</span>`;
+
+    row.innerHTML = `
+      <div class="card-art-box">
+        ${this.getUpgradeSvg(item.id)}
+      </div>
+      <div class="card-content">
+        <div class="card-header-row">
+          <span class="card-title">${item.name}</span>
+          <span class="card-stat-pill">${item.stat}</span>
+        </div>
+        <div class="card-meta-row">
+          ${tag}
+        </div>
+        <div class="card-desc">${item.desc}</div>
+      </div>
+    `;
+    return row;
+  }
+
+  watchAdForChestBonus() {
+    if (!this.pendingChestBonusReward) return;
+    const btn = document.getElementById('btn-ad-chest-bonus');
+    const btnText = document.getElementById('btn-ad-chest-bonus-text');
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.textContent = 'Reklam Hazırlanıyor...';
+
+    const onRewardSuccess = () => {
+      if (this.pendingChestBonusReward) {
+        const bonusItem = this.pendingChestBonusReward;
+        this.pendingChestRewards.push(bonusItem);
+        this.pendingChestBonusReward = null;
+
+        if (luckyChestContainer) {
+          const row = this.renderChestRewardCard(bonusItem, this.pendingChestRewards.length - 1);
+          luckyChestContainer.appendChild(row);
+        }
+
+        sounds.playJackpot();
+        vibrate.success();
+        this.showToast('🎉 2. Ganimet Başarıyla Açıldı!', '#05ffa1');
+
+        if (btn) {
+          btn.disabled = true;
+          btn.classList.remove('pulse');
+          btn.style.opacity = '0.8';
+          btn.style.background = 'rgba(5, 255, 161, 0.2)';
+          btn.style.borderColor = '#05ffa1';
+        }
+        if (btnText) {
+          btnText.textContent = '✓ 2. Ganimet Açıldı!';
+          btnText.style.color = '#05ffa1';
+        }
+        if (btnClaimChest) {
+          btnClaimChest.textContent = 'GANİMETLERİ AL VE DEVAM ET';
+        }
+      }
+    };
+
+    const onError = (err) => {
+      if (btn) btn.disabled = false;
+      if (btnText) btnText.textContent = '2. Ganimeti Aç (Reklam İzle)';
+      this.showToast('Reklam yüklenemedi, lütfen tekrar deneyin.', '#ff5500');
+    };
+
+    if (window.showRewardedAd) {
+      window.showRewardedAd(
+        onRewardSuccess,
+        onError,
+        window.ADMOB_CONFIG ? window.ADMOB_CONFIG.reviveAdUnitId : null
+      );
+    } else {
+      onRewardSuccess();
+    }
   }
 
   claimLuckyChest() {
@@ -5075,20 +5147,15 @@ class Game {
         } else if (p.type === 'magnet') {
           this.player.vacuumTimer = 180; // 3 saniye mega vakum
         } else if (p.type === 'nuke') {
-          // EMP Nükleer Temizlik
+          // Taktiksel EMP Savunması (Düşmanları yok etmez, gemi etrafındaki mermileri savuşturur)
           sounds.playNuke();
-          vibrate.heavy();
-          this.screenShake = 12;
-          this.particles.spawnShockwave(this.width / 2, this.height / 2, '#ffffff', 420);
-          this.enemyProjectiles = [];
-          for (let e of this.enemies) {
-            const isBossUnit = e.isBoss || (e.type && e.type.startsWith('boss'));
-            if (isBossUnit) {
-              e.hp -= 15; // Boss'lara etkisi olmasın (sadece hafif 15 hasar)
-            } else {
-              e.hp = 0; // Normal düşmanları ve meteorları siler
-            }
-          }
+          vibrate.medium();
+          this.screenShake = 6;
+          this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 240);
+          this.enemyProjectiles = this.enemyProjectiles.filter(ep => {
+            return Math.hypot(ep.x - this.player.x, ep.y - this.player.y) > 240;
+          });
+          this.particles.spawnFloatingText(this.player.x, this.player.y - 30, 'EMP SAVUNMA!', '#00f0ff', 15);
         }
         this.powerups.splice(i, 1);
       } else if (p.toRemove) {
@@ -6766,7 +6833,7 @@ class Game {
       for (let k = 0; k < 6; k++) {
         this.gems.push(new Gem(enemy.x + (Math.random() * 30 - 15), enemy.y + (Math.random() * 30 - 15), 3));
       }
-      const pTypes = ['overcharge', 'shield', 'magnet', 'nuke'];
+      const pTypes = ['overcharge', 'shield', 'magnet'];
       const pType = pTypes[Math.floor(Math.random() * pTypes.length)];
       this.powerups.push(new PowerUp(enemy.x, enemy.y, pType));
     } else if (enemy.type === 'elite_scout') {
@@ -6779,7 +6846,7 @@ class Game {
         this.gems.push(new Gem(enemy.x + (Math.random() * 24 - 12), enemy.y + (Math.random() * 24 - 12), 3));
       }
       this.luckyChests.push(new LuckyChest(enemy.x, enemy.y));
-      const pTypes = ['overcharge', 'shield', 'magnet', 'nuke'];
+      const pTypes = ['overcharge', 'shield', 'magnet'];
       const pType = pTypes[Math.floor(Math.random() * pTypes.length)];
       this.powerups.push(new PowerUp(enemy.x, enemy.y, pType));
     } else if (enemy.isChampion) {
@@ -6794,7 +6861,7 @@ class Game {
       if (Math.random() < 0.5) {
         this.luckyChests.push(new LuckyChest(enemy.x, enemy.y));
       } else {
-        const pTypes = ['overcharge', 'shield', 'magnet', 'nuke'];
+        const pTypes = ['overcharge', 'shield', 'magnet'];
         const pType = pTypes[Math.floor(Math.random() * pTypes.length)];
         this.powerups.push(new PowerUp(enemy.x, enemy.y, pType));
       }
@@ -6857,7 +6924,7 @@ class Game {
 
       // Küçük taşlardan güçlendirme kapsülü şansı (%6)
       if (Math.random() < 0.06 && this.powerups.length < 3) {
-        const pTypes = ['overcharge', 'shield', 'magnet', 'nuke'];
+        const pTypes = ['overcharge', 'shield', 'magnet'];
         const pType = pTypes[Math.floor(Math.random() * pTypes.length)];
         this.powerups.push(new PowerUp(enemy.x, enemy.y, pType));
       }
