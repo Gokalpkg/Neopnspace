@@ -1311,7 +1311,7 @@ class Game {
       { id: 'saws', name: 'PLAZMA TESTERELERİ', recipe: 'Dron Lvl 3 + Atış Hızı Lvl 4', active: this.player.evolutions.orbitalSaws, ready: (this.player.upgrades.drones || 0) >= 3 && this.player.upgrades.fireRate >= 4 },
       { id: 'supernova', name: 'SÜPERNOVA ÇEKİRDEĞİ', recipe: 'Füze Lvl 4 + Tesla Lvl 3', active: this.player.evolutions.supernova, ready: this.player.upgrades.missiles >= 4 && (this.player.upgrades.tesla || 0) >= 3 },
       { id: 'matrix', name: 'KIYAMET TESLA MATRİSİ', recipe: 'Tesla Lvl 4 + EMP Lvl 3', active: this.player.evolutions.doomsdayMatrix, ready: (this.player.upgrades.tesla || 0) >= 4 && this.player.upgrades.emp >= 3 },
-      { id: 'hyper_saber', name: 'YANSITICI HİPER IŞIN KILICI', recipe: 'Gövde Lvl 3 + Atış Hızı Lvl 4', active: this.player.evolutions.hyperSaber, ready: (this.player.upgrades.hull || 0) >= 3 && this.player.upgrades.fireRate >= 4 },
+      { id: 'hyper_plasma', name: 'AŞIRI YÜKLEMELİ PLAZMA', recipe: 'Gövde Lvl 3 + Atış Hızı Lvl 4', active: this.player.evolutions.hyperPlasma, ready: (this.player.upgrades.hull || 0) >= 3 && this.player.upgrades.fireRate >= 4 },
       { id: 'void_drones', name: 'VAKUM AVCI DRONLARI', recipe: 'Dron Lvl 3 + Mıknatıs Lvl 3', active: this.player.evolutions.voidDrones, ready: (this.player.upgrades.drones || 0) >= 3 && this.player.upgrades.magnet >= 3 }
     ];
 
@@ -1349,7 +1349,7 @@ class Game {
     if (bestiaryGrid) {
       bestiaryGrid.innerHTML = '';
       const BESTIARY = [
-        { name: 'KORSAN AVCI (SCOUT)', desc: 'Hızlı dalış yapar, hafif plazma sıkar. Zayıflık: Silecek parrisi.', icon: '🛸', color: '#ffbe0b' },
+        { name: 'KORSAN AVCI (SCOUT)', desc: 'Hızlı dalış yapar, hafif plazma sıkar. Zayıflık: Seri plazma ateşi.', icon: '🛸', color: '#ffbe0b' },
         { name: 'AĞIR KRUVAZÖR', desc: 'Geniş mermi yelpazesi atar. Zayıflık: Arkadan ray tüfeği.', icon: '🛡️', color: '#ff0055' },
         { name: 'KUANTUM IŞINLANICI', desc: 'Anlık yer değiştirir. Zayıflık: Güdümlü mikro-füzeler.', icon: '⚡', color: '#a855f7' },
         { name: 'PATLAYICI ÇEKİRDEK', desc: 'Yok olunca şok dalgası saçar. Zayıflık: Uzak menzil.', icon: '💥', color: '#ff5500' },
@@ -3222,6 +3222,7 @@ class Game {
           <circle cx="8" cy="48" r="4" fill="#ffffff" filter="url(#glMx)"/>
           <circle cx="30" cy="32" r="6" fill="#bf5af2"/>
         </svg>`;
+      case 'evo_hyper_plasma':
       case 'evo_hyper_saber':
         return `<svg viewBox="0 0 60 60" width="46" height="46" fill="none">
           <defs><filter id="glSb"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
@@ -3348,14 +3349,14 @@ class Game {
         desc: 'Gemi, dronlar ve düşmanlar arasında sürekli bir yıldırım ağı örer; 4 saniyede bir tüm zincirlere dev EMP şoku verir!'
       });
     }
-    if ((this.player.upgrades.hull || 0) >= 3 && this.player.upgrades.fireRate >= 4 && !this.player.evolutions.hyperSaber) {
+    if ((this.player.upgrades.hull || 0) >= 3 && this.player.upgrades.fireRate >= 4 && !this.player.evolutions.hyperPlasma) {
       evolutions.push({
-        id: 'evo_hyper_saber',
+        id: 'evo_hyper_plasma',
         isEvolution: true,
-        name: 'YANSITICI HİPER IŞIN KILICI',
-        stat: 'MERMİ SAPTIRMA',
+        name: 'AŞIRI YÜKLEMELİ PLAZMA',
+        stat: 'DELİCİ PLAZMA',
         color: '#05ffa1',
-        desc: 'Ön plazma kılıcı devasa çift yönlü hiper bıçağa dönüşür; temas eden düşman mermilerini düşmanlara geri fırlatır!'
+        desc: 'Tüm plazma mermileri hedefleri delip geçer ve isabet ettiği noktalarda yıkıcı elektrik plazma şoku patlatır!'
       });
     }
     if ((this.player.upgrades.drones || 0) >= 3 && this.player.upgrades.magnet >= 3 && !this.player.evolutions.voidDrones) {
@@ -3461,13 +3462,13 @@ class Game {
         desc: 'Kalkan Kırılmasında 360° EMP • Tüm Mermileri Siler'
       },
       {
-        id: 'apex_wiper',
-        name: 'APEX SİLECEK',
-        stat: 'ÇİFT BIÇAK',
+        id: 'apex_overdrive',
+        name: 'APEX OVERDRIVE',
+        stat: 'HIZLI SALDIRI',
         color: '#ff0055',
-        level: this.player.synergies && this.player.synergies.apexWiper ? 1 : 0,
+        level: this.player.synergies && (this.player.synergies.apexOverdrive || this.player.synergies.apexWiper) ? 1 : 0,
         maxLevel: 1,
-        desc: 'Hücum Hattında Çift Bıçaklı Girdap • Mermi Kesici'
+        desc: 'Hücum Hattında +%35 Ekstra Seri Atış Hızı ve Yüksek Delicilik'
       },
       {
         id: 'crystal_shrapnel',
@@ -3738,7 +3739,8 @@ class Game {
       this.updateHUD();
       return;
     }
-    if (id === 'evo_hyper_saber') {
+    if (id === 'evo_hyper_plasma' || id === 'evo_hyper_saber') {
+      this.player.evolutions.hyperPlasma = true;
       this.player.evolutions.hyperSaber = true;
       sounds.playEvolution();
       vibrate.success();
@@ -3770,7 +3772,8 @@ class Game {
       this.updateHUD();
       return;
     }
-    if (id === 'apex_wiper') {
+    if (id === 'apex_overdrive' || id === 'apex_wiper') {
+      this.player.synergies.apexOverdrive = true;
       this.player.synergies.apexWiper = true;
       sounds.playEvolution();
       vibrate.success();
@@ -4336,7 +4339,7 @@ class Game {
 
         // Geminin tepesinde beliren net taktiksel mod bildirimi
         if (currentZone === 'front') {
-          this.player.zoneBannerText = '⚔️ HÜCUM: SİLECEK KILICI';
+          this.player.zoneBannerText = '⚔️ HÜCUM: SERİ AŞIRI YÜKLEME';
           this.player.zoneBannerColor = '#ff0055';
         } else if (currentZone === 'mid') {
           this.player.zoneBannerText = '⚡ TAARRUZ: ÇİFT PLAZMA & FÜZE';
@@ -4756,122 +4759,9 @@ class Game {
     const baseInterval = this.player.isFever ? 11 : 21; // 21 frame başlangıç: dengeli, kademeli güçlenme
     const fireInterval = Math.max(7, Math.round(baseInterval / speedMult));
 
-    // === ARABA SİLECEĞİ PLAZMA KILICI (WIPER PLASMA SABER) — SADECE EN ÜST HÜCUM HATTINDA AKTİF ===
-    const isFrontZone = (this.player.combatZone === 'front');
-    if (isFrontZone) {
-      const r = this.player.visualRadius || 26;
-      const wiperSpeedBonus = 1.45;
-      this.player.wiperTime = (this.player.wiperTime || 0) + 0.16 * dt * speedMult * wiperSpeedBonus;
-      const wiperAngle = Math.sin(this.player.wiperTime) * (Math.PI * 0.42); // -75° ile +75° arası silecek salınımı
-      const isApex = this.player.synergies && this.player.synergies.apexWiper;
-      const bladeLen = Math.round(r * (isApex ? 3.5 : 2.8)); // Apex sinerjisi kılıcı uzatır ve güçlendirir
-
-      const tilt = this.player.tilt || 0;
-      const cosT = Math.cos(tilt);
-      const sinT = Math.sin(tilt);
-      const noseRelX = 0;
-      const noseRelY = -r * 1.55;
-      const noseWorldX = this.player.x + (noseRelX * cosT - noseRelY * sinT);
-      const noseWorldY = this.player.y + (noseRelX * sinT + noseRelY * cosT);
-
-      const tipRelX = Math.sin(wiperAngle) * bladeLen;
-      const tipRelY = noseRelY - Math.cos(wiperAngle) * bladeLen;
-      const tipWorldX = this.player.x + (tipRelX * cosT - tipRelY * sinT);
-      const tipWorldY = this.player.y + (tipRelX * sinT + tipRelY * cosT);
-
-      // Çizgi Parçası - Nokta Mesafe Fonksiyonu (Continuous Hitbox)
-      const distToBlade = (px, py) => {
-        const dx = tipWorldX - noseWorldX;
-        const dy = tipWorldY - noseWorldY;
-        const lenSq = dx * dx + dy * dy;
-        if (lenSq === 0) return Math.hypot(px - noseWorldX, py - noseWorldY);
-        let t = ((px - noseWorldX) * dx + (py - noseWorldY) * dy) / lenSq;
-        t = Math.max(0, Math.min(1, t));
-        return Math.hypot(px - (noseWorldX + t * dx), py - (noseWorldY + t * dy));
-      };
-
-      // Kılıçla Düşman ve Asteroitleri Biçme (Kısa menzilli saf yakın dövüş plazması - ASLA ATEŞ ETMEZ)
-      const slashDamage = (6.0 + (this.player.upgrades.laser || 1) * 2.5) * 6.0 * 0.32 * dt;
-      let hitAny = false;
-      for (let enemy of this.enemies) {
-        if (enemy.hp <= 0 || enemy.toRemove) continue;
-        const d = distToBlade(enemy.x, enemy.y);
-        if (d < enemy.radius + 20) {
-          enemy.hp -= slashDamage;
-          hitAny = true;
-          if (Math.random() < 0.5 * dt) {
-            this.particles.spawnExplosion(enemy.x, enemy.y, '#ff0055', 4, 1.8);
-            if (Math.random() < 0.25 * dt) {
-              this.particles.spawnShockwave(enemy.x, enemy.y, '#ff0055', 28);
-            }
-            vibrate.light();
-          }
-        }
-      }
-      if (hitAny && ((this.frames || 0) - (this.player.lastWiperSlashFrame || 0)) >= 8) {
-        sounds.playWiperSlash();
-        this.player.lastWiperSlashFrame = this.frames;
-      }
-
-    // Silecek Mermi Savurma / Parri (Blade Deflect)
-    if (this.player.combatZone === 'front' && this.wiperSlashActive) {
-      for (let proj of this.enemyProjectiles) {
-        if (proj.toRemove || proj.deflected) continue;
-        const deflectDist = Math.hypot(proj.x - this.player.x, proj.y - this.player.y);
-        if (deflectDist < 55) {
-          // Mermiyi ters çevir ve düşmanlara doğru fırlat
-          proj.vy = -Math.abs(proj.vy) * 1.5;
-          proj.vx = proj.vx * 0.5 + (Math.random() - 0.5) * 2;
-          proj.deflected = true;
-          proj.isDeflected = true;
-          sounds.playDeflect();
-          vibrate.light();
-          this.particles.spawnExplosion(proj.x, proj.y, '#00f0ff', 5, 2);
-        }
-      }
-    }
-
-      // Kılıçla Yaklaşan Mermileri Havada Kesip Yok Etme VEYA Geri Yansıtma (Hiper Kılıç)
-      const isHyperSaber = this.player.evolutions && this.player.evolutions.hyperSaber;
-      for (let p = this.enemyProjectiles.length - 1; p >= 0; p--) {
-        const proj = this.enemyProjectiles[p];
-        const dp = distToBlade(proj.x, proj.y);
-        if (dp < (isHyperSaber ? 34 : 26)) {
-          if (isHyperSaber) {
-            // MERMİYİ SAPTIRIP DÜŞMANLARA GERİ FIRLAT (Bullet Deflection)
-            this.playerBullets.push({
-              x: proj.x,
-              y: proj.y,
-              vx: (Math.random() - 0.5) * 4,
-              vy: -14,
-              damage: (24 + (this.player.upgrades.laser || 1) * 4) * (this.player.damageMultiplier || 1.0),
-              w: 7,
-              h: 16,
-              color: '#05ffa1',
-              isDeflected: true,
-              traveled: 0,
-              maxRange: 9999,
-              pierce: 2
-            });
-            this.particles.spawnShockwave(proj.x, proj.y, '#05ffa1', 40);
-            sounds.playDeflect();
-          } else {
-            this.particles.spawnExplosion(proj.x, proj.y, '#00f0ff', 4, 1.5);
-            sounds.playDeflect();
-          }
-          this.enemyProjectiles.splice(p, 1);
-        }
-      }
-    } else {
-      this.player.wiperTime = 0;
-    }
-
-    // 1. Ana Silah Sistemi (3 BÖLGE İÇİN 3 TAMAMEN AYRI VE EŞSİZ SALDIRI MODU)
+    // 1. Ana Silah Sistemi
     const zone = this.player.combatZone || 'mid';
-    if (zone === 'front') {
-      // 1. Kademe (HÜCUM): TEK SALDIRI SİLECEK KILICI! (Mermi ve füze kesinlikle ateşlenmez)
-      this.player.shootCooldown = 0;
-    } else if (zone === 'rear') {
+    if (zone === 'rear') {
       // 3. Kademe (KESKİN NİŞANCI): ELEKTRO-RAY HYPER RAILGUN!
       // Ağır ritimli, ekranı boydan boya delen, devasa tekil darbe hasarı
       const railInterval = Math.max(22, fireInterval * 1.85);
@@ -4913,9 +4803,10 @@ class Game {
         }
       }
     } else {
-      // 2. Kademe (TAARRUZ): ÇİFT / ÜÇLÜ PLAZMA BLUSTER + GÜDÜMLÜ MİKRO FÜZELER
+      // 2. Kademe (HÜCUM & TAARRUZ): ÇİFT / ÜÇLÜ PLAZMA BLUSTER + GÜDÜMLÜ MİKRO FÜZELER
+      const effectiveInterval = (zone === 'front') ? Math.max(5, Math.round(fireInterval * 0.78)) : fireInterval;
       this.player.shootCooldown += dt;
-      if (this.player.shootCooldown >= fireInterval) {
+      if (this.player.shootCooldown >= effectiveInterval) {
         this.player.shootCooldown = 0;
         sounds.playLaser();
         vibrate.light();
@@ -4997,9 +4888,8 @@ class Game {
       }
     }
 
-    // 2. Güdümlü Mikro-Füzeler — SADECE ORTA (TAARRUZ) HATTINDA AKTİF!
-    // Ön hatta silecek, arka hatta railgun vardır. Orta hatta taarruz yaylımı için füzeler ateşlenir!
-    if (this.player.upgrades.missiles > 0 && zone === 'mid') {
+    // 2. Güdümlü Mikro-Füzeler
+    if (this.player.upgrades.missiles > 0) {
       const missileRateMult = this.player.isStationary ? 1.25 : 1.0;
       this.player.missileCooldown += dt * missileRateMult;
       const missileInterval = Math.max(130, 220 - this.player.upgrades.missiles * 22);
@@ -7520,79 +7410,6 @@ class Game {
     ctx.fill();
     ctx.globalAlpha = 1.0;
     ctx.restore();
-
-    // === ARABA SİLECEĞİ PLAZMA KILICI (WIPER PLASMA SABER) — SADECE EN ÜST HÜCUM HATTINDA GÖRÜNÜR ===
-    if (isFrontZone) {
-      ctx.save();
-      const wiperAngle = Math.sin(this.player.wiperTime || 0) * (Math.PI * 0.42);
-      const prevAngle = Math.sin((this.player.wiperTime || 0) - 0.25) * (Math.PI * 0.42);
-      const bladeLen = Math.round(r * 2.8); // Kısa menzilli kompakt silecek bıçağı (~73px)
-      const hx = 0;
-      const hy = -r * 1.55;
-
-      const saberColor = '#ff0055';
-      const saberTrailColor = 'rgba(255, 0, 85, 0.45)';
-
-      // 1. Silecek Salınım İzi / Hareket Gölgesi
-      ctx.save();
-      const trailGrad = ctx.createRadialGradient(hx, hy, 4, hx, hy, bladeLen + 6);
-      trailGrad.addColorStop(0, saberTrailColor);
-      trailGrad.addColorStop(0.7, 'rgba(255, 0, 85, 0.15)');
-      trailGrad.addColorStop(1, 'transparent');
-      ctx.fillStyle = trailGrad;
-
-      const minA = Math.min(wiperAngle, prevAngle) - Math.PI / 2;
-      const maxA = Math.max(wiperAngle, prevAngle) - Math.PI / 2;
-      ctx.beginPath();
-      ctx.moveTo(hx, hy);
-      ctx.arc(hx, hy, bladeLen, minA, maxA);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-
-      // 2. Kılıç Emitter Yuvası
-      ctx.fillStyle = '#0f172a';
-      ctx.strokeStyle = saberColor;
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.arc(hx, hy, 4.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      // 3. Sallanan Kılıç Gövdesi ve Akkor Kesici Çekirdek
-      const tx = hx + Math.sin(wiperAngle) * bladeLen;
-      const ty = hy - Math.cos(wiperAngle) * bladeLen;
-
-      // Dış neon plazma aurası
-      ctx.strokeStyle = saberColor;
-      ctx.lineWidth = 4.5;
-      ctx.beginPath();
-      ctx.moveTo(hx, hy);
-      ctx.lineTo(tx, ty);
-      ctx.stroke();
-
-      // İç akkor beyaz lazer çekirdeği
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(hx, hy);
-      ctx.lineTo(tx, ty);
-      ctx.stroke();
-
-      // Kılıç Ucu Sivri Plazma Parıltısı
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(tx, ty, 3.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Ucundan fırlayan kıvılcımlar
-      if (Math.random() < 0.35) {
-        ctx.fillStyle = '#ffbe0b';
-        ctx.fillRect(tx + (Math.random() * 6 - 3), ty + (Math.random() * 6 - 3), 2, 2);
-      }
-
-      ctx.restore();
-    }
 
     // === KESKİN NİŞANCI (REAR ZONE): ELEKTRO-RAY HYPER RAILGUN NAMLUSU ===
     if (this.player.combatZone === 'rear') {
