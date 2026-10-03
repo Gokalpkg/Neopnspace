@@ -4680,7 +4680,7 @@ class Game {
       window.showRewardedAd(
         onRewardSuccess,
         onError,
-        window.ADMOB_CONFIG ? window.ADMOB_CONFIG.reviveAdUnitId : null
+        window.ADMOB_CONFIG ? window.ADMOB_CONFIG.chestAdUnitId : null
       );
     } else {
       onRewardSuccess();
