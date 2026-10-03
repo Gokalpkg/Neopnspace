@@ -45,6 +45,23 @@ class SoundEngine {
     } catch (e) {}
   }
 
+  pauseAudio() {
+    this.stopBGM();
+    if (this.ctx && this.ctx.state === 'running') {
+      try {
+        this.ctx.suspend().catch(() => {});
+      } catch (e) {}
+    }
+  }
+
+  resumeAudio() {
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try {
+        this.ctx.resume().catch(() => {});
+      } catch (e) {}
+    }
+  }
+
   init() {
     try {
       if (!this.ctx) {

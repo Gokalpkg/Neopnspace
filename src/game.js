@@ -641,6 +641,11 @@ class Game {
       }
     };
 
+    this.cancelDrag = () => {
+      isDragging = false;
+      activePointerId = null;
+    };
+
     window.addEventListener('pointerdown', (e) => {
       handleDragStart(e.pointerId, e.clientX, e.clientY);
     });
@@ -667,14 +672,44 @@ class Game {
     }, { passive: false });
 
     // Telefon kilitlendiğinde veya arka plana geçtiğinde oyunu ve sesi otomatik duraklat
+    const handleAppBackground = () => {
+      if (sounds.pauseAudio) sounds.pauseAudio();
+      else sounds.stopBGM();
+      if (this.cancelDrag) this.cancelDrag();
+      if (this.state === 'PLAYING') {
+        this.pauseGame();
+      }
+    };
+
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        sounds.stopBGM();
+        handleAppBackground();
+      } else {
         if (this.state === 'PLAYING') {
-          this.pauseGame();
+          if (sounds.resumeAudio) sounds.resumeAudio();
+          sounds.startBGM();
         }
       }
     });
+
+    window.addEventListener('blur', () => {
+      handleAppBackground();
+    });
+
+    if (window.Capacitor?.Plugins?.App) {
+      try {
+        window.Capacitor.Plugins.App.addListener('appStateChange', (state) => {
+          if (!state.isActive) {
+            handleAppBackground();
+          } else {
+            if (this.state === 'PLAYING') {
+              if (sounds.resumeAudio) sounds.resumeAudio();
+              sounds.startBGM();
+            }
+          }
+        });
+      } catch (err) {}
+    }
 
     // Klavye Desteği (Masaüstü Testi İçin)
     this.keys = {};
@@ -1169,8 +1204,10 @@ class Game {
     if (this.state !== 'PLAYING') return;
     this.state = 'PAUSED';
     try { history.pushState({ modal: 'pause' }, ''); } catch(e) {}
+    if (sounds.pauseAudio) sounds.pauseAudio();
+    else sounds.stopBGM();
     if (sounds.setPauseFilter) sounds.setPauseFilter(true);
-    sounds.stopBGM();
+    if (this.cancelDrag) this.cancelDrag();
     vibrate.light();
 
     // Üst Görev & Durum Kartını Güncelle (HUD'dan Duraklatma Menüsüne Taşınan Bilgiler)
@@ -1428,6 +1465,7 @@ class Game {
     if (this.state !== 'PAUSED') return;
     this.state = 'PLAYING';
     this.lastTime = performance.now();
+    if (sounds.resumeAudio) sounds.resumeAudio();
     if (sounds.setPauseFilter) sounds.setPauseFilter(false);
     sounds.startBGM();
     vibrate.light();
@@ -4418,6 +4456,10 @@ class Game {
       return;
     }
 
+    if (this.state === 'PAUSED') {
+      return;
+    }
+
     if (this.state !== 'PLAYING') {
       this.particles.update(this.width, this.height);
       return;
@@ -7100,19 +7142,19 @@ class Game {
     this.drawPlayerBullets();
 
     // Oyuncu Gemisini ve Hayalet İzlerini Çiz
-    if (this.state === 'PLAYING' || this.state === 'LEVEL_UP' || this.state === 'LUCKY_CHEST') {
+    if (this.state === 'PLAYING' || this.state === 'PAUSED' || this.state === 'LEVEL_UP' || this.state === 'LUCKY_CHEST') {
       this.drawPlayerAfterimages();
       this.drawPlayerShip();
       this.drawOrbitalSaws();
     }
 
     // Overdrive / Süper Güç Barı
-    if (this.state === 'PLAYING') {
+    if (this.state === 'PLAYING' || this.state === 'PAUSED') {
       this.drawOverdriveBar();
     }
 
     // Gezegen Savunma Bariyeri Hattı (Alt Siber Grid Çizgisi)
-    if (this.state === 'PLAYING' || this.state === 'LEVEL_UP' || this.state === 'LUCKY_CHEST') {
+    if (this.state === 'PLAYING' || this.state === 'PAUSED' || this.state === 'LEVEL_UP' || this.state === 'LUCKY_CHEST') {
       ctx.save();
       const isBarrierHit = this.barrierFlash > 0;
       const barrierY = this.height - 4;
