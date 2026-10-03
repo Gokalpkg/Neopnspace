@@ -2754,7 +2754,7 @@ class Game {
     this.player.shield = this.player.maxShield;
     this.player.level = 1;
     this.player.xp = 0;
-    this.player.nextXp = 14; // Yavaş ve dengeli seviye atlama
+    this.player.nextXp = 5; // İlk yükseltme hızla gelsin (Vampire Survivors tarzı ilk seçim)
     this.player.score = 0;
     this.player.magnetRange = Math.round((60 + (tech.magnet || 0) * 10) * (skinCfg.magnetMult || 1.0)); // Başlangıçta dar mıknatıs
     this.player.crystalMultiplier = 1 + (tech.crystalBoost || 0) * 0.08;
@@ -3392,7 +3392,7 @@ class Game {
       {
         id: 'missiles',
         name: 'Güdümlü Mikro-Füze',
-        stat: (this.player.upgrades.missiles === 0 ? '+2 FÜZE' : '+1 FÜZE & GÜÇ'),
+        stat: '+1 FÜZE',
         color: '#ff5500',
         level: this.player.upgrades.missiles,
         maxLevel: 4,
@@ -3423,34 +3423,34 @@ class Game {
         color: '#ff0055',
         level: this.player.upgrades.emp,
         maxLevel: 3,
-        desc: 'Periyodik EMP Dalgası • Ekran Temizliği & Şok'
+        desc: 'Periyodik EMP Dalgası • Alan Temizliği & Şok'
       },
       {
         id: 'shield',
         name: 'Enerji Kalkanı',
-        stat: '+20 KALKAN',
+        stat: '+15 KALKAN',
         color: '#00f0ff',
         level: this.player.upgrades.shield,
         maxLevel: 4,
-        desc: '+20 Maks Kalkan • Anında Koruma Onarımı'
+        desc: '+15 Maks Kalkan • Anında Koruma Onarımı'
       },
       {
         id: 'magnet',
         name: 'Kuantum Çekici',
-        stat: '+40 MENZİL',
+        stat: '+20 MENZİL',
         color: '#a855f7',
         level: this.player.upgrades.magnet,
         maxLevel: 4,
-        desc: '+40 Mıknatıs Menzili • Hızlı Kristal Vakumu'
+        desc: '+20 Mıknatıs Menzili • Hızlı Kristal Vakumu'
       },
       {
         id: 'hull',
         name: 'Gövde Nanobotları',
-        stat: '+20 CAN / +45 TAMİR',
+        stat: '+15 CAN / +25 TAMİR',
         color: '#10b981',
         level: this.player.upgrades.hull || 0,
         maxLevel: 4,
-        desc: '+20 Maksimum Can • +45 Acil Gövde Onarımı'
+        desc: '+15 Maksimum Can • +25 Acil Gövde Onarımı'
       },
       {
         id: 'overload_reactor',
@@ -3836,13 +3836,13 @@ class Game {
 
     // Özel etki ayarlamaları (Dengeli ve tatmin edici oranlar)
     if (id === 'magnet') {
-      this.player.magnetRange += 40;
+      this.player.magnetRange += 20;
     } else if (id === 'shield') {
-      this.player.maxShield += 20;
-      this.player.shield = Math.min(this.player.maxShield, this.player.shield + 20);
+      this.player.maxShield += 15;
+      this.player.shield = Math.min(this.player.maxShield, this.player.shield + 15);
     } else if (id === 'hull') {
-      this.player.maxHp += 20;
-      this.player.hp = Math.min(this.player.maxHp, this.player.hp + 45);
+      this.player.maxHp += 15;
+      this.player.hp = Math.min(this.player.maxHp, this.player.hp + 25);
       this.particles.spawnShockwave(this.player.x, this.player.y, '#10b981', 180);
     }
 
@@ -3968,9 +3968,9 @@ class Game {
       { id: 'tesla', name: 'Tesla Yıldırımı', stat: '+ARK ELEKTRİK', color: '#38bdf8', level: this.player.upgrades.tesla || 0, maxLevel: 4, desc: 'Düşmanlar arasında sıçrayan elektrik arkları.' },
       { id: 'drones', name: 'Koruyucu Drone', stat: '+SAVUNMA UYDUSU', color: '#05ffa1', level: this.player.upgrades.drones, maxLevel: 3, desc: 'Gemi etrafında dönerek mermileri ve taşları engelleyen uydu.' },
       { id: 'emp', name: 'EMP Şok Dalgası', stat: 'ŞOK BOMBASI', color: '#ff0055', level: this.player.upgrades.emp, maxLevel: 3, desc: 'Periyodik ekran temizleyen şok dalgası.' },
-      { id: 'shield', name: 'Enerji Kalkanı', stat: '+20 KALKAN', color: '#00f0ff', level: this.player.upgrades.shield, maxLevel: 4, desc: 'Maksimum kalkan kapasitesini artırır ve tamir eder.' },
-      { id: 'magnet', name: 'Kuantum Çekici', stat: '+40 MENZİL', color: '#a855f7', level: this.player.upgrades.magnet, maxLevel: 4, desc: 'Kristalleri çekme yarıçapını artırır.' },
-      { id: 'hull', name: 'Gövde Nanobotları', stat: '+20 CAN / +45 TAMİR', color: '#10b981', level: this.player.upgrades.hull || 0, maxLevel: 4, desc: 'Gemi canını ve acil tamir kapasitesini artırır.' }
+      { id: 'shield', name: 'Enerji Kalkanı', stat: '+15 KALKAN', color: '#00f0ff', level: this.player.upgrades.shield, maxLevel: 4, desc: 'Maksimum kalkan kapasitesini artırır ve tamir eder.' },
+      { id: 'magnet', name: 'Kuantum Çekici', stat: '+20 MENZİL', color: '#a855f7', level: this.player.upgrades.magnet, maxLevel: 4, desc: 'Kristalleri çekme yarıçapını artırır.' },
+      { id: 'hull', name: 'Gövde Nanobotları', stat: '+15 CAN / +25 TAMİR', color: '#10b981', level: this.player.upgrades.hull || 0, maxLevel: 4, desc: 'Gemi canını ve acil tamir kapasitesini artırır.' }
     ].filter(u => u.level < u.maxLevel);
 
     const roll = Math.random();
@@ -4896,8 +4896,8 @@ class Game {
       if (this.player.missileCooldown >= missileInterval && this.enemies.length > 0) {
         this.player.missileCooldown = 0;
         const isCluster = this.player.evolutions.clusterMissiles;
-        const totalMissiles = 1 + this.player.upgrades.missiles;
-        const baseDmg = (3.5 + this.player.upgrades.missiles * 1.0) * (isCluster ? 1.35 : 1.0) * (this.player.damageMultiplier || 1.0);
+        const totalMissiles = this.player.upgrades.missiles;
+        const baseDmg = (2.8 + this.player.upgrades.missiles * 0.9) * (isCluster ? 1.35 : 1.0) * (this.player.damageMultiplier || 1.0);
 
         for (let i = 0; i < totalMissiles; i++) {
           const isDirect = (i % 2 === 0);
@@ -5285,15 +5285,21 @@ class Game {
     this.screenShake = 4;
     this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 200);
 
-    // Yakındaki tüm düşman mermilerini temizle (Savunma amaçlı)
-    this.enemyProjectiles = [];
+    const empRadius = 150 + this.player.upgrades.emp * 20;
+
+    // Yalnızca EMP etki alanı (empRadius) içindeki düşman mermilerini temizle (Tüm ekranı bedava silmez)
+    if (this.enemyProjectiles && this.enemyProjectiles.length > 0) {
+      this.enemyProjectiles = this.enemyProjectiles.filter(proj => {
+        const d = Math.hypot(proj.x - this.player.x, proj.y - this.player.y);
+        return d >= empRadius;
+      });
+    }
 
     // Çevredeki düşmanlara makul ve dengeli alan hasarı
-    const empRadius = 150 + this.player.upgrades.emp * 20;
     for (let enemy of this.enemies) {
       const dist = Math.hypot(enemy.x - this.player.x, enemy.y - this.player.y);
       if (dist < empRadius) {
-        enemy.hp -= 5 + this.player.upgrades.emp * 2.5;
+        enemy.hp -= 4 + this.player.upgrades.emp * 2;
       }
     }
   }
@@ -5699,11 +5705,11 @@ class Game {
 
           enemy.hp -= hitDamage;
 
-          // Tesla Zincirleme Yıldırım
-          if (this.player.upgrades.tesla > 0 && Math.random() < (0.35 + this.player.upgrades.tesla * 0.15)) {
+          // Tesla Zincirleme Yıldırım (Dengeli hayatta kalma ölçeklemesi)
+          if (this.player.upgrades.tesla > 0 && Math.random() < (0.18 + this.player.upgrades.tesla * 0.08)) {
             let zapCount = 0;
-            const maxZaps = 1 + this.player.upgrades.tesla; // Seviye arttıkça daha fazla hedefe sıçrar (2-5 hedef)
-            const teslaDmg = (5.0 + this.player.upgrades.tesla * 2.5) * (this.player.damageMultiplier || 1);
+            const maxZaps = this.player.upgrades.tesla; // Seviye arttıkça hedef sayısı (1, 2, 3, 4 hedef)
+            const teslaDmg = (2.2 + this.player.upgrades.tesla * 1.4) * (this.player.damageMultiplier || 1);
             for (let other of this.enemies) {
               if (other !== enemy && !other.toRemove && other.hp > 0) {
                 const ed = Math.hypot(other.x - enemy.x, other.y - enemy.y);
@@ -5783,7 +5789,7 @@ class Game {
         const droneCount = this.player.upgrades.drones;
         const isBastion = this.player.evolutions && this.player.evolutions.nanoBastion;
         const orbitRadius = isBastion ? 62 : 45;
-        const droneDmg = (isBastion ? 0.65 : 0.18) * dt;
+        const droneDmg = (isBastion ? 0.35 : 0.12) * dt;
         for (let d = 0; d < droneCount; d++) {
           const angle = this.player.droneAngle + (d * (Math.PI * 2 / droneCount));
           const droneX = this.player.x + Math.cos(angle) * orbitRadius;
@@ -5811,7 +5817,7 @@ class Game {
             const closeX = x1 + t * (x2 - x1);
             const closeY = y1 + t * (y2 - y1);
             if (Math.hypot(enemy.x - closeX, enemy.y - closeY) < enemy.radius + 6) {
-              enemy.hp -= 0.22 * dt;
+              enemy.hp -= 0.14 * dt;
               if (Math.random() < 0.25) {
                 this.particles.spawnExplosion(closeX, closeY, '#05ffa1', 2, 1);
               }
@@ -6491,18 +6497,22 @@ class Game {
           }
         }
 
-        // Seviye Atlama Kontrolü (Hızlı, akıcı ve tatmin edici roguelite eğrisi)
+        // Seviye Atlama Kontrolü (Vampire Survivors tarzı: 1. yükseltme çok hızlı, sonrakiler dikleşen eğri)
         if (this.player.xp >= this.player.nextXp) {
           this.player.xp -= this.player.nextXp;
           this.player.level++;
           if (this.player.level === 2) {
-            this.player.nextXp = 10;
+            this.player.nextXp = 12;
           } else if (this.player.level === 3) {
-            this.player.nextXp = 18;
+            this.player.nextXp = 24;
           } else if (this.player.level === 4) {
-            this.player.nextXp = 30;
+            this.player.nextXp = 42;
+          } else if (this.player.level === 5) {
+            this.player.nextXp = 68;
+          } else if (this.player.level === 6) {
+            this.player.nextXp = 105;
           } else {
-            this.player.nextXp = Math.round(this.player.nextXp * 1.45 + 8);
+            this.player.nextXp = Math.round(this.player.nextXp * 1.55 + 15);
           }
           // Seviye atlama epik efektleri
           this.screenShake = 6;
