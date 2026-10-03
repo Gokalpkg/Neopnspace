@@ -420,6 +420,7 @@ export class Enemy {
         this.time = Math.random() * 100;
         this.score = 40;
         this.color = '#ff0077';
+        this.shootTimer = 65 + Math.random() * 45;
         break;
 
       case 'cruiser':
@@ -603,14 +604,24 @@ export class Enemy {
 
     if (this.type === 'scout') {
       this.time += dt;
-      this.x += Math.sin(this.time * this.sineFreq) * this.sineAmp * dt;
+      // Oyuncuya doğru hafif yönelme (Aggressive tracking)
+      const targetDx = playerX - this.x;
+      this.x += Math.sin(this.time * this.sineFreq) * this.sineAmp * dt + Math.sign(targetDx) * Math.min(Math.abs(targetDx) * 0.02, 0.9) * dt;
       this.y += this.speedY * dt;
 
-      // Aşağıya kaçmayı engelle: Belirli bir sınıra gelince yukarı kavis çizer
-      if (this.y > screenHeight - 85 && this.speedY > 0) {
+      // Aşağıya kaçmayı engelle: Oyuncu seviyesine yaklaşınca yukarı kavis çizer
+      if (this.y > screenHeight - 95 && this.speedY > 0) {
         this.speedY = -Math.abs(this.speedY);
-      } else if (this.y < 65 && this.speedY < 0) {
+      } else if (this.y < 70 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
+      }
+
+      // Oyuncuya aktif olarak ateş et! (Kendini korumak için öldürmek zorunda kalırsın)
+      this.shootTimer -= dt;
+      if (this.shootTimer <= 0) {
+        this.shootTimer = 70 + Math.random() * 40;
+        const angle = Math.atan2(playerY - this.y, playerX - this.x);
+        enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 10, angle, 3.4));
       }
     } else if (this.isBoss) {
       const info = Enemy.getBossInfo(this.type);
@@ -772,9 +783,10 @@ export class Enemy {
 
       this.shootTimer -= dt;
       if (this.shootTimer <= 0) {
-        this.shootTimer = 85;
+        this.shootTimer = 65 + Math.random() * 20;
         const angle = Math.atan2(playerY - this.y, playerX - this.x);
-        enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, angle, 3.8));
+        enemyProjectiles.push(new EnemyProjectile(this.x - 8, this.y + 15, angle, 3.8));
+        enemyProjectiles.push(new EnemyProjectile(this.x + 8, this.y + 15, angle, 3.8));
       }
     } else if (this.type === 'dive_bomber') {
       if (!this.isDiving) {

@@ -4654,21 +4654,17 @@ class Game {
       }
     }
 
-    // Kalkan Yenilenmesi (Konum Bonusu: Arka Güvenli Hatta 2 kat hızlı onarım!)
-    const regenThreshold = this.player.combatZone === 'rear' ? 65 : 120;
-    const regenRate = this.player.combatZone === 'rear' ? 0.65 : 0.25;
-    const hpRegenRate = this.player.combatZone === 'rear' ? 0.14 : 0.05;
+    // Kalkan Yenilenmesi (Dengeli Hayatta Kalma: Hasar almadan 4.5 sn durulmalı, serbest ölümsüzlük yok!)
+    const regenThreshold = this.player.combatZone === 'rear' ? 240 : 300; // ~4 - 5 saniye hasar almama şartı
+    const regenRate = 0.12; // Yavaş ve dikkatli kalkan şarjı
 
     this.player.shieldRegenTimer += dt;
     if (this.player.shieldRegenTimer > regenThreshold) {
       if (this.player.shield < this.player.maxShield) {
         this.player.shield = Math.min(this.player.maxShield, this.player.shield + regenRate * dt);
         if (this.frames % 4 === 0) this.updateStatusBarsOnly();
-      } else if (this.player.hp < this.player.maxHp) {
-        // Kalkan tam doluysa, canı onar (Güvenli hatta çok daha hızlı!)
-        this.player.hp = Math.min(this.player.maxHp, this.player.hp + hpRegenRate * dt);
-        if (this.frames % 4 === 0) this.updateStatusBarsOnly();
       }
+      // Otomatik bedava CAN (HP) yenilenmesi kaldırıldı: Can sadece Gövde Onarım kartları veya nanobotlarla iyileşir!
     }
 
     // Telegraph Lazer Uyarılarını Güncelle
@@ -6605,7 +6601,7 @@ class Game {
   }
 
   handleEnemyEscaped(enemy) {
-    // Kaçan meteor veya düşman sadece kombo serisini sıfırlar, can/kalkana asla haksız hasar vermez!
+    // Kaçan meteor veya düşman gezegen savunma hattını zorlar!
     if (this.comboCount > 0) {
       if (this.comboCount >= 5) {
         this.screenShake = Math.min(4, this.comboCount * 0.3);
@@ -6617,6 +6613,18 @@ class Game {
     sounds.playShieldHit();
     vibrate.light();
     this.particles.spawnShockwave(enemy.x, this.height - 8, '#ff0055', 70);
+
+    // Savunma Hattı Baskısı (Hareketsiz bekleyip düşmanları serbestçe geçirmeyi engeller)
+    const breachDmg = enemy.isBoss ? 20 : (enemy.shape ? 4 : 8);
+    if (this.player.shield > 0) {
+      this.player.shield = Math.max(0, this.player.shield - breachDmg);
+      this.particles.spawnFloatingText(enemy.x, this.height - 25, `BARİYER BASKISI -${breachDmg}`, '#ff0055', 12);
+    } else {
+      this.player.hp = Math.max(1, this.player.hp - Math.round(breachDmg * 0.5));
+      this.particles.spawnFloatingText(enemy.x, this.height - 25, `GÖVDE UYARISI -${Math.round(breachDmg * 0.5)}`, '#ff3b30', 12);
+    }
+    this.player.shieldRegenTimer = 0; // Kalkan bekleme süresini sıfırla
+
     this.updateHUD();
   }
 
