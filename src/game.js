@@ -6699,22 +6699,18 @@ class Game {
           }
         }
 
-        // Seviye Atlama Kontrolü (Vampire Survivors tarzı: 1. yükseltme çok hızlı, sonrakiler dikleşen eğri)
+        // Seviye Atlama Kontrolü (Kullanıcı İsteği: Lvl 2: 12 XP, Lvl 3: 83 XP, Lvl 4: 230 XP, Sonrası: nextXp * 1.83 + 38)
         if (this.player.xp >= this.player.nextXp) {
           this.player.xp -= this.player.nextXp;
           this.player.level++;
           if (this.player.level === 2) {
             this.player.nextXp = 12;
           } else if (this.player.level === 3) {
-            this.player.nextXp = 24;
+            this.player.nextXp = 83;
           } else if (this.player.level === 4) {
-            this.player.nextXp = 42;
-          } else if (this.player.level === 5) {
-            this.player.nextXp = 68;
-          } else if (this.player.level === 6) {
-            this.player.nextXp = 105;
+            this.player.nextXp = 230;
           } else {
-            this.player.nextXp = Math.round(this.player.nextXp * 1.55 + 15);
+            this.player.nextXp = Math.round(this.player.nextXp * 1.83 + 38);
           }
           // Seviye atlama epik efektleri
           this.screenShake = 6;
