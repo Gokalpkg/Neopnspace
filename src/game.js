@@ -5010,7 +5010,7 @@ class Game {
         const dmgBonus = (this.player.isFever ? 3.0 : 0) + (isOvercharge ? 2.5 : 0);
         const railDmg = (14.0 + lvl * 4.8 + dmgBonus) * critMult * (this.player.damageMultiplier || 1.0);
 
-        // Tam ekran boyu delen hiper hızlı elektrikli railgun mermisi
+        // Ağır darbeli elektro-ray railgun mermisi (artık birimlerin içinden geçmez, çarptığı hedefe tam darbe verir)
         this.playerBullets.push({
           x: this.player.x,
           y: this.player.y - 28,
@@ -5020,7 +5020,7 @@ class Game {
           w: 12,
           h: 54,
           color: isCrit ? '#ffbe0b' : '#38bdf8',
-          piercing: true,
+          piercing: false,
           isRailgun: true,
           isCrit: isCrit,
           maxRange: 9999,
@@ -5963,13 +5963,10 @@ class Game {
           }
 
           if (bullet.isRailgun) {
-            // Railgun: Yolundaki tüm hedefleri ezip deler geçer!
-            this.particles.spawnShockwave(bullet.x, enemy.y, '#38bdf8', 32);
-            this.particles.spawnExplosion(bullet.x, enemy.y, '#ffffff', 4, 1.3);
-            bullet.penetrations = (bullet.penetrations || 0) + 1;
-            if (bullet.penetrations >= 12) {
-              this.playerBullets.splice(j, 1);
-            }
+            // Railgun: Hedefe çarptığında güçlü şok dalgası ve patlama yaratır, birimlerin içinden geçmez!
+            this.particles.spawnShockwave(bullet.x, enemy.y, '#38bdf8', 36);
+            this.particles.spawnExplosion(bullet.x, enemy.y, '#ffffff', 6, 1.8);
+            this.playerBullets.splice(j, 1);
           } else if (bullet.piercing) {
             bullet.penetrations = (bullet.penetrations || 0) + 1;
             if (bullet.penetrations >= 3) {
