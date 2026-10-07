@@ -5303,8 +5303,10 @@ class Game {
       shield: 0, // Kalkan geliştirmesiyle veya sandıktan sonradan açılır
       magnet: 1,
       tesla: 0,
-      hull: 0
+      hull: 0,
+      wingman: 0
     };
+    this.player.wingmen = [];
 
     // Pilot Seçimi & Yetenek Durumu
     const arch = this.activeArchetype || 'interceptor';
@@ -5813,6 +5815,24 @@ class Game {
           <rect x="10" y="14" width="12" height="4" fill="#ffffff"/>
         </svg>`;
 
+      case 'wingman':
+        // Mikro Klon (Pet / Wingman): Yanımızda uçan minyatür müttefik savaş uçağı
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#04121f"/>
+          <!-- Büyük Ana Uçak Silueti (Arka plan / Sol taraf) -->
+          <polygon points="12,5 17,17 14,24 8,24 5,17" fill="#0369a1"/>
+          <!-- Parlayan Minyatür Klon Pet Uçak (Sağ / Yan Taraf) -->
+          <polygon points="22,7 26,17 24,25 18,25 16,17" fill="#0284c7"/>
+          <polygon points="22,10 25,18 22,23 19,18" fill="#00f0ff"/>
+          <!-- Pet Uçak Kokpit -->
+          <rect x="21" y="13" width="2" height="4" fill="#ffffff"/>
+          <!-- Pet İtki Plazma Alevi -->
+          <polygon points="19,25 22,29 24,25" fill="#38bdf8"/>
+          <!-- İleri Çıkan Plazma Lazer Işını -->
+          <rect x="21" y="2" width="2" height="4" fill="#fef08a"/>
+          <circle cx="22" cy="1" r="1.5" fill="#ffffff"/>
+        </svg>`;
+
       case 'evo_vortex':
       case 'vortex':
         // Vortex Karadelik Lazeri: Mor girdap & kara delik ufku
@@ -6255,6 +6275,15 @@ class Game {
         desc: t('upg_hull_desc')
       },
       {
+        id: 'wingman',
+        name: t('upg_wingman_name'),
+        stat: (this.player.upgrades.wingman === 0 ? '1 MİKRO KLON' : (this.player.upgrades.wingman === 1 ? 'ÇİFT KLON' : 'SÜPER SÜRÜ')),
+        color: '#00f0ff',
+        level: this.player.upgrades.wingman || 0,
+        maxLevel: 3,
+        desc: t('upg_wingman_desc')
+      },
+      {
         id: 'overload_reactor',
         name: 'AŞIRI YÜKLEME REAKTÖRÜ',
         stat: 'EMP ŞOKU',
@@ -6399,6 +6428,10 @@ class Game {
         ],
         hull: [
           { partner: 'fireRate', name: 'Hiper Kılıç', hasPartner: (this.player.upgrades.fireRate || 0) >= 4 }
+        ],
+        wingman: [
+          { partner: 'fireRate', name: 'Siber Sürü', hasPartner: (this.player.upgrades.fireRate || 0) >= 3 },
+          { partner: 'laser', name: 'İkiz Foton', hasPartner: (this.player.upgrades.laser || 0) >= 3 }
         ]
       };
 
@@ -6646,6 +6679,12 @@ class Game {
       this.player.maxHp += 15;
       this.player.hp = Math.min(this.player.maxHp, this.player.hp + 25);
       this.particles.spawnShockwave(this.player.x, this.player.y, '#10b981', 180);
+    } else if (id === 'wingman') {
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 160);
+      const wmLevel = this.player.upgrades.wingman || 1;
+      const label = wmLevel === 1 ? '+1 MİKRO KLON (PET)!' : (wmLevel === 2 ? '+ÇİFT MİKRO KLON!' : '+SÜPER SÜRÜ YAYLIMI!');
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 30, label, '#00f0ff', 16);
+      this.syncWingmen();
     }
 
     levelModal.classList.add('hidden');
@@ -6772,7 +6811,8 @@ class Game {
       { id: 'emp', name: t('upg_emp_name'), stat: 'ŞOK BOMBASI', color: '#ff0055', level: this.player.upgrades.emp, maxLevel: 3, desc: t('upg_emp_desc') },
       { id: 'shield', name: t('upg_shield_name'), stat: '+15 KALKAN', color: '#00f0ff', level: this.player.upgrades.shield, maxLevel: 4, desc: t('upg_shield_desc') },
       { id: 'magnet', name: t('upg_magnet_name'), stat: '+20 MENZİL', color: '#a855f7', level: this.player.upgrades.magnet, maxLevel: 4, desc: t('upg_magnet_desc') },
-      { id: 'hull', name: t('upg_hull_name'), stat: '+15 CAN / +25 TAMİR', color: '#10b981', level: this.player.upgrades.hull || 0, maxLevel: 4, desc: t('upg_hull_desc') }
+      { id: 'hull', name: t('upg_hull_name'), stat: '+15 CAN / +25 TAMİR', color: '#10b981', level: this.player.upgrades.hull || 0, maxLevel: 4, desc: t('upg_hull_desc') },
+      { id: 'wingman', name: t('upg_wingman_name'), stat: '+MİKRO KLON', color: '#00f0ff', level: this.player.upgrades.wingman || 0, maxLevel: 3, desc: t('upg_wingman_desc') }
     ].filter(u => u.level < u.maxLevel);
 
     const pool = [...evolutions, ...availableUpgrades.sort(() => 0.5 - Math.random())];
@@ -8117,6 +8157,11 @@ class Game {
         }
       }
       if (this.droneOverdriveTimer > 0) this.droneOverdriveTimer -= dt;
+    }
+
+    // === MİKRO KLON SAVAŞ UÇAĞI (PET / WINGMAN SİSTEMİ) ===
+    if ((this.player.upgrades.wingman || 0) > 0) {
+      this.updateWingmen(dt);
     }
 
     // === KALICI HANGAR YOLDAŞ DRONE GÜNCELLEMESİ (COMPANION DRONE) ===
@@ -10056,6 +10101,7 @@ class Game {
     if (this.state === 'PLAYING' || this.state === 'PAUSED' || this.state === 'LEVEL_UP' || this.state === 'LUCKY_CHEST') {
       this.drawPlayerAfterimages();
       this.drawPlayerShip();
+      this.drawWingmen();
       this.drawOrbitalSaws();
       this.drawCompanionDrone();
     }
@@ -10766,6 +10812,220 @@ class Game {
     ctx.fillText(`${cd.level}`, 0, 15);
 
     ctx.restore();
+  }
+
+  syncWingmen() {
+    if (!this.player) return;
+    if (!this.player.wingmen) this.player.wingmen = [];
+    const count = Math.min(2, this.player.upgrades.wingman || 0);
+
+    if (count === 0) {
+      this.player.wingmen = [];
+      return;
+    }
+
+    // 1. Sol Kanat Mikro Klon Jet
+    if (count >= 1 && !this.player.wingmen.find(w => w.side === -1)) {
+      this.player.wingmen.push({
+        side: -1,
+        x: this.player.x - 34,
+        y: this.player.y + 10,
+        tilt: 0,
+        shootTimer: 0
+      });
+    }
+
+    // 2. Sağ Kanat Mikro Klon Jet
+    if (count >= 2 && !this.player.wingmen.find(w => w.side === 1)) {
+      this.player.wingmen.push({
+        side: 1,
+        x: this.player.x + 34,
+        y: this.player.y + 10,
+        tilt: 0,
+        shootTimer: 23 // Dengeli ve tatmin edici ardışık çift ritim ofseti
+      });
+    }
+
+    // Seviye 1'e inerse sağ kanadı temizle
+    if (count === 1) {
+      this.player.wingmen = this.player.wingmen.filter(w => w.side === -1);
+    }
+  }
+
+  updateWingmen(dt) {
+    if (!this.player) return;
+    const wmLevel = this.player.upgrades.wingman || 0;
+    if (wmLevel <= 0) return;
+
+    if (!this.player.wingmen || this.player.wingmen.length === 0) {
+      this.syncWingmen();
+    }
+
+    const skin = this.skins[this.currentSkinId] || this.skins.cyberpunk;
+    const bulletColor = this.player.isFever ? '#ffbe0b' : skin.primary;
+
+    // Kullanıcı talebi: "yanımıza çok ufak bizim kopyamız gibi bi uçak gelsin o yavaş yavaş sıksın"
+    // Lvl 1 & 2: ~46 frame (yaklaşık 0.76 saniyede bir sakin ve ritmik plazma)
+    // Lvl 3: ~34 frame (yaklaşık 0.56 saniyede bir hafif hızlanan ikili destek)
+    const shootInterval = wmLevel >= 3 ? 34 : 46;
+    const baseDamage = Math.round((16 + (wmLevel - 1) * 6) * (this.player.damageMultiplier || 1.0));
+
+    for (let wm of this.player.wingmen) {
+      // Pürüzsüz takip ve süzülme fiziği (Hovering & Spring Lag)
+      const hoverX = Math.sin((this.gameTime || 0) * 3.5 + wm.side * 1.5) * 2;
+      const hoverY = Math.cos((this.gameTime || 0) * 4.0 + wm.side * 1.5) * 3;
+      const targetX = this.player.x + wm.side * 34 + hoverX;
+      const targetY = this.player.y + 8 + hoverY;
+
+      wm.x += (targetX - wm.x) * 0.16 * dt;
+      wm.y += (targetY - wm.y) * 0.16 * dt;
+      wm.tilt = (this.player.tilt || 0) * 0.85;
+
+      // Ritmik atış sayacı
+      wm.shootTimer = (wm.shootTimer || 0) + dt;
+      if (wm.shootTimer >= shootInterval) {
+        wm.shootTimer = 0;
+
+        // Hafif dışarı doğru açılı yayılım (flank tarama)
+        const spreadVx = wm.side * (wmLevel >= 3 ? 0.4 : 0.2);
+
+        this.playerBullets.push({
+          x: wm.x,
+          y: wm.y - 12,
+          vx: spreadVx,
+          vy: -15,
+          damage: baseDamage,
+          w: 4,
+          h: 12,
+          color: bulletColor,
+          isWingmanBullet: true,
+          piercing: wmLevel >= 3,
+          isCrit: Math.random() < 0.15,
+          maxRange: 850,
+          traveled: 0
+        });
+
+        // Minyatür namlu plazma parıltısı ve hafif lazer sesi
+        this.particles.spawnExplosion(wm.x, wm.y - 12, bulletColor, 2, 0.8);
+        sounds.playLaser();
+      }
+    }
+  }
+
+  drawWingmen() {
+    if (!this.player) return;
+    const wmLevel = this.player.upgrades.wingman || 0;
+    if (wmLevel <= 0 || !this.player.wingmen || this.player.wingmen.length === 0) return;
+
+    const skin = this.skins[this.currentSkinId] || this.skins.cyberpunk;
+    const primaryColor = this.player.isFever ? '#ffbe0b' : skin.primary;
+    const secondaryColor = this.player.isFever ? '#ffffff' : skin.secondary;
+    const cockpitColor = this.player.isFever ? '#ffffff' : skin.cockpit;
+
+    for (let wm of this.player.wingmen) {
+      ctx.save();
+      ctx.translate(wm.x, wm.y);
+      ctx.rotate(wm.tilt || 0);
+
+      // Oyuncu gemisinin birebir sevimli minyatür kopyası (~0.36x ölçek)
+      const scale = 0.36;
+      ctx.scale(scale, scale);
+      const r = this.player.visualRadius || 26;
+
+      // 1. Minyatür İtki Alevleri
+      const flamePulse = 0.75 + Math.sin(((this.frames || 0) + wm.side * 12) * 0.4) * 0.25;
+      const flameLen = 10 * flamePulse;
+      ctx.fillStyle = skin.flame || '#00f0ff';
+      // Sol motor
+      ctx.beginPath();
+      ctx.moveTo(-9, r * 0.85);
+      ctx.lineTo(-6.5, r * 0.85 + flameLen);
+      ctx.lineTo(-4, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+      // Sağ motor
+      ctx.beginPath();
+      ctx.moveTo(4, r * 0.85);
+      ctx.lineTo(6.5, r * 0.85 + flameLen);
+      ctx.lineTo(9, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+
+      // 2. Motor Podları
+      ctx.fillStyle = '#111827';
+      ctx.strokeStyle = primaryColor;
+      ctx.lineWidth = 2.0;
+      ctx.fillRect(-9, r * 0.55, 5, 8);
+      ctx.strokeRect(-9, r * 0.55, 5, 8);
+      ctx.fillRect(4, r * 0.55, 5, 8);
+      ctx.strokeRect(4, r * 0.55, 5, 8);
+
+      // 3. Mini Kanat Ucu Lazer Namluları
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-r * 1.35, -r * 0.25, 4, r * 0.9);
+      ctx.strokeRect(-r * 1.35, -r * 0.25, 4, r * 0.9);
+      ctx.fillRect(r * 1.35 - 4, -r * 0.25, 4, r * 0.9);
+      ctx.strokeRect(r * 1.35 - 4, -r * 0.25, 4, r * 0.9);
+
+      // Namlu ucu hazır enerji parıltısı
+      ctx.fillStyle = primaryColor;
+      ctx.fillRect(-r * 1.35, -r * 0.45, 4, 3);
+      ctx.fillRect(r * 1.35 - 4, -r * 0.45, 4, 3);
+
+      // 4. Ana Mini Gövde & Delta Kanatlar (Tam Oyuncu Formu)
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = primaryColor;
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.55);
+      ctx.lineTo(r * 0.28, -r * 0.9);
+      ctx.lineTo(r * 0.55, -r * 0.45);
+      ctx.lineTo(r * 0.35, -r * 0.25);
+      ctx.lineTo(r * 1.35, r * 0.65);
+      ctx.lineTo(r * 1.25, r * 1.0);
+      ctx.lineTo(r * 0.3, r * 0.85);
+      ctx.lineTo(0, r * 0.6);
+      ctx.lineTo(-r * 0.3, r * 0.85);
+      ctx.lineTo(-r * 1.25, r * 1.0);
+      ctx.lineTo(-r * 1.35, r * 0.65);
+      ctx.lineTo(-r * 0.35, -r * 0.25);
+      ctx.lineTo(-r * 0.55, -r * 0.45);
+      ctx.lineTo(-r * 0.28, -r * 0.9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 5. İç Titanyum Zırh Plakaları
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = secondaryColor;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.15);
+      ctx.lineTo(r * 0.24, -r * 0.2);
+      ctx.lineTo(r * 0.85, r * 0.52);
+      ctx.lineTo(r * 0.4, r * 0.48);
+      ctx.lineTo(0, r * 0.4);
+      ctx.lineTo(-r * 0.4, r * 0.48);
+      ctx.lineTo(-r * 0.85, r * 0.52);
+      ctx.lineTo(-r * 0.24, -r * 0.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 6. Mini Kokpit Camı
+      ctx.fillStyle = cockpitColor;
+      ctx.beginPath();
+      ctx.ellipse(0, -r * 0.35, 4.5, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 7. Merkez Mikro Füzyon Reaktörü Çekirdeği
+      ctx.fillStyle = primaryColor;
+      ctx.beginPath();
+      ctx.arc(0, r * 0.15, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
   }
 
   // Ana Döngü (120Hz/90Hz/60Hz ekranlarda pürüzsüz ve sabit hız garantisi)

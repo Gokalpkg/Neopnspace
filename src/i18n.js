@@ -151,6 +151,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% Thruster Speed • Superior Evasion",
     upg_orbit_name: "Plasma Sawblade",
     upg_orbit_desc: "Orbiting Energy Blade • High Close-range Shred",
+    upg_wingman_name: "Mini Clone (Pet)",
+    upg_wingman_desc: "Miniature clone starfighter flying beside you. Rhythmically fires support plasma bolts.",
 
     // Overdrive & Floating Text
     overdrive_active: ">>> OVERDRIVE ACTIVE <<<",
@@ -376,6 +378,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+%12 İtici Motor Hızı • Gelişmiş Kaçış Manevrası",
     upg_orbit_name: "Plazma Testeresi",
     upg_orbit_desc: "Yörünge Testeresi • Yakın Alan Sürekli Hasar",
+    upg_wingman_name: "Mikro Klon (Pet)",
+    upg_wingman_desc: "Yanında uçan minyatür klon savaş uçağı. Yavaş ve kararlı ritimle ileriye destek plazması sıkar.",
 
     overdrive_active: ">>> OVERDRIVE AKTİF <<<",
     overdrive_ready: "SÜPER GÜÇ",
@@ -599,6 +603,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% Vitesse • Manœuvres d'Évasion Améliorées",
     upg_orbit_name: "Scie Plasma",
     upg_orbit_desc: "Lame Orbitale • Lacération Continue Rapprochée",
+    upg_wingman_name: "Mini Clone (Pet)",
+    upg_wingman_desc: "Mini chasseur clone à vos côtés. Tire des tirs de plasma en soutien.",
 
     overdrive_active: ">>> SURCHARGE ACTIVE <<<",
     overdrive_ready: "SUPER POUVOIR",
@@ -744,6 +750,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% Vitesse • Esquive Rehaussée",
     upg_orbit_name: "Scie Plasma",
     upg_orbit_desc: "Scie Orbitale • Dégâts Rapprochés Continus",
+    upg_wingman_name: "Mini Clone (Pet)",
+    upg_wingman_desc: "Mini chasseur clone à vos côtés. Tire des tirs de plasma en soutien.",
 
     overdrive_active: ">>> SURCHARGE ACTIVE <<<",
     overdrive_ready: "SUPER POUVOIR",
@@ -889,6 +897,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% Triebwerksgeschwindigkeit • Schnellere Ausweichmanöver",
     upg_orbit_name: "Plasmasäge",
     upg_orbit_desc: "Orbitale Energiesäge • Kontinuierlicher Nahkampfschaden",
+    upg_wingman_name: "Mini-Klon (Pet)",
+    upg_wingman_desc: "Miniatur-Klonjäger an deiner Seite. Feuert rhythmisch Plasma-Unterstützung.",
 
     overdrive_active: ">>> ÜBERLADUNG AKTIV <<<",
     overdrive_ready: "SUPERKRAFT",
@@ -1072,6 +1082,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% 航速提升 • 極限機動閃避",
     upg_orbit_name: "等離子圓鋸",
     upg_orbit_desc: "環繞旋轉鋸刃 • 近身持續切割毀滅",
+    upg_wingman_name: "微型僚機 (寵物克隆)",
+    upg_wingman_desc: "伴隨身旁的微型克隆戰機，持續向前發射等離子支援火力。",
 
     overdrive_active: ">>> 超載狀態啟動 <<<",
     overdrive_ready: "絕招充能",
@@ -1217,6 +1229,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% 航速提升 • 超强机动回避",
     upg_orbit_name: "等离子电锯",
     upg_orbit_desc: "环绕近战锯刃 • 持续高频近身切割",
+    upg_wingman_name: "迷你僚机 (宠物克隆)",
+    upg_wingman_desc: "伴随在身旁的微型克隆战机，持续向前发射等离子支援火力。",
 
     overdrive_active: ">>> 超载过载启动 <<<",
     overdrive_ready: "超级力量",
@@ -1362,6 +1376,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% 航速提升 • 極限戰術迴避",
     upg_orbit_name: "等離子旋轉鋸",
     upg_orbit_desc: "環繞旋轉鋸刃 • 近身持續切割重創",
+    upg_wingman_name: "微型僚機 (寵物克隆)",
+    upg_wingman_desc: "伴隨身旁的微型克隆戰機，持續向前發射等離子支援火力。",
 
     overdrive_active: ">>> 超載過載啟動 <<<",
     overdrive_ready: "絕招充能",
@@ -1507,6 +1523,8 @@ export const TRANSLATIONS = {
     upg_speed_desc: "+12% 移動速度 • 緊急回避力向上",
     upg_orbit_name: "プラズマソーブレード",
     upg_orbit_desc: "旋回エネルギーブレード • 近接持続粉砕",
+    upg_wingman_name: "ミニクローン (ペット機)",
+    upg_wingman_desc: "自機の傍らを飛行するミニクローン戦闘機。前方にプラズマ支援射撃を行います。",
 
     overdrive_active: ">>> オーバードライブ発動中 <<<",
     overdrive_ready: "スーパーパワー",
