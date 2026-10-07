@@ -812,7 +812,12 @@
           </div>
         </div>
 
-        <button id="btn-hangar-close" class="neon-btn" style="margin-top: 14px;">KAYDET VE ÇIK</button>
+        <div class="hangar-footer-bar">
+          <button id="btn-hangar-close" class="neon-btn-primary hangar-confirm-btn">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            KAYDET VE ÇIK
+          </button>
+        </div>
       </div>
     </div>
 
@@ -895,85 +900,94 @@
       </div>
     </div>
 
-    <!-- Oyun Bitti (Game Over) Modalı -->
+    <!-- Oyun Bitti (Game Over / Uçuş Raporu) Modalı -->
     <div id="gameover-modal" class="modal-overlay hidden">
-      <div class="modal-card gameover-card" style="max-width: 380px;">
-        <div class="modal-icon" style="margin-bottom: 6px;">
-          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M7 1h2v3H7zM3 3h3v2H3zM10 3h3v2h-3zM1 7h3v2H1zM12 7h3v2h-3zM3 11h3v2H3zM10 11h3v2h-3zM7 12h2v3H7z" fill="#ff0055"/><rect x="5" y="5" width="6" height="6" fill="#ffe600"/><rect x="6" y="6" width="4" height="4" fill="#ffffff"/></svg>
+      <div class="modal-card gameover-card">
+        
+        <!-- ÜST BAŞLIK & AMBİYANS İKONU -->
+        <div class="go-header-stage">
+          <div class="go-beacon-circle">
+            <svg class="go-skull-svg" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C7.58 2 4 5.58 4 10c0 2.8 1.45 5.27 3.66 6.72V19a2 2 0 002 2h4.68a2 2 0 002-2v-2.28C18.55 15.27 20 12.8 20 10c0-4.42-3.58-8-8-8z" fill="#ff0055" stroke="#ff0055" stroke-width="1.5"/>
+              <circle cx="9" cy="10" r="2" fill="#030816"/>
+              <circle cx="15" cy="10" r="2" fill="#030816"/>
+              <path d="M10 16h4M10 18h4" stroke="#030816" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="go-titles">
+            <span class="go-tactical-tag">MİSYON SONLANDI</span>
+            <h2 class="gameover-title" data-i18n="gameover_title">SİNYAL KESİLDİ</h2>
+          </div>
         </div>
-        <h2 class="gameover-title" style="color: #ff0055; text-shadow: 0 0 18px rgba(255, 0, 85, 0.7); font-size: 1.5rem; margin-bottom: 2px; font-family: var(--font-display); font-weight: 900; letter-spacing: 1px;" data-i18n="gameover_title">SİNYAL KESİLDİ</h2>
-        <div class="gameover-subtitle" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 14px;" data-i18n="gameover_subtitle">Gemin derin uzayda imhâ edildi!</div>
 
-        <!-- İstatistik Tablosu -->
+        <!-- REKOR DURUM ROZETİ (go-hook) -->
+        <div id="go-hook" class="go-hook-banner target-banner"></div>
+
+        <!-- UÇUŞ TELEMETRİSİ (4'LÜ IZGARA) -->
         <div class="gameover-stats-grid">
-          <div class="go-stat-box">
+          <div class="go-stat-box score-box">
             <span class="go-stat-label" data-i18n="pause_score">SKOR</span>
-            <strong id="final-score" class="go-stat-val" style="color: #00f0ff;">0</strong>
+            <strong id="final-score" class="go-stat-val">0</strong>
           </div>
-          <div class="go-stat-box">
-            <span class="go-stat-label" data-i18n="mode_storm_best">REKOR</span>
-            <strong id="final-high-score" class="go-stat-val" style="color: #ffbe0b;">0</strong>
+          <div class="go-stat-box highscore-box">
+            <span class="go-stat-label" data-i18n="mode_storm_best">EN İYİ</span>
+            <strong id="final-high-score" class="go-stat-val">0</strong>
           </div>
-          <div class="go-stat-box">
+          <div class="go-stat-box time-box">
             <span class="go-stat-label" data-i18n="pause_time">SÜRE</span>
             <strong id="final-time" class="go-stat-val">00:00</strong>
           </div>
-          <div class="go-stat-box">
+          <div class="go-stat-box wave-box">
             <span class="go-stat-label" data-i18n="pause_wave">SEVİYE</span>
-            <strong id="final-level" class="go-stat-val" style="color: #bf5af2;">1</strong>
+            <strong id="final-level" class="go-stat-val">1</strong>
           </div>
         </div>
 
-        <!-- Ganimet Katlama & Ödül Teşvik Kutusu -->
-        <div class="go-reward-double-box">
-          <div class="go-reward-header">
-            <span class="go-reward-title">KOŞU GANİMETİ</span>
-            <span class="go-reward-tag">🔥 2X FIRSAT</span>
-          </div>
-          <div class="go-reward-comparison">
-            <div class="reward-col current">
-              <span class="reward-lbl">KAZANILAN</span>
-              <strong id="final-crystals" class="reward-val">+0 CR</strong>
-            </div>
-            <div class="reward-arrow">➔</div>
-            <div class="reward-col boosted">
-              <span class="reward-lbl">2X İLE KASAYA</span>
-              <strong id="final-crystals-boosted" class="reward-val-boosted">+0 CR 🔥</strong>
+        <!-- GANİMET KASASI & 2X KATLAMA (KOMPAKT & ŞIK) -->
+        <div class="go-vault-card">
+          <div class="vault-info">
+            <span class="vault-label">KOŞU GANİMETİ</span>
+            <div class="vault-values">
+              <span id="final-crystals" class="vault-crystal-val">+0 CR</span>
+              <span class="vault-multiplier-preview" id="final-crystals-boosted">+0 CR 🔥</span>
             </div>
           </div>
+          <button id="btn-double-crystals" class="vault-double-btn pulse gold-shimmer-btn">
+            <span class="btn-shimmer-badge">⚡ 2X</span>
+            <span id="btn-double-crystals-text">KATLA (REKLAM)</span>
+          </button>
         </div>
 
-        <button id="btn-double-crystals" class="neon-btn pulse gold-shimmer-btn" style="width: 100%; font-size: 0.96rem; padding: 11px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span class="btn-shimmer-badge">⚡ 2X KATLA</span>
-          <span id="btn-double-crystals-text">🎬 GANİMETİ İKİYE KATLA (REKLAM)</span>
+        <!-- HIZLI YÜKSELTMEYİ ÖNER (go-quick-upgrade) -->
+        <button id="go-quick-upgrade" class="go-quick-upgrade-btn" style="display: none;"></button>
+
+        <!-- REVIVE / CANLANMA SEÇENEĞİ (Canlanma hakkı varsa belirir) -->
+        <button id="btn-ad-revive" class="go-revive-btn pulse" data-i18n="btn_revive">
+          <svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="#030816" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="#030816" stroke-width="1.8"/></svg>
+          CANLAN & SAVAŞA DÖN
         </button>
 
-        <!-- Aksiyon Butonları -->
-        <div class="gameover-actions">
-          <button id="btn-ad-revive" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #030816; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;" data-i18n="btn_revive">
-            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><polygon points="3,1 10,6 3,11" fill="#030816"/></svg>
-            REKLAM İZLE: CANLAN & DEVAM ET
+        <!-- BİRİNCİL AKSİYON: YENİDEN SAVAŞ (BÜYÜK VE PARLAK) -->
+        <button id="btn-restart" class="go-primary-restart-btn" data-i18n="btn_retry">
+          <svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M4 2v4H0M12 14v-4h4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M13.5 6A6 6 0 002.5 7.5L0 6M2.5 10a6 6 0 0011-1.5L16 10" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          YENİDEN SAVAŞA GİR
+        </button>
+
+        <!-- İKİNCİL BUTONLAR: HANGAR & MENÜ & PAYLAŞ -->
+        <div class="go-nav-row">
+          <button id="btn-gameover-hangar" class="go-secondary-btn">
+            <svg class="tab-icon" viewBox="0 0 16 16"><path d="M8 1L2 5v9l6-3 6 3V5L8 1z" fill="currentColor"/></svg>
+            HANGAR
           </button>
-          <button id="btn-restart" class="neon-btn" style="width: 100%; font-size: 1.0rem; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;" data-i18n="btn_retry">
-            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9z" fill="#030816"/></svg>
-            YENİDEN DOĞ
+          <button id="btn-gameover-menu" class="go-secondary-btn" data-i18n="btn_menu">
+            <svg class="tab-icon" viewBox="0 0 16 16"><path d="M8 2L2 7v7h4v-4h4v4h4V7L8 2z" fill="currentColor"/></svg>
+            ANA HUB
           </button>
-          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-            <button id="btn-share-score" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(255, 215, 0, 0.12); border-color: #ffd700; color: #ffd700;">
-              <span>📢</span> SKORU PAYLAŞ
-            </button>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <button id="btn-gameover-hangar" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM4 9h4v2H4zM1 4h2v4H1zM9 4h2v4H9z" fill="#00f0ff"/><rect x="4" y="4" width="4" height="4" fill="#ffbe0b"/></svg>
-              ATÖLYE & HANGAR
-            </button>
-            <button id="btn-gameover-menu" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;" data-i18n="btn_menu">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#00f0ff"/></svg>
-              ANA MENÜ
-            </button>
-          </div>
+          <button id="btn-share-score" class="go-share-btn" title="Skoru Paylaş">
+            <svg class="tab-icon" viewBox="0 0 16 16"><circle cx="4" cy="8" r="2.5" fill="currentColor"/><circle cx="12" cy="4" r="2.5" fill="currentColor"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M6 7l4-2M6 9l4 2" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
         </div>
+
       </div>
     </div>
 

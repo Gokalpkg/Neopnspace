@@ -1317,6 +1317,7 @@ class Game {
         sounds.init();
         sounds.playCardSelect();
         gameoverModal.classList.add('hidden');
+        this.state = 'MENU';
         this.openHangar();
         if (this.tabBtnTech) this.tabBtnTech.click();
       });
@@ -1529,16 +1530,33 @@ class Game {
       });
     }
 
+    const handleCloseHangar = (e) => {
+      if (e) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+      }
+      sounds.init();
+      sounds.playCardSelect();
+      vibrate.light();
+      this.closeHangar();
+    };
+
     if (btnHangarClose) {
-      btnHangarClose.addEventListener('click', () => {
-        this.goToMenuTab(1);
-      });
+      btnHangarClose.addEventListener('click', handleCloseHangar);
+      btnHangarClose.addEventListener('touchend', handleCloseHangar, { passive: false });
     }
 
     const btnHangarCloseX = document.getElementById('btn-hangar-close-x');
     if (btnHangarCloseX) {
-      btnHangarCloseX.addEventListener('click', () => {
-        this.goToMenuTab(1);
+      btnHangarCloseX.addEventListener('click', handleCloseHangar);
+      btnHangarCloseX.addEventListener('touchend', handleCloseHangar, { passive: false });
+    }
+
+    if (hangarModal) {
+      hangarModal.addEventListener('click', (e) => {
+        if (e.target === hangarModal) {
+          handleCloseHangar(e);
+        }
       });
     }
 
@@ -2453,6 +2471,7 @@ class Game {
 
   openHangar() {
     try { history.pushState({ modal: 'hangar' }, ''); } catch(e) {}
+    this.state = 'MENU';
     this.updateCrystalsDisplay();
     this.updateTrophiesBadge();
     this.switchHangarTab(this.activeHangarTab || 'skins');
@@ -2462,8 +2481,12 @@ class Game {
   }
 
   closeHangar() {
+    this.state = 'MENU';
     if (hangarModal) hangarModal.classList.add('hidden');
+    if (startScreen) startScreen.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(1);
+    this.updateMenuShipPreview();
+    this.updateCrystalsDisplay();
   }
 
   updateCrystalsDisplay() {
@@ -5903,6 +5926,7 @@ class Game {
     this.player.visualRadius = 26;
     this.player.tilt = 0;
     this.player.combatZone = 'rear';
+    this.revivesUsed = 0;
 
     const tech = this.techUpgrades || {};
     const skinCfg = this.skins[this.currentSkinId] || this.skins.cyberpunk;
@@ -7771,83 +7795,56 @@ class Game {
     });
   }
 
-  // Ölüm ekranı kancası: rekora ne kadar kaldı + tek dokunuşla kalıcı yükseltme + büyük TEKRAR
+  // Ölüm ekranı kancası: rekora ne kadar kaldı + tek dokunuşla kalıcı yükseltme
   buildGameOverHook(prevBest, isNewRecord) {
-    const card = document.querySelector('#gameover-modal .modal-card');
-    if (!card) return;
-    const score = this.player.score;
-
+    const score = this.player ? this.player.score : 0;
     if (finalHighScore) finalHighScore.textContent = (this.highScores[this.currentMode] || 0).toLocaleString();
 
-    let hook = document.getElementById('go-hook');
-    if (!hook) {
-      hook = document.createElement('div');
-      hook.id = 'go-hook';
-      const grid = card.querySelector('.gameover-stats-grid');
-      if (grid) card.insertBefore(hook, grid);
-    }
-    const hookBase = 'margin:0 0 12px;padding:10px 12px;border-radius:12px;font-weight:900;font-size:1rem;letter-spacing:.5px;text-align:center;';
-    if (isNewRecord && prevBest > 0) {
-      hook.textContent = `🏆 YENİ REKOR! ${score.toLocaleString()} (önceki ${prevBest.toLocaleString()})`;
-      hook.style.cssText = hookBase + 'background:rgba(255,215,0,.15);border:1px solid #ffd700;color:#ffd700;';
-    } else if (isNewRecord) {
-      hook.textContent = `🏆 İLK REKORUN: ${score.toLocaleString()} — şimdi bunu geç!`;
-      hook.style.cssText = hookBase + 'background:rgba(255,215,0,.15);border:1px solid #ffd700;color:#ffd700;';
-    } else {
-      const left = Math.max(1, prevBest - score + 1);
-      hook.textContent = `🎯 Rekora ${left.toLocaleString()} puan kaldı! (${prevBest.toLocaleString()})`;
-      hook.style.cssText = hookBase + 'background:rgba(0,240,255,.12);border:1px solid #00f0ff;color:#00f0ff;';
+    const hook = document.getElementById('go-hook');
+    if (hook) {
+      if (isNewRecord && prevBest > 0) {
+        hook.className = 'go-hook-banner record-banner';
+        hook.innerHTML = `<span>🏆 YENİ REKOR!</span> <strong>${score.toLocaleString()}</strong> <em>(Önceki: ${prevBest.toLocaleString()})</em>`;
+      } else if (isNewRecord) {
+        hook.className = 'go-hook-banner record-banner';
+        hook.innerHTML = `<span>🏆 İLK REKORUN!</span> <strong>${score.toLocaleString()}</strong>`;
+      } else {
+        const left = Math.max(1, prevBest - score + 1);
+        hook.className = 'go-hook-banner target-banner';
+        hook.innerHTML = `<span>🎯 Rekora <strong>${left.toLocaleString()}</strong> puan kaldı!</span> <em>(En İyi: ${prevBest.toLocaleString()})</em>`;
+      }
     }
 
     // En ucuz alınabilir kalıcı yükseltmeyi öner
-    let quick = document.getElementById('go-quick-upgrade');
-    if (!quick) {
-      quick = document.createElement('button');
-      quick.id = 'go-quick-upgrade';
-      quick.className = 'neon-btn';
-      quick.style.cssText = 'width:100%;padding:10px;margin-bottom:10px;font-weight:900;font-size:.92rem;background:linear-gradient(135deg,#05ffa1,#00f0ff);color:#030816;border:none;border-radius:10px;cursor:pointer;';
-      const dbl = document.getElementById('btn-double-crystals');
-      if (dbl) card.insertBefore(quick, dbl);
-    }
-    const options = this.getTechCatalog()
-      .map(item => ({ item, lvl: this.techUpgrades[item.id] || 0 }))
-      .filter(o => o.lvl < o.item.maxLevel)
-      .map(o => ({ ...o, cost: o.item.costs[o.lvl] }))
-      .filter(o => o.cost <= this.totalCrystals)
-      .sort((a, b) => a.cost - b.cost);
-    const best = options[0];
-    if (best) {
-      quick.style.display = '';
-      quick.textContent = `⚡ ${best.item.name}: ${best.item.formatVal(best.lvl + 1)} — ${best.cost} CR AL`;
-      quick.onclick = () => {
-        sounds.init();
-        if (this.totalCrystals < best.cost) return;
-        this.totalCrystals -= best.cost;
-        this.techUpgrades[best.item.id] = best.lvl + 1;
-        localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
-        this.saveTechUpgrades();
-        sounds.playLevelUp();
-        vibrate.success();
-        this.updateCrystalsDisplay();
-        this.logEvent('quick_upgrade', { id: best.item.id, lvl: best.lvl + 1 });
-        this.showToast(`✓ ${best.item.name} geliştirildi!`, '#05ffa1');
-        this.buildGameOverHook(prevBest, isNewRecord);
-      };
-    } else {
-      quick.style.display = 'none';
-    }
-
-    // TEKRAR butonunu ana eylem yap (revive reklamının üstüne al, büyüt)
-    const restart = document.getElementById('btn-restart');
-    const revive = document.getElementById('btn-ad-revive');
-    if (restart && revive && restart.parentNode === revive.parentNode) {
-      restart.parentNode.insertBefore(restart, revive);
-      restart.style.fontSize = '1.2rem';
-      restart.style.padding = '15px';
-      restart.style.fontWeight = '900';
-      restart.style.background = 'linear-gradient(135deg,#00f0ff,#bf5af2)';
-      restart.style.color = '#030816';
-      restart.style.border = 'none';
+    const quick = document.getElementById('go-quick-upgrade');
+    if (quick) {
+      const options = this.getTechCatalog()
+        .map(item => ({ item, lvl: this.techUpgrades[item.id] || 0 }))
+        .filter(o => o.lvl < o.item.maxLevel)
+        .map(o => ({ ...o, cost: o.item.costs[o.lvl] }))
+        .filter(o => o.cost <= this.totalCrystals)
+        .sort((a, b) => a.cost - b.cost);
+      const best = options[0];
+      if (best) {
+        quick.style.display = 'flex';
+        quick.innerHTML = `<span>⚡ ${best.item.name} (${best.item.formatVal(best.lvl + 1)})</span> <strong>${best.cost} CR AL</strong>`;
+        quick.onclick = () => {
+          sounds.init();
+          if (this.totalCrystals < best.cost) return;
+          this.totalCrystals -= best.cost;
+          this.techUpgrades[best.item.id] = best.lvl + 1;
+          localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+          this.saveTechUpgrades();
+          sounds.playLevelUp();
+          vibrate.success();
+          this.updateCrystalsDisplay();
+          this.logEvent('quick_upgrade', { id: best.item.id, lvl: best.lvl + 1 });
+          this.showToast(`✓ ${best.item.name} geliştirildi!`, '#05ffa1');
+          this.buildGameOverHook(prevBest, isNewRecord);
+        };
+      } else {
+        quick.style.display = 'none';
+      }
     }
   }
 
@@ -7910,10 +7907,15 @@ class Game {
     const freeRevives = parseInt(localStorage.getItem('neon_bonus_revives') || '0', 10);
     const btnAdRevive = document.getElementById('btn-ad-revive');
     if (btnAdRevive) {
-      if (freeRevives > 0) {
-        btnAdRevive.innerHTML = t('gameover_revive_free', { n: freeRevives });
+      if ((this.revivesUsed || 0) >= 1) {
+        btnAdRevive.style.display = 'none';
       } else {
-        btnAdRevive.innerHTML = t('gameover_revive_ad');
+        btnAdRevive.style.display = 'flex';
+        if (freeRevives > 0) {
+          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="#030816" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="#030816" stroke-width="1.8"/></svg> ÜCRETSİZ CANLAN (${freeRevives} YEDEK)`;
+        } else {
+          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><polygon points="5,3 13,8 5,13" fill="#030816"/></svg> CANLAN & SAVAŞA DÖN (REKLAM)`;
+        }
       }
     }
 
@@ -7927,6 +7929,7 @@ class Game {
   }
 
   executeRevive() {
+    this.revivesUsed = (this.revivesUsed || 0) + 1;
     if (gameoverModal) gameoverModal.classList.add('hidden');
     this.state = 'PLAYING';
     this.lastTime = performance.now();
