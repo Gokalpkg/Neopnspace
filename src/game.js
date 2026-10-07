@@ -2883,6 +2883,10 @@ class Game {
     const revives = parseInt(localStorage.getItem('neon_bonus_revives') || '0', 10);
     const damageBuff = parseInt(localStorage.getItem('neon_boost_damage') || '0', 10);
     const magnetBuff = parseInt(localStorage.getItem('neon_boost_magnet') || '0', 10);
+    const overdrive = parseInt(localStorage.getItem('neon_boost_overdrive') || '0', 10);
+    const rerolls = parseInt(localStorage.getItem('neon_boost_rerolls') || '0', 10);
+    const crystal = parseInt(localStorage.getItem('neon_boost_crystal') || '0', 10);
+    const shield = parseInt(localStorage.getItem('neon_boost_shield') || '0', 10);
 
     return [
       {
@@ -7866,14 +7870,14 @@ class Game {
 
         // Geminin tepesinde beliren net taktiksel mod bildirimi
         if (currentZone === 'front') {
-          this.player.zoneBannerText = '⚔️ HÜCUM: SERİ AŞIRI YÜKLEME';
-          this.player.zoneBannerColor = '#ff0055';
+          this.player.zoneBannerText = '⚡ AĞIR BALYOZ: ELEKTRO-RAY';
+          this.player.zoneBannerColor = '#38bdf8';
         } else if (currentZone === 'mid') {
-          this.player.zoneBannerText = '⚡ TAARRUZ: ÇİFT PLAZMA & FÜZE';
+          this.player.zoneBannerText = '⚔️ TAARRUZ: ÇİFT PLAZMA';
           this.player.zoneBannerColor = '#ffbe0b';
         } else {
-          this.player.zoneBannerText = '🎯 KESKİN NİŞANCI: ELEKTRO-RAY';
-          this.player.zoneBannerColor = '#38bdf8';
+          this.player.zoneBannerText = '🔥 SAVUNMA: SERİ AŞIRI YÜKLEME';
+          this.player.zoneBannerColor = '#ff0055';
         }
         this.player.zoneBannerTimer = 85; // ~1.4 saniye görünür
 
@@ -8353,8 +8357,8 @@ class Game {
 
     // 1. Ana Silah Sistemi
     const zone = this.player.combatZone || 'mid';
-    if (zone === 'rear') {
-      // 3. Kademe (KESKİN NİŞANCI): ELEKTRO-RAY HYPER RAILGUN!
+    if (zone === 'front') {
+      // 1. Kademe (ÖN HAT / AĞIR BALYOZ): ELEKTRO-RAY HYPER RAILGUN!
       // Ağır ritimli, ekranı boydan boya delen, devasa tekil darbe hasarı
       const railInterval = Math.max(22, fireInterval * 1.85);
       this.player.shootCooldown += dt;
@@ -8365,13 +8369,13 @@ class Game {
         this.screenShake = Math.max(this.screenShake, 5.0);
 
         const lvl = this.player.upgrades.laser;
-        const isCrit = Math.random() < ((this.player.critChance || 0.08) + 0.15); // Sniper keskin nişancı kritik bonusu (+%15)
+        const isCrit = Math.random() < ((this.player.critChance || 0.08) + 0.15); // Ağır balyoz kritik bonusu (+%15)
         const isOvercharge = this.player.overchargeTimer > 0;
         const critMult = isCrit ? 2.0 : 1.0;
         const dmgBonus = (this.player.isFever ? 3.0 : 0) + (isOvercharge ? 2.5 : 0);
         const railDmg = (14.0 + lvl * 4.8 + dmgBonus) * critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy);
 
-        // Ağır darbeli elektro-ray railgun mermisi (artık birimlerin içinden geçmez, çarptığı hedefe tam darbe verir)
+        // Ağır darbeli elektro-ray railgun mermisi (çarptığı hedefe tam darbe verir)
         this.playerBullets.push({
           x: this.player.x,
           y: this.player.y - 28,
@@ -8395,8 +8399,8 @@ class Game {
         }
       }
     } else {
-      // 2. Kademe (HÜCUM & TAARRUZ): ÇİFT / ÜÇLÜ PLAZMA BLUSTER + GÜDÜMLÜ MİKRO FÜZELER
-      const effectiveInterval = (zone === 'front') ? Math.max(5, Math.round(fireInterval * 0.78)) : fireInterval;
+      // 2. Kademe (SAVUNMA & TAARRUZ): ÇİFT / ÜÇLÜ SERİ PLAZMA BLASTER + GÜDÜMLÜ MİKRO FÜZELER
+      const effectiveInterval = (zone === 'rear') ? Math.max(5, Math.round(fireInterval * 0.72)) : fireInterval;
       this.player.shootCooldown += dt;
       if (this.player.shootCooldown >= effectiveInterval) {
         this.player.shootCooldown = 0;
@@ -11118,20 +11122,19 @@ class Game {
     if (activeTrail && activeTrail.id === 'rainbow') {
       baseFlame = `hsl(${((this.frames || 0) * 10) % 360}, 100%, 65%)`;
     }
-    let thrusterColor = this.player.overchargeTimer > 0 ? '#bf5af2' : (this.player.isFever ? '#ffbe0b' : baseFlame);
     if (this.player.combatZone === 'front') {
-      thrusterColor = '#ff0055';
+      thrusterColor = '#38bdf8';
     } else if (this.player.combatZone === 'rear') {
-      thrusterColor = '#00f0ff';
+      thrusterColor = '#ff0055';
     }
     ctx.fillStyle = thrusterColor;
     ctx.fillRect(-8, r * 0.8, 3, 3);
     ctx.fillRect(5, r * 0.8, 3, 3);
 
-    // Motor itki alevleri (Hücum hattında daha uzun akkor plazma!)
-    const isFrontZone = this.player.combatZone === 'front';
+    // Motor itki alevleri (Seri hatta daha uzun akkor plazma!)
+    const isRearZone = this.player.combatZone === 'rear';
     const flamePulse = 0.8 + Math.sin((this.frames || 0) * 0.35) * 0.3;
-    const baseFlameLen = isFrontZone ? 16 : 9;
+    const baseFlameLen = isRearZone ? 16 : 9;
     const flameLen = baseFlameLen * flamePulse;
     ctx.fillStyle = thrusterColor;
 
@@ -11164,9 +11167,9 @@ class Game {
     // Namlu ucu hazır enerji parıltısı (Hücum hattında akkor plazma)
     let blasterGlow = this.player.isStationary ? '#00f0ff' : primaryColor;
     if (this.player.combatZone === 'front') {
-      blasterGlow = '#ff0055';
-    } else if (this.player.combatZone === 'rear') {
       blasterGlow = '#38bdf8';
+    } else if (this.player.combatZone === 'rear') {
+      blasterGlow = '#ff0055';
     }
     ctx.fillStyle = this.player.overchargeTimer > 0 ? '#bf5af2' : (this.player.isFever ? '#ffbe0b' : blasterGlow);
     ctx.fillRect(-r * 1.35, -r * 0.45, 3.5, this.player.isStationary ? 4.5 : 3);
@@ -11321,8 +11324,8 @@ class Game {
     ctx.globalAlpha = 1.0;
     ctx.restore();
 
-    // === KESKİN NİŞANCI (REAR ZONE): ELEKTRO-RAY HYPER RAILGUN NAMLUSU ===
-    if (this.player.combatZone === 'rear') {
+    // === AĞIR BALYOZ (FRONT ZONE): ELEKTRO-RAY HYPER RAILGUN NAMLUSU ===
+    if (this.player.combatZone === 'front') {
       ctx.save();
       // Çift ray namlusu (titanyum & neon mavi)
       ctx.fillStyle = '#1e293b';
@@ -11586,8 +11589,8 @@ class Game {
     // ama tabi baya %10 hızımız ve gücümüzde falan olsun hatta %2 ile başlasın 10 a kadar artabilsin eklentiyi yükselttikçe işte"
     const powerRatio = 0.02 + ((wmLevel - 1) / Math.max(1, 2)) * 0.08; // Seviye 1: %2, Seviye 2: %6, Seviye 3: %10
     const zone = this.player.combatZone || 'mid';
-    const isPlayerFast = (zone === 'front' || this.player.isFever);
-    const isPlayerSlow = (zone === 'rear' && !this.player.isFever);
+    const isPlayerFast = (zone === 'rear' || this.player.isFever);
+    const isPlayerSlow = (zone === 'front' && !this.player.isFever);
 
     let petMode = 'balanced';
     let shootInterval = 34;
