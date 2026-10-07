@@ -2265,7 +2265,7 @@ class Game {
       { id: 'magnet', name: 'MIKNATIS', icon: '⚓', max: 5, cost: 200, desc: '+%10 Menzil/Lv' },
       { id: 'critDmg', name: 'KRİTİK', icon: '⚡', max: 5, cost: 250, desc: '+%8 Hasar/Lv' },
       { id: 'startShield', name: 'KALKAN', icon: '🛡️', max: 3, cost: 300, desc: '+10 Kalkan/Lv' },
-      { id: 'xpBonus', name: 'DEN. BON.', icon: '⭐', max: 5, cost: 180, desc: '+%10 XP/Lv' },
+      { id: 'xpBonus', name: 'DENEYİM', icon: '⭐', max: 5, cost: 180, desc: '+%10 XP/Lv' },
       { id: 'crystalBonus', name: 'KRİSTAL', icon: '💎', max: 4, cost: 240, desc: '+%12 Kristal/Lv' },
       { id: 'rerollStart', name: 'YENİDEN', icon: '🎲', max: 2, cost: 500, desc: '+1 Reroll/Lv' }
     ];
@@ -2277,10 +2277,21 @@ class Game {
       const canBuy = this.totalCrystals >= cost && !isMaxed;
       const div = document.createElement('div');
       div.className = `mastery-node ${lv > 0 ? 'unlocked' : ''} ${isMaxed ? 'maxed' : ''}`;
-      div.innerHTML = '<div class="mastery-node-icon">' + node.icon + '</div>' +
-        '<div class="mastery-node-name">' + node.name + '</div>' +
-        '<div class="mastery-node-level">Lv.' + lv + '/' + node.max + '</div>' +
-        (!isMaxed ? '<div class="mastery-node-cost">' + cost + ' 💎</div>' : '<div class="mastery-node-cost" style="color:#05ffa1">MAKS</div>');
+
+      let pipsHtml = '<div class="mastery-node-level-bar">';
+      for (let i = 1; i <= node.max; i++) {
+        pipsHtml += `<div class="mastery-level-pip ${i <= lv ? 'active' : ''}"></div>`;
+      }
+      pipsHtml += '</div>';
+
+      div.innerHTML = `
+        <div class="mastery-node-icon">${node.icon}</div>
+        <div class="mastery-node-name">${node.name}</div>
+        ${pipsHtml}
+        <div class="mastery-node-desc">${node.desc}</div>
+        <div class="mastery-node-cost">${isMaxed ? 'MAKSİMUM' : `${cost.toLocaleString()} 💎`}</div>
+      `;
+
       if (canBuy) {
         div.addEventListener('click', () => {
           this.totalCrystals -= cost;
@@ -2368,6 +2379,40 @@ class Game {
     if (!this.pilotStats) this.pilotStats = this.loadPilotStats();
     this.updateTrophiesBadge();
 
+    // Üst Özet Kartı (Summary Banner)
+    const totalEarned = Object.keys(this.trophies).filter(k => this.trophies[k]).length;
+    let totalClaimedCR = 0;
+    for (const def of this.trophyDefs) {
+      if (this.trophies[def.id]) totalClaimedCR += def.reward;
+    }
+    const categoriesList = ['asteroid', 'kill', 'boss', 'combo', 'survive', 'crystal', 'graze', 'flight', 'chest', 'bomb'];
+    const masterCount = categoriesList.filter(catId => {
+      const catTiers = this.trophyDefs.filter(t => t.category === catId);
+      return catTiers.every(t => this.trophies[t.id]);
+    }).length;
+
+    let summaryBanner = document.getElementById('trophies-summary-banner');
+    if (!summaryBanner) {
+      summaryBanner = document.createElement('div');
+      summaryBanner.id = 'trophies-summary-banner';
+      summaryBanner.className = 'trophies-summary-banner';
+      container.insertBefore(summaryBanner, grid);
+    }
+    summaryBanner.innerHTML = `
+      <div class="trophies-summary-item">
+        <span class="trophies-summary-val">${totalEarned} / 50</span>
+        <span class="trophies-summary-lbl">ROZET KAZANILDI</span>
+      </div>
+      <div class="trophies-summary-item">
+        <span class="trophies-summary-val" style="color:#05ffa1;">${masterCount} / 10</span>
+        <span class="trophies-summary-lbl">ALAN USTALIĞI</span>
+      </div>
+      <div class="trophies-summary-item">
+        <span class="trophies-summary-val" style="color:#00f0ff;">+${totalClaimedCR.toLocaleString()} 💎</span>
+        <span class="trophies-summary-lbl">TOPLAM ÖDÜL</span>
+      </div>
+    `;
+
     // Filtre sekmesi
     let filterBar = document.getElementById('trophies-filter-bar');
     if (!filterBar) {
@@ -2426,7 +2471,8 @@ class Game {
         const progressPct = allCompleted ? 100 : Math.min(100, Math.floor((currentVal / activeTier.target) * 100));
 
         const card = document.createElement('div');
-        card.className = 'trophy-card' + (allCompleted ? ' maxed' : isReadyToClaim ? ' claimable' : '');
+        const tierCls = `tier-${activeTier.tier || 1}`;
+        card.className = `trophy-card ${tierCls}` + (allCompleted ? ' maxed' : isReadyToClaim ? ' claimable' : '');
 
         let pipsHtml = '';
         for (let i = 1; i <= 5; i++) {
@@ -2448,7 +2494,7 @@ class Game {
               <div class="trophy-progress-fill" style="width: ${progressPct}%;"></div>
             </div>
             <div class="trophy-meta-row">
-              <span>${allCompleted ? 'MAKSİMUM ZORLUK' : `${currentVal.toLocaleString()} / ${activeTier.target.toLocaleString()}`}</span>
+              <span>${allCompleted ? 'MAKSİMUM ZORLUK TAMAM' : `${currentVal.toLocaleString()} / ${activeTier.target.toLocaleString()}`}</span>
               <span class="trophy-reward-tag">${allCompleted ? '🏆 KAZANILDI' : `+${activeTier.reward} 💎`}</span>
             </div>
           </div>
@@ -2483,7 +2529,8 @@ class Game {
         const progressPct = Math.min(100, Math.floor((currentVal / def.target) * 100));
 
         const card = document.createElement('div');
-        card.className = 'trophy-card' + (earned ? ' maxed' : isReadyToClaim ? ' claimable' : '');
+        const tierCls = `tier-${def.tier || 1}`;
+        card.className = `trophy-card ${tierCls}` + (earned ? ' maxed' : isReadyToClaim ? ' claimable' : '');
 
         card.innerHTML = `
           <div class="trophy-icon">${earned ? def.icon : isReadyToClaim ? '⭐' : def.icon}</div>
@@ -3126,6 +3173,14 @@ class Game {
     if (!dronesContainer) return;
     dronesContainer.innerHTML = '';
 
+    const banner = document.createElement('div');
+    banner.className = 'hangar-section-banner';
+    banner.innerHTML = `
+      <div class="banner-badge">🛸 OTONOM YOLDAŞ SİSTEMLERİ // DRONE HANGARI</div>
+      <div class="banner-hint">Taktik dronlar görevlerde geminize eşlik edip otomatik saldıran ve sizi koruyan otonom sistemlerdir.</div>
+    `;
+    dronesContainer.appendChild(banner);
+
     const upgradeCosts = [0, 350, 700, 1300, 2200, 3500]; // Lvl 1 -> 5 maliyetleri
     const droneRoleBadges = {
       striker: '💥 PLAZMA LAZER',
@@ -3143,23 +3198,13 @@ class Game {
       const isMax = currentLvl >= 5;
 
       const card = document.createElement('div');
-      card.className = `skin-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
+      card.className = `drone-bay-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
 
-      let badgeText = isEquipped ? '✓ KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `🔓 ${drone.cost} CR`);
-      let badgeClass = isEquipped ? 'equipped' : (isUnlocked ? 'unlocked' : 'locked');
       const roleText = droneRoleBadges[drone.id] || 'YOLDAŞ DRONE';
 
-      // Yıldız rütbeleri
-      let starsHtml = '';
-      if (isUnlocked) {
-        starsHtml = `<div style="color: #ffd700; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 2px;">` +
-          '★'.repeat(currentLvl) + '☆'.repeat(5 - currentLvl) +
-          ` <span style="font-size:0.68rem; color:#94a3b8;">LVL ${currentLvl}</span></div>`;
-      }
-
       card.innerHTML = `
-        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle, ${drone.color}22 0%, rgba(0,0,0,0.5) 75%);border:1px solid ${drone.color}44;border-radius:12px;padding:8px;position:relative;">
-          <svg viewBox="0 0 32 32" width="46" height="46">
+        <div class="drone-dock-pad" style="border-color: ${drone.color}55; box-shadow: inset 0 0 12px ${drone.color}22;">
+          <svg viewBox="0 0 32 32" width="38" height="38">
             ${drone.id === 'clone' ? `
               <path d="M16 4 L26 26 L19 22 L16 26 L13 22 L6 26 Z" fill="${drone.color}" />
               <rect x="15" y="11" width="2" height="6" fill="#ffffff" />
@@ -3173,13 +3218,22 @@ class Game {
             `}
           </svg>
         </div>
-        <span class="skin-card-title">${drone.name}</span>
-        <span style="font-size: 0.65rem; color: ${drone.color}; background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.4px;">${roleText}</span>
-        ${starsHtml}
-        <span style="font-size:0.68rem;color:#94a3b8;text-align:center;margin:2px 0 6px;line-height:1.2;">${drone.desc}</span>
-        <div style="display:flex;gap:6px;width:100%;justify-content:center;margin-top:auto;">
-          <button class="skin-badge ${badgeClass} btn-equip-drone" style="flex:1;cursor:pointer;border:none;padding:5px 6px;font-size:0.75rem;">${badgeText}</button>
-          ${isUnlocked && !isMax ? `<button class="btn-upgrade-drone" style="flex:1;background:rgba(255,215,0,0.18);border:1px solid #ffd700;color:#ffd700;border-radius:9999px;font-size:0.72rem;font-weight:900;padding:5px 6px;cursor:pointer;">▲ +${nextCost} CR</button>` : ''}
+        <div class="drone-bay-info">
+          <div class="drone-title-row">
+            <span class="drone-name">${drone.name}</span>
+            <span class="drone-role-badge" style="color: ${drone.color}; background: ${drone.color}22; border: 1px solid ${drone.color}44;">${roleText}</span>
+          </div>
+          <div class="drone-stars-ladder">
+            <span style="color:#ffd700; letter-spacing: 2px;">${'★'.repeat(currentLvl)}${'☆'.repeat(5 - currentLvl)}</span>
+            <span style="font-size: 8.5px; color: #94a3b8; font-weight: 800; margin-left: 4px;">${isUnlocked ? `LVL ${currentLvl}/5` : 'KİLİTLİ'}</span>
+          </div>
+          <div class="drone-desc">${drone.desc}</div>
+        </div>
+        <div class="drone-action-col">
+          <button class="drone-btn-equip ${isEquipped ? 'is-equipped' : isUnlocked ? 'can-equip' : 'must-buy'}" type="button">
+            ${isEquipped ? '✓ GÖREVDE' : isUnlocked ? 'KUŞAN' : `🔓 ${drone.cost} CR`}
+          </button>
+          ${isUnlocked && !isMax ? `<button class="drone-btn-upgrade" type="button">▲ +${nextCost} CR</button>` : ''}
         </div>
       `;
 
@@ -3212,7 +3266,7 @@ class Game {
         }
       };
 
-      const equipBtn = card.querySelector('.btn-equip-drone');
+      const equipBtn = card.querySelector('.drone-btn-equip');
       if (equipBtn) {
         equipBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -3221,12 +3275,12 @@ class Game {
       }
 
       card.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-upgrade-drone')) return;
+        if (e.target.closest('.drone-btn-upgrade')) return;
         handleEquipOrBuy();
       });
 
       // Drone Seviye Yükseltme
-      const upBtn = card.querySelector('.btn-upgrade-drone');
+      const upBtn = card.querySelector('.drone-btn-upgrade');
       if (upBtn) {
         upBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -3256,6 +3310,15 @@ class Game {
     if (!trailsContainer) return;
     trailsContainer.innerHTML = '';
 
+    const banner = document.createElement('div');
+    banner.className = 'hangar-section-banner';
+    banner.style.gridColumn = '1 / -1';
+    banner.innerHTML = `
+      <div class="banner-badge">✨ İTKİ & EGZOZ PROTOKOLLERİ // PLAZMA İZLERİ</div>
+      <div class="banner-hint">Geminizin arkasında bıraktığı yüksek enerjili kozmik motor plazma akışı efektleri.</div>
+    `;
+    trailsContainer.appendChild(banner);
+
     if (!Array.isArray(this.unlockedTrails)) {
       this.unlockedTrails = ['default'];
     }
@@ -3268,25 +3331,25 @@ class Game {
       const isEquipped = this.equippedTrailId === tr.id;
 
       const card = document.createElement('div');
-      card.className = `skin-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
+      card.className = `trail-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
 
       let badgeText = isEquipped ? '✓ KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `🔓 ${tr.cost} CR`);
       let badgeClass = isEquipped ? 'equipped' : (isUnlocked ? 'unlocked' : 'locked');
 
       card.innerHTML = `
-        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle, ${tr.color}28 0%, rgba(0,0,0,0.5) 75%);border:1px solid ${tr.color}44;border-radius:12px;padding:8px;">
-          <svg viewBox="0 0 32 32" width="46" height="46">
+        <div class="trail-chamber-art" style="box-shadow: inset 0 0 16px ${tr.color}33;">
+          <svg viewBox="0 0 32 32" width="40" height="40">
             <line x1="8" y1="28" x2="8" y2="4" stroke="${tr.color}" stroke-width="3.5" stroke-linecap="round"/>
             <line x1="24" y1="28" x2="24" y2="4" stroke="${tr.color}" stroke-width="3.5" stroke-linecap="round"/>
             <circle cx="8" cy="10" r="2.5" fill="#ffffff"/>
             <circle cx="24" cy="10" r="2.5" fill="#ffffff"/>
-            <circle cx="16" cy="20" r="4" fill="${tr.color}" opacity="0.75"/>
-            <circle cx="16" cy="14" r="2" fill="#ffffff" opacity="0.9"/>
+            <circle cx="16" cy="18" r="4" fill="${tr.color}" opacity="0.85"/>
+            <circle cx="16" cy="12" r="2" fill="#ffffff" opacity="0.9"/>
           </svg>
         </div>
-        <span class="skin-card-title">${tr.name}</span>
-        <span style="font-size:0.68rem;color:#94a3b8;text-align:center;margin:2px 0 6px;line-height:1.2;">${tr.desc}</span>
-        <button class="skin-badge ${badgeClass}" style="width:100%;cursor:pointer;border:none;padding:5px 8px;font-size:0.75rem;">${badgeText}</button>
+        <span class="trail-card-title">${tr.name}</span>
+        <span class="trail-card-desc">${tr.desc}</span>
+        <button class="trail-card-btn ${badgeClass}" type="button">${badgeText}</button>
       `;
 
       card.addEventListener('click', () => {
@@ -3422,26 +3485,52 @@ class Game {
     if (!boostersContainer) return;
     boostersContainer.innerHTML = '';
 
+    const banner = document.createElement('div');
+    banner.className = 'hangar-section-banner';
+    banner.innerHTML = `
+      <div class="banner-badge">🚀 OPERASYONEL MÜHİMMAT // CEPHANELİK</div>
+      <div class="banner-hint">Satın alınan takviyeler sonraki turda otomatik devreye girer. Depolanan mühimmatlar bitene kadar her tur kullanılır.</div>
+    `;
+    boostersContainer.appendChild(banner);
+
+    const categoryChips = {
+      revive: { tag: 'CAN SİGORTASI', color: '#05ffa1' },
+      damage: { tag: 'SALDIRI GÜCÜ', color: '#ff0055' },
+      magnet: { tag: 'VAKUM ALANI', color: '#a855f7' },
+      overdrive: { tag: 'OVERDRIVE REAKTÖR', color: '#ffd700' },
+      reroll: { tag: 'KART MANİPÜLASYONU', color: '#38bdf8' },
+      crystal: { tag: 'KAYNAK MADENİ', color: '#bf5af2' },
+      shield: { tag: 'AĞIR BARİYER', color: '#00f0ff' }
+    };
+
     const catalog = this.getBoostersCatalog();
     catalog.forEach(item => {
       const card = document.createElement('div');
-      card.className = 'skin-card';
+      card.className = 'booster-card';
       const canAfford = this.totalCrystals >= item.cost;
+      const chip = categoryChips[item.id] || { tag: 'TAKTİK TAKVİYE', color: item.color };
 
       card.innerHTML = `
-        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle, ${item.color}22 0%, rgba(0,0,0,0.5) 75%);border:1px solid ${item.color}44;border-radius:12px;padding:6px;">
+        <div class="booster-art-pod" style="box-shadow: 0 0 14px ${item.color}33; border-color: ${item.color}44;">
           ${item.icon}
         </div>
-        <span class="skin-card-title">${item.name}</span>
-        <span style="font-size:0.65rem;color:${item.color};background:rgba(0,0,0,0.4);border:1px solid ${item.color}33;padding:1px 6px;border-radius:4px;font-weight:900;">${item.tag || 'TAKVİYE'}</span>
-        <div style="font-size:0.72rem;color:#ffd700;font-weight:900;margin:1px 0;">STOK: ${item.stock} ADET</div>
-        <span style="font-size:0.68rem;color:#94a3b8;text-align:center;margin:1px 0 6px;line-height:1.2;">${item.desc}</span>
-        <button class="skin-badge ${canAfford ? 'unlocked' : 'locked'}" style="cursor:pointer;border:none;width:100%;font-weight:900;padding:5px 6px;">
-          ${item.cost} CR SATIN AL (+${item.amount})
+        <div class="booster-info">
+          <div class="booster-header-row">
+            <span class="booster-title">${item.name}</span>
+            <span class="booster-type-chip" style="color: ${chip.color}; border-color: ${chip.color}55; background: ${chip.color}18;">${chip.tag}</span>
+          </div>
+          <div class="booster-stock-indicator">
+            <span class="booster-stock-led ${item.stock > 0 ? 'has-stock' : ''}"></span>
+            <span style="color: ${item.stock > 0 ? '#05ffa1' : '#94a3b8'};">ENVANTER: ${item.stock} ADET</span>
+          </div>
+          <div class="booster-desc">${item.desc}</div>
+        </div>
+        <button class="booster-buy-btn ${canAfford ? 'can-afford' : 'locked'}" type="button">
+          +${item.amount} AL (${item.cost} CR)
         </button>
       `;
 
-      const buyBtn = card.querySelector('.skin-badge');
+      const buyBtn = card.querySelector('.booster-buy-btn');
       if (buyBtn) {
         buyBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -3643,15 +3732,26 @@ class Game {
         actionBtnHtml = `<button class="tech-ad-boost-btn pulse" title="Reklam İzle ve +125 Kristal Kazan">🎬 EKSİK: ${missing} CR (+125 AL)</button>`;
       }
 
+      let notchesHtml = '<div class="tech-led-track">';
+      for (let i = 1; i <= item.maxLevel; i++) {
+        notchesHtml += `<div class="tech-led-notch ${i <= currentLvl ? 'active' : ''}"></div>`;
+      }
+      notchesHtml += '</div>';
+
+      const statDeltaText = isMaxed
+        ? `✓ MAKSİMUM KAPASİTE (${item.formatVal(currentLvl)})`
+        : `${item.formatVal(currentLvl)} ➔ ${item.formatVal(currentLvl + 1)}`;
+
       card.innerHTML = `
-        <div class="tech-icon">${getPixelIconSvg(item.icon, 'md')}</div>
+        <div class="tech-icon-frame">${getPixelIconSvg(item.icon, 'md')}</div>
         <div class="tech-info">
           <div class="tech-title-row">
             <span class="tech-name">${item.name}</span>
             <span class="tech-level-pill">${levelPillText}</span>
           </div>
-          <div class="tech-desc">${item.desc} (${item.formatVal(currentLvl)})</div>
-          ${item.scoreImpact ? `<div class="tech-score-impact">🎯 ${item.scoreImpact}</div>` : ''}
+          ${notchesHtml}
+          <div class="tech-desc">${item.desc}</div>
+          <div class="tech-stat-delta">${statDeltaText}</div>
         </div>
         ${actionBtnHtml}
       `;

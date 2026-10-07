@@ -757,50 +757,73 @@
           <!-- Canlı İnceleme Sahnesi + Dinamik Kostüm Kartları -->
         </div>
 
-        <div id="trails-container" class="hangar-grid hidden">
+        <div id="trails-container" class="hangar-trails-view hidden">
           <!-- Dinamik Motor İzi Kartları -->
         </div>
 
-        <div id="drones-container" class="hangar-grid hidden">
+        <div id="drones-container" class="hangar-drones-view hidden">
           <!-- Dinamik Kalıcı Drone Kartları -->
         </div>
 
-        <div id="boosters-container" class="hangar-grid hidden">
+        <div id="boosters-container" class="hangar-boosters-view hidden">
           <!-- Dinamik Taktiksel Mühimmat & Takviye Kartları -->
         </div>
 
         <div id="tech-tab-view" class="tech-tab-view hidden">
           <!-- Başlangıç Pilot Seçimi & Aşırı Yükleme Protokolü -->
           <div class="archetype-selector-box hangar-archetype-box">
-            <div class="archetype-title" data-i18n="hangar_pilot_title">PİLOT SEÇİMİ:</div>
+            <div class="archetype-header-row">
+              <span class="archetype-title" data-i18n="hangar_pilot_title">PİLOT SEÇİMİ VE PROTOKOL</span>
+              <span class="archetype-hint">4 ÖZEL KOMUTAN</span>
+            </div>
             <div class="archetype-tabs">
-              <button class="archetype-btn active" data-archetype="interceptor">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#00f0ff"/></svg> VEGA
+              <button class="archetype-btn active" data-archetype="interceptor" type="button">
+                <div class="archetype-btn-glow"></div>
+                <div class="archetype-btn-icon"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#00f0ff"/></svg></div>
+                <div class="archetype-btn-info">
+                  <span class="archetype-btn-name">VEGA</span>
+                  <span class="archetype-btn-role">ÖNLEYİCİ</span>
+                </div>
               </button>
-              <button class="archetype-btn" data-archetype="dreadnought">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M1 2h8v3c0 2.5-4 4-4 4s-4-1.5-4-4V2z" fill="#00f0ff"/></svg> TITAN
+              <button class="archetype-btn" data-archetype="dreadnought" type="button">
+                <div class="archetype-btn-glow"></div>
+                <div class="archetype-btn-icon"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10"><path d="M1 2h8v3c0 2.5-4 4-4 4s-4-1.5-4-4V2z" fill="#ffbe0b"/></svg></div>
+                <div class="archetype-btn-info">
+                  <span class="archetype-btn-name">TITAN</span>
+                  <span class="archetype-btn-role">DRETNOT</span>
+                </div>
               </button>
-              <button class="archetype-btn" data-archetype="technician">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><circle cx="5" cy="5" r="3" fill="#00f0ff"/><rect x="0" y="4" width="3" height="2" fill="#00f0ff"/><rect x="7" y="4" width="3" height="2" fill="#00f0ff"/></svg> NOVA
+              <button class="archetype-btn" data-archetype="technician" type="button">
+                <div class="archetype-btn-glow"></div>
+                <div class="archetype-btn-icon"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10"><circle cx="5" cy="5" r="3" fill="#d946ef"/><rect x="0" y="4" width="3" height="2" fill="#d946ef"/><rect x="7" y="4" width="3" height="2" fill="#d946ef"/></svg></div>
+                <div class="archetype-btn-info">
+                  <span class="archetype-btn-name">NOVA</span>
+                  <span class="archetype-btn-role">TEKNİSYEN</span>
+                </div>
               </button>
-              <button class="archetype-btn" data-archetype="blaze">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/></svg> BLAZE
+              <button class="archetype-btn" data-archetype="blaze" type="button">
+                <div class="archetype-btn-glow"></div>
+                <div class="archetype-btn-icon"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/></svg></div>
+                <div class="archetype-btn-info">
+                  <span class="archetype-btn-name">BLAZE</span>
+                  <span class="archetype-btn-role">PİROMANYAK</span>
+                </div>
               </button>
             </div>
             <div id="archetype-desc" class="archetype-desc">Klasik Uçuş: +%12 Hız ve +%15 Seri Ateş ile çevik saf manevra</div>
-            <div id="pilot-action-row" style="margin-top: 8px; display: flex; justify-content: center;"></div>
+            <div id="pilot-action-row" class="pilot-action-row"></div>
           </div>
 
-          <div class="overload-toggle-row hangar-overload-row">
-            <label class="overload-toggle-label">
-              <input type="checkbox" id="toggle-overload-protocol">
-              <span class="overload-slider"></span>
-              <span class="overload-text"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:3px"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/></svg> AŞIRI YÜKLEME (+%50 KRİSTAL)</span>
-            </label>
-          </div>
+          <div class="overload-and-reset-bar">
+            <div class="overload-toggle-row hangar-overload-row">
+              <label class="overload-toggle-label">
+                <input type="checkbox" id="toggle-overload-protocol">
+                <span class="overload-slider"></span>
+                <span class="overload-text"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:3px"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/></svg> AŞIRI YÜKLEME (+%50 KRİSTAL)</span>
+              </label>
+            </div>
 
-          <!-- Atölye Sıfırlama ve Kristal İade Butonu (Reroll / Reset) -->
-          <div class="hangar-reset-row" style="margin-bottom: 12px; display: flex; justify-content: flex-end;">
+            <!-- Atölye Sıfırlama ve Kristal İade Butonu (Reroll / Reset) -->
             <button id="btn-reset-tech" class="tech-reset-btn" title="Tüm kalıcı geliştirmeleri sıfırlar ve harcanan tüm kristalleri eksiksiz iade eder">
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:5px;"><path d="M6 1a5 5 0 1 0 4.5 2.8L9.2 4.5A3.5 3.5 0 1 1 6 2.5V4l3-2.5L6 0v1z" fill="#ffbe0b"/></svg>
               <span>ATÖLYEYİ SIFIRLA (İADE AL)</span>
@@ -815,7 +838,7 @@
           <div id="mastery-tree-section" class="mastery-tree-section">
             <div class="mastery-title">
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 0l2 4h4l-3 3 1 5-4-2-4 2 1-5-3-3h4z" fill="#ffbe0b"/></svg>
-              PİLOT USTALIK AĞACI
+              PİLOT SİBER-MATRİS USTALIK AĞACI
             </div>
             <div id="mastery-grid" class="mastery-grid">
               <!-- Dinamik olarak game.js'den doldurulacak -->

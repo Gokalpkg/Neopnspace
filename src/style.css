@@ -2241,7 +2241,394 @@ html, body {
   color: #ffbe0b;
 }
 
-/* === DİĞER HANGAR KARTLARI (DRONLAR, İZLER, MÜHİMMAT) === */
+/* === HANGAR BÖLÜM BANNERLARI (SECTION HEADERS) === */
+.hangar-section-banner {
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.06);
+}
+.banner-badge {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  color: #00f0ff;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.banner-hint {
+  font-size: 9.5px;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+/* === TAKTİK MÜHİMMAT CEPHANELİĞİ (BOOSTERS VIEW) === */
+.hangar-boosters-view {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-height: 56vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 4px !important;
+}
+
+.booster-card {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.booster-card:hover {
+  border-color: rgba(0, 240, 255, 0.45);
+  background: rgba(15, 23, 42, 0.95);
+}
+.booster-art-pod {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.booster-info {
+  flex: 1;
+  min-width: 0;
+}
+.booster-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.booster-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.booster-type-chip {
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  border: 1px solid currentColor;
+}
+.booster-stock-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+.booster-stock-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+  display: inline-block;
+}
+.booster-stock-led.has-stock {
+  background: #05ffa1;
+  box-shadow: 0 0 8px #05ffa1;
+}
+.booster-desc {
+  font-size: 10px;
+  color: #94a3b8;
+  line-height: 1.25;
+}
+.booster-buy-btn {
+  background: rgba(255, 215, 0, 0.12);
+  border: 1.5px solid rgba(255, 215, 0, 0.45);
+  color: #ffd700;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+}
+.booster-buy-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 215, 0, 0.25);
+}
+.booster-buy-btn.locked {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+/* === YOLDAŞ DRONE TERSANESİ (DRONES VIEW) === */
+.hangar-drones-view {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-height: 56vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 4px !important;
+}
+
+.drone-bay-card {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.drone-bay-card.equipped {
+  border-color: #00f0ff;
+  background: rgba(0, 240, 255, 0.08);
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.22);
+}
+.drone-bay-card.locked {
+  opacity: 0.82;
+}
+.drone-dock-pad {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, rgba(0, 0, 0, 0.65) 80%);
+  border: 1.5px solid rgba(0, 240, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.15);
+}
+.drone-bay-card.equipped .drone-dock-pad {
+  border-color: #00f0ff;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+}
+.drone-bay-info {
+  flex: 1;
+  min-width: 0;
+}
+.drone-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.drone-name {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+}
+.drone-role-badge {
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+.drone-stars-ladder {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 2px 0 3px;
+  font-size: 11px;
+}
+.drone-desc {
+  font-size: 10px;
+  color: #94a3b8;
+  line-height: 1.25;
+}
+.drone-action-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+  min-width: 92px;
+}
+.drone-btn-equip {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.drone-btn-equip:active {
+  transform: scale(0.95);
+}
+.drone-btn-equip.is-equipped {
+  background: #00f0ff;
+  color: #030816;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.45);
+}
+.drone-btn-equip.can-equip {
+  background: rgba(5, 255, 161, 0.18);
+  border: 1.5px solid #05ffa1;
+  color: #05ffa1;
+}
+.drone-btn-equip.must-buy {
+  background: rgba(255, 215, 0, 0.18);
+  border: 1.5px solid #ffd700;
+  color: #ffd700;
+}
+.drone-btn-upgrade {
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 900;
+  background: rgba(255, 190, 11, 0.15);
+  border: 1px solid rgba(255, 190, 11, 0.45);
+  color: #ffbe0b;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.drone-btn-upgrade:active {
+  transform: scale(0.95);
+  background: rgba(255, 190, 11, 0.28);
+}
+
+/* === İTKİ VE PLAZMA İZLERİ (TRAILS VIEW) === */
+.hangar-trails-view {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-height: 56vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 4px !important;
+}
+
+.trail-card {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.trail-card:hover {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+.trail-card.equipped {
+  border-color: #00f0ff;
+  background: rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+}
+.trail-chamber-art {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.75) 0%, rgba(10, 15, 30, 0.95) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.trail-card-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+}
+.trail-card-desc {
+  font-size: 9px;
+  color: #94a3b8;
+  line-height: 1.25;
+  height: 22px;
+  overflow: hidden;
+}
+.trail-card-btn {
+  width: 100%;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 900;
+  border: none;
+  cursor: pointer;
+  margin-top: auto;
+  transition: all 0.2s ease;
+}
+.trail-card-btn:active {
+  transform: scale(0.95);
+}
+.trail-card-btn.equipped {
+  background: #00f0ff;
+  color: #030816;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+.trail-card-btn.unlocked {
+  background: rgba(5, 255, 161, 0.18);
+  border: 1px solid #05ffa1;
+  color: #05ffa1;
+}
+.trail-card-btn.locked {
+  background: rgba(255, 190, 11, 0.18);
+  border: 1px solid rgba(255, 190, 11, 0.45);
+  color: #ffbe0b;
+}
+
+/* === ESKİ HANGAR KARTLARI UYUMLULUK (GENERIC FALLBACK) === */
 .hangar-grid {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2675,7 +3062,7 @@ html, body {
 .tech-tab-view {
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
+  gap: 10px !important;
   width: 100% !important;
   box-sizing: border-box !important;
   max-height: 56vh !important;
@@ -2686,6 +3073,9 @@ html, body {
 
 .skins-view-container::-webkit-scrollbar,
 .hangar-grid::-webkit-scrollbar,
+.hangar-trails-view::-webkit-scrollbar,
+.hangar-drones-view::-webkit-scrollbar,
+.hangar-boosters-view::-webkit-scrollbar,
 .tech-tab-view::-webkit-scrollbar,
 .trophies-tab-view::-webkit-scrollbar {
   width: 4px;
@@ -2693,23 +3083,139 @@ html, body {
 
 .skins-view-container::-webkit-scrollbar-thumb,
 .hangar-grid::-webkit-scrollbar-thumb,
+.hangar-trails-view::-webkit-scrollbar-thumb,
+.hangar-drones-view::-webkit-scrollbar-thumb,
+.hangar-boosters-view::-webkit-scrollbar-thumb,
 .tech-tab-view::-webkit-scrollbar-thumb,
 .trophies-tab-view::-webkit-scrollbar-thumb {
-  background: rgba(0, 240, 255, 0.3);
+  background: rgba(0, 240, 255, 0.35);
   border-radius: 4px;
 }
 
+/* === ATÖLYE PİLOT SEÇİMİ VE AŞIRI YÜKLEME === */
 .hangar-archetype-box {
-  background: rgba(10, 16, 32, 0.85);
-  border: 1px solid rgba(0, 240, 255, 0.22);
-  border-radius: 12px;
-  padding: 8px 12px;
+  background: rgba(10, 16, 32, 0.9);
+  border: 1.5px solid rgba(0, 240, 255, 0.25);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 2px;
+}
+
+.archetype-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.archetype-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  color: #00f0ff;
+  letter-spacing: 0.8px;
+}
+.archetype-hint {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.archetype-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.archetype-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.archetype-btn:active {
+  transform: scale(0.96);
+}
+.archetype-btn.active {
+  border-color: #00f0ff !important;
+  background: rgba(0, 240, 255, 0.14) !important;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.35) !important;
+}
+.archetype-btn[data-archetype="dreadnought"].active {
+  border-color: #ffbe0b !important;
+  background: rgba(255, 190, 11, 0.14) !important;
+  box-shadow: 0 0 12px rgba(255, 190, 11, 0.35) !important;
+}
+.archetype-btn[data-archetype="technician"].active {
+  border-color: #d946ef !important;
+  background: rgba(217, 70, 239, 0.14) !important;
+  box-shadow: 0 0 12px rgba(217, 70, 239, 0.35) !important;
+}
+.archetype-btn[data-archetype="blaze"].active {
+  border-color: #ff5500 !important;
+  background: rgba(255, 85, 0, 0.14) !important;
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.35) !important;
+}
+
+.archetype-btn-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.archetype-btn-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.archetype-btn-name {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+}
+.archetype-btn-role {
+  font-size: 7.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.3px;
+}
+
+.archetype-desc {
+  font-size: 11px;
+  color: #cbd5e1;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+  padding: 6px 10px;
+  line-height: 1.35;
+  text-align: center;
+  border-left: 3px solid #00f0ff;
+}
+
+.overload-and-reset-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 0 8px;
+  flex-wrap: wrap;
 }
 
 .hangar-overload-row {
-  margin-top: -2px;
-  margin-bottom: 4px;
-  padding: 0 4px;
+  margin: 0;
+  padding: 0;
 }
 
 .tech-reset-btn {
@@ -2719,129 +3225,176 @@ html, body {
   border: 1px solid rgba(255, 190, 11, 0.45);
   color: #ffbe0b;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 0.6px;
-  padding: 6px 12px;
+  letter-spacing: 0.5px;
+  padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(255, 190, 11, 0.1);
+  box-shadow: 0 0 10px rgba(255, 190, 11, 0.12);
 }
-
 .tech-reset-btn:active {
   transform: scale(0.96);
   background: rgba(255, 190, 11, 0.28);
 }
 
+/* === KALICI GELİŞTİRMELER (TECH CARDS) === */
 .tech-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-right: 2px;
+  gap: 8px;
+  width: 100%;
 }
 
 .tech-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 10px 12px;
   display: flex;
   align-items: center;
   gap: 12px;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
-
 .tech-card:hover {
-  border-color: rgba(0, 240, 255, 0.4);
+  border-color: rgba(0, 240, 255, 0.45);
+  background: rgba(15, 23, 42, 0.95);
 }
-
 .tech-card.maxed {
-  border-color: rgba(5, 255, 161, 0.4);
-  background: rgba(5, 255, 161, 0.05);
+  border-color: rgba(5, 255, 161, 0.45);
+  background: rgba(5, 255, 161, 0.06);
 }
 
-.tech-icon {
-  font-size: 26px;
-  width: 40px;
-  height: 40px;
+.tech-icon-frame {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(0, 240, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
   flex-shrink: 0;
+  box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.15);
+}
+.tech-card.maxed .tech-icon-frame {
+  border-color: #05ffa1;
+  box-shadow: 0 0 10px rgba(5, 255, 161, 0.25);
 }
 
 .tech-info {
   flex: 1;
   min-width: 0;
 }
-
 .tech-title-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   margin-bottom: 2px;
 }
-
 .tech-name {
-  font-size: 13px;
+  font-family: var(--font-display);
+  font-size: 12px;
   font-weight: 800;
   color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
 .tech-level-pill {
-  font-size: 10px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 900;
   color: #ffbe0b;
   background: rgba(255, 190, 11, 0.15);
+  border: 1px solid rgba(255, 190, 11, 0.35);
   padding: 1px 6px;
   border-radius: 6px;
+  flex-shrink: 0;
+}
+.tech-card.maxed .tech-level-pill {
+  color: #05ffa1;
+  background: rgba(5, 255, 161, 0.15);
+  border-color: rgba(5, 255, 161, 0.4);
+}
+
+.tech-led-track {
+  display: flex;
+  gap: 2.5px;
+  margin: 3px 0 4px;
+}
+.tech-led-notch {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+.tech-led-notch.active {
+  background: #00f0ff;
+  box-shadow: 0 0 5px rgba(0, 240, 255, 0.6);
+}
+.tech-card.maxed .tech-led-notch.active {
+  background: #05ffa1;
+  box-shadow: 0 0 5px rgba(5, 255, 161, 0.6);
 }
 
 .tech-desc {
-  font-size: 11px;
+  font-size: 10px;
   color: #94a3b8;
-  line-height: 1.3;
+  line-height: 1.25;
 }
-
-.tech-score-impact {
-  margin-top: 4px;
-  display: inline-block;
+.tech-stat-delta {
   font-size: 10px;
   font-weight: 800;
-  color: #ffbe0b;
-  background: rgba(255, 190, 11, 0.12);
-  border: 1px solid rgba(255, 190, 11, 0.35);
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.3px;
+  color: #00f0ff;
+  margin-top: 2px;
+}
+.tech-card.maxed .tech-stat-delta {
+  color: #05ffa1;
 }
 
 .tech-buy-btn {
-  background: linear-gradient(135deg, #00f0ff, #05ffa1);
+  background: linear-gradient(135deg, #00f0ff, #0077ff);
   color: #030816;
   border: none;
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
   font-weight: 900;
-  padding: 8px 10px;
+  padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  white-space: nowrap;
+  flex-shrink: 0;
   box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-  transition: transform 0.15s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
-
 .tech-buy-btn:active {
   transform: scale(0.95);
 }
-
 .tech-buy-btn:disabled {
-  background: rgba(255, 255, 255, 0.1);
-  color: #64748b;
-  cursor: not-allowed;
+  background: rgba(5, 255, 161, 0.15);
+  border: 1px solid rgba(5, 255, 161, 0.4);
+  color: #05ffa1;
+  cursor: default;
   box-shadow: none;
+}
+.tech-ad-boost-btn {
+  background: linear-gradient(135deg, rgba(255, 190, 11, 0.2), rgba(255, 85, 0, 0.25));
+  border: 1.5px solid #ffbe0b;
+  color: #ffbe0b;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 900;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* === ALTIN UZAY SANDIĞI (LUCKY CHEST) MODALI === */
@@ -4020,12 +4573,12 @@ html, body {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* === PILOT USTALIK AĞACI (MASTERY TREE) === */
+/* === PILOT SİBER-MATRİS USTALIK AĞACI (MASTERY TREE) === */
 .mastery-tree-section {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 190, 11, 0.2);
+  border-top: 1.5px dashed rgba(255, 190, 11, 0.3);
 }
 
 .mastery-title {
@@ -4048,100 +4601,239 @@ html, body {
 }
 
 .mastery-node {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 190, 11, 0.2);
-  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(255, 190, 11, 0.25);
+  border-radius: 10px;
   padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
-
+.mastery-node:active {
+  transform: scale(0.96);
+}
 .mastery-node.unlocked {
   border-color: #ffbe0b;
   background: rgba(255, 190, 11, 0.1);
+  box-shadow: 0 0 10px rgba(255, 190, 11, 0.2);
 }
-
 .mastery-node.maxed {
   border-color: #05ffa1;
   background: rgba(5, 255, 161, 0.1);
+  box-shadow: 0 0 12px rgba(5, 255, 161, 0.25);
 }
 
 .mastery-node-icon {
-  font-size: 18px;
-  margin-bottom: 4px;
+  font-size: 20px;
+  margin-bottom: 2px;
 }
 
 .mastery-node-name {
   font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin-bottom: 2px;
+  font-size: 9.5px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.3px;
 }
 
-.mastery-node-level {
-  font-family: var(--font-display);
+.mastery-node-desc {
   font-size: 8px;
   color: #94a3b8;
+  margin: 1px 0 3px;
+}
+
+.mastery-node-level-bar {
+  display: flex;
+  gap: 2px;
+  width: 80%;
+  margin: 2px 0 4px;
+}
+
+.mastery-level-pip {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1px;
+}
+.mastery-level-pip.active {
+  background: #ffbe0b;
+  box-shadow: 0 0 4px rgba(255, 190, 11, 0.6);
+}
+.mastery-node.maxed .mastery-level-pip.active {
+  background: #05ffa1;
+  box-shadow: 0 0 4px rgba(5, 255, 161, 0.6);
 }
 
 .mastery-node-cost {
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: 8.5px;
+  font-weight: 900;
   color: #ffbe0b;
-  margin-top: 2px;
+  background: rgba(255, 190, 11, 0.15);
+  border: 1px solid rgba(255, 190, 11, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.mastery-node.maxed .mastery-node-cost {
+  color: #05ffa1;
+  background: rgba(5, 255, 161, 0.15);
+  border-color: rgba(5, 255, 161, 0.4);
 }
 
-/* === BAŞARIM ROZETLERİ (30 KADEMELİ SİSTEM) === */
+/* === BAŞARIM ROZETLERİ (ROZETLER VIEW) === */
 .trophies-tab-view {
   width: 100%;
   max-height: 56vh;
   overflow-y: auto;
   padding-right: 4px;
+  box-sizing: border-box;
+}
+
+.trophies-summary-banner {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 240, 255, 0.08));
+  border: 1.5px solid rgba(255, 215, 0, 0.35);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: inset 0 0 12px rgba(255, 215, 0, 0.05);
+}
+
+.trophies-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.trophies-summary-val {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.trophies-summary-lbl {
+  font-size: 8.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.trophies-filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.trophy-filter-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.trophy-filter-pill.active {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: #00f0ff;
+  color: #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+}
+
+.filter-count-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
 }
 
 .trophies-grid {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 6px 0;
+  padding: 2px 0 6px;
 }
 
 .trophy-card {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   padding: 10px 12px;
   text-align: left;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.trophy-card.maxed {
-  border-color: rgba(5, 255, 161, 0.45);
-  background: rgba(5, 255, 161, 0.06);
+.trophy-card:hover {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.trophy-card.tier-1 { border-color: rgba(205, 127, 50, 0.35); }
+.trophy-card.tier-2 { border-color: rgba(203, 213, 225, 0.35); }
+.trophy-card.tier-3 { border-color: rgba(255, 215, 0, 0.4); }
+.trophy-card.tier-4 { border-color: rgba(0, 240, 255, 0.45); }
+.trophy-card.tier-5 {
+  border-color: rgba(191, 90, 242, 0.55);
+  background: linear-gradient(90deg, rgba(191, 90, 242, 0.08) 0%, rgba(15, 23, 42, 0.85) 100%);
 }
 
 .trophy-card.claimable {
-  border-color: rgba(255, 190, 11, 0.6);
-  background: rgba(255, 190, 11, 0.08);
-  box-shadow: 0 0 12px rgba(255, 190, 11, 0.15);
+  border-color: #ffd700 !important;
+  background: rgba(255, 215, 0, 0.08) !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.25) !important;
+}
+
+.trophy-card.maxed {
+  border-color: rgba(5, 255, 161, 0.45) !important;
+  background: rgba(5, 255, 161, 0.06) !important;
 }
 
 .trophy-icon {
   font-size: 24px;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 8px;
-  border: 1px solid rgba(0, 240, 255, 0.2);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 10px;
+  border: 1.5px solid rgba(0, 240, 255, 0.25);
   flex-shrink: 0;
+  box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);
+}
+.trophy-card.claimable .trophy-icon {
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+.trophy-card.maxed .trophy-icon {
+  border-color: #05ffa1;
+  box-shadow: 0 0 10px rgba(5, 255, 161, 0.3);
 }
 
 .trophy-main {
@@ -4159,65 +4851,12 @@ html, body {
 
 .trophy-name {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   color: #f1f5f9;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.trophy-level-badge {
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  font-weight: 900;
-  color: #ffbe0b;
-  background: rgba(255, 190, 11, 0.15);
-  border: 1px solid rgba(255, 190, 11, 0.35);
-  padding: 1px 6px;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-
-.trophies-filter-bar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  padding: 0 2px;
-}
-
-.trophy-filter-pill {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 7px 10px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 800;
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.trophy-filter-pill.active {
-  background: rgba(0, 240, 255, 0.12);
-  border-color: #00f0ff;
-  color: #00f0ff;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-}
-
-.filter-count-badge {
-  font-size: 9px;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  color: inherit;
 }
 
 .trophy-pips-group {
@@ -4239,17 +4878,22 @@ html, body {
   text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
 }
 
+.trophy-level-badge {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 900;
+  color: #ffbe0b;
+  background: rgba(255, 190, 11, 0.15);
+  border: 1px solid rgba(255, 190, 11, 0.35);
+  padding: 1px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
 .trophy-level-badge.tier-high {
-  color: #ff007f;
-  background: rgba(255, 0, 127, 0.15);
-  border-color: rgba(255, 0, 127, 0.4);
+  color: #bf5af2;
+  background: rgba(191, 90, 242, 0.15);
+  border-color: rgba(191, 90, 242, 0.4);
 }
-
-.trophy-reward-tag {
-  font-weight: 800;
-  color: #00f0ff;
-}
-
 .trophy-card.maxed .trophy-level-badge {
   color: #05ffa1;
   background: rgba(5, 255, 161, 0.15);
@@ -4259,7 +4903,7 @@ html, body {
 .trophy-desc {
   font-size: 10px;
   color: #94a3b8;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   line-height: 1.25;
 }
 
@@ -4287,21 +4931,25 @@ html, body {
   color: #cbd5e1;
 }
 
+.trophy-reward-tag {
+  font-weight: 800;
+  color: #00f0ff;
+}
+
 .trophy-claim-btn {
-  background: linear-gradient(135deg, #ffbe0b, #ff9100);
+  background: linear-gradient(135deg, #ffd700, #ff9100);
   color: #030816;
   border: none;
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: 900;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(255, 190, 11, 0.4);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.45);
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
-
 .trophy-claim-btn:active {
   transform: scale(0.95);
 }
