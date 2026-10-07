@@ -745,8 +745,8 @@ class Game {
         id: 'striker',
         name: 'VURUCU DRONE',
         desc: 'En yakın düşmana kesintisiz lazer ateşi açar',
-        cost: 0,
-        unlocked: true,
+        cost: 800,
+        unlocked: false,
         baseDmg: 8,
         color: '#00f0ff',
         type: 'laser'
@@ -792,8 +792,14 @@ class Game {
         type: 'clone'
       }
     };
-    this.droneLevels = JSON.parse(localStorage.getItem('neon_drone_levels') || '{"striker":1,"missile":0,"medic":0,"tesla":0,"clone":0}');
-    this.equippedDroneId = localStorage.getItem('neon_equipped_drone') || 'striker';
+    this.droneLevels = JSON.parse(localStorage.getItem('neon_drone_levels') || '{"striker":0,"missile":0,"medic":0,"tesla":0,"clone":0}');
+    this.equippedDroneId = localStorage.getItem('neon_equipped_drone') || null;
+    if (this.equippedDroneId === 'striker' && (!this.droneLevels.striker || !localStorage.getItem('neon_drone_striker_bought'))) {
+      this.equippedDroneId = null;
+      if (this.droneLevels.striker) this.droneLevels.striker = 0;
+      localStorage.setItem('neon_drone_levels', JSON.stringify(this.droneLevels));
+      localStorage.removeItem('neon_equipped_drone');
+    }
 
     // Kozmetik Motor İzleri Koleksiyonu (Engine Trails)
     this.trails = {
@@ -5671,10 +5677,10 @@ class Game {
     this.player.titanShieldTimer = 0;
     this.player.blazeDashTimer = 0;
 
-    // Kalıcı Hangar Yoldaş Drone Başlatması
-    const eqDroneId = this.equippedDroneId || 'striker';
-    const eqDroneLvl = (this.droneLevels && this.droneLevels[eqDroneId]) || 0;
-    if (eqDroneLvl > 0 && this.hangarDrones[eqDroneId]) {
+    // Kalıcı Hangar Yoldaş Drone Başlatması (Sadece oyuncu hangardan donandıysa devreye girer)
+    const eqDroneId = this.equippedDroneId;
+    const eqDroneLvl = (eqDroneId && this.droneLevels && this.droneLevels[eqDroneId]) || 0;
+    if (eqDroneId && eqDroneLvl > 0 && this.hangarDrones[eqDroneId]) {
       this.companionDrone = {
         id: eqDroneId,
         level: eqDroneLvl,
@@ -9367,11 +9373,16 @@ class Game {
       }
 
       // 1. Mermi ile Çarpışma Kontrolü
-      for (let j = this.playerBullets.length - 1; j >= 0; j--) {
-        const bullet = this.playerBullets[j];
-        const dist = Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y);
-        if (dist < enemy.radius + 6) {
-          let hitDamage = bullet.damage;
+      // Önceden bildirilen füzeler / kamikaze araçları yok edilemez, sadece manevrayla kaçılabilir
+      const isIndestructibleMissile = (enemy.type === 'kamikaze' || enemy.type === 'dive_bomber');
+      if (isIndestructibleMissile) {
+        // Mermiler bunlara çarpmaz, doğrudan geçer
+      } else {
+        for (let j = this.playerBullets.length - 1; j >= 0; j--) {
+          const bullet = this.playerBullets[j];
+          const dist = Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y);
+          if (dist < enemy.radius + 6) {
+            let hitDamage = bullet.damage;
 
           // 7. BOSS KIRILABİLİR SİLAH PODLARI & SAVUNMASIZ ÇEKİRDEK (WEAKPOINT)
           if (enemy.isBoss || enemy.type.startsWith('boss')) {
@@ -9475,14 +9486,16 @@ class Game {
           break;
         }
       }
+    }
 
       // 2. Güdümlü Füze ile Çarpışma
-      for (let j = this.homingMissiles.length - 1; j >= 0; j--) {
-        const missile = this.homingMissiles[j];
-        if (missile.state && missile.state !== 'active') continue;
-        const dist = Math.hypot(missile.x - enemy.x, missile.y - enemy.y);
-        if (dist < enemy.radius + 8) {
-          enemy.hp -= missile.damage;
+      if (!isIndestructibleMissile) {
+        for (let j = this.homingMissiles.length - 1; j >= 0; j--) {
+          const missile = this.homingMissiles[j];
+          if (missile.state && missile.state !== 'active') continue;
+          const dist = Math.hypot(missile.x - enemy.x, missile.y - enemy.y);
+          if (dist < enemy.radius + 8) {
+            enemy.hp -= missile.damage;
           if (missile.isCluster || this.player.evolutions.clusterMissiles) {
             sounds.playNuke();
             this.screenShake = 3;
@@ -9516,6 +9529,7 @@ class Game {
           break;
         }
       }
+    }
 
       // 3. Koruyucu Drone Çarpışması & Drone Lazer Ağı
       if (this.player.upgrades.drones > 0) {
@@ -9821,6 +9835,7 @@ class Game {
       this.screenShake = 8;
       this.particles.spawnShockwave(enemy.x, enemy.y, '#ff4d00', 125);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#ff9100', 26, 4);
+      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 25, true);
 
       // Çevredeki tüm düşman ve taşlara zincirleme hasar!
       for (let other of this.enemies) {
@@ -9829,6 +9844,9 @@ class Game {
           if (d < 115) {
             other.hp -= 20;
             this.particles.spawnExplosion(other.x, other.y, '#ff4d00', 6, 2);
+            if (other.hp <= 0 && other.type && other.type.startsWith('asteroid')) {
+              this.particles.spawnAsteroidBreakAnimation(other.x, other.y, other.radius || 18, other.type === 'asteroid_bomb');
+            }
           }
         }
       }
@@ -9841,6 +9859,7 @@ class Game {
       this.screenShake = 10;
       this.particles.spawnShockwave(enemy.x, enemy.y, '#c084fc', 150);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#c084fc', 28, 4);
+      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 24, true);
 
       // Yakındaki tüm düşmanlara 40 EMP hasarı!
       for (let other of this.enemies) {
@@ -9852,6 +9871,9 @@ class Game {
             if (other.hp <= 0) {
               other.toRemove = true;
               this.score += other.score;
+              if (other.type && other.type.startsWith('asteroid')) {
+                this.particles.spawnAsteroidBreakAnimation(other.x, other.y, other.radius || 18, false);
+              }
             }
           }
         }
@@ -9870,6 +9892,7 @@ class Game {
     if (isAsteroid) {
       this.updateMissionProgress('kill_asteroids', 1);
       if (this.pilotStats) this.pilotStats.asteroidsDestroyed = (this.pilotStats.asteroidsDestroyed || 0) + 1;
+      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 20, enemy.type === 'asteroid_bomb');
     }
     if (enemy.type === 'boss') {
       this.updateMissionProgress('defeat_boss', 1);
@@ -9902,15 +9925,13 @@ class Game {
       // asteroid_s patlayınca BİTER, aşağıda zengin XP kristali verir
     } else {
       // === YENİ 2 AŞAMALI SİSTEM (İLK BOSS ÖNCESİ) ===
-      // Gelen taşa 1 kez vurduğunuzda doğrudan 2 küçük taşa ayrılır.
-      // O 2 küçük taşa 1 kez vurduğunuzda patlar ve BİTER!
       if (enemy.type === 'asteroid_m' || enemy.type === 'asteroid_l') {
         this.enemies.push(new Enemy(enemy.x - 10, enemy.y, 'asteroid_s', 1, fragSpeed));
         this.enemies.push(new Enemy(enemy.x + 10, enemy.y, 'asteroid_s', 1, fragSpeed));
         this.particles.spawnExplosion(enemy.x, enemy.y, '#a0aec0', 10, 2.2);
       }
-      // asteroid_s patlayınca BİTER, aşağıda zengin XP kristali verir
     }
+
 
     // Kristal ve Yetenek Düşürme Sistemi:
     if (enemy.isBoss || enemy.type.startsWith('boss')) {
@@ -11523,38 +11544,44 @@ class Game {
     const skin = this.skins[this.currentSkinId] || this.skins.cyberpunk;
     const bulletColor = this.player.isFever ? '#ffbe0b' : skin.primary;
 
-    // Kullanıcı talebi: "yanımıza çok ufak bizim kopyamız gibi bi uçak gelsin o yavaş yavaş sıksın"
-    // Lvl 1 & 2: ~46 frame (yaklaşık 0.76 saniyede bir sakin ve ritmik plazma)
-    // Lvl 3: ~34 frame (yaklaşık 0.56 saniyede bir hafif hızlanan ikili destek)
-    const shootInterval = wmLevel >= 3 ? 34 : 46;
-    const baseDamage = Math.round((16 + (wmLevel - 1) * 6) * (this.player.damageMultiplier || 1.0));
+    // Kullanıcı talebi: "etrafında rastgele yamuk yumuk daireselimsi hareketler çizen bir ufak şey olsun ve ara ara yavaşça vursun"
+    // Ritmik, sakin ve yavaş destek atışları (~58 frame / ~0.95 saniye)
+    const shootInterval = wmLevel >= 3 ? 42 : 58;
+    const baseDamage = Math.round((18 + (wmLevel - 1) * 7) * (this.player.damageMultiplier || 1.0));
 
     for (let wm of this.player.wingmen) {
-      // Pürüzsüz takip ve süzülme fiziği (Hovering & Spring Lag)
-      const hoverX = Math.sin((this.gameTime || 0) * 3.5 + wm.side * 1.5) * 2;
-      const hoverY = Math.cos((this.gameTime || 0) * 4.0 + wm.side * 1.5) * 3;
-      const targetX = this.player.x + wm.side * 34 + hoverX;
-      const targetY = this.player.y + 8 + hoverY;
+      // Yamuk yumuk, organik, daireselimsi hareket fiziği (Wobbly Lissajous Orbit)
+      wm.orbitAngle = (wm.orbitAngle || (wm.side > 0 ? Math.PI : 0)) + 0.038 * dt * wm.side;
+      wm.wobblePhase = (wm.wobblePhase || 0) + 0.07 * dt;
 
-      wm.x += (targetX - wm.x) * 0.16 * dt;
-      wm.y += (targetY - wm.y) * 0.16 * dt;
-      wm.tilt = (this.player.tilt || 0) * 0.85;
+      // Elips eksen yarıçapları + organik harmonik bozulmalar (yamuk yumuk dairesel)
+      const radX = 38 + Math.sin(wm.wobblePhase * 1.3) * 8 + Math.cos(wm.wobblePhase * 0.7) * 5;
+      const radY = 28 + Math.cos(wm.wobblePhase * 1.1) * 7 + Math.sin(wm.wobblePhase * 0.5) * 4;
 
-      // Ritmik atış sayacı
+      const targetX = this.player.x + Math.cos(wm.orbitAngle) * radX;
+      const targetY = this.player.y + Math.sin(wm.orbitAngle) * radY - 4;
+
+      // Yumuşak yaylanma ile takip
+      wm.x += (targetX - wm.x) * 0.14 * dt;
+      wm.y += (targetY - wm.y) * 0.14 * dt;
+
+      // Harekete ve yörünge eğimine göre tatlı mini kafa yatırma açısı
+      const wobbleTilt = Math.sin(wm.wobblePhase * 1.5) * 0.22;
+      wm.tilt = (this.player.tilt || 0) * 0.5 + wobbleTilt;
+
+      // Ara ara yavaşça vuran atış sayacı
       wm.shootTimer = (wm.shootTimer || 0) + dt;
       if (wm.shootTimer >= shootInterval) {
         wm.shootTimer = 0;
 
-        // Hafif dışarı doğru açılı yayılım (flank tarama)
-        const spreadVx = wm.side * (wmLevel >= 3 ? 0.4 : 0.2);
-
+        // İleriye doğru tatlı, yavaş ve tok plazma atışı
         this.playerBullets.push({
           x: wm.x,
-          y: wm.y - 12,
-          vx: spreadVx,
-          vy: -15,
+          y: wm.y - 10,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: -14,
           damage: baseDamage,
-          w: 4,
+          w: 4.5,
           h: 12,
           color: bulletColor,
           isWingmanBullet: true,
@@ -11564,8 +11591,8 @@ class Game {
           traveled: 0
         });
 
-        // Minyatür namlu plazma parıltısı ve hafif lazer sesi
-        this.particles.spawnExplosion(wm.x, wm.y - 12, bulletColor, 2, 0.8);
+        // Minyatür namlu parıltısı ve sakin atış sesi
+        this.particles.spawnExplosion(wm.x, wm.y - 10, bulletColor, 2, 0.7);
         sounds.playLaser();
       }
     }

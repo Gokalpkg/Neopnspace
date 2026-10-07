@@ -98,8 +98,8 @@ export class ParticleSystem {
 
   // 7. Düşman Patlamalarında Parça Saçılması (Debris & Shards - Hafifletilmiş)
   spawnDebris(x, y, color = '#ff0055', count = 4) {
-    if (this.shards.length > 18) return;
-    const finalCount = Math.min(count, 4);
+    if (this.shards.length > 25) return;
+    const finalCount = Math.min(count, 6);
     for (let i = 0; i < finalCount; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1.4 + Math.random() * 2.6;
@@ -112,6 +112,49 @@ export class ParticleSystem {
         color,
         alpha: 1,
         decay: 0.045 + Math.random() * 0.03
+      });
+    }
+  }
+
+  // Meteor / Taş Parçalanma Patlama Animasyonu (Birden yok olmayı önleyen organik parçalanma)
+  spawnAsteroidBreakAnimation(x, y, radius = 25, isBomb = false) {
+    // 1. Dışa doğru savrulan kaya parçaları (Rock Chunks)
+    const chunkCount = Math.max(5, Math.min(10, Math.round(radius * 0.35)));
+    const baseColors = isBomb ? ['#ff4d00', '#ffbe0b', '#7c2d12', '#451a03'] : ['#94a3b8', '#64748b', '#cbd5e1', '#334155'];
+    for (let i = 0; i < chunkCount; i++) {
+      const angle = (i * (Math.PI * 2 / chunkCount)) + (Math.random() - 0.5) * 0.5;
+      const speed = 1.8 + Math.random() * 3.8;
+      const rotSpeed = (Math.random() - 0.5) * 0.25;
+      this.shards.push({
+        x: x + (Math.random() - 0.5) * (radius * 0.5),
+        y: y + (Math.random() - 0.5) * (radius * 0.5),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: Math.max(3, Math.min(8, (radius * 0.25) + Math.random() * 3)),
+        color: baseColors[Math.floor(Math.random() * baseColors.length)],
+        alpha: 1.0,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: rotSpeed,
+        decay: 0.032 + Math.random() * 0.018
+      });
+    }
+
+    // 2. Genişleyen köz & alev / toz parçacıkları
+    const dustCount = Math.min(12, Math.round(radius * 0.45));
+    const dustColor = isBomb ? '#ff9100' : '#94a3b8';
+    for (let i = 0; i < dustCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.8 + Math.random() * 2.5;
+      this.particles.push({
+        x: x + Math.cos(angle) * (radius * 0.3),
+        y: y + Math.sin(angle) * (radius * 0.3),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        radius: 2.2 + Math.random() * 3.0,
+        isPixel: true,
+        color: isBomb ? (Math.random() < 0.5 ? '#ff4d00' : '#ffbe0b') : dustColor,
+        alpha: 0.95,
+        decay: 0.04 + Math.random() * 0.03
       });
     }
   }
@@ -393,6 +436,7 @@ export class ParticleSystem {
         const s = this.shards[i];
         s.x += s.vx * dt;
         s.y += s.vy * dt;
+        if (s.rotSpeed !== undefined) s.rot += s.rotSpeed * dt;
         s.vx *= Math.pow(0.95, dt);
         s.vy *= Math.pow(0.95, dt);
         s.alpha -= s.decay * dt;
@@ -488,13 +532,21 @@ export class ParticleSystem {
       }
     }
 
-    // 4.5. Metal Enkaz Parçaları (Debris & Shards - Yüksek Hızlı Sıfır-Overhead Çizim)
+    // 4.5. Metal & Taş Enkaz Parçaları (Debris & Shards - Dönüşlü Organik Çizim)
     if (this.shards && this.shards.length > 0) {
       for (let s of this.shards) {
         ctx.fillStyle = s.color;
         ctx.globalAlpha = Math.max(0, s.alpha);
         const sz = s.size || 2;
-        ctx.fillRect(s.x - sz * 0.5, s.y - sz * 0.5, sz, sz);
+        if (s.rot !== undefined) {
+          ctx.save();
+          ctx.translate(s.x, s.y);
+          ctx.rotate(s.rot);
+          ctx.fillRect(-sz * 0.5, -sz * 0.5, sz, sz);
+          ctx.restore();
+        } else {
+          ctx.fillRect(s.x - sz * 0.5, s.y - sz * 0.5, sz, sz);
+        }
       }
     }
 
