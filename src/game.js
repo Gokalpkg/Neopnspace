@@ -11510,6 +11510,7 @@ class Game {
     if (activeTrail && activeTrail.id === 'rainbow') {
       baseFlame = `hsl(${((this.frames || 0) * 10) % 360}, 100%, 65%)`;
     }
+    let thrusterColor = baseFlame;
     if (this.player.combatZone === 'front') {
       thrusterColor = '#38bdf8';
     } else if (this.player.combatZone === 'rear') {
