@@ -2103,32 +2103,63 @@ html, body {
 /* === HANGAR SEKMELERİ & PİLOT ATÖLYESİ === */
 .hangar-tabs {
   display: flex;
-  gap: 8px;
-  margin: 10px 0 14px;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 4px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 6px;
+  margin: 8px 0 14px;
+  background: rgba(7, 11, 24, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+.hangar-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .hangar-tab-btn {
-  flex: 1;
-  background: transparent;
-  border: none;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 8px 13px;
+  border-radius: 9px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  letter-spacing: 0.5px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hangar-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 .hangar-tab-btn.active {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(5, 255, 161, 0.15));
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.28), rgba(5, 255, 161, 0.18));
   color: #00f0ff;
   border: 1px solid #00f0ff;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.tab-emoji {
+  font-size: 12px;
+  line-height: 1;
 }
 
 .tech-tab-view {

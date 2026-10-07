@@ -707,14 +707,14 @@
             </button>
           </div>
         </div>
-        <!-- Hangar Sekmeleri -->
-        <div class="hangar-tabs">
-          <button id="tab-btn-skins" class="hangar-tab-btn active">KOSTÜMLER</button>
-          <button id="tab-btn-trails" class="hangar-tab-btn">İZLER</button>
-          <button id="tab-btn-drones" class="hangar-tab-btn">DRONLAR</button>
-          <button id="tab-btn-boosters" class="hangar-tab-btn">MÜHİMMAT</button>
-          <button id="tab-btn-tech" class="hangar-tab-btn">PİLOT ATÖLYESİ</button>
-          <button id="tab-btn-trophies" class="hangar-tab-btn">BAŞARIMLAR</button>
+        <!-- Hangar Sekmeleri (Yatay Kaydırılabilir Siber Menü) -->
+        <div class="hangar-tabs" role="tablist">
+          <button id="tab-btn-skins" class="hangar-tab-btn active" role="tab" data-tab="skins"><span class="tab-emoji">🚀</span> KOSTÜMLER</button>
+          <button id="tab-btn-trails" class="hangar-tab-btn" role="tab" data-tab="trails"><span class="tab-emoji">✨</span> İZLER</button>
+          <button id="tab-btn-drones" class="hangar-tab-btn" role="tab" data-tab="drones"><span class="tab-emoji">🛸</span> DRONLAR</button>
+          <button id="tab-btn-boosters" class="hangar-tab-btn" role="tab" data-tab="boosters"><span class="tab-emoji">⚡</span> MÜHİMMAT</button>
+          <button id="tab-btn-tech" class="hangar-tab-btn" role="tab" data-tab="tech"><span class="tab-emoji">🎖️</span> PİLOT ATÖLYESİ</button>
+          <button id="tab-btn-trophies" class="hangar-tab-btn" role="tab" data-tab="trophies"><span class="tab-emoji">🏆</span> BAŞARIMLAR</button>
         </div>
 
         <div id="skins-container" class="skins-grid">
@@ -751,7 +751,7 @@
                 <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/></svg> BLAZE
               </button>
             </div>
-            <div id="archetype-desc" class="archetype-desc">Zaman Bükümü: Düşmanları 4 sn %70 yavaşlatır</div>
+            <div id="archetype-desc" class="archetype-desc">Klasik Uçuş: +%12 Hız ve +%15 Seri Ateş ile çevik saf manevra</div>
             <div id="pilot-action-row" style="margin-top: 8px; display: flex; justify-content: center;"></div>
           </div>
 

@@ -1483,135 +1483,40 @@ class Game {
       });
     }
 
-    if (tabBtnSkins) {
-      tabBtnSkins.addEventListener('click', () => {
+    // Hangar Sekmeleri Dinleyicileri (Pürüzsüz Tek Dokunuş ve Çift Tetikleme Korumalı)
+    const bindHangarTabBtn = (btn, tabKey) => {
+      if (!btn) return;
+      let lastTouchTime = 0;
+      const onActivate = (e) => {
+        if (e && e.cancelable) e.preventDefault();
         sounds.init();
         sounds.playCardSelect();
-        tabBtnSkins.classList.add('active');
-        if (tabBtnTrails) tabBtnTrails.classList.remove('active');
-        if (tabBtnDrones) tabBtnDrones.classList.remove('active');
-        if (tabBtnBoosters) tabBtnBoosters.classList.remove('active');
-        if (tabBtnTech) tabBtnTech.classList.remove('active');
-        if (tabBtnTrophies) tabBtnTrophies.classList.remove('active');
-        if (skinsContainer) skinsContainer.classList.remove('hidden');
-        if (trailsContainer) trailsContainer.classList.add('hidden');
-        if (dronesContainer) dronesContainer.classList.add('hidden');
-        if (boostersContainer) boostersContainer.classList.add('hidden');
-        if (techTabView) techTabView.classList.add('hidden');
-        if (techContainer) techContainer.classList.add('hidden');
-        if (trophiesTabView) trophiesTabView.classList.add('hidden');
-      });
-    }
+        vibrate.light();
+        this.switchHangarTab(tabKey);
+      };
 
-    if (tabBtnTrails) {
-      tabBtnTrails.addEventListener('click', () => {
-        sounds.init();
-        sounds.playCardSelect();
-        tabBtnTrails.classList.add('active');
-        if (tabBtnSkins) tabBtnSkins.classList.remove('active');
-        if (tabBtnDrones) tabBtnDrones.classList.remove('active');
-        if (tabBtnBoosters) tabBtnBoosters.classList.remove('active');
-        if (tabBtnTech) tabBtnTech.classList.remove('active');
-        if (tabBtnTrophies) tabBtnTrophies.classList.remove('active');
-        if (trailsContainer) trailsContainer.classList.remove('hidden');
-        if (skinsContainer) skinsContainer.classList.add('hidden');
-        if (dronesContainer) dronesContainer.classList.add('hidden');
-        if (boostersContainer) boostersContainer.classList.add('hidden');
-        if (techTabView) techTabView.classList.add('hidden');
-        if (techContainer) techContainer.classList.add('hidden');
-        if (trophiesTabView) trophiesTabView.classList.add('hidden');
-        this.renderHangarTrails();
-      });
-    }
+      btn.addEventListener('touchend', (e) => {
+        lastTouchTime = Date.now();
+        onActivate(e);
+      }, { passive: false });
 
-    if (tabBtnDrones) {
-      tabBtnDrones.addEventListener('click', () => {
-        sounds.init();
-        sounds.playCardSelect();
-        tabBtnDrones.classList.add('active');
-        if (tabBtnSkins) tabBtnSkins.classList.remove('active');
-        if (tabBtnTrails) tabBtnTrails.classList.remove('active');
-        if (tabBtnBoosters) tabBtnBoosters.classList.remove('active');
-        if (tabBtnTech) tabBtnTech.classList.remove('active');
-        if (tabBtnTrophies) tabBtnTrophies.classList.remove('active');
-        if (dronesContainer) dronesContainer.classList.remove('hidden');
-        if (skinsContainer) skinsContainer.classList.add('hidden');
-        if (trailsContainer) trailsContainer.classList.add('hidden');
-        if (boostersContainer) boostersContainer.classList.add('hidden');
-        if (techTabView) techTabView.classList.add('hidden');
-        if (techContainer) techContainer.classList.add('hidden');
-        if (trophiesTabView) trophiesTabView.classList.add('hidden');
-        this.renderHangarDrones();
+      btn.addEventListener('click', (e) => {
+        if (Date.now() - lastTouchTime < 450) return; // Çift tıklama filtresi
+        onActivate(e);
       });
-    }
+    };
 
-    if (tabBtnBoosters) {
-      tabBtnBoosters.addEventListener('click', () => {
-        sounds.init();
-        sounds.playCardSelect();
-        tabBtnBoosters.classList.add('active');
-        if (tabBtnSkins) tabBtnSkins.classList.remove('active');
-        if (tabBtnTrails) tabBtnTrails.classList.remove('active');
-        if (tabBtnDrones) tabBtnDrones.classList.remove('active');
-        if (tabBtnTech) tabBtnTech.classList.remove('active');
-        if (tabBtnTrophies) tabBtnTrophies.classList.remove('active');
-        if (boostersContainer) boostersContainer.classList.remove('hidden');
-        if (skinsContainer) skinsContainer.classList.add('hidden');
-        if (trailsContainer) trailsContainer.classList.add('hidden');
-        if (dronesContainer) dronesContainer.classList.add('hidden');
-        if (techTabView) techTabView.classList.add('hidden');
-        if (techContainer) techContainer.classList.add('hidden');
-        if (trophiesTabView) trophiesTabView.classList.add('hidden');
-        this.renderHangarBoosters();
-      });
-    }
-
-    if (tabBtnTech) {
-      tabBtnTech.addEventListener('click', () => {
-        sounds.init();
-        sounds.playCardSelect();
-        tabBtnTech.classList.add('active');
-        if (tabBtnSkins) tabBtnSkins.classList.remove('active');
-        if (tabBtnTrails) tabBtnTrails.classList.remove('active');
-        if (tabBtnDrones) tabBtnDrones.classList.remove('active');
-        if (tabBtnBoosters) tabBtnBoosters.classList.remove('active');
-        if (tabBtnTrophies) tabBtnTrophies.classList.remove('active');
-        if (techTabView) techTabView.classList.remove('hidden');
-        if (techContainer) techContainer.classList.remove('hidden');
-        if (skinsContainer) skinsContainer.classList.add('hidden');
-        if (trailsContainer) trailsContainer.classList.add('hidden');
-        if (dronesContainer) dronesContainer.classList.add('hidden');
-        if (boostersContainer) boostersContainer.classList.add('hidden');
-        if (trophiesTabView) trophiesTabView.classList.add('hidden');
-        this.renderTechUpgrades();
-      });
-    }
+    bindHangarTabBtn(tabBtnSkins, 'skins');
+    bindHangarTabBtn(tabBtnTrails, 'trails');
+    bindHangarTabBtn(tabBtnDrones, 'drones');
+    bindHangarTabBtn(tabBtnBoosters, 'boosters');
+    bindHangarTabBtn(tabBtnTech, 'tech');
+    bindHangarTabBtn(tabBtnTrophies, 'trophies');
 
     if (btnResetTech) {
       btnResetTech.addEventListener('click', () => {
         sounds.init();
         this.resetTechUpgrades();
-      });
-    }
-
-    if (tabBtnTrophies) {
-      tabBtnTrophies.addEventListener('click', () => {
-        sounds.init();
-        sounds.playCardSelect();
-        tabBtnTrophies.classList.add('active');
-        if (tabBtnSkins) tabBtnSkins.classList.remove('active');
-        if (tabBtnTrails) tabBtnTrails.classList.remove('active');
-        if (tabBtnDrones) tabBtnDrones.classList.remove('active');
-        if (tabBtnBoosters) tabBtnBoosters.classList.remove('active');
-        if (tabBtnTech) tabBtnTech.classList.remove('active');
-        if (trophiesTabView) trophiesTabView.classList.remove('hidden');
-        if (skinsContainer) skinsContainer.classList.add('hidden');
-        if (trailsContainer) trailsContainer.classList.add('hidden');
-        if (dronesContainer) dronesContainer.classList.add('hidden');
-        if (boostersContainer) boostersContainer.classList.add('hidden');
-        if (techTabView) techTabView.classList.add('hidden');
-        if (techContainer) techContainer.classList.add('hidden');
-        this.renderTrophies();
       });
     }
 
@@ -1714,17 +1619,30 @@ class Game {
     };
 
     archetypeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
+      const selectArchetype = () => {
         sounds.init();
         sounds.playCardSelect();
         vibrate.light();
         const targetArch = btn.dataset.archetype;
         const isUnlocked = this.unlockedPilots.includes(targetArch);
         this.activeArchetype = targetArch;
+        const p = this.pilots[targetArch] || this.pilots.interceptor;
         if (isUnlocked) {
           localStorage.setItem('neon_flight_archetype', this.activeArchetype);
+          this.showToast(`🎖️ Pilot ${p.name} Göreve Atandı!`, p.color || '#00f0ff');
+        } else {
+          this.showToast(`🔒 Pilot ${p.name} Kilitli (${p.cost} CR)`, '#ffd700');
         }
         updatePilotUI();
+      };
+
+      btn.addEventListener('touchend', (e) => {
+        if (e && e.cancelable) e.preventDefault();
+        selectArchetype();
+      }, { passive: false });
+
+      btn.addEventListener('click', (e) => {
+        selectArchetype();
       });
     });
 
@@ -1874,6 +1792,10 @@ class Game {
       if (Math.abs(deltaX) < Math.abs(deltaY) * 1.3) return;
 
       const target = e.target;
+      if (target && target.closest && (target.closest('.hangar-card') || target.closest('#hangar-modal') || target.closest('.hangar-tabs'))) {
+        return; // Hangar içi kaydırmalarda menü sekmesi değiştirilmez!
+      }
+
       if (target && target.closest && target.closest('#menu-ship-card')) {
         if (deltaX > 40) {
           this.prevMenuSkin();
@@ -1903,7 +1825,6 @@ class Game {
 
     const swipeContainers = [
       document.getElementById('start-screen'),
-      document.getElementById('hangar-modal'),
       document.getElementById('missions-modal'),
       document.getElementById('lucky-wheel-modal'),
       document.getElementById('daily-reward-modal'),
@@ -2285,57 +2206,57 @@ class Game {
     if (pauseModal) pauseModal.classList.add('hidden');
   }
 
+  switchHangarTab(tabName = 'skins') {
+    this.activeHangarTab = tabName;
+
+    const allTabs = [
+      { id: 'skins', btn: tabBtnSkins, view: skinsContainer, render: () => this.renderHangarSkins() },
+      { id: 'trails', btn: tabBtnTrails, view: trailsContainer, render: () => this.renderHangarTrails() },
+      { id: 'drones', btn: tabBtnDrones, view: dronesContainer, render: () => this.renderHangarDrones() },
+      { id: 'boosters', btn: tabBtnBoosters, view: boostersContainer, render: () => this.renderHangarBoosters() },
+      { id: 'tech', btn: tabBtnTech, view: techTabView, render: () => {
+        if (techContainer) techContainer.classList.remove('hidden');
+        this.renderTechUpgrades();
+        this.renderMasteryTree();
+      }},
+      { id: 'trophies', btn: tabBtnTrophies, view: trophiesTabView, render: () => this.renderTrophies() }
+    ];
+
+    allTabs.forEach(tab => {
+      const isTarget = tab.id === tabName;
+      if (tab.btn) {
+        if (isTarget) {
+          tab.btn.classList.add('active');
+          try {
+            tab.btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          } catch(e) {}
+        } else {
+          tab.btn.classList.remove('active');
+        }
+      }
+      if (tab.view) {
+        if (isTarget) {
+          tab.view.classList.remove('hidden');
+        } else {
+          tab.view.classList.add('hidden');
+        }
+      }
+    });
+
+    const activeTabObj = allTabs.find(t => t.id === tabName);
+    if (activeTabObj && typeof activeTabObj.render === 'function') {
+      try {
+        activeTabObj.render();
+      } catch(err) {
+        console.error("Hangar sekme çizim hatası:", err);
+      }
+    }
+  }
+
   openHangar() {
     try { history.pushState({ modal: 'hangar' }, ''); } catch(e) {}
-    this.renderHangarSkins();
-    this.renderHangarTrails();
-    this.renderHangarDrones();
-    this.renderTechUpgrades();
-    this.renderMasteryTree();
-    this.renderTrophies();
-
-    // Sekmelerin görünürlüğünü garantiye al
-    if (tabBtnTrails && tabBtnTrails.classList.contains('active')) {
-      if (trailsContainer) trailsContainer.classList.remove('hidden');
-      if (skinsContainer) skinsContainer.classList.add('hidden');
-      if (dronesContainer) dronesContainer.classList.add('hidden');
-      if (techTabView) techTabView.classList.add('hidden');
-      if (techContainer) techContainer.classList.add('hidden');
-      if (trophiesTabView) trophiesTabView.classList.add('hidden');
-    } else if (tabBtnDrones && tabBtnDrones.classList.contains('active')) {
-      if (dronesContainer) dronesContainer.classList.remove('hidden');
-      if (skinsContainer) skinsContainer.classList.add('hidden');
-      if (trailsContainer) trailsContainer.classList.add('hidden');
-      if (techTabView) techTabView.classList.add('hidden');
-      if (techContainer) techContainer.classList.add('hidden');
-      if (trophiesTabView) trophiesTabView.classList.add('hidden');
-    } else if (tabBtnTrophies && tabBtnTrophies.classList.contains('active')) {
-      if (trophiesTabView) trophiesTabView.classList.remove('hidden');
-      if (skinsContainer) skinsContainer.classList.add('hidden');
-      if (trailsContainer) trailsContainer.classList.add('hidden');
-      if (dronesContainer) dronesContainer.classList.add('hidden');
-      if (techTabView) techTabView.classList.add('hidden');
-      if (techContainer) techContainer.classList.add('hidden');
-    } else if (tabBtnTech && tabBtnTech.classList.contains('active')) {
-      if (techTabView) techTabView.classList.remove('hidden');
-      if (techContainer) techContainer.classList.remove('hidden');
-      if (skinsContainer) skinsContainer.classList.add('hidden');
-      if (trailsContainer) trailsContainer.classList.add('hidden');
-      if (dronesContainer) dronesContainer.classList.add('hidden');
-      if (trophiesTabView) trophiesTabView.classList.add('hidden');
-    } else {
-      if (tabBtnSkins) tabBtnSkins.classList.add('active');
-      if (tabBtnTrails) tabBtnTrails.classList.remove('active');
-      if (tabBtnDrones) tabBtnDrones.classList.remove('active');
-      if (tabBtnTech) tabBtnTech.classList.remove('active');
-      if (tabBtnTrophies) tabBtnTrophies.classList.remove('active');
-      if (skinsContainer) skinsContainer.classList.remove('hidden');
-      if (trailsContainer) trailsContainer.classList.add('hidden');
-      if (dronesContainer) dronesContainer.classList.add('hidden');
-      if (techTabView) techTabView.classList.add('hidden');
-      if (techContainer) techContainer.classList.add('hidden');
-      if (trophiesTabView) trophiesTabView.classList.add('hidden');
-    }
+    this.updateCrystalsDisplay();
+    this.switchHangarTab(this.activeHangarTab || 'skins');
 
     if (hangarModal) hangarModal.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(0);
@@ -2670,22 +2591,17 @@ class Game {
       const card = document.createElement('div');
       card.className = `skin-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
 
-      let badgeText = 'SEÇ';
-      let badgeClass = 'unlocked';
-      if (isEquipped) {
-        badgeText = 'KULLANILIYOR';
-        badgeClass = 'equipped';
-      } else if (!isUnlocked) {
-        badgeText = `${skin.cost} CR`;
-        badgeClass = 'locked';
-      }
+      let badgeText = isEquipped ? '✓ KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `🔓 ${skin.cost} CR`);
+      let badgeClass = isEquipped ? 'equipped' : (isUnlocked ? 'unlocked' : 'locked');
 
       card.innerHTML = `
-        <div class="skin-ship-art">
+        <div class="skin-ship-art" style="transition: transform 0.25s ease;">
           ${getShipPixelSvg(skin.id, 52)}
         </div>
         <span class="skin-card-title">${skin.name}</span>
-        <span class="skin-badge ${badgeClass}">${badgeText}</span>
+        <span style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin: 1px 0 3px;">${skin.title || 'Savaş Jeti'}</span>
+        ${skin.perkTitle ? `<span style="font-size: 0.65rem; color: #ffd700; background: rgba(255,215,0,0.12); padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-bottom: 4px;">⚡ ${skin.perkTitle}</span>` : ''}
+        <button class="skin-badge ${badgeClass}" style="width: 100%; cursor: pointer; border: none; font-size: 0.75rem; padding: 4px 8px;">${badgeText}</button>
       `;
 
       card.addEventListener('click', () => {
@@ -2695,6 +2611,7 @@ class Game {
           localStorage.setItem('neon_equipped_skin', skin.id);
           sounds.playCardSelect();
           vibrate.light();
+          this.showToast(`🚀 ${skin.name} Kuşanıldı!`, skin.primary || '#00f0ff');
           this.renderHangarSkins();
         } else if (this.totalCrystals >= skin.cost) {
           this.totalCrystals -= skin.cost;
@@ -2704,11 +2621,14 @@ class Game {
           this.currentSkinId = skin.id;
           localStorage.setItem('neon_equipped_skin', skin.id);
           sounds.playLevelUp();
+          sounds.playJackpot();
           vibrate.success();
+          this.showToast(`🎉 ${skin.name} Gemisi Satın Alındı!`, '#ffd700');
           this.updateCrystalsDisplay();
           this.renderHangarSkins();
         } else {
           vibrate.medium();
+          this.showToast(`⚠️ Yetersiz Kristal! (${skin.cost - this.totalCrystals} CR eksik)`, '#ff0055');
         }
       });
 
@@ -2720,7 +2640,14 @@ class Game {
     if (!dronesContainer) return;
     dronesContainer.innerHTML = '';
 
-    const upgradeCosts = [0, 350, 700, 1300, 2200, 3500]; // Lvl 1 -> 5 dengeli maliyetleri
+    const upgradeCosts = [0, 350, 700, 1300, 2200, 3500]; // Lvl 1 -> 5 maliyetleri
+    const droneRoleBadges = {
+      striker: '💥 PLAZMA LAZER',
+      missile: '🚀 GÜDÜMLÜ ROKET',
+      medic: '🛡️ KALKAN ONARIMI',
+      tesla: '⚡ ARK YILDIRIM',
+      clone: '👥 MİKRO KLON PET'
+    };
 
     Object.values(this.hangarDrones).forEach(drone => {
       const currentLvl = this.droneLevels[drone.id] || 0;
@@ -2732,56 +2659,85 @@ class Game {
       const card = document.createElement('div');
       card.className = `skin-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
 
-      let badgeText = isEquipped ? 'KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `${drone.cost} CR`);
+      let badgeText = isEquipped ? '✓ KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `🔓 ${drone.cost} CR`);
       let badgeClass = isEquipped ? 'equipped' : (isUnlocked ? 'unlocked' : 'locked');
+      const roleText = droneRoleBadges[drone.id] || 'YOLDAŞ DRONE';
+
+      // Yıldız rütbeleri
+      let starsHtml = '';
+      if (isUnlocked) {
+        starsHtml = `<div style="color: #ffd700; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 2px;">` +
+          '★'.repeat(currentLvl) + '☆'.repeat(5 - currentLvl) +
+          ` <span style="font-size:0.68rem; color:#94a3b8;">LVL ${currentLvl}</span></div>`;
+      }
 
       card.innerHTML = `
-        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);border-radius:10px;padding:8px;">
+        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle, ${drone.color}22 0%, rgba(0,0,0,0.5) 75%);border:1px solid ${drone.color}44;border-radius:12px;padding:8px;position:relative;">
           <svg viewBox="0 0 32 32" width="46" height="46">
-            <circle cx="16" cy="16" r="10" fill="none" stroke="${drone.color}" stroke-width="2"/>
-            <circle cx="16" cy="16" r="4" fill="${drone.color}"/>
-            <line x1="16" y1="2" x2="16" y2="6" stroke="${drone.color}" stroke-width="2"/>
-            <line x1="16" y1="26" x2="16" y2="30" stroke="${drone.color}" stroke-width="2"/>
-            <line x1="2" y1="16" x2="6" y2="16" stroke="${drone.color}" stroke-width="2"/>
-            <line x1="26" y1="16" x2="30" y2="16" stroke="${drone.color}" stroke-width="2"/>
+            ${drone.id === 'clone' ? `
+              <path d="M16 4 L26 26 L19 22 L16 26 L13 22 L6 26 Z" fill="${drone.color}" />
+              <rect x="15" y="11" width="2" height="6" fill="#ffffff" />
+            ` : `
+              <circle cx="16" cy="16" r="10" fill="none" stroke="${drone.color}" stroke-width="2"/>
+              <circle cx="16" cy="16" r="4" fill="${drone.color}"/>
+              <line x1="16" y1="2" x2="16" y2="6" stroke="${drone.color}" stroke-width="2"/>
+              <line x1="16" y1="26" x2="16" y2="30" stroke="${drone.color}" stroke-width="2"/>
+              <line x1="2" y1="16" x2="6" y2="16" stroke="${drone.color}" stroke-width="2"/>
+              <line x1="26" y1="16" x2="30" y2="16" stroke="${drone.color}" stroke-width="2"/>
+            `}
           </svg>
         </div>
-        <span class="skin-card-title">${drone.name} ${isUnlocked ? `<span style="color:#ffd700;font-size:0.75rem;">(LVL ${currentLvl})</span>` : ''}</span>
-        <span style="font-size:0.7rem;color:#94a3b8;text-align:center;margin:2px 0 4px;">${drone.desc}</span>
-        <div style="display:flex;gap:6px;width:100%;justify-content:center;">
-          <button class="skin-badge ${badgeClass}" style="flex:1;cursor:pointer;border:none;">${badgeText}</button>
-          ${isUnlocked && !isMax ? `<button class="btn-upgrade-drone" style="flex:1;background:rgba(255,215,0,0.15);border:1px solid #ffd700;color:#ffd700;border-radius:6px;font-size:0.72rem;font-weight:800;padding:4px;cursor:pointer;">YÜKSELT (+${nextCost} CR)</button>` : ''}
+        <span class="skin-card-title">${drone.name}</span>
+        <span style="font-size: 0.65rem; color: ${drone.color}; background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.4px;">${roleText}</span>
+        ${starsHtml}
+        <span style="font-size:0.68rem;color:#94a3b8;text-align:center;margin:2px 0 6px;line-height:1.2;">${drone.desc}</span>
+        <div style="display:flex;gap:6px;width:100%;justify-content:center;margin-top:auto;">
+          <button class="skin-badge ${badgeClass} btn-equip-drone" style="flex:1;cursor:pointer;border:none;padding:5px 6px;font-size:0.75rem;">${badgeText}</button>
+          ${isUnlocked && !isMax ? `<button class="btn-upgrade-drone" style="flex:1;background:rgba(255,215,0,0.18);border:1px solid #ffd700;color:#ffd700;border-radius:9999px;font-size:0.72rem;font-weight:900;padding:5px 6px;cursor:pointer;">▲ +${nextCost} CR</button>` : ''}
         </div>
       `;
 
-      // Kuşan / Satın Al
-      const mainBtn = card.querySelector('.skin-badge');
-      if (mainBtn) {
-        mainBtn.addEventListener('click', (e) => {
+      // Kart veya Kuşan Butonuna Basınca
+      const handleEquipOrBuy = () => {
+        sounds.init();
+        if (isUnlocked) {
+          this.equippedDroneId = drone.id;
+          localStorage.setItem('neon_equipped_drone', drone.id);
+          sounds.playCardSelect();
+          vibrate.light();
+          this.showToast(`🛸 ${drone.name} Göreve Atandı!`, drone.color);
+          this.renderHangarDrones();
+        } else if (this.totalCrystals >= drone.cost) {
+          this.totalCrystals -= drone.cost;
+          localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+          this.droneLevels[drone.id] = 1;
+          localStorage.setItem('neon_drone_levels', JSON.stringify(this.droneLevels));
+          this.equippedDroneId = drone.id;
+          localStorage.setItem('neon_equipped_drone', drone.id);
+          sounds.playLevelUp();
+          sounds.playJackpot();
+          vibrate.success();
+          this.showToast(`🎉 ${drone.name} Hangara Katıldı!`, '#ffd700');
+          this.updateCrystalsDisplay();
+          this.renderHangarDrones();
+        } else {
+          vibrate.medium();
+          this.showToast(`⚠️ Yetersiz Kristal! (${drone.cost - this.totalCrystals} CR eksik)`, '#ff0055');
+        }
+      };
+
+      const equipBtn = card.querySelector('.btn-equip-drone');
+      if (equipBtn) {
+        equipBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          sounds.init();
-          if (isUnlocked) {
-            this.equippedDroneId = drone.id;
-            localStorage.setItem('neon_equipped_drone', drone.id);
-            sounds.playCardSelect();
-            vibrate.light();
-            this.renderHangarDrones();
-          } else if (this.totalCrystals >= drone.cost) {
-            this.totalCrystals -= drone.cost;
-            localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
-            this.droneLevels[drone.id] = 1;
-            localStorage.setItem('neon_drone_levels', JSON.stringify(this.droneLevels));
-            this.equippedDroneId = drone.id;
-            localStorage.setItem('neon_equipped_drone', drone.id);
-            sounds.playLevelUp();
-            vibrate.success();
-            this.updateCrystalsDisplay();
-            this.renderHangarDrones();
-          } else {
-            vibrate.medium();
-          }
+          handleEquipOrBuy();
         });
       }
+
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-upgrade-drone')) return;
+        handleEquipOrBuy();
+      });
 
       // Drone Seviye Yükseltme
       const upBtn = card.querySelector('.btn-upgrade-drone');
@@ -2796,10 +2752,12 @@ class Game {
             localStorage.setItem('neon_drone_levels', JSON.stringify(this.droneLevels));
             sounds.playLevelUp();
             vibrate.success();
+            this.showToast(`⚡ ${drone.name} Seviye ${currentLvl + 1}'e Yükseltildi!`, '#ffd700');
             this.updateCrystalsDisplay();
             this.renderHangarDrones();
           } else {
             vibrate.medium();
+            this.showToast(`⚠️ Yükseltme için ${nextCost - this.totalCrystals} CR eksik!`, '#ff0055');
           }
         });
       }
@@ -2812,6 +2770,13 @@ class Game {
     if (!trailsContainer) return;
     trailsContainer.innerHTML = '';
 
+    if (!Array.isArray(this.unlockedTrails)) {
+      this.unlockedTrails = ['default'];
+    }
+    if (!this.unlockedTrails.includes('default')) {
+      this.unlockedTrails.push('default');
+    }
+
     Object.values(this.trails).forEach(tr => {
       const isUnlocked = this.unlockedTrails.includes(tr.id);
       const isEquipped = this.equippedTrailId === tr.id;
@@ -2819,22 +2784,23 @@ class Game {
       const card = document.createElement('div');
       card.className = `skin-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
 
-      let badgeText = isEquipped ? 'KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `${tr.cost} CR`);
+      let badgeText = isEquipped ? '✓ KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `🔓 ${tr.cost} CR`);
       let badgeClass = isEquipped ? 'equipped' : (isUnlocked ? 'unlocked' : 'locked');
 
       card.innerHTML = `
-        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);border-radius:10px;padding:8px;">
+        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle, ${tr.color}28 0%, rgba(0,0,0,0.5) 75%);border:1px solid ${tr.color}44;border-radius:12px;padding:8px;">
           <svg viewBox="0 0 32 32" width="46" height="46">
-            <line x1="8" y1="28" x2="8" y2="4" stroke="${tr.color}" stroke-width="3" stroke-linecap="round"/>
-            <line x1="24" y1="28" x2="24" y2="4" stroke="${tr.color}" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="8" cy="12" r="2.5" fill="#ffffff"/>
-            <circle cx="24" cy="12" r="2.5" fill="#ffffff"/>
-            <circle cx="16" cy="20" r="3.5" fill="${tr.color}" opacity="0.6"/>
+            <line x1="8" y1="28" x2="8" y2="4" stroke="${tr.color}" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="24" y1="28" x2="24" y2="4" stroke="${tr.color}" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="8" cy="10" r="2.5" fill="#ffffff"/>
+            <circle cx="24" cy="10" r="2.5" fill="#ffffff"/>
+            <circle cx="16" cy="20" r="4" fill="${tr.color}" opacity="0.75"/>
+            <circle cx="16" cy="14" r="2" fill="#ffffff" opacity="0.9"/>
           </svg>
         </div>
         <span class="skin-card-title">${tr.name}</span>
-        <span style="font-size:0.7rem;color:#94a3b8;text-align:center;margin:2px 0 4px;">${tr.desc}</span>
-        <span class="skin-badge ${badgeClass}">${badgeText}</span>
+        <span style="font-size:0.68rem;color:#94a3b8;text-align:center;margin:2px 0 6px;line-height:1.2;">${tr.desc}</span>
+        <button class="skin-badge ${badgeClass}" style="width:100%;cursor:pointer;border:none;padding:5px 8px;font-size:0.75rem;">${badgeText}</button>
       `;
 
       card.addEventListener('click', () => {
@@ -2844,6 +2810,7 @@ class Game {
           localStorage.setItem('neon_equipped_trail', tr.id);
           sounds.playCardSelect();
           vibrate.light();
+          this.showToast(`✨ ${tr.name} İtkisi Kuşanıldı!`, tr.color);
           this.renderHangarTrails();
         } else if (this.totalCrystals >= tr.cost) {
           this.totalCrystals -= tr.cost;
@@ -2853,11 +2820,14 @@ class Game {
           this.equippedTrailId = tr.id;
           localStorage.setItem('neon_equipped_trail', tr.id);
           sounds.playLevelUp();
+          sounds.playJackpot();
           vibrate.success();
+          this.showToast(`🎉 ${tr.name} İtkisi Açıldı ve Kuşanıldı!`, '#ffd700');
           this.updateCrystalsDisplay();
           this.renderHangarTrails();
         } else {
           vibrate.medium();
+          this.showToast(`⚠️ Yetersiz Kristal! (${tr.cost - this.totalCrystals} CR eksik)`, '#ff0055');
         }
       });
 
