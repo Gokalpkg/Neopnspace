@@ -146,6 +146,10 @@
         </div>
 
         <div class="menu-top-right">
+          <button id="btn-lucky-wheel" class="sound-icon-btn menu-header-btn pulse relative-btn" title="Kozmik Şans Çarkı" aria-label="Şans Çarkı" style="position: relative; font-size: 15px; border-color: rgba(255, 215, 0, 0.45); background: rgba(255, 215, 0, 0.12);">
+            🎡
+            <span id="wheel-badge-dot" class="badge-dot" style="position: absolute; top: -1px; right: -1px;"></span>
+          </button>
           <button id="btn-free-gold-menu" class="btn-free-gold pulse gold-shimmer-btn" title="Reklam İzle ve +200 ~ +380 Kristal Kazan!">
             <span class="gold-icon">🎁</span>
             <span class="gold-label">+200 ⚡</span>
@@ -266,7 +270,7 @@
 
       <!-- Alt Hızlı Erişim Çubuğu (5 Zengin Buton) -->
       <div class="menu-bottom-dock">
-        <button id="btn-hangar" class="dock-btn highlight-dock-btn">
+        <button id="btn-hangar" class="dock-btn">
           <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M8 1h3v3H8zM7 3h1v1H7zM6 4h1v1H6zM5 5h1v1H5zM4 6h1v1H4zM3 7h1v1H3zM2 8h1v1H2zM1 9h2v2H1z" fill="#00f0ff"/><rect x="9" y="2" width="1" height="1" fill="#030816"/></svg></span>
           <span class="dock-label" data-i18n="dock_hangar">HANGAR</span>
         </button>
@@ -275,12 +279,11 @@
           <span class="dock-label" data-i18n="dock_missions">GÖREVLER</span>
           <span id="missions-badge-dot" class="badge-dot hidden"></span>
         </button>
-        <button id="btn-lucky-wheel" class="dock-btn relative-btn highlight-dock-btn">
-          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="#ffd700" stroke-width="1.5"/><circle cx="6" cy="6" r="2" fill="#ff0055"/><polygon points="6,1 7,4 5,4" fill="#ffd700"/></svg></span>
-          <span class="dock-label" data-i18n="dock_wheel">ŞANS ÇARKI</span>
-          <span id="wheel-badge-dot" class="badge-dot"></span>
+        <button id="btn-menu" class="dock-btn relative-btn dock-tab-active">
+          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#05ffa1"/><rect x="5" y="7" width="2" height="4" fill="#030816"/></svg></span>
+          <span class="dock-label" data-i18n="dock_menu">MENÜ</span>
         </button>
-        <button id="btn-daily-reward" class="dock-btn relative-btn highlight-dock-btn">
+        <button id="btn-daily-reward" class="dock-btn relative-btn">
           <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M1 2h10v8H1z" fill="#05ffa1"/><rect x="2" y="3" width="8" height="6" fill="#064e3b"/><line x1="6" y1="2" x2="6" y2="10" stroke="#05ffa1" stroke-width="1.5"/><line x1="1" y1="6" x2="11" y2="6" stroke="#05ffa1" stroke-width="1.5"/></svg></span>
           <span class="dock-label" data-i18n="dock_supply">İKMAL</span>
           <span id="daily-reward-dot" class="badge-dot hidden"></span>

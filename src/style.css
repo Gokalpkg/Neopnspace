@@ -1189,17 +1189,70 @@ html, body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+.dock-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 7px 2px;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  color: #64748b;
+  font-family: var(--font-display);
+}
+
+.dock-btn:active {
+  transform: scale(0.92);
+  background: rgba(5, 255, 161, 0.18);
+  border-color: rgba(5, 255, 161, 0.45);
+  color: #fff;
+}
+
+.dock-icon {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.dock-btn .dock-icon svg {
+  opacity: 0.65;
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.dock-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
 .dock-btn.dock-tab-active {
-  background: rgba(0, 240, 255, 0.22) !important;
-  border-color: #00f0ff !important;
+  background: linear-gradient(180deg, rgba(5, 255, 161, 0.22) 0%, rgba(5, 255, 161, 0.08) 100%) !important;
+  border: 1.5px solid #05ffa1 !important;
   color: #ffffff !important;
-  box-shadow: 0 0 14px rgba(0, 240, 255, 0.45) !important;
+  box-shadow: 0 0 16px rgba(5, 255, 161, 0.5), inset 0 0 8px rgba(5, 255, 161, 0.2) !important;
   transform: translateY(-2px);
 }
 
 .dock-btn.dock-tab-active .dock-label {
-  color: #00f0ff !important;
+  color: #05ffa1 !important;
   font-weight: 900 !important;
+  text-shadow: 0 0 8px rgba(5, 255, 161, 0.7) !important;
+}
+
+.dock-btn.dock-tab-active .dock-icon svg,
+.dock-btn.dock-tab-active .dock-icon svg path,
+.dock-btn.dock-tab-active .dock-icon svg polygon,
+.dock-btn.dock-tab-active .dock-icon svg rect,
+.dock-btn.dock-tab-active .dock-icon svg circle {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 5px #05ffa1);
 }
 
 @keyframes slideModalFromRight {
@@ -1218,56 +1271,6 @@ html, body {
 
 .modal-card.slide-from-left {
   animation: slideModalFromLeft 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
-}
-
-.dock-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  padding: 7px 2px;
-  cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
-  backdrop-filter: blur(6px);
-  pointer-events: auto;
-  color: #94a3b8;
-  font-family: var(--font-display);
-}
-
-.dock-btn:active {
-  transform: scale(0.92);
-  background: rgba(0, 240, 255, 0.18);
-  border-color: rgba(0, 240, 255, 0.45);
-  color: #fff;
-}
-
-.dock-icon {
-  font-size: 19px;
-  line-height: 1;
-}
-
-.dock-label {
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-}
-
-.highlight-dock-btn {
-  border-color: rgba(5, 255, 161, 0.35);
-  background: rgba(5, 255, 161, 0.08);
-}
-
-.highlight-dock-btn .dock-label {
-  color: #05ffa1;
-}
-
-.highlight-dock-btn:active {
-  background: rgba(5, 255, 161, 0.22);
-  border-color: #05ffa1;
 }
 
 /* Günlük İkmal Modalı */
@@ -1709,39 +1712,30 @@ html, body {
 
 /* === HANGAR & TERSANE REWORK (PREMIUM SCI-FI TERMINAL) === */
 .hangar-card {
-  max-width: 440px;
-  max-height: 90vh;
+  width: 100% !important;
+  max-width: 440px !important;
+  min-width: min(100%, 340px) !important;
+  box-sizing: border-box !important;
+  max-height: 90vh !important;
   background: rgba(8, 12, 24, 0.96) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
   border: 1.5px solid rgba(0, 240, 255, 0.3) !important;
   border-radius: 20px !important;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 240, 255, 0.22) !important;
-  padding: 14px 14px 16px !important;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 240, 255, 0.3) transparent;
-}
-
-.hangar-card::-webkit-scrollbar {
-  width: 4px;
-}
-.hangar-card::-webkit-scrollbar-thumb {
-  background: rgba(0, 240, 255, 0.3);
-  border-radius: 4px;
+  padding: 14px 14px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
 }
 
 .hangar-footer-bar {
-  position: sticky;
-  bottom: -16px;
-  width: 100%;
-  padding: 10px 0 2px;
-  background: linear-gradient(180deg, transparent 0%, rgba(8, 12, 24, 0.95) 30%, rgba(8, 12, 24, 0.98) 100%);
-  z-index: 30;
-  margin-top: 14px;
+  width: 100% !important;
+  padding: 8px 0 2px !important;
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 12, 24, 0.95) 30%, rgba(8, 12, 24, 0.98) 100%) !important;
+  z-index: 30 !important;
+  margin-top: auto !important;
+  flex-shrink: 0 !important;
 }
 
 .hangar-confirm-btn {
@@ -1920,9 +1914,15 @@ html, body {
 
 /* === GEMİLER: HOLOGRAFİK İNCELEME PODU (SHOWCASE PODIUM) === */
 .skins-view-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-height: 56vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 4px !important;
 }
 
 .hangar-showcase {
@@ -2243,12 +2243,21 @@ html, body {
 
 /* === DİĞER HANGAR KARTLARI (DRONLAR, İZLER, MÜHİMMAT) === */
 .hangar-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-height: 56vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: 4px 4px 8px 2px !important;
 }
 
 .skin-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
   background: rgba(255, 255, 255, 0.04);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
@@ -2664,12 +2673,30 @@ html, body {
 }
 
 .tech-tab-view {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 56vh;
-  overflow-y: auto;
-  padding-right: 4px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-height: 56vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 4px !important;
+}
+
+.skins-view-container::-webkit-scrollbar,
+.hangar-grid::-webkit-scrollbar,
+.tech-tab-view::-webkit-scrollbar,
+.trophies-tab-view::-webkit-scrollbar {
+  width: 4px;
+}
+
+.skins-view-container::-webkit-scrollbar-thumb,
+.hangar-grid::-webkit-scrollbar-thumb,
+.tech-tab-view::-webkit-scrollbar-thumb,
+.trophies-tab-view::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 4px;
 }
 
 .hangar-archetype-box {

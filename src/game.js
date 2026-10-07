@@ -1227,18 +1227,17 @@ class Game {
     const btnLuckyWheel = document.getElementById('btn-lucky-wheel');
     if (btnLuckyWheel) {
       btnLuckyWheel.addEventListener('click', () => {
-        if (this.getCurrentMenuTabIndex() === 3) {
-          this.goToMenuTab(1);
-        } else {
-          this.goToMenuTab(3);
-        }
+        sounds.init();
+        sounds.playCardSelect();
+        vibrate.light();
+        this.openLuckyWheel();
       });
     }
 
     const btnCloseWheel = document.getElementById('btn-close-wheel');
     if (btnCloseWheel) {
       btnCloseWheel.addEventListener('click', () => {
-        this.goToMenuTab(1);
+        this.goToMenuTab(2);
       });
     }
 
@@ -1253,10 +1252,10 @@ class Game {
     // Günlük İkmal Sandığı Butonları
     if (btnDailyReward) {
       btnDailyReward.addEventListener('click', () => {
-        if (this.getCurrentMenuTabIndex() === 4) {
-          this.goToMenuTab(1);
+        if (this.getCurrentMenuTabIndex() === 3) {
+          this.goToMenuTab(2);
         } else {
-          this.goToMenuTab(4);
+          this.goToMenuTab(3);
         }
       });
     }
@@ -1270,7 +1269,7 @@ class Game {
 
     if (btnCloseDaily) {
       btnCloseDaily.addEventListener('click', () => {
-        this.goToMenuTab(1);
+        this.goToMenuTab(2);
       });
     }
 
@@ -1278,10 +1277,10 @@ class Game {
     const btnLeaderboard = document.getElementById('btn-leaderboard');
     if (btnLeaderboard) {
       btnLeaderboard.addEventListener('click', () => {
-        if (this.getCurrentMenuTabIndex() === 5) {
-          this.goToMenuTab(1);
+        if (this.getCurrentMenuTabIndex() === 4) {
+          this.goToMenuTab(2);
         } else {
-          this.goToMenuTab(5);
+          this.goToMenuTab(4);
         }
       });
     }
@@ -1289,7 +1288,7 @@ class Game {
     const btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
     if (btnCloseLeaderboard) {
       btnCloseLeaderboard.addEventListener('click', () => {
-        this.goToMenuTab(1);
+        this.goToMenuTab(2);
       });
     }
 
@@ -1523,10 +1522,21 @@ class Game {
     if (btnHangar) {
       btnHangar.addEventListener('click', () => {
         if (this.getCurrentMenuTabIndex() === 0) {
-          this.goToMenuTab(1);
+          this.goToMenuTab(2);
         } else {
           this.goToMenuTab(0);
         }
+      });
+    }
+
+    // Orta Menü Butonu (Hub / Ana Savaş Ekranı)
+    const btnMenu = document.getElementById('btn-menu');
+    if (btnMenu) {
+      btnMenu.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        vibrate.light();
+        this.goToMenuTab(2);
       });
     }
 
@@ -1627,34 +1637,30 @@ class Game {
     // Görevler Butonları
     if (btnMissions) {
       btnMissions.addEventListener('click', () => {
-        if (this.getCurrentMenuTabIndex() === 2) {
-          this.goToMenuTab(1);
-        } else {
+        if (this.getCurrentMenuTabIndex() === 1) {
           this.goToMenuTab(2);
+        } else {
+          this.goToMenuTab(1);
         }
       });
     }
 
     if (btnMissionsClose) {
       btnMissionsClose.addEventListener('click', () => {
-        this.goToMenuTab(1);
+        this.goToMenuTab(2);
       });
     }
 
     // İstatistik Butonları
     if (btnStats) {
       btnStats.addEventListener('click', () => {
-        if (this.getCurrentMenuTabIndex() === 4) {
-          this.goToMenuTab(1);
-        } else {
-          this.goToMenuTab(4);
-        }
+        this.openStats();
       });
     }
 
     if (btnStatsClose) {
       btnStatsClose.addEventListener('click', () => {
-        this.goToMenuTab(1);
+        this.goToMenuTab(2);
       });
     }
 
@@ -1800,10 +1806,10 @@ class Game {
   updateDockActiveTab(activeTab) {
     const dockMap = [
       { id: 'btn-hangar', tab: 0 },
-      { id: 'btn-missions', tab: 2 },
-      { id: 'btn-lucky-wheel', tab: 3 },
-      { id: 'btn-daily-reward', tab: 4 },
-      { id: 'btn-leaderboard', tab: 5 }
+      { id: 'btn-missions', tab: 1 },
+      { id: 'btn-menu', tab: 2 },
+      { id: 'btn-daily-reward', tab: 3 },
+      { id: 'btn-leaderboard', tab: 4 }
     ];
     dockMap.forEach(({ id, tab }) => {
       const btn = document.getElementById(id);
@@ -1819,19 +1825,16 @@ class Game {
 
   getCurrentMenuTabIndex() {
     if (hangarModal && !hangarModal.classList.contains('hidden')) return 0;
-    if (missionsModal && !missionsModal.classList.contains('hidden')) return 2;
-    const wheelModal = document.getElementById('lucky-wheel-modal');
-    if (wheelModal && !wheelModal.classList.contains('hidden')) return 3;
-    if (dailyRewardModal && !dailyRewardModal.classList.contains('hidden')) return 4;
+    if (missionsModal && !missionsModal.classList.contains('hidden')) return 1;
+    if (dailyRewardModal && !dailyRewardModal.classList.contains('hidden')) return 3;
     const lbModal = document.getElementById('leaderboard-modal');
-    if (lbModal && !lbModal.classList.contains('hidden')) return 5;
-    if (statsModal && !statsModal.classList.contains('hidden')) return 6;
-    return 1; // Ana Savaş Menüsü (Hub)
+    if (lbModal && !lbModal.classList.contains('hidden')) return 4;
+    return 2; // Ana Hub (MENÜ)
   }
 
   goToMenuTab(targetIndex, direction = 'none') {
     if (this.state !== 'MENU') return;
-    const index = Math.max(0, Math.min(6, targetIndex));
+    const index = Math.max(0, Math.min(4, targetIndex));
     sounds.init();
     sounds.playCardSelect();
     vibrate.light();
@@ -1851,22 +1854,18 @@ class Game {
     if (index === 0) {
       this.openHangar();
     } else if (index === 1) {
+      this.openMissions();
+    } else if (index === 2) {
       if (startScreen) startScreen.classList.remove('hidden');
       this.updateMenuShipPreview();
-    } else if (index === 2) {
-      this.openMissions();
     } else if (index === 3) {
-      this.openLuckyWheel();
-    } else if (index === 4) {
       this.openDailyRewardModal();
-    } else if (index === 5) {
+    } else if (index === 4) {
       this.openLeaderboard();
-    } else if (index === 6) {
-      this.openStats();
     }
 
     // Yumuşak geçiş animasyonu (Clash Royale stili kayma)
-    const activeModal = [hangarModal, null, missionsModal, wheelModal, dailyRewardModal, lbModal, statsModal][index];
+    const activeModal = [hangarModal, missionsModal, null, dailyRewardModal, lbModal][index];
     if (activeModal) {
       const card = activeModal.querySelector('.modal-card');
       if (card) {
@@ -1926,12 +1925,12 @@ class Game {
       }
 
       // Clash Royale Sekme Sıralaması:
-      // 0: Hangar <-> 1: Ana Hub <-> 2: Görevler <-> 3: Çark <-> 4: İkmal <-> 5: Liderler
+      // 0: Hangar <-> 1: Görevler <-> 2: MENÜ <-> 3: İkmal <-> 4: Liderler
       const currentTab = this.getCurrentMenuTabIndex();
 
       if (deltaX < -45) {
         // Parmağı sola kaydır -> Sonraki sekmeye geç (sağa doğru)
-        if (currentTab < 5) {
+        if (currentTab < 4) {
           this.goToMenuTab(currentTab + 1, 'left');
         }
       } else if (deltaX > 45) {
@@ -2548,12 +2547,8 @@ class Game {
             if (tabsContainer && tabsContainer.clientWidth > 0) {
               const targetScroll = tab.btn.offsetLeft - (tabsContainer.clientWidth / 2) + (tab.btn.clientWidth / 2);
               tabsContainer.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
-            } else {
-              tab.btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             }
-          } catch(e) {
-            try { tab.btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(err) {}
-          }
+          } catch(e) {}
         } else {
           tab.btn.classList.remove('active');
         }
@@ -2561,6 +2556,7 @@ class Game {
       if (tab.view) {
         if (isTarget) {
           tab.view.classList.remove('hidden');
+          try { tab.view.scrollTop = 0; } catch(e) {}
         } else {
           tab.view.classList.add('hidden');
         }
@@ -2592,7 +2588,7 @@ class Game {
     this.state = 'MENU';
     if (hangarModal) hangarModal.classList.add('hidden');
     if (startScreen) startScreen.classList.remove('hidden');
-    if (this.updateDockActiveTab) this.updateDockActiveTab(1);
+    if (this.updateDockActiveTab) this.updateDockActiveTab(2);
     this.updateMenuShipPreview();
     this.updateCrystalsDisplay();
   }
@@ -4026,12 +4022,12 @@ class Game {
     try { history.pushState({ modal: 'missions' }, ''); } catch(e) {}
     this.renderMissions();
     if (missionsModal) missionsModal.classList.remove('hidden');
-    if (this.updateDockActiveTab) this.updateDockActiveTab(2);
+    if (this.updateDockActiveTab) this.updateDockActiveTab(1);
   }
 
   closeMissions() {
     if (missionsModal) missionsModal.classList.add('hidden');
-    if (this.updateDockActiveTab) this.updateDockActiveTab(1);
+    if (this.updateDockActiveTab) this.updateDockActiveTab(2);
   }
 
   renderMissions() {
@@ -4160,7 +4156,7 @@ class Game {
 
   closeStats() {
     if (statsModal) statsModal.classList.add('hidden');
-    if (this.updateDockActiveTab) this.updateDockActiveTab(1);
+    if (this.updateDockActiveTab) this.updateDockActiveTab(2);
   }
 
   setMode(mode) {
@@ -4921,7 +4917,7 @@ class Game {
     try { history.pushState({ modal: 'lucky_wheel' }, ''); } catch(e) {}
     const wheelModal = document.getElementById('lucky-wheel-modal');
     if (wheelModal) wheelModal.classList.remove('hidden');
-    if (this.updateDockActiveTab) this.updateDockActiveTab(3);
+    if (this.updateDockActiveTab) this.updateDockActiveTab(-1);
     this.updateWheelUI();
     this.drawLuckyWheel();
   }
@@ -5411,7 +5407,7 @@ class Game {
     try { history.pushState({ modal: 'leaderboard' }, ''); } catch(e) {}
     const lbModal = document.getElementById('leaderboard-modal');
     if (lbModal) lbModal.classList.remove('hidden');
-    if (this.updateDockActiveTab) this.updateDockActiveTab(5);
+    if (this.updateDockActiveTab) this.updateDockActiveTab(4);
     this.renderLeaderboard(this.lbMode || 'storm');
   }
 
@@ -7885,21 +7881,13 @@ class Game {
     } catch (e) {}
   }
 
-  // Kademeli menü: yeni oyuncu ilk oyunda sadece OYNA'yı görür
+  // Kademeli menü: arayüz elementleri kontrolü
   applyMenuProgression() {
-    const played = parseInt(localStorage.getItem('neon_games_played') || '0', 10);
-    const hasHistory = Math.max(this.highScores.classic || 0, this.highScores.storm || 0) > 0;
-    const games = hasHistory ? 99 : played;
-    const rules = [
-      { id: 'btn-hangar', min: 1 },
-      { id: 'btn-missions', min: 3 },
-      { id: 'btn-lucky-wheel', min: 3 },
-      { id: 'btn-daily-reward', min: 3 },
-      { id: 'btn-leaderboard', min: 5 }
-    ];
-    rules.forEach(r => {
-      const el = document.getElementById(r.id);
-      if (el) el.style.display = games >= r.min ? '' : 'none';
+    // Dock sekmeleri ve ana menü her zaman eksiksiz ve dengeli görünür
+    const dockButtons = ['btn-hangar', 'btn-missions', 'btn-menu', 'btn-daily-reward', 'btn-leaderboard'];
+    dockButtons.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
     });
   }
 
@@ -11040,10 +11028,12 @@ class Game {
     // Yıldızlar, Nebulalar, Sektör Közleri & Efektler
     this.particles.render(ctx);
 
-    // Ana Menü Ekranı: Canlı Siber Izgara ve Holografik Gemi Vitrini
+    // Ana Menü Ekranı: Canlı Siber Izgara ve Fırlatma Vitrini
     if (this.state === 'MENU') {
       this.drawMenuCyberGrid();
-      this.drawMenuShipShowcase();
+      if (this.launching) {
+        this.drawMenuShipShowcase();
+      }
       ctx.restore();
       return;
     }
