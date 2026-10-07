@@ -280,10 +280,11 @@ export class ParticleSystem {
     ctx.restore();
   }
 
-  // Ekran Flaş Darbesi (Kritik darbe & Boss ölümü)
-  triggerFlash(color = '#ffffff', alpha = 0.4) {
+  // Ekran Flaş Darbesi (Kritik darbe & Boss ölümü - Epilepsi dostu yumuşak parlama)
+  triggerFlash(color = '#ffffff', alpha = 0.25) {
     this.screenFlashColor = color;
-    this.screenFlashAlpha = Math.max(this.screenFlashAlpha, alpha);
+    const safeAlpha = Math.min(alpha, 0.20);
+    this.screenFlashAlpha = Math.max(this.screenFlashAlpha, safeAlpha);
   }
 
   // Hitstop (Vuruş Mikro Donması)
