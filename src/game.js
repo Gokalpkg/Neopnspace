@@ -1676,6 +1676,7 @@ class Game {
     this.setupMenuSwipeNavigation();
     this.initLuckyWheel();
     this.initLeaderboard();
+    this.applyMenuProgression();
   }
 
   updateDockActiveTab(activeTab) {
@@ -5150,6 +5151,7 @@ class Game {
     if (this.launching) return;
     this.launching = true;
     this.launchProgress = 0;
+    this.logEvent('run_start', { mode: this.currentMode, games: parseInt(localStorage.getItem('neon_games_played') || '0', 10) });
     this.requestWakeLock();
     sounds.playWarpDrive();
     vibrate.heavy();
@@ -7358,6 +7360,115 @@ class Game {
     this.updateHUD();
   }
 
+  // Yerel olay günlüğü (Faz 0 ölçüm): son 300 olayı saklar, sunucuya hiçbir şey göndermez
+  logEvent(name, data = {}) {
+    try {
+      const raw = localStorage.getItem('neon_events');
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.push({ t: Date.now(), e: name, ...data });
+      while (arr.length > 300) arr.shift();
+      localStorage.setItem('neon_events', JSON.stringify(arr));
+    } catch (e) {}
+  }
+
+  // Kademeli menü: yeni oyuncu ilk oyunda sadece OYNA'yı görür
+  applyMenuProgression() {
+    const played = parseInt(localStorage.getItem('neon_games_played') || '0', 10);
+    const hasHistory = Math.max(this.highScores.classic || 0, this.highScores.storm || 0) > 0;
+    const games = hasHistory ? 99 : played;
+    const rules = [
+      { id: 'btn-hangar', min: 1 },
+      { id: 'btn-missions', min: 3 },
+      { id: 'btn-lucky-wheel', min: 3 },
+      { id: 'btn-daily-reward', min: 3 },
+      { id: 'btn-leaderboard', min: 5 }
+    ];
+    rules.forEach(r => {
+      const el = document.getElementById(r.id);
+      if (el) el.style.display = games >= r.min ? '' : 'none';
+    });
+  }
+
+  // Ölüm ekranı kancası: rekora ne kadar kaldı + tek dokunuşla kalıcı yükseltme + büyük TEKRAR
+  buildGameOverHook(prevBest, isNewRecord) {
+    const card = document.querySelector('#gameover-modal .modal-card');
+    if (!card) return;
+    const score = this.player.score;
+
+    if (finalHighScore) finalHighScore.textContent = (this.highScores[this.currentMode] || 0).toLocaleString();
+
+    let hook = document.getElementById('go-hook');
+    if (!hook) {
+      hook = document.createElement('div');
+      hook.id = 'go-hook';
+      const grid = card.querySelector('.gameover-stats-grid');
+      if (grid) card.insertBefore(hook, grid);
+    }
+    const hookBase = 'margin:0 0 12px;padding:10px 12px;border-radius:12px;font-weight:900;font-size:1rem;letter-spacing:.5px;text-align:center;';
+    if (isNewRecord && prevBest > 0) {
+      hook.textContent = `🏆 YENİ REKOR! ${score.toLocaleString()} (önceki ${prevBest.toLocaleString()})`;
+      hook.style.cssText = hookBase + 'background:rgba(255,215,0,.15);border:1px solid #ffd700;color:#ffd700;';
+    } else if (isNewRecord) {
+      hook.textContent = `🏆 İLK REKORUN: ${score.toLocaleString()} — şimdi bunu geç!`;
+      hook.style.cssText = hookBase + 'background:rgba(255,215,0,.15);border:1px solid #ffd700;color:#ffd700;';
+    } else {
+      const left = Math.max(1, prevBest - score + 1);
+      hook.textContent = `🎯 Rekora ${left.toLocaleString()} puan kaldı! (${prevBest.toLocaleString()})`;
+      hook.style.cssText = hookBase + 'background:rgba(0,240,255,.12);border:1px solid #00f0ff;color:#00f0ff;';
+    }
+
+    // En ucuz alınabilir kalıcı yükseltmeyi öner
+    let quick = document.getElementById('go-quick-upgrade');
+    if (!quick) {
+      quick = document.createElement('button');
+      quick.id = 'go-quick-upgrade';
+      quick.className = 'neon-btn';
+      quick.style.cssText = 'width:100%;padding:10px;margin-bottom:10px;font-weight:900;font-size:.92rem;background:linear-gradient(135deg,#05ffa1,#00f0ff);color:#030816;border:none;border-radius:10px;cursor:pointer;';
+      const dbl = document.getElementById('btn-double-crystals');
+      if (dbl) card.insertBefore(quick, dbl);
+    }
+    const options = this.getTechCatalog()
+      .map(item => ({ item, lvl: this.techUpgrades[item.id] || 0 }))
+      .filter(o => o.lvl < o.item.maxLevel)
+      .map(o => ({ ...o, cost: o.item.costs[o.lvl] }))
+      .filter(o => o.cost <= this.totalCrystals)
+      .sort((a, b) => a.cost - b.cost);
+    const best = options[0];
+    if (best) {
+      quick.style.display = '';
+      quick.textContent = `⚡ ${best.item.name}: ${best.item.formatVal(best.lvl + 1)} — ${best.cost} CR AL`;
+      quick.onclick = () => {
+        sounds.init();
+        if (this.totalCrystals < best.cost) return;
+        this.totalCrystals -= best.cost;
+        this.techUpgrades[best.item.id] = best.lvl + 1;
+        localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+        this.saveTechUpgrades();
+        sounds.playLevelUp();
+        vibrate.success();
+        this.updateCrystalsDisplay();
+        this.logEvent('quick_upgrade', { id: best.item.id, lvl: best.lvl + 1 });
+        this.showToast(`✓ ${best.item.name} geliştirildi!`, '#05ffa1');
+        this.buildGameOverHook(prevBest, isNewRecord);
+      };
+    } else {
+      quick.style.display = 'none';
+    }
+
+    // TEKRAR butonunu ana eylem yap (revive reklamının üstüne al, büyüt)
+    const restart = document.getElementById('btn-restart');
+    const revive = document.getElementById('btn-ad-revive');
+    if (restart && revive && restart.parentNode === revive.parentNode) {
+      restart.parentNode.insertBefore(restart, revive);
+      restart.style.fontSize = '1.2rem';
+      restart.style.padding = '15px';
+      restart.style.fontWeight = '900';
+      restart.style.background = 'linear-gradient(135deg,#00f0ff,#bf5af2)';
+      restart.style.color = '#030816';
+      restart.style.border = 'none';
+    }
+  }
+
   gameOver() {
     this.state = 'GAME_OVER';
     this.releaseWakeLock();
@@ -7372,11 +7483,18 @@ class Game {
       this.savePilotStats();
     }
 
-    if (this.player.score > this.highScores[this.currentMode]) {
+    const prevBest = this.highScores[this.currentMode] || 0;
+    const isNewRecord = this.player.score > prevBest;
+    if (isNewRecord) {
       this.highScores[this.currentMode] = this.player.score;
       localStorage.setItem(`neon_high_score_${this.currentMode}`, this.highScores[this.currentMode].toString());
       localStorage.setItem('neon_space_high_score', this.highScores['classic'].toString());
     }
+    const gamesPlayed = parseInt(localStorage.getItem('neon_games_played') || '0', 10) + 1;
+    localStorage.setItem('neon_games_played', gamesPlayed.toString());
+    this.logEvent('run_end', { score: this.player.score, time: Math.round(this.gameTime), level: this.player.level, mode: this.currentMode, record: isNewRecord });
+    this.applyMenuProgression();
+    this.buildGameOverHook(prevBest, isNewRecord);
 
     const mins = Math.floor(this.gameTime / 60).toString().padStart(2, '0');
     const secs = (this.gameTime % 60).toString().padStart(2, '0');
@@ -9211,6 +9329,7 @@ class Game {
           }
 
           enemy.hp -= hitDamage;
+          if (!enemy.isBoss && !(enemy.type && enemy.type.startsWith('boss'))) enemy.y -= 1.4;
 
           // Tesla Zincirleme Yıldırım (Dengeli hayatta kalma ölçeklemesi)
           if (this.player.upgrades.tesla > 0 && Math.random() < (0.18 + this.player.upgrades.tesla * 0.08)) {
@@ -9494,6 +9613,9 @@ class Game {
     const comboMult = 1 + (this.comboCount - 1) * 0.12;
     
     const points = Math.round(enemy.score * (this.currentMode === 'storm' ? comboMult * 1.25 : comboMult));
+    if (this.particles.floatingTexts.length < 10) {
+      this.particles.spawnFloatingText(enemy.x, enemy.y - 6, `+${points}`, this.comboCount >= 10 ? '#ffd700' : '#ffffff', this.comboCount >= 10 ? 14 : 11);
+    }
     
     if (this.comboCount > 1 && this.comboCount % 5 === 0) {
       this.screenShake = Math.min(5, this.comboCount * 0.25);
