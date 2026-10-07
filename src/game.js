@@ -558,58 +558,79 @@ class Game {
       rerollStart: 0  // Başlangıç reroll hakkı +1/lv (max 2)
     };
 
-    // 30 Kademeli Başarım Sistemi (10 Kategori x 3 Aşama)
+    // 50 Kademeli Başarım Sistemi (10 Kategori x 5 Aşama - 4. ve 5. Usta/Efsane Kademeler Eklendi)
     this.trophies = JSON.parse(localStorage.getItem('neon_trophies') || '{}');
+    this.trophyCategoryView = 'progressive';
     this.trophyDefs = [
-      // 1. Düşman Avcısı
+      // 1. Düşman Avcısı (kill)
       { id: 'kill_1', category: 'kill', tier: 1, name: 'İlk Av', desc: 'Toplam 3 düşman yok et', icon: '🎯', stat: 'totalKills', target: 3, reward: 25 },
       { id: 'kill_2', category: 'kill', tier: 2, name: 'Kozmik Avcı', desc: 'Toplam 30 düşman yok et', icon: '⚔️', stat: 'totalKills', target: 30, reward: 50 },
       { id: 'kill_3', category: 'kill', tier: 3, name: 'Yıldız Katili', desc: 'Toplam 300 düşman yok et', icon: '💥', stat: 'totalKills', target: 300, reward: 120 },
+      { id: 'kill_4', category: 'kill', tier: 4, name: 'Galaksi Kasırgası', desc: 'Toplam 1,000 düşman yok et', icon: '⚡', stat: 'totalKills', target: 1000, reward: 250 },
+      { id: 'kill_5', category: 'kill', tier: 5, name: 'Hiçlik Yok Edici', desc: 'Toplam 3,000 düşman yok et', icon: '👑', stat: 'totalKills', target: 3000, reward: 500 },
 
-      // 2. Asteroit Kıran
+      // 2. Asteroit Kıran (asteroid)
       { id: 'asteroid_1', category: 'asteroid', tier: 1, name: 'Taş Kırıcı', desc: '3 asteroit parçala', icon: '🪨', stat: 'asteroidsDestroyed', target: 3, reward: 20 },
       { id: 'asteroid_2', category: 'asteroid', tier: 2, name: 'Meteor Yağmuru', desc: '30 asteroit parçala', icon: '☄️', stat: 'asteroidsDestroyed', target: 30, reward: 45 },
       { id: 'asteroid_3', category: 'asteroid', tier: 3, name: 'Kuşak Temizleyici', desc: '300 asteroit parçala', icon: '🪐', stat: 'asteroidsDestroyed', target: 300, reward: 100 },
+      { id: 'asteroid_4', category: 'asteroid', tier: 4, name: 'Göktaşı Kıyameti', desc: '1,000 asteroit parçala', icon: '☄️', stat: 'asteroidsDestroyed', target: 1000, reward: 220 },
+      { id: 'asteroid_5', category: 'asteroid', tier: 5, name: 'Gezegen Parçalayıcı', desc: '3,000 asteroit parçala', icon: '🌌', stat: 'asteroidsDestroyed', target: 3000, reward: 450 },
 
-      // 3. Boss Avcısı
+      // 3. Boss Avcısı (boss)
       { id: 'boss_1', category: 'boss', tier: 1, name: 'Amiral Tehdidi', desc: 'İlk Amiral Boss\'unu yen', icon: '💀', stat: 'bossesDefeated', target: 1, reward: 50 },
       { id: 'boss_2', category: 'boss', tier: 2, name: 'Filo Avcısı', desc: 'Toplam 5 Boss yok et', icon: '☠️', stat: 'bossesDefeated', target: 5, reward: 100 },
       { id: 'boss_3', category: 'boss', tier: 3, name: 'Kozmik Ecel', desc: 'Toplam 20 Boss yok et', icon: '👑', stat: 'bossesDefeated', target: 20, reward: 250 },
+      { id: 'boss_4', category: 'boss', tier: 4, name: 'Amiral Kabusu', desc: 'Toplam 50 Boss yok et', icon: '☠️', stat: 'bossesDefeated', target: 50, reward: 500 },
+      { id: 'boss_5', category: 'boss', tier: 5, name: 'Kozmik Hükümdar', desc: 'Toplam 120 Boss yok et', icon: '👑', stat: 'bossesDefeated', target: 120, reward: 1000 },
 
-      // 4. Kombo Ustası
+      // 4. Kombo Ustası (combo)
       { id: 'combo_1', category: 'combo', tier: 1, name: 'Seri Darbe', desc: '10x kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 10, reward: 25 },
       { id: 'combo_2', category: 'combo', tier: 2, name: 'Fırtına Ritmi', desc: '25x kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 25, reward: 60 },
       { id: 'combo_3', category: 'combo', tier: 3, name: 'Apex Akışı', desc: '50x maksimum kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 50, reward: 150 },
+      { id: 'combo_4', category: 'combo', tier: 4, name: 'Kuantum Ritim', desc: '75x maksimum kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 75, reward: 260 },
+      { id: 'combo_5', category: 'combo', tier: 5, name: 'Işık Hızı Serisi', desc: '100x maksimum kombo zincirine ulaş', icon: '🔥', stat: 'maxCombo', target: 100, reward: 450 },
 
-      // 5. Hayatta Kalma (Süre)
+      // 5. Hayatta Kalma (survive)
       { id: 'survive_1', category: 'survive', tier: 1, name: 'Uçuş Başlangıcı', desc: 'Tek seferde 60 saniye hayatta kal', icon: '⏱️', stat: 'maxTime', target: 60, reward: 20 },
       { id: 'survive_2', category: 'survive', tier: 2, name: 'Zaman Savaşçısı', desc: 'Tek seferde 180 saniye hayatta kal', icon: '⏳', stat: 'maxTime', target: 180, reward: 50 },
       { id: 'survive_3', category: 'survive', tier: 3, name: 'Sonsuz Direniş', desc: 'Tek seferde 300 saniye (5 dk) hayatta kal', icon: '⌛', stat: 'maxTime', target: 300, reward: 120 },
+      { id: 'survive_4', category: 'survive', tier: 4, name: 'Demir İrade', desc: 'Tek seferde 480 saniye (8 dk) hayatta kal', icon: '🛡️', stat: 'maxTime', target: 480, reward: 240 },
+      { id: 'survive_5', category: 'survive', tier: 5, name: 'Kozmik Ölümsüz', desc: 'Tek seferde 720 saniye (12 dk) hayatta kal', icon: '👑', stat: 'maxTime', target: 720, reward: 450 },
 
-      // 6. Kristal Zengini
+      // 6. Kristal Zengini (crystal)
       { id: 'crystal_1', category: 'crystal', tier: 1, name: 'Ganimet Avcısı', desc: 'Toplam 100 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 100, reward: 30 },
       { id: 'crystal_2', category: 'crystal', tier: 2, name: 'Kozmik Madenci', desc: 'Toplam 1,000 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 1000, reward: 75 },
       { id: 'crystal_3', category: 'crystal', tier: 3, name: 'Kristal Baronu', desc: 'Toplam 10,000 kristal topla', icon: '💠', stat: 'lifetimeCrystals', target: 10000, reward: 200 },
+      { id: 'crystal_4', category: 'crystal', tier: 4, name: 'Elmas İmparatoru', desc: 'Toplam 30,000 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 30000, reward: 400 },
+      { id: 'crystal_5', category: 'crystal', tier: 5, name: 'Evrensel Hazine', desc: 'Toplam 100,000 kristal topla', icon: '💠', stat: 'lifetimeCrystals', target: 100000, reward: 800 },
 
-      // 7. Sıyırma / Graze Ası
+      // 7. Sıyırma / Graze Ası (graze)
       { id: 'graze_1', category: 'graze', tier: 1, name: 'Kıl Payı', desc: '10 kez mermi veya tehlike sıyır', icon: '✨', stat: 'totalGraze', target: 10, reward: 25 },
       { id: 'graze_2', category: 'graze', tier: 2, name: 'Refleks Pilotu', desc: '50 kez tehlike sıyır', icon: '🌟', stat: 'totalGraze', target: 50, reward: 60 },
       { id: 'graze_3', category: 'graze', tier: 3, name: 'Gölge Hayalet', desc: '200 kez tehlike sıyır', icon: '💫', stat: 'totalGraze', target: 200, reward: 150 },
+      { id: 'graze_4', category: 'graze', tier: 4, name: 'Sonsuz Dansçı', desc: '600 kez tehlike sıyır', icon: '✨', stat: 'totalGraze', target: 600, reward: 300 },
+      { id: 'graze_5', category: 'graze', tier: 5, name: 'Kuantum Hayalet', desc: '1,500 kez tehlike sıyır', icon: '🌟', stat: 'totalGraze', target: 1500, reward: 550 },
 
-      // 8. Sefer Uçuşları
+      // 8. Sefer Uçuşları (flight)
       { id: 'flight_1', category: 'flight', tier: 1, name: 'Acemi Kanatlar', desc: '3 uçuş seferine çık', icon: '🚀', stat: 'totalFlights', target: 3, reward: 20 },
       { id: 'flight_2', category: 'flight', tier: 2, name: 'Kıdemli Filo', desc: '15 uçuş seferine çık', icon: '🛸', stat: 'totalFlights', target: 15, reward: 50 },
       { id: 'flight_3', category: 'flight', tier: 3, name: 'Uzay Gazisi', desc: '50 uçuş seferine çık', icon: '🌌', stat: 'totalFlights', target: 50, reward: 120 },
+      { id: 'flight_4', category: 'flight', tier: 4, name: 'Galaksi Kaşifi', desc: '120 uçuş seferine çık', icon: '🛸', stat: 'totalFlights', target: 120, reward: 250 },
+      { id: 'flight_5', category: 'flight', tier: 5, name: 'Zaman Seyyahı', desc: '300 uçuş seferine çık', icon: '🌌', stat: 'totalFlights', target: 300, reward: 450 },
 
-      // 9. Şanslı Uzay Sandığı
+      // 9. Şanslı Uzay Sandığı (chest)
       { id: 'chest_1', category: 'chest', tier: 1, name: 'İlk Sandık', desc: '1 şanslı uzay sandığı aç', icon: '🎁', stat: 'totalChests', target: 1, reward: 30 },
       { id: 'chest_2', category: 'chest', tier: 2, name: 'Hazine Avcısı', desc: '5 şanslı uzay sandığı aç', icon: '📦', stat: 'totalChests', target: 5, reward: 70 },
       { id: 'chest_3', category: 'chest', tier: 3, name: 'Kozmik Zenginlik', desc: '20 şanslı uzay sandığı aç', icon: '🏆', stat: 'totalChests', target: 20, reward: 180 },
+      { id: 'chest_4', category: 'chest', tier: 4, name: 'Kadim Sandık Avcısı', desc: '50 şanslı uzay sandığı aç', icon: '🎁', stat: 'totalChests', target: 50, reward: 350 },
+      { id: 'chest_5', category: 'chest', tier: 5, name: 'Gizemler Efendisi', desc: '120 şanslı uzay sandığı aç', icon: '🏆', stat: 'totalChests', target: 120, reward: 600 },
 
-      // 10. Bomba Patlatıcı
+      // 10. Bomba Patlatıcı (bomb)
       { id: 'bomb_1', category: 'bomb', tier: 1, name: 'Fünye', desc: '3 bomba asteroit patlat', icon: '💣', stat: 'bombAsteroidsDestroyed', target: 3, reward: 20 },
       { id: 'bomb_2', category: 'bomb', tier: 2, name: 'Şok Dalgası', desc: '20 bomba asteroit patlat', icon: '🧨', stat: 'bombAsteroidsDestroyed', target: 20, reward: 55 },
-      { id: 'bomb_3', category: 'bomb', tier: 3, name: 'Süpernova Patlaması', desc: '80 bomba asteroit patlat', icon: '☢️', stat: 'bombAsteroidsDestroyed', target: 80, reward: 140 }
+      { id: 'bomb_3', category: 'bomb', tier: 3, name: 'Süpernova Patlaması', desc: '80 bomba asteroit patlat', icon: '☢️', stat: 'bombAsteroidsDestroyed', target: 80, reward: 140 },
+      { id: 'bomb_4', category: 'bomb', tier: 4, name: 'Atomik Patlama', desc: '250 bomba asteroit patlat', icon: '🧨', stat: 'bombAsteroidsDestroyed', target: 250, reward: 280 },
+      { id: 'bomb_5', category: 'bomb', tier: 5, name: 'Karadelik Çöküşü', desc: '600 bomba asteroit patlat', icon: '☢️', stat: 'bombAsteroidsDestroyed', target: 600, reward: 500 }
     ];
     this.sessionStats = { grazeCount: 0, deflectCount: 0, noDamageTimer: 0 };
 
@@ -840,6 +861,7 @@ class Game {
     this.renderHangarSkins();
     this.dailyMissions = null;
     this.initMissions();
+    this.updateTrophiesBadge();
     this.updatePilotRankDisplay();
     this.updateMenuShipPreview();
     this.checkDailyReward();
@@ -2145,15 +2167,30 @@ class Game {
     if (!this.pilotStats) this.pilotStats = this.loadPilotStats();
     let newlyCompleted = false;
 
-    for (const def of this.trophyDefs) {
-      if (this.trophies[def.id]) continue; // Zaten ödülü alınmış
-      const currentVal = this.pilotStats[def.stat] || 0;
-      if (currentVal >= def.target) {
-        // Otomatik hak kazanıldı, henüz alınmadıysa kaydedilebilir
-        newlyCompleted = true;
+    const categories = ['kill', 'asteroid', 'boss', 'combo', 'survive', 'crystal', 'graze', 'flight', 'chest', 'bomb'];
+    for (const catId of categories) {
+      const catTiers = this.trophyDefs.filter(t => t.category === catId);
+      const activeTier = catTiers.find(t => !this.trophies[t.id]);
+      if (activeTier) {
+        const currentVal = this.pilotStats[activeTier.stat] || 0;
+        if (currentVal >= activeTier.target) {
+          newlyCompleted = true;
+          break;
+        }
       }
     }
     return newlyCompleted;
+  }
+
+  updateTrophiesBadge() {
+    const badge = document.getElementById('trophies-badge-dot');
+    if (!badge) return;
+    const hasClaimable = this.checkAllTrophies();
+    if (hasClaimable) {
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
   }
 
   claimTrophy(id) {
@@ -2180,6 +2217,7 @@ class Game {
       this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 150);
     }
 
+    this.updateTrophiesBadge();
     this.renderTrophies();
   }
 
@@ -2189,59 +2227,168 @@ class Game {
   }
 
   renderTrophies() {
+    const container = document.getElementById('trophies-tab-view');
     const grid = document.getElementById('trophies-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
+    if (!grid || !container) return;
 
     if (!this.pilotStats) this.pilotStats = this.loadPilotStats();
+    this.updateTrophiesBadge();
 
-    // 30 Başarımı Kategori ve Kademeye Göre Sıralı Render Et
-    for (const def of this.trophyDefs) {
-      const earned = !!this.trophies[def.id];
-      const currentVal = Math.min(def.target, this.pilotStats[def.stat] || 0);
-      const isReadyToClaim = !earned && currentVal >= def.target;
-      const progressPct = Math.min(100, Math.floor((currentVal / def.target) * 100));
+    // Filtre sekmesi
+    let filterBar = document.getElementById('trophies-filter-bar');
+    if (!filterBar) {
+      filterBar = document.createElement('div');
+      filterBar.id = 'trophies-filter-bar';
+      filterBar.className = 'trophies-filter-bar';
+      container.insertBefore(filterBar, grid);
+    }
 
-      const card = document.createElement('div');
-      card.className = 'trophy-card' + (earned ? ' maxed' : isReadyToClaim ? ' claimable' : '');
+    const isProg = this.trophyCategoryView !== 'all';
+    filterBar.innerHTML = `
+      <div class="trophy-filter-pill ${isProg ? 'active' : ''}" data-view="prog">
+        <span>⚡ KADEMELİ GELİŞİM</span>
+        <span class="filter-count-badge">10 ALAN</span>
+      </div>
+      <div class="trophy-filter-pill ${!isProg ? 'active' : ''}" data-view="all">
+        <span>📜 TÜM ROZETLER</span>
+        <span class="filter-count-badge">50 KADEME</span>
+      </div>
+    `;
 
-      card.innerHTML = `
-        <div class="trophy-icon">${earned ? def.icon : isReadyToClaim ? '⭐' : def.icon}</div>
-        <div class="trophy-main">
-          <div class="trophy-header-row">
-            <span class="trophy-name">${def.name}</span>
-            <span class="trophy-level-badge">KADEME ${def.tier}</span>
+    filterBar.querySelector('[data-view="prog"]').onclick = () => {
+      this.trophyCategoryView = 'progressive';
+      this.renderTrophies();
+    };
+    filterBar.querySelector('[data-view="all"]').onclick = () => {
+      this.trophyCategoryView = 'all';
+      this.renderTrophies();
+    };
+
+    grid.innerHTML = '';
+
+    if (isProg) {
+      // 10 Kategori bazında aktif kademeyi göster
+      const categories = [
+        { id: 'asteroid', title: 'Asteroit Kıran', icon: '🪐' },
+        { id: 'kill', title: 'Düşman Avcısı', icon: '⚔️' },
+        { id: 'boss', title: 'Boss Avcısı', icon: '💀' },
+        { id: 'combo', title: 'Kombo Ustası', icon: '⚡' },
+        { id: 'survive', title: 'Hayatta Kalma', icon: '⏱️' },
+        { id: 'crystal', title: 'Kristal Madencisi', icon: '💎' },
+        { id: 'graze', title: 'Sıyırma Refleksi', icon: '✨' },
+        { id: 'flight', title: 'Sefer Uçuşları', icon: '🚀' },
+        { id: 'chest', title: 'Kozmik Sandık', icon: '🎁' },
+        { id: 'bomb', title: 'Patlayıcı Uzmanı', icon: '💣' }
+      ];
+
+      for (const cat of categories) {
+        const catTiers = this.trophyDefs.filter(t => t.category === cat.id);
+        const earnedCount = catTiers.filter(t => this.trophies[t.id]).length;
+        const allCompleted = earnedCount === catTiers.length;
+        const activeTier = catTiers.find(t => !this.trophies[t.id]) || catTiers[catTiers.length - 1];
+
+        const currentVal = Math.min(activeTier.target, this.pilotStats[activeTier.stat] || 0);
+        const isReadyToClaim = !allCompleted && !this.trophies[activeTier.id] && currentVal >= activeTier.target;
+        const progressPct = allCompleted ? 100 : Math.min(100, Math.floor((currentVal / activeTier.target) * 100));
+
+        const card = document.createElement('div');
+        card.className = 'trophy-card' + (allCompleted ? ' maxed' : isReadyToClaim ? ' claimable' : '');
+
+        let pipsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          pipsHtml += `<span class="trophy-pip ${i <= earnedCount ? 'filled' : ''}">★</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="trophy-icon">${allCompleted ? '👑' : isReadyToClaim ? '⭐' : activeTier.icon}</div>
+          <div class="trophy-main">
+            <div class="trophy-header-row">
+              <span class="trophy-name">${allCompleted ? cat.title : activeTier.name}</span>
+              <div class="trophy-pips-group" title="${earnedCount}/5 Tamamlandı">${pipsHtml}</div>
+              <span class="trophy-level-badge ${activeTier.tier >= 4 ? 'tier-high' : ''}">
+                ${allCompleted ? 'USTALIK (5/5)' : `KADEME ${activeTier.tier}/5`}
+              </span>
+            </div>
+            <div class="trophy-desc">${allCompleted ? 'Tüm kademe zorlukları başarıyla fethedildi!' : activeTier.desc}</div>
+            <div class="trophy-progress-track">
+              <div class="trophy-progress-fill" style="width: ${progressPct}%;"></div>
+            </div>
+            <div class="trophy-meta-row">
+              <span>${allCompleted ? 'MAKSİMUM ZORLUK' : `${currentVal.toLocaleString()} / ${activeTier.target.toLocaleString()}`}</span>
+              <span class="trophy-reward-tag">${allCompleted ? '🏆 KAZANILDI' : `+${activeTier.reward} 💎`}</span>
+            </div>
           </div>
-          <div class="trophy-desc">${def.desc}</div>
-          <div class="trophy-progress-track">
-            <div class="trophy-progress-fill" style="width: ${progressPct}%;"></div>
-          </div>
-          <div class="trophy-meta-row">
-            <span>${currentVal.toLocaleString()} / ${def.target.toLocaleString()}</span>
-            <span>+${def.reward} 💎</span>
-          </div>
-        </div>
-      `;
+        `;
 
-      if (isReadyToClaim) {
-        const claimBtn = document.createElement('button');
-        claimBtn.className = 'trophy-claim-btn pulse';
-        claimBtn.textContent = 'AL +' + def.reward + ' 💎';
-        claimBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.claimTrophy(def.id);
-        });
-        card.appendChild(claimBtn);
-      } else if (earned) {
-        const completedBadge = document.createElement('div');
-        completedBadge.className = 'trophy-level-badge';
-        completedBadge.style.color = '#05ffa1';
-        completedBadge.style.borderColor = 'rgba(5, 255, 161, 0.4)';
-        completedBadge.textContent = 'TAMAMLANDI';
-        card.appendChild(completedBadge);
+        if (isReadyToClaim) {
+          const claimBtn = document.createElement('button');
+          claimBtn.className = 'trophy-claim-btn pulse';
+          claimBtn.textContent = 'AL +' + activeTier.reward + ' 💎';
+          claimBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.claimTrophy(activeTier.id);
+          });
+          card.appendChild(claimBtn);
+        } else if (allCompleted) {
+          const completedBadge = document.createElement('div');
+          completedBadge.className = 'trophy-level-badge';
+          completedBadge.style.color = '#05ffa1';
+          completedBadge.style.borderColor = 'rgba(5, 255, 161, 0.4)';
+          completedBadge.textContent = 'USTALIK';
+          card.appendChild(completedBadge);
+        }
+
+        grid.appendChild(card);
       }
+    } else {
+      // 50 Başarımı Liste Halinde Render Et
+      for (const def of this.trophyDefs) {
+        const earned = !!this.trophies[def.id];
+        const currentVal = Math.min(def.target, this.pilotStats[def.stat] || 0);
+        const isReadyToClaim = !earned && currentVal >= def.target;
+        const progressPct = Math.min(100, Math.floor((currentVal / def.target) * 100));
 
-      grid.appendChild(card);
+        const card = document.createElement('div');
+        card.className = 'trophy-card' + (earned ? ' maxed' : isReadyToClaim ? ' claimable' : '');
+
+        card.innerHTML = `
+          <div class="trophy-icon">${earned ? def.icon : isReadyToClaim ? '⭐' : def.icon}</div>
+          <div class="trophy-main">
+            <div class="trophy-header-row">
+              <span class="trophy-name">${def.name}</span>
+              <span class="trophy-level-badge ${def.tier >= 4 ? 'tier-high' : ''}">KADEME ${def.tier}/5</span>
+            </div>
+            <div class="trophy-desc">${def.desc}</div>
+            <div class="trophy-progress-track">
+              <div class="trophy-progress-fill" style="width: ${progressPct}%;"></div>
+            </div>
+            <div class="trophy-meta-row">
+              <span>${currentVal.toLocaleString()} / ${def.target.toLocaleString()}</span>
+              <span class="trophy-reward-tag">+${def.reward} 💎</span>
+            </div>
+          </div>
+        `;
+
+        if (isReadyToClaim) {
+          const claimBtn = document.createElement('button');
+          claimBtn.className = 'trophy-claim-btn pulse';
+          claimBtn.textContent = 'AL +' + def.reward + ' 💎';
+          claimBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.claimTrophy(def.id);
+          });
+          card.appendChild(claimBtn);
+        } else if (earned) {
+          const completedBadge = document.createElement('div');
+          completedBadge.className = 'trophy-level-badge';
+          completedBadge.style.color = '#05ffa1';
+          completedBadge.style.borderColor = 'rgba(5, 255, 161, 0.4)';
+          completedBadge.textContent = 'TAMAMLANDI';
+          card.appendChild(completedBadge);
+        }
+
+        grid.appendChild(card);
+      }
     }
   }
 
@@ -2307,6 +2454,7 @@ class Game {
   openHangar() {
     try { history.pushState({ modal: 'hangar' }, ''); } catch(e) {}
     this.updateCrystalsDisplay();
+    this.updateTrophiesBadge();
     this.switchHangarTab(this.activeHangarTab || 'skins');
 
     if (hangarModal) hangarModal.classList.remove('hidden');
@@ -3860,6 +4008,7 @@ class Game {
   savePilotStats() {
     if (this.pilotStats) {
       localStorage.setItem('neon_pilot_stats', JSON.stringify(this.pilotStats));
+      this.updateTrophiesBadge();
     }
   }
 
