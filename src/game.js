@@ -116,6 +116,7 @@ const timerDisplay = document.getElementById('timer-display');
 const bossBarContainer = document.getElementById('boss-bar-container');
 const bossBarFill = document.getElementById('boss-bar-fill');
 const recordBadge = document.getElementById('record-badge');
+const hudRecordTarget = document.getElementById('hud-record-target');
 
 // Butonlar & Menü Elemanları
 const btnStart = document.getElementById('btn-start');
@@ -416,8 +417,8 @@ class Game {
     this.currentSectorId = 'void';
     this.warpTimer = 0;
     
-    // Çoklu Mod ve Skor Sistemi
-    this.currentMode = 'classic'; // 'classic' veya 'storm'
+    // Çoklu Mod ve Skor Sistemi (Fırtına / Sonsuz Skor Modu Varsayılan)
+    this.currentMode = localStorage.getItem('neon_current_mode') || 'storm';
     this.highScores = {
       classic: parseInt(localStorage.getItem('neon_high_score_classic') || localStorage.getItem('neon_space_high_score') || '0', 10),
       storm: parseInt(localStorage.getItem('neon_high_score_storm') || '0', 10)
@@ -1059,6 +1060,33 @@ class Game {
       btnRestart.addEventListener('click', () => {
         sounds.init();
         this.triggerLaunch();
+      });
+    }
+
+    const btnShareScore = document.getElementById('btn-share-score');
+    if (btnShareScore) {
+      btnShareScore.addEventListener('click', async () => {
+        sounds.init();
+        const score = this.player.score || 0;
+        const modeName = this.currentMode === 'storm' ? 'Fırtına Modu' : `Bölüm ${this.selectedLevel}`;
+        const shareText = `🚀 Neon Space Survivor'da ${score.toLocaleString()} puan yaptım! (${modeName})\nBu rekoru geçebilir misin?`;
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Neon Space Survivor Rekoru',
+              text: shareText
+            });
+            return;
+          } catch (e) {}
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(shareText);
+            this.showToast('📋 Rekor panoya kopyalandı! Arkadaşına yapıştır.', '#ffd700');
+            return;
+          } catch (e) {}
+        }
+        this.showToast('📢 Skor: ' + score.toLocaleString(), '#ffd700');
       });
     }
 
@@ -3012,8 +3040,9 @@ class Game {
         icon: 'energy',
         name: 'Plazma Rezonansı',
         desc: 'Tüm silahlara her seviyede kalıcı +%6 hasar artışı sağlar',
+        scoreImpact: '+%12 Skor Potansiyeli',
         maxLevel: 10,
-        costs: [150, 350, 750, 1500, 2800, 4800, 8000, 12500, 19000, 29000],
+        costs: [80, 220, 550, 1200, 2400, 4200, 7000, 11000, 17000, 26000],
         formatVal: (lvl) => `+%${lvl * 6} Hasar`
       },
       {
@@ -3021,8 +3050,9 @@ class Game {
         icon: 'shield',
         name: 'Gövde Kalkanı',
         desc: 'Her seviyede +12 maksimum başlangıç kalkanı kazandırır',
+        scoreImpact: '+15 sn Hayatta Kalma',
         maxLevel: 10,
-        costs: [130, 300, 650, 1350, 2500, 4200, 7000, 11000, 17000, 25000],
+        costs: [70, 180, 450, 1000, 2000, 3600, 6000, 9500, 15000, 22000],
         formatVal: (lvl) => `+${lvl * 12} Kalkan`
       },
       {
@@ -3030,8 +3060,9 @@ class Game {
         icon: 'hull',
         name: 'Titanyum Zırh',
         desc: 'Gemi maksimum gövde canını her kademede +15 artırır',
+        scoreImpact: '+1 Ekstra Hata Payı',
         maxLevel: 10,
-        costs: [120, 280, 600, 1200, 2200, 3800, 6400, 10000, 15500, 23000],
+        costs: [60, 160, 400, 900, 1800, 3200, 5400, 8500, 13500, 20000],
         formatVal: (lvl) => `+${lvl * 15} Can`
       },
       {
@@ -3039,8 +3070,9 @@ class Game {
         icon: 'target',
         name: 'Kritik Odak',
         desc: 'Her seviyede +%2.5 kalıcı kritik vuruş şansı sağlar',
+        scoreImpact: '+%15 Seri Yıkım',
         maxLevel: 10,
-        costs: [140, 320, 700, 1400, 2600, 4400, 7400, 11800, 18000, 27000],
+        costs: [75, 190, 480, 1100, 2200, 3800, 6400, 10200, 16000, 24000],
         formatVal: (lvl) => `+%${(lvl * 2.5).toFixed(1)} Kritik`
       },
       {
@@ -3048,8 +3080,9 @@ class Game {
         icon: 'magnet',
         name: 'Kristal Çekici',
         desc: 'Kristalleri ve ganimetleri çekme menzilini +18 artırır',
+        scoreImpact: 'Daha Hızlı Seviye Atlama',
         maxLevel: 8,
-        costs: [100, 250, 550, 1100, 2100, 3600, 6000, 9500],
+        costs: [50, 140, 380, 850, 1700, 3000, 5200, 8200],
         formatVal: (lvl) => `+${lvl * 18} Menzil`
       },
       {
@@ -3057,8 +3090,9 @@ class Game {
         icon: 'speed',
         name: 'Plazma Reaktörü',
         desc: 'Süper Güç (Overdrive) dolum hızını kalıcı %8 artırır',
+        scoreImpact: 'Sık Ultimate / Dalga Silici',
         maxLevel: 6,
-        costs: [180, 450, 1100, 2300, 4500, 8500],
+        costs: [110, 290, 750, 1700, 3500, 7000],
         formatVal: (lvl) => `+%${lvl * 8} Şarj`
       },
       {
@@ -3066,8 +3100,9 @@ class Game {
         icon: 'crystal',
         name: 'Kristal Madenciliği',
         desc: 'Toplanan her kristalden kalıcı %8 daha fazla kaynak sağlar',
+        scoreImpact: 'Turlarda +%30 Hızlı Zenginleşme',
         maxLevel: 8,
-        costs: [200, 500, 1200, 2400, 4500, 7800, 12800, 20000],
+        costs: [120, 320, 850, 1900, 3800, 6800, 11000, 17500],
         formatVal: (lvl) => `+%${lvl * 8} Kristal`
       },
       {
@@ -3075,8 +3110,9 @@ class Game {
         icon: 'dice',
         name: 'Taktiksel Analiz',
         desc: 'Her oyunda seviye atlama kartlarını +1 yenileme hakkı verir',
+        scoreImpact: 'İstediğin Build’i Kurma Garantisi',
         maxLevel: 4,
-        costs: [350, 950, 2400, 5800],
+        costs: [200, 600, 1600, 4200],
         formatVal: (lvl) => `${lvl} Reroll`
       },
       {
@@ -3084,8 +3120,9 @@ class Game {
         icon: 'fire',
         name: 'Anka Protokolü',
         desc: 'Ölümcül hasarda dev süpernova şok dalgasıyla dirilme sağlar',
+        scoreImpact: 'Ölümden Dönüp Rekor Kırma',
         maxLevel: 3,
-        costs: [1500, 4500, 11000],
+        costs: [850, 2800, 7500],
         formatVal: (lvl) => lvl >= 1 ? `Kademe ${lvl}` : 'Kilitli'
       }
     ];
@@ -3158,6 +3195,7 @@ class Game {
             <span class="tech-level-pill">${levelPillText}</span>
           </div>
           <div class="tech-desc">${item.desc} (${item.formatVal(currentLvl)})</div>
+          ${item.scoreImpact ? `<div class="tech-score-impact">🎯 ${item.scoreImpact}</div>` : ''}
         </div>
         ${actionBtnHtml}
       `;
@@ -3713,6 +3751,7 @@ class Game {
 
   setMode(mode) {
     this.currentMode = mode;
+    localStorage.setItem('neon_current_mode', mode);
     if (mode === 'classic') {
       if (modeClassic) modeClassic.classList.add('active');
       if (modeStorm) modeStorm.classList.remove('active');
@@ -3727,6 +3766,15 @@ class Game {
   updateHighScoreDisplay() {
     const stormHigh = this.highScores.storm || 0;
     if (scoreValStorm) scoreValStorm.textContent = stormHigh.toLocaleString();
+    if (modeClassic && modeStorm) {
+      if (this.currentMode === 'classic') {
+        modeClassic.classList.add('active');
+        modeStorm.classList.remove('active');
+      } else {
+        modeClassic.classList.remove('active');
+        modeStorm.classList.add('active');
+      }
+    }
     this.updateLevelDisplay();
   }
 
@@ -4969,7 +5017,7 @@ class Game {
     if (!list) return;
 
     if (activeCountEl) {
-      activeCountEl.textContent = `${(this.totalPilots || 18492).toLocaleString()} ${t('lb_active_pilots') ? t('lb_active_pilots').replace('{n}', '') : 'AKTİF PİLOT'}`;
+      activeCountEl.textContent = 'GÜNCEL SIRALAMA LİGİ';
     }
 
     // Tab buttons UI active toggle
@@ -5833,6 +5881,7 @@ class Game {
     this._hudHpPct = -1;
     this._hudShieldPct = -1;
     this._hudLvl = -1;
+    this._hudScore = -1;
     this.updateHUD();
     this.updateStatusBarsOnly();
   }
@@ -5857,7 +5906,22 @@ class Game {
     }
     if (this._hudScore !== this.player.score) {
       this._hudScore = this.player.score;
-      scoreDisplay.textContent = this.player.score.toLocaleString();
+      if (scoreDisplay) scoreDisplay.textContent = this.player.score.toLocaleString();
+
+      if (hudRecordTarget) {
+        const best = this.highScores[this.currentMode] || 0;
+        if (this.isNewRecordSet || (best > 0 && this.player.score > best)) {
+          hudRecordTarget.textContent = '🏆 YENİ REKOR!';
+          hudRecordTarget.className = 'hud-record-target broken';
+        } else if (best > 0) {
+          const diff = best - this.player.score;
+          hudRecordTarget.textContent = `🎯 REKOR: ${best.toLocaleString()} (-${diff.toLocaleString()})`;
+          hudRecordTarget.className = 'hud-record-target';
+        } else {
+          hudRecordTarget.textContent = '🎯 İLK UÇUŞ';
+          hudRecordTarget.className = 'hud-record-target';
+        }
+      }
     }
 
     const xpPercent = Math.min(100, (this.player.xp / this.player.nextXp) * 100);
