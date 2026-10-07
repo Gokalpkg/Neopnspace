@@ -1677,6 +1677,19 @@ class Game {
     this.initLuckyWheel();
     this.initLeaderboard();
     this.applyMenuProgression();
+
+    // Faz 1.1: İlk açılışta menüyü atla, direkt oyuna gir
+    const gamesPlayed = parseInt(localStorage.getItem('neon_games_played') || '0', 10);
+    const hasScore = parseInt(localStorage.getItem('neon_high_score_storm') || '0', 10) > 0
+                  || parseInt(localStorage.getItem('neon_high_score_classic') || '0', 10) > 0;
+    if (gamesPlayed === 0 && !hasScore) {
+      // Fırtına modunu varsayılan yap
+      this.currentMode = 'storm';
+      // 1.8 saniye sonra otomatik başlat
+      setTimeout(() => {
+        this.triggerLaunch();
+      }, 1800);
+    }
   }
 
   updateDockActiveTab(activeTab) {
@@ -6428,6 +6441,7 @@ class Game {
     this.state = 'LEVEL_UP';
     sounds.playLevelUp();
     vibrate.success();
+    this.logEvent('level_up', { level: this.player.level, time: Math.round(this.gameTime), score: this.player.score });
 
     // Evrim seçeneklerini kontrol et
     const evolutions = [];
@@ -6800,6 +6814,26 @@ class Game {
             ${levelTag}
           </div>
           <div class="card-desc">${upgrade.desc}</div>
+          ${!upgrade.isEvolution && !upgrade.isBonus ? (() => {
+            const lvl = upgrade.level;
+            const previews = {
+              laser: [`Mermi: ${lvl+1} top`, `Hasar: +%${25 + lvl*20}`, lvl===1?'ÇİFT NAMLU açılır':lvl===2?'ÜÇLÜ ODAK açılır':''],
+              fireRate: [`Atış hızı: +%${12*(lvl+1)}`],
+              missiles: [`Füze: ${lvl} → ${lvl+1}`],
+              tesla: [`Ark zinciri: +${lvl+1} hedef`],
+              drones: [`Drone: ${lvl} → ${lvl+1}`, lvl===0?'1. drone aktif':lvl===1?'Lazer ağı açılır':'3× drone'],
+              emp: [`EMP hasar: +%${25*(lvl+1)}`, `Etki alanı: +${15*(lvl+1)}px`],
+              shield: [`Kalkan: ${20+lvl*15} → ${20+(lvl+1)*15}`, `Yenileme hızı +%15`],
+              magnet: [`Çekim menzili: ${60+lvl*20} → ${60+(lvl+1)*20}px`],
+              hull: [`Can: ${65+lvl*15} → ${65+(lvl+1)*15}`, `Tamir: +25 HP`],
+              wingman: [`Kanat gemisi: ${lvl} → ${lvl+1}`],
+              overload_reactor: ['Kalkan kırılınca 360° EMP'],
+              apex_overdrive: ['Atış hızı: +%35'],
+              crystal_shrapnel: ['Her 7 kristalde otomatik dart']
+            };
+            const pts = (previews[upgrade.id] || []).filter(Boolean);
+            return pts.length ? `<div class="card-preview-line">⚡ ${pts[0]}${pts[1] ? ` · ${pts[1]}` : ''}</div>` : '';
+          })() : ''}
           ${synergyHtml}
         </div>
       `;
@@ -8920,14 +8954,17 @@ class Game {
       let interval = 45;
       let speedMult = 0.85;
 
-      if (this.gameTime < 25) {
-        interval = 55;
+      if (this.gameTime < 8) {
+        interval = 8;  // İlk 8 saniyede hemen düşman çıksın (~1.5s'de ilk isabet)
+        speedMult = 0.70; // Yavaş başla, öğrenme fırsatı ver
+      } else if (this.gameTime < 25) {
+        interval = 42;
         speedMult = 0.85;
       } else if (this.gameTime < 60) {
-        interval = 40;
+        interval = 36;
         speedMult = 1.05;
       } else if (this.gameTime < 100) {
-        interval = 30;
+        interval = 28;
         speedMult = 1.25;
       } else {
         interval = Math.max(16, 26 - Math.floor((this.gameTime - 100) * 0.15));

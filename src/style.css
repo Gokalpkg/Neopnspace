@@ -1513,6 +1513,18 @@ html, body {
   line-height: 1.4;
 }
 
+.card-preview-line {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 6px;
+  padding: 3px 7px;
+  letter-spacing: 0.3px;
+}
+
 .evolution-card {
   border-color: #d946ef !important;
   background: linear-gradient(135deg, rgba(217, 70, 239, 0.2), rgba(255, 190, 11, 0.1)) !important;
