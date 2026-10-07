@@ -64,6 +64,7 @@ export const TRANSLATIONS = {
     // Bottom Dock
     dock_hangar: "HANGAR & TECH",
     dock_missions: "MISSIONS",
+    dock_menu: "MENU",
     dock_supply: "SUPPLY",
     dock_stats: "STATISTICS",
     privacy_link: "Privacy Policy",
@@ -299,6 +300,7 @@ export const TRANSLATIONS = {
 
     dock_hangar: "HANGAR & ATÖLYE",
     dock_missions: "GÖREVLER",
+    dock_menu: "MENÜ",
     dock_supply: "İKMAL",
     dock_stats: "İSTATİSTİK",
     privacy_link: "Gizlilik Politikası",

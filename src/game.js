@@ -545,8 +545,13 @@ class Game {
     // Pilot İstatistikleri
     this.pilotStats = this.loadPilotStats();
 
-    // Kristal Kasası & Kostümler
-    this.totalCrystals = parseInt(localStorage.getItem('neon_total_crystals') || '0', 10);
+    // Geliştirici Modu (Dev Mode - Sınırsız Altın & Elmas)
+    this.devMode = localStorage.getItem('neon_dev_mode') === 'true';
+    if (this.devMode) {
+      this.totalCrystals = 999999999;
+    } else {
+      this.totalCrystals = parseInt(localStorage.getItem('neon_total_crystals') || '0', 10);
+    }
 
     // Pilot Ustalık Ağacı (Mastery Tree)
     this.masteryTree = JSON.parse(localStorage.getItem('neon_mastery') || 'null') || {
@@ -1214,8 +1219,20 @@ class Game {
       });
     }
 
+    let crystalTapCount = 0;
+    let crystalTapTimer = null;
     if (btnMenuCrystals) {
       btnMenuCrystals.addEventListener('click', () => {
+        crystalTapCount++;
+        clearTimeout(crystalTapTimer);
+        crystalTapTimer = setTimeout(() => { crystalTapCount = 0; }, 1800);
+
+        if (crystalTapCount >= 5) {
+          crystalTapCount = 0;
+          this.toggleDevMode();
+          return;
+        }
+
         sounds.init();
         sounds.playCardSelect();
         this.openHangar();
@@ -2594,8 +2611,10 @@ class Game {
   }
 
   updateCrystalsDisplay() {
-    if (totalCrystalsDisplay) totalCrystalsDisplay.textContent = this.totalCrystals.toLocaleString();
-    if (hangarCrystalsVal) hangarCrystalsVal.textContent = this.totalCrystals.toLocaleString();
+    if (this.devMode) this.totalCrystals = 999999999;
+    const displayText = this.devMode ? '∞ SINIRSIZ' : this.totalCrystals.toLocaleString();
+    if (totalCrystalsDisplay) totalCrystalsDisplay.textContent = displayText;
+    if (hangarCrystalsVal) hangarCrystalsVal.textContent = displayText;
   }
 
   updateGoldDisplay() {
@@ -2603,9 +2622,37 @@ class Game {
   }
 
   saveGold(val) {
-    this.totalCrystals = val;
+    this.totalCrystals = this.devMode ? 999999999 : val;
     localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
     this.updateCrystalsDisplay();
+  }
+
+  toggleDevMode(forceState = null) {
+    this.devMode = forceState !== null ? forceState : !this.devMode;
+    localStorage.setItem('neon_dev_mode', this.devMode ? 'true' : 'false');
+
+    if (this.devMode) {
+      if (!localStorage.getItem('neon_pre_dev_crystals')) {
+        localStorage.setItem('neon_pre_dev_crystals', this.totalCrystals.toString());
+      }
+      this.totalCrystals = 999999999;
+      localStorage.setItem('neon_total_crystals', '999999999');
+      sounds.playJackpot();
+      vibrate.success();
+      this.showToast('🛠️ GELİŞTİRİCİ MODU: Sınırsız Altın & Elmas Aktif!', '#05ffa1');
+    } else {
+      const prev = parseInt(localStorage.getItem('neon_pre_dev_crystals') || '1000', 10);
+      this.totalCrystals = prev;
+      localStorage.setItem('neon_total_crystals', prev.toString());
+      localStorage.removeItem('neon_pre_dev_crystals');
+      sounds.playCardSelect();
+      vibrate.light();
+      this.showToast('🛠️ Geliştirici Modu Kapatıldı', '#ffbe0b');
+    }
+
+    this.updateCrystalsDisplay();
+    if (this.updateDevModeUI) this.updateDevModeUI();
+    if (this.activeHangarTab) this.switchHangarTab(this.activeHangarTab);
   }
 
   addGoldReward(amount = 200, isAd = false) {
@@ -3706,10 +3753,40 @@ class Game {
     };
     this.renderLanguageGrid = renderLanguageGrid;
 
+    const btnToggleDevMode = document.getElementById('btn-toggle-dev-mode');
+    const updateDevModeUI = () => {
+      if (!btnToggleDevMode) return;
+      if (this.devMode) {
+        btnToggleDevMode.textContent = 'AÇIK';
+        btnToggleDevMode.style.background = 'linear-gradient(135deg, rgba(5, 255, 161, 0.28), rgba(0, 240, 255, 0.2))';
+        btnToggleDevMode.style.borderColor = '#05ffa1';
+        btnToggleDevMode.style.color = '#05ffa1';
+        btnToggleDevMode.style.boxShadow = '0 0 12px rgba(5, 255, 161, 0.45)';
+      } else {
+        btnToggleDevMode.textContent = 'KAPALI';
+        btnToggleDevMode.style.background = 'rgba(255, 255, 255, 0.04)';
+        btnToggleDevMode.style.borderColor = 'rgba(255, 190, 11, 0.4)';
+        btnToggleDevMode.style.color = '#ffbe0b';
+        btnToggleDevMode.style.boxShadow = 'none';
+      }
+    };
+    this.updateDevModeUI = updateDevModeUI;
+    updateDevModeUI();
+
+    if (btnToggleDevMode) {
+      btnToggleDevMode.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        vibrate.medium();
+        this.toggleDevMode();
+      });
+    }
+
     const openSettings = () => {
       if (settingsModal) {
         renderLanguageGrid();
         updateSettingsToggles();
+        updateDevModeUI();
         try { history.pushState({ modal: 'settings' }, ''); } catch(e) {}
         settingsModal.classList.remove('hidden');
       }
