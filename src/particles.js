@@ -156,19 +156,10 @@ export class ParticleSystem {
     });
   }
 
-  // Şok Dalgası (Genişleyen Neon Halka - Mobil Optimize Max 8)
+  // Şok Dalgası (Kullanıcı talebi doğrultusunda ekrandaki yuvarlak halkalar ve göz yorucu epilepsi tetikleyicileri tamamen devre dışı bırakıldı)
   spawnShockwave(x, y, color = '#00f0ff', maxRadius = 160) {
-    if (this.shockwaves.length > 8) {
-      this.shockwaves.shift(); // En eskisini at, kuyruğu şişirme
-    }
-    this.shockwaves.push({
-      x,
-      y,
-      radius: 6,
-      maxRadius,
-      color,
-      alpha: 1
-    });
+    // Devre dışı: ekranda yuvarlak halka / şok dalgası oluşturulmaz
+    return;
   }
 
   // Tesla Zincirleme Yıldırım Arkı (Elektrik Arkı)
@@ -477,23 +468,8 @@ export class ParticleSystem {
       }
     }
 
-    // 3. Şok Dalgaları (Çift Halkalı Neon Darbe)
-    for (let sw of this.shockwaves) {
-      ctx.strokeStyle = sw.color;
-      ctx.lineWidth = 2.5;
-      ctx.globalAlpha = Math.max(0, sw.alpha);
-      ctx.beginPath();
-      ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // İç mini parlak halka
-      if (sw.radius > 12) {
-        ctx.lineWidth = 1.0;
-        ctx.beginPath();
-        ctx.arc(sw.x, sw.y, sw.radius * 0.82, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    }
+    // 3. Şok Dalgaları (Devre dışı - boş döngü)
+    this.shockwaves.length = 0;
 
     // 4. Parçacıklar (Kuantize Retro-Pixel ve Normal Kıvılcımlar)
     for (let p of this.particles) {

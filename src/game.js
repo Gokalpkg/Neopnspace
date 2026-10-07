@@ -2837,10 +2837,8 @@ class Game {
 
   getBoostersCatalog() {
     const revives = parseInt(localStorage.getItem('neon_bonus_revives') || '0', 10);
-    const overdrive = parseInt(localStorage.getItem('neon_boost_overdrive') || '0', 10);
-    const rerolls = parseInt(localStorage.getItem('neon_boost_rerolls') || '0', 10);
-    const crystal = parseInt(localStorage.getItem('neon_boost_crystal') || '0', 10);
-    const shield = parseInt(localStorage.getItem('neon_boost_shield') || '0', 10);
+    const damageBuff = parseInt(localStorage.getItem('neon_boost_damage') || '0', 10);
+    const magnetBuff = parseInt(localStorage.getItem('neon_boost_magnet') || '0', 10);
 
     return [
       {
@@ -2849,9 +2847,31 @@ class Game {
         icon: '🛡️',
         desc: 'Gemi patladığında reklamsız anında dirilme hakkı depolar.',
         stock: revives,
-        cost: 400,
+        cost: 350,
         color: '#05ffa1',
         storageKey: 'neon_bonus_revives',
+        amount: 1
+      },
+      {
+        id: 'damage',
+        name: 'PLAZMA SÜPERŞARJ',
+        icon: '💥',
+        desc: 'Sonraki oyunda tüm silahlara +%25 saf hasar bonusu sağlar.',
+        stock: damageBuff,
+        cost: 160,
+        color: '#ff0055',
+        storageKey: 'neon_boost_damage',
+        amount: 1
+      },
+      {
+        id: 'magnet',
+        name: 'GRAVİTASYON VAKUMU',
+        icon: '🧲',
+        desc: 'Sonraki oyunda kristal çekim menzilini +%80 artırır.',
+        stock: magnetBuff,
+        cost: 140,
+        color: '#a855f7',
+        storageKey: 'neon_boost_magnet',
         amount: 1
       },
       {
@@ -2860,7 +2880,7 @@ class Game {
         icon: '⚡',
         desc: 'Sonraki oyuna %50 hazır Süper Güç barıyla başlatır.',
         stock: overdrive,
-        cost: 250,
+        cost: 200,
         color: '#ffd700',
         storageKey: 'neon_boost_overdrive',
         amount: 1
@@ -2871,7 +2891,7 @@ class Game {
         icon: '🎲',
         desc: 'Seviye atlama kartlarını +2 kez ekstra yenileme hakkı verir.',
         stock: rerolls,
-        cost: 180,
+        cost: 150,
         color: '#38bdf8',
         storageKey: 'neon_boost_rerolls',
         amount: 2
@@ -2882,7 +2902,7 @@ class Game {
         icon: '💎',
         desc: 'Sonraki oyunda toplanan tüm kristallere kalıcı +%50 bonus.',
         stock: crystal,
-        cost: 320,
+        cost: 250,
         color: '#bf5af2',
         storageKey: 'neon_boost_crystal',
         amount: 1
@@ -2891,9 +2911,9 @@ class Game {
         id: 'shield',
         name: 'AĞIR KALKAN JENERATÖRÜ',
         icon: '🔰',
-        desc: 'Oyuna +25 ekstra enerji kalkanı ile tam korumalı başlatır.',
+        desc: 'Oyuna +30 ekstra enerji kalkanı ile tam korumalı başlatır.',
         stock: shield,
-        cost: 220,
+        cost: 180,
         color: '#00f0ff',
         storageKey: 'neon_boost_shield',
         amount: 1
@@ -5657,12 +5677,24 @@ class Game {
       localStorage.setItem('neon_boost_crystal', (bCrystal - 1).toString());
       this.particles.spawnFloatingText(this.player.x, this.player.y - 85, '💎 +%50 KRİSTAL RADARI AKTİF!', '#bf5af2', 16);
     }
+    const bDamage = parseInt(localStorage.getItem('neon_boost_damage') || '0', 10);
+    if (bDamage > 0) {
+      this.player.damageMultiplier = (this.player.damageMultiplier || 1.0) * 1.25;
+      localStorage.setItem('neon_boost_damage', (bDamage - 1).toString());
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 105, '💥 +%25 PLAZMA HASAR BONUSU!', '#ff0055', 16);
+    }
+    const bMagnet = parseInt(localStorage.getItem('neon_boost_magnet') || '0', 10);
+    if (bMagnet > 0) {
+      this.player.magnetRange = (this.player.magnetRange || 90) * 1.8;
+      localStorage.setItem('neon_boost_magnet', (bMagnet - 1).toString());
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 125, '🧲 GRAVİTASYON VAKUMU AKTİF!', '#a855f7', 16);
+    }
     const bShield = parseInt(localStorage.getItem('neon_boost_shield') || '0', 10);
     if (bShield > 0) {
-      this.player.maxShield += 25;
-      this.player.shield = Math.max(this.player.shield, 25);
+      this.player.maxShield += 30;
+      this.player.shield = Math.max(this.player.shield, 30);
       localStorage.setItem('neon_boost_shield', (bShield - 1).toString());
-      this.particles.spawnFloatingText(this.player.x, this.player.y - 25, '🔰 AĞIR KALKAN AKTİF (+25)!', '#00f0ff', 16);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 25, '🔰 AĞIR KALKAN AKTİF (+30)!', '#00f0ff', 16);
     }
 
     // Sinerjiler & Adrenalin
