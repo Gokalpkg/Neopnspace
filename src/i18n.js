@@ -152,7 +152,7 @@ export const TRANSLATIONS = {
     upg_orbit_name: "Plasma Sawblade",
     upg_orbit_desc: "Orbiting Energy Blade • High Close-range Shred",
     upg_wingman_name: "Mini Clone (Pet)",
-    upg_wingman_desc: "Miniature clone starfighter flying beside you. Rhythmically fires support plasma bolts.",
+    upg_wingman_desc: "Reverse-mode support clone. Fires heavy shots during rapid fire and rapid shots during sniper fire (+2% → +10% speed/power).",
 
     // Overdrive & Floating Text
     overdrive_active: ">>> OVERDRIVE ACTIVE <<<",
@@ -379,7 +379,7 @@ export const TRANSLATIONS = {
     upg_orbit_name: "Plazma Testeresi",
     upg_orbit_desc: "Yörünge Testeresi • Yakın Alan Sürekli Hasar",
     upg_wingman_name: "Mikro Klon (Pet)",
-    upg_wingman_desc: "Yanında uçan minyatür klon savaş uçağı. Yavaş ve kararlı ritimle ileriye destek plazması sıkar.",
+    upg_wingman_desc: "Tersi modda saldıran minyatür gemi. Hızlı moddayken ağır, yavaş moddayken seri ateşle vurur (+%2 → +%10 güç/hız).",
 
     overdrive_active: ">>> OVERDRIVE AKTİF <<<",
     overdrive_ready: "SÜPER GÜÇ",

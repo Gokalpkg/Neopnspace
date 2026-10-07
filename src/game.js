@@ -6697,7 +6697,7 @@ class Game {
       {
         id: 'wingman',
         name: t('upg_wingman_name'),
-        stat: (this.player.upgrades.wingman === 0 ? '1 MİKRO KLON' : (this.player.upgrades.wingman === 1 ? 'ÇİFT KLON' : 'SÜPER SÜRÜ')),
+        stat: (this.player.upgrades.wingman === 0 ? '+1 KLON (%2 GÜÇ)' : (this.player.upgrades.wingman === 1 ? 'ÇİFT KLON (%6 GÜÇ)' : 'SÜPER SÜRÜ (%10 GÜÇ)')),
         color: '#00f0ff',
         level: this.player.upgrades.wingman || 0,
         maxLevel: 3,
@@ -7122,7 +7122,8 @@ class Game {
     } else if (id === 'wingman') {
       this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 160);
       const wmLevel = this.player.upgrades.wingman || 1;
-      const label = wmLevel === 1 ? '+1 MİKRO KLON (PET)!' : (wmLevel === 2 ? '+ÇİFT MİKRO KLON!' : '+SÜPER SÜRÜ YAYLIMI!');
+      const petPowerPct = Math.round((0.02 + ((wmLevel - 1) / 2) * 0.08) * 100);
+      const label = wmLevel === 1 ? `+1 MİKRO KLON! (%${petPowerPct} TERS MOD GÜÇ)` : (wmLevel === 2 ? `+ÇİFT MİKRO KLON! (%${petPowerPct} GÜÇ)` : `+APEX SÜRÜ KLON! (%${petPowerPct} GÜÇ)`);
       this.particles.spawnFloatingText(this.player.x, this.player.y - 30, label, '#00f0ff', 16);
       this.syncWingmen();
     }
@@ -8342,7 +8343,10 @@ class Game {
     const adrenalineBonus = this.player.adrenalineTimer > 0 ? adrenalineBoost : 0.0;
     // 8. UÇUŞ DOKTRİNİ (Avcı / Interceptor) Atış Hızı Bonusu
     const archBonus = (this.player.fireRateBonus || 1.0) - 1.0;
-    const speedMult = 1 + timeBonus + levelBonus + upgradeBonus + stationaryBonus + adrenalineBonus + archBonus;
+    // Mikro Klon (Pet) Eklenti Sinerjisi (%2 -> %10 hız ve güç desteği)
+    const wmLevel = this.player.upgrades.wingman || 0;
+    const wingmanSynergy = wmLevel > 0 ? (0.02 + ((wmLevel - 1) / 2) * 0.08) : 0;
+    const speedMult = 1 + timeBonus + levelBonus + upgradeBonus + stationaryBonus + adrenalineBonus + archBonus + wingmanSynergy;
 
     const baseInterval = this.player.isFever ? 11 : 21; // 21 frame başlangıç: dengeli, kademeli güçlenme
     const fireInterval = Math.max(7, Math.round(baseInterval / speedMult));
@@ -8365,7 +8369,7 @@ class Game {
         const isOvercharge = this.player.overchargeTimer > 0;
         const critMult = isCrit ? 2.0 : 1.0;
         const dmgBonus = (this.player.isFever ? 3.0 : 0) + (isOvercharge ? 2.5 : 0);
-        const railDmg = (14.0 + lvl * 4.8 + dmgBonus) * critMult * (this.player.damageMultiplier || 1.0);
+        const railDmg = (14.0 + lvl * 4.8 + dmgBonus) * critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy);
 
         // Ağır darbeli elektro-ray railgun mermisi (artık birimlerin içinden geçmez, çarptığı hedefe tam darbe verir)
         this.playerBullets.push({
@@ -8413,7 +8417,7 @@ class Game {
         const dmgBonus = (this.player.isFever ? 1.5 : 0) + (isOvercharge ? 1.4 : 0);
         const isPiercing = isOvercharge || isVortex;
 
-        const calcDmg = (base) => (base + dmgBonus) * critMult * vortexMult * (this.player.damageMultiplier || 1.0);
+        const calcDmg = (base) => (base + dmgBonus) * critMult * vortexMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy);
 
         const pushBullet = (bx, by, vx, vy, dmg, w, h) => {
           this.playerBullets.push({
@@ -11544,12 +11548,43 @@ class Game {
     const skin = this.skins[this.currentSkinId] || this.skins.cyberpunk;
     const bulletColor = this.player.isFever ? '#ffbe0b' : skin.primary;
 
-    // Kullanıcı talebi: "etrafında rastgele yamuk yumuk daireselimsi hareketler çizen bir ufak şey olsun ve ara ara yavaşça vursun"
-    // Ritmik, sakin ve yavaş destek atışları (~58 frame / ~0.95 saniye)
-    const shootInterval = wmLevel >= 3 ? 42 : 58;
-    const baseDamage = Math.round((18 + (wmLevel - 1) * 7) * (this.player.damageMultiplier || 1.0));
+    // Kullanıcı talebi:
+    // "ve o ufak sen hangi moddaysan tersi modda saldırsın hızlı atış modundaysan yavaş atışla yavaş atış modundaysan hızlı atışla vursun
+    // ama tabi baya %10 hızımız ve gücümüzde falan olsun hatta %2 ile başlasın 10 a kadar artabilsin eklentiyi yükselttikçe işte"
+    const powerRatio = 0.02 + ((wmLevel - 1) / Math.max(1, 2)) * 0.08; // Seviye 1: %2, Seviye 2: %6, Seviye 3: %10
+    const zone = this.player.combatZone || 'mid';
+    const isPlayerFast = (zone === 'front' || this.player.isFever);
+    const isPlayerSlow = (zone === 'rear' && !this.player.isFever);
+
+    let petMode = 'balanced';
+    let shootInterval = 34;
+    let bulletWidth = 4.5;
+    let bulletHeight = 12;
+    let bulletVy = -15;
+
+    const playerBaseDmg = (3.8 + (this.player.upgrades.laser - 1) * 1.5) * (this.player.damageMultiplier || 1.0);
+    let petDmg = Math.max(2.0, Math.round(playerBaseDmg * (powerRatio / 0.05) * 0.9 * 10) / 10);
+
+    if (isPlayerFast) {
+      // Oyuncu HIZLI modda (Hücum Bölgesi) -> Mini Klon YAVAŞ VE AĞIR ATIŞ moduna geçer!
+      petMode = 'slow_heavy';
+      shootInterval = 56; // Ağır ritimli, tok vuruş (~0.93 sn)
+      bulletWidth = 6.5;
+      bulletHeight = 16;
+      bulletVy = -15;
+      petDmg = Math.max(3.5, Math.round(playerBaseDmg * (powerRatio / 0.05) * 1.8 * 10) / 10);
+    } else if (isPlayerSlow) {
+      // Oyuncu YAVAŞ modda (Keskin Nişancı Railgun) -> Mini Klon HIZLI VE SERİ ATIŞ moduna geçer!
+      petMode = 'fast_rapid';
+      shootInterval = 14; // Seri tıkır tıkır makineli plazma (~0.23 sn)
+      bulletWidth = 3.5;
+      bulletHeight = 9.5;
+      bulletVy = -17;
+      petDmg = Math.max(1.2, Math.round(playerBaseDmg * (powerRatio / 0.05) * 0.45 * 10) / 10);
+    }
 
     for (let wm of this.player.wingmen) {
+      wm.currentMode = petMode;
       // Yamuk yumuk, organik, daireselimsi hareket fiziği (Wobbly Lissajous Orbit)
       wm.orbitAngle = (wm.orbitAngle || (wm.side > 0 ? Math.PI : 0)) + 0.038 * dt * wm.side;
       wm.wobblePhase = (wm.wobblePhase || 0) + 0.07 * dt;
@@ -11569,30 +11604,34 @@ class Game {
       const wobbleTilt = Math.sin(wm.wobblePhase * 1.5) * 0.22;
       wm.tilt = (this.player.tilt || 0) * 0.5 + wobbleTilt;
 
-      // Ara ara yavaşça vuran atış sayacı
+      // Tersi mod atış sayacı
       wm.shootTimer = (wm.shootTimer || 0) + dt;
       if (wm.shootTimer >= shootInterval) {
         wm.shootTimer = 0;
 
-        // İleriye doğru tatlı, yavaş ve tok plazma atışı
+        const isHeavy = petMode === 'slow_heavy';
+        const isRapid = petMode === 'fast_rapid';
+        const color = isHeavy ? '#ff9100' : (isRapid ? '#00f0ff' : bulletColor);
+
+        // İleriye doğru ters mod mermisi
         this.playerBullets.push({
           x: wm.x,
           y: wm.y - 10,
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: -14,
-          damage: baseDamage,
-          w: 4.5,
-          h: 12,
-          color: bulletColor,
+          vx: (Math.random() - 0.5) * (isHeavy ? 0.25 : 0.45),
+          vy: bulletVy,
+          damage: petDmg,
+          w: bulletWidth,
+          h: bulletHeight,
+          color: color,
           isWingmanBullet: true,
-          piercing: wmLevel >= 3,
-          isCrit: Math.random() < 0.15,
+          piercing: isHeavy || wmLevel >= 3,
+          isCrit: isHeavy || Math.random() < 0.12,
           maxRange: 850,
           traveled: 0
         });
 
         // Minyatür namlu parıltısı ve sakin atış sesi
-        this.particles.spawnExplosion(wm.x, wm.y - 10, bulletColor, 2, 0.7);
+        this.particles.spawnExplosion(wm.x, wm.y - 10, color, isHeavy ? 3.5 : 2, isHeavy ? 1.1 : 0.6);
         sounds.playLaser();
       }
     }
@@ -11618,10 +11657,13 @@ class Game {
       ctx.scale(scale, scale);
       const r = this.player.visualRadius || 26;
 
-      // 1. Minyatür İtki Alevleri
-      const flamePulse = 0.75 + Math.sin(((this.frames || 0) + wm.side * 12) * 0.4) * 0.25;
-      const flameLen = 10 * flamePulse;
-      ctx.fillStyle = skin.flame || '#00f0ff';
+      // 1. Minyatür İtki Alevleri (Ters moda duyarlı itki ritmi)
+      const isHeavy = wm.currentMode === 'slow_heavy';
+      const isRapid = wm.currentMode === 'fast_rapid';
+      const flameSpeed = isRapid ? 0.75 : (isHeavy ? 0.25 : 0.4);
+      const flamePulse = 0.75 + Math.sin(((this.frames || 0) + wm.side * 12) * flameSpeed) * 0.25;
+      const flameLen = (isRapid ? 12 : (isHeavy ? 8 : 10)) * flamePulse;
+      ctx.fillStyle = isHeavy ? '#ff3d00' : (isRapid ? '#00f0ff' : (skin.flame || '#00f0ff'));
       // Sol motor
       ctx.beginPath();
       ctx.moveTo(-9, r * 0.85);
@@ -11653,8 +11695,8 @@ class Game {
       ctx.fillRect(r * 1.35 - 4, -r * 0.25, 4, r * 0.9);
       ctx.strokeRect(r * 1.35 - 4, -r * 0.25, 4, r * 0.9);
 
-      // Namlu ucu hazır enerji parıltısı
-      ctx.fillStyle = primaryColor;
+      // Namlu ucu hazır enerji parıltısı (Ters moda duyarlı)
+      ctx.fillStyle = isHeavy ? '#ff9100' : (isRapid ? '#00f0ff' : primaryColor);
       ctx.fillRect(-r * 1.35, -r * 0.45, 4, 3);
       ctx.fillRect(r * 1.35 - 4, -r * 0.45, 4, 3);
 
@@ -11704,10 +11746,10 @@ class Game {
       ctx.ellipse(0, -r * 0.35, 4.5, 9, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 7. Merkez Mikro Füzyon Reaktörü Çekirdeği
-      ctx.fillStyle = primaryColor;
+      // 7. Merkez Mikro Füzyon Reaktörü Çekirdeği (Ters moda göre reaktif)
+      ctx.fillStyle = isHeavy ? '#ff9100' : (isRapid ? '#00f0ff' : primaryColor);
       ctx.beginPath();
-      ctx.arc(0, r * 0.15, 4, 0, Math.PI * 2);
+      ctx.arc(0, r * 0.15, isHeavy ? 4.8 : (isRapid ? 3.5 : 4), 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();
