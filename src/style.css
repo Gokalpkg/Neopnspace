@@ -1707,78 +1707,530 @@ html, body {
   margin-top: 4px;
 }
 
-/* Hangar Modalı */
+/* === HANGAR & TERSANE REWORK (PREMIUM SCI-FI TERMINAL) === */
 .hangar-card {
-  max-width: 420px;
-  max-height: 85vh;
+  max-width: 440px;
+  max-height: 90vh;
+  background: rgba(8, 12, 24, 0.96) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1.5px solid rgba(0, 240, 255, 0.3) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 240, 255, 0.22) !important;
+  padding: 14px 14px 16px !important;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 240, 255, 0.3) transparent;
+}
+
+.hangar-card::-webkit-scrollbar {
+  width: 4px;
+}
+.hangar-card::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 4px;
 }
 
 .hangar-header {
-  text-align: center;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
-.skins-grid {
+.hangar-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hangar-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.hangar-sub-badge {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.6px;
+  color: #00f0ff;
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+  margin-bottom: 2px;
+}
+
+.hangar-main-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 1px;
+  text-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+}
+
+.hangar-close-x {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.hangar-close-x:hover, .hangar-close-x:active {
+  background: rgba(255, 0, 85, 0.2);
+  border-color: #ff0055;
+  color: #ff0055;
+  transform: scale(1.08);
+}
+
+.hangar-currency-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 6px 10px;
+}
+
+/* Hangar Sekmeleri (Segmented Cyber Tabs) */
+.hangar-tabs {
+  display: flex;
+  gap: 5px;
+  margin: 4px 0 12px;
+  background: rgba(5, 8, 18, 0.9) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+.hangar-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.hangar-tab-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #94a3b8;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 11px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  letter-spacing: 0.5px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.hangar-tab-btn .tab-icon {
+  width: 13px;
+  height: 13px;
+}
+.hangar-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.hangar-tab-btn.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(5, 255, 161, 0.15)) !important;
+  color: #00f0ff !important;
+  border: 1px solid #00f0ff !important;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+/* === GEMİLER: HOLOGRAFİK İNCELEME PODU (SHOWCASE PODIUM) === */
+.skins-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hangar-showcase {
+  background: radial-gradient(circle at 50% 25%, rgba(0, 240, 255, 0.1) 0%, rgba(8, 12, 24, 0.85) 75%);
+  border: 1.5px solid rgba(0, 240, 255, 0.35);
+  border-radius: 16px;
+  padding: 12px 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 240, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.showcase-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 4px;
+  min-height: 94px;
+}
+
+.showcase-glow-ring {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 1.5px dashed;
+  opacity: 0.5;
+  animation: rotateRing 16s linear infinite;
+}
+
+.showcase-vessel-art {
+  position: relative;
+  z-index: 2;
+  animation: floatVessel 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.5));
+}
+
+.showcase-pedestal {
+  width: 110px;
+  height: 6px;
+  margin-top: 4px;
+}
+.pedestal-line {
+  height: 2px;
+  width: 100%;
+  border-radius: 2px;
+}
+
+.showcase-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.showcase-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.showcase-name-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.showcase-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.8px;
+}
+
+.showcase-subtitle {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.showcase-status-badge {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  letter-spacing: 0.6px;
+}
+.badge-equipped {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
+  border: 1px solid #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+}
+.badge-owned {
+  background: rgba(5, 255, 161, 0.18);
+  color: #05ffa1;
+  border: 1px solid #05ffa1;
+}
+.badge-locked {
+  background: rgba(255, 190, 11, 0.18);
+  color: #ffbe0b;
+  border: 1px solid #ffbe0b;
+}
+
+.showcase-perk-box {
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 3px solid #00f0ff;
+  border-radius: 0 8px 8px 0;
+  padding: 6px 10px;
+}
+.showcase-perk-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.showcase-perk-desc {
+  font-size: 11px;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.showcase-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.stat-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stat-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #94a3b8;
+}
+.stat-bar-track {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.fill-dmg {
+  background: linear-gradient(90deg, #ff0055, #ff5500);
+  box-shadow: 0 0 6px rgba(255, 0, 85, 0.5);
+}
+.fill-shield {
+  background: linear-gradient(90deg, #00f0ff, #38bdf8);
+  box-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+}
+.fill-speed {
+  background: linear-gradient(90deg, #ffd700, #ffbe0b);
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
+.fill-magnet {
+  background: linear-gradient(90deg, #bf5af2, #d946ef);
+  box-shadow: 0 0 6px rgba(191, 90, 242, 0.5);
+}
+
+.showcase-action-btn {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-align: center;
+}
+.btn-showcase-equipped {
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: 1.5px solid #00f0ff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+}
+.btn-showcase-equip {
+  background: linear-gradient(135deg, #00f0ff, #05ffa1);
+  color: #030816;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.45);
+}
+.btn-showcase-buy {
+  background: linear-gradient(135deg, #ffd700, #ff9100);
+  color: #030816;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
+}
+.btn-showcase-locked {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* === GEMİ ENVANTERİ GALERİSİ (SHIP ROSTER GALLERY) === */
+.hangar-gallery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gallery-section-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  color: #64748b;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.hangar-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hangar-mini-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+}
+.hangar-mini-card:hover, .hangar-mini-card:active {
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
+}
+.hangar-mini-card.selected {
+  border-color: #00f0ff !important;
+  background: rgba(0, 240, 255, 0.12) !important;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35) !important;
+  transform: translateY(-2px);
+}
+.hangar-mini-card.equipped {
+  border-color: rgba(5, 255, 161, 0.6);
+}
+.hangar-mini-card.locked {
+  opacity: 0.65;
+  filter: grayscale(0.3);
+}
+
+.mini-card-art {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+.hangar-mini-card:hover .mini-card-art {
+  transform: scale(1.1);
+}
+
+.mini-card-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2px;
+}
+
+.mini-card-title {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.mini-card-tag {
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+.tag-eq {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
+}
+.tag-un {
+  background: rgba(5, 255, 161, 0.2);
+  color: #05ffa1;
+}
+.tag-lock {
+  background: rgba(255, 190, 11, 0.2);
+  color: #ffbe0b;
+}
+
+/* === DİĞER HANGAR KARTLARI (DRONLAR, İZLER, MÜHİMMAT) === */
+.hangar-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .skin-card {
   background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
 }
-
+.skin-card:hover, .skin-card:active {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
 .skin-card.equipped {
   border-color: #00f0ff;
   background: rgba(0, 240, 255, 0.1);
   box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
 }
-
 .skin-card.locked {
-  opacity: 0.65;
-  filter: grayscale(0.4);
-}
-
-.skin-preview-circle {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+  opacity: 0.75;
 }
 
 .skin-ship-art {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   transition: transform 0.2s ease;
 }
-
-.skin-card:hover .skin-ship-art, .skin-card:active .skin-ship-art {
-  transform: scale(1.1);
+.skin-card:hover .skin-ship-art {
+  transform: scale(1.08);
 }
 
 .skin-card-title {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
   color: #fff;
   text-align: center;
@@ -1789,26 +2241,34 @@ html, body {
   font-family: var(--font-display);
   font-size: 10.5px;
   font-weight: 900;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 9999px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
 }
-
 .skin-badge.equipped {
   background: #00f0ff;
   color: #030816;
   box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
 }
-
 .skin-badge.unlocked {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: rgba(5, 255, 161, 0.2);
+  color: #05ffa1;
+  border: 1px solid rgba(5, 255, 161, 0.4);
+}
+.skin-badge.locked {
+  background: rgba(255, 190, 11, 0.18);
+  color: #ffbe0b;
+  border: 1px solid rgba(255, 190, 11, 0.4);
 }
 
-.skin-badge.locked {
-  background: rgba(255, 190, 11, 0.2);
-  color: #ffbe0b;
+@keyframes floatVessel {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes rotateRing {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Duraklatma Modalı */

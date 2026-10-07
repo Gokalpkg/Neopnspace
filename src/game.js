@@ -1513,6 +1513,13 @@ class Game {
       });
     }
 
+    const btnHangarCloseX = document.getElementById('btn-hangar-close-x');
+    if (btnHangarCloseX) {
+      btnHangarCloseX.addEventListener('click', () => {
+        this.goToMenuTab(1);
+      });
+    }
+
     // Hangar Sekmeleri Dinleyicileri (Pürüzsüz Tek Dokunuş ve Çift Tetikleme Korumalı)
     const bindHangarTabBtn = (btn, tabKey) => {
       if (!btn) return;
@@ -2628,56 +2635,169 @@ class Game {
     if (!skinsContainer) return;
     skinsContainer.innerHTML = '';
 
+    if (!this.inspectedSkinId || !this.skins[this.inspectedSkinId]) {
+      this.inspectedSkinId = this.currentSkinId || 'cyberpunk';
+    }
+    const inspected = this.skins[this.inspectedSkinId] || this.skins.cyberpunk;
+    const isInspectedUnlocked = this.unlockedSkins.includes(inspected.id);
+    const isInspectedEquipped = this.currentSkinId === inspected.id;
+
+    // 1. ÜST CANLI İNCELEME PODU (HOLOGRAPHIC INSPECTION PODIUM)
+    const showcase = document.createElement('div');
+    showcase.className = 'hangar-showcase';
+
+    const dmgPct = Math.min(100, Math.round((inspected.stats.dmg / 150) * 100));
+    const shieldPct = Math.min(100, Math.round((inspected.stats.shield / 150) * 100));
+    const speedPct = Math.min(100, Math.round((inspected.stats.speed / 150) * 100));
+    const magnetPct = Math.min(100, Math.round((inspected.stats.magnet / 150) * 100));
+
+    let actionBtnText = '';
+    let actionBtnClass = '';
+    if (isInspectedEquipped) {
+      actionBtnText = '✓ GÖREVDE KUŞANILDI';
+      actionBtnClass = 'btn-showcase-equipped';
+    } else if (isInspectedUnlocked) {
+      actionBtnText = '🚀 BU GEMİYİ KUŞAN';
+      actionBtnClass = 'btn-showcase-equip';
+    } else {
+      const canAfford = this.totalCrystals >= inspected.cost;
+      actionBtnText = `🔓 ${inspected.cost.toLocaleString()} KRİSTAL İLE AÇ`;
+      actionBtnClass = canAfford ? 'btn-showcase-buy' : 'btn-showcase-locked';
+    }
+
+    showcase.innerHTML = `
+      <div class="showcase-stage">
+        <div class="showcase-glow-ring" style="border-color: ${inspected.primary}44; box-shadow: 0 0 30px ${inspected.primary}33;"></div>
+        <div class="showcase-vessel-art">
+          ${getShipPixelSvg(inspected.id, 76)}
+        </div>
+        <div class="showcase-pedestal">
+          <div class="pedestal-line" style="background: linear-gradient(90deg, transparent, ${inspected.primary}, transparent);"></div>
+        </div>
+      </div>
+
+      <div class="showcase-details">
+        <div class="showcase-header-row">
+          <div class="showcase-name-wrap">
+            <span class="showcase-title">${inspected.name}</span>
+            <span class="showcase-subtitle">${inspected.title || 'Savaş Jeti'}</span>
+          </div>
+          <span class="showcase-status-badge ${isInspectedEquipped ? 'badge-equipped' : (isInspectedUnlocked ? 'badge-owned' : 'badge-locked')}">
+            ${isInspectedEquipped ? 'AKTİF' : (isInspectedUnlocked ? 'HANGARDA' : 'KİLİTLİ')}
+          </span>
+        </div>
+
+        <div class="showcase-perk-box" style="border-left-color: ${inspected.primary};">
+          <div class="showcase-perk-title" style="color: ${inspected.primary};">
+            ⚡ ${inspected.perkTitle || 'ÖZEL YETENEK'}
+          </div>
+          <div class="showcase-perk-desc">${inspected.perk}</div>
+        </div>
+
+        <div class="showcase-stats-grid">
+          <div class="stat-bar-group">
+            <div class="stat-bar-label"><span>⚔️ HASAR</span><span class="stat-num">${inspected.stats.dmg}%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill fill-dmg" style="width: ${dmgPct}%;"></div></div>
+          </div>
+          <div class="stat-bar-group">
+            <div class="stat-bar-label"><span>🛡️ KALKAN</span><span class="stat-num">${inspected.stats.shield}%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill fill-shield" style="width: ${shieldPct}%;"></div></div>
+          </div>
+          <div class="stat-bar-group">
+            <div class="stat-bar-label"><span>⚡ ÇEVİKLİK</span><span class="stat-num">${inspected.stats.speed}%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill fill-speed" style="width: ${speedPct}%;"></div></div>
+          </div>
+          <div class="stat-bar-group">
+            <div class="stat-bar-label"><span>🧲 RADAR</span><span class="stat-num">${inspected.stats.magnet}%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill fill-magnet" style="width: ${magnetPct}%;"></div></div>
+          </div>
+        </div>
+
+        <button class="showcase-action-btn ${actionBtnClass}">
+          ${actionBtnText}
+        </button>
+      </div>
+    `;
+
+    const showcaseBtn = showcase.querySelector('.showcase-action-btn');
+    if (showcaseBtn) {
+      showcaseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.init();
+        if (isInspectedUnlocked) {
+          if (!isInspectedEquipped) {
+            this.currentSkinId = inspected.id;
+            localStorage.setItem('neon_equipped_skin', inspected.id);
+            sounds.playCardSelect();
+            vibrate.light();
+            this.showToast(`🚀 ${inspected.name} Kuşanıldı!`, inspected.primary || '#00f0ff');
+            this.renderHangarSkins();
+            this.updateMenuShipPreview();
+          }
+        } else if (this.totalCrystals >= inspected.cost) {
+          this.totalCrystals -= inspected.cost;
+          localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+          this.unlockedSkins.push(inspected.id);
+          localStorage.setItem('neon_unlocked_skins', JSON.stringify(this.unlockedSkins));
+          this.currentSkinId = inspected.id;
+          localStorage.setItem('neon_equipped_skin', inspected.id);
+          sounds.playLevelUp();
+          sounds.playJackpot();
+          vibrate.success();
+          this.showToast(`🎉 ${inspected.name} Satın Alındı ve Kuşanıldı!`, '#ffd700');
+          this.updateCrystalsDisplay();
+          this.renderHangarSkins();
+          this.updateMenuShipPreview();
+        } else {
+          vibrate.medium();
+          this.showToast(`⚠️ Yetersiz Kristal! (${(inspected.cost - this.totalCrystals).toLocaleString()} CR eksik)`, '#ff0055');
+        }
+      });
+    }
+
+    skinsContainer.appendChild(showcase);
+
+    // 2. ALT GEMİ SEÇİM GALERİSİ (SHIP ROSTER GALLERY)
+    const gallerySection = document.createElement('div');
+    gallerySection.className = 'hangar-gallery-section';
+    gallerySection.innerHTML = `<div class="gallery-section-title">FİLO ENVANTERİ // GEMİLER (${this.unlockedSkins.length}/${Object.keys(this.skins).length})</div>`;
+
+    const galleryGrid = document.createElement('div');
+    galleryGrid.className = 'hangar-gallery-grid';
+
     Object.values(this.skins).forEach(skin => {
       const isUnlocked = this.unlockedSkins.includes(skin.id);
       const isEquipped = this.currentSkinId === skin.id;
+      const isSelected = this.inspectedSkinId === skin.id;
 
       const card = document.createElement('div');
-      card.className = `skin-card ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
-
-      let badgeText = isEquipped ? '✓ KUŞANILDI' : (isUnlocked ? 'KUŞAN' : `🔓 ${skin.cost} CR`);
-      let badgeClass = isEquipped ? 'equipped' : (isUnlocked ? 'unlocked' : 'locked');
+      card.className = `hangar-mini-card ${isSelected ? 'selected' : ''} ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}`;
 
       card.innerHTML = `
-        <div class="skin-ship-art" style="transition: transform 0.25s ease;">
-          ${getShipPixelSvg(skin.id, 52)}
+        <div class="mini-card-art">
+          ${getShipPixelSvg(skin.id, 44)}
         </div>
-        <span class="skin-card-title">${skin.name}</span>
-        <span style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin: 1px 0 3px;">${skin.title || 'Savaş Jeti'}</span>
-        ${skin.perkTitle ? `<span style="font-size: 0.65rem; color: #ffd700; background: rgba(255,215,0,0.12); padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-bottom: 4px;">⚡ ${skin.perkTitle}</span>` : ''}
-        <button class="skin-badge ${badgeClass}" style="width: 100%; cursor: pointer; border: none; font-size: 0.75rem; padding: 4px 8px;">${badgeText}</button>
+        <div class="mini-card-info">
+          <span class="mini-card-title">${skin.name}</span>
+          <span class="mini-card-tag ${isEquipped ? 'tag-eq' : (isUnlocked ? 'tag-un' : 'tag-lock')}">
+            ${isEquipped ? 'KUŞANILDI' : (isUnlocked ? 'SAHİPSİN' : `${skin.cost} CR`)}
+          </span>
+        </div>
       `;
 
       card.addEventListener('click', () => {
         sounds.init();
-        if (isUnlocked) {
-          this.currentSkinId = skin.id;
-          localStorage.setItem('neon_equipped_skin', skin.id);
-          sounds.playCardSelect();
-          vibrate.light();
-          this.showToast(`🚀 ${skin.name} Kuşanıldı!`, skin.primary || '#00f0ff');
-          this.renderHangarSkins();
-        } else if (this.totalCrystals >= skin.cost) {
-          this.totalCrystals -= skin.cost;
-          localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
-          this.unlockedSkins.push(skin.id);
-          localStorage.setItem('neon_unlocked_skins', JSON.stringify(this.unlockedSkins));
-          this.currentSkinId = skin.id;
-          localStorage.setItem('neon_equipped_skin', skin.id);
-          sounds.playLevelUp();
-          sounds.playJackpot();
-          vibrate.success();
-          this.showToast(`🎉 ${skin.name} Gemisi Satın Alındı!`, '#ffd700');
-          this.updateCrystalsDisplay();
-          this.renderHangarSkins();
-        } else {
-          vibrate.medium();
-          this.showToast(`⚠️ Yetersiz Kristal! (${skin.cost - this.totalCrystals} CR eksik)`, '#ff0055');
-        }
+        sounds.playCardSelect();
+        vibrate.light();
+        this.inspectedSkinId = skin.id;
+        this.renderHangarSkins();
       });
 
-      skinsContainer.appendChild(card);
+      galleryGrid.appendChild(card);
     });
+
+    gallerySection.appendChild(galleryGrid);
+    skinsContainer.appendChild(gallerySection);
   }
 
   renderHangarDrones() {
@@ -2892,7 +3012,8 @@ class Game {
       {
         id: 'revive',
         name: 'ACİL DURUM DİRİLME',
-        icon: '🛡️',
+        tag: '+1 CAN YEDEĞİ',
+        icon: `<svg viewBox="0 0 24 24" width="34" height="34"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" fill="rgba(5,255,161,0.18)" stroke="#05ffa1" stroke-width="2"/><path d="M12 7v10M7 12h10" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>`,
         desc: 'Gemi patladığında reklamsız anında dirilme hakkı depolar.',
         stock: revives,
         cost: 350,
@@ -2903,7 +3024,8 @@ class Game {
       {
         id: 'damage',
         name: 'PLAZMA SÜPERŞARJ',
-        icon: '💥',
+        tag: '+%25 SAF HASAR',
+        icon: `<svg viewBox="0 0 24 24" width="34" height="34"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="rgba(255,0,85,0.18)" stroke="#ff0055" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#ffbe0b"/></svg>`,
         desc: 'Sonraki oyunda tüm silahlara +%25 saf hasar bonusu sağlar.',
         stock: damageBuff,
         cost: 160,
@@ -2914,7 +3036,8 @@ class Game {
       {
         id: 'magnet',
         name: 'GRAVİTASYON VAKUMU',
-        icon: '🧲',
+        tag: '+%80 ÇEKİM ALANI',
+        icon: `<svg viewBox="0 0 24 24" width="34" height="34"><path d="M4 4v7a8 8 0 0 0 16 0V4h-4v7a4 4 0 0 1-8 0V4H4z" fill="rgba(168,85,247,0.18)" stroke="#a855f7" stroke-width="2"/><rect x="4" y="4" width="4" height="3" fill="#ff0055"/><rect x="16" y="4" width="4" height="3" fill="#00f0ff"/></svg>`,
         desc: 'Sonraki oyunda kristal çekim menzilini +%80 artırır.',
         stock: magnetBuff,
         cost: 140,
@@ -2925,7 +3048,8 @@ class Game {
       {
         id: 'overdrive',
         name: 'OVERDRIVE REAKTÖRÜ',
-        icon: '⚡',
+        tag: '%50 HAZIR SÜPER GÜÇ',
+        icon: `<svg viewBox="0 0 24 24" width="34" height="34"><polygon points="13,2 4,14 11,14 9,22 20,10 13,10" fill="#ffd700"/><circle cx="12" cy="12" r="10" fill="none" stroke="#ffd700" stroke-width="1.5" stroke-dasharray="3,3"/></svg>`,
         desc: 'Sonraki oyuna %50 hazır Süper Güç barıyla başlatır.',
         stock: overdrive,
         cost: 200,
@@ -2936,7 +3060,8 @@ class Game {
       {
         id: 'reroll',
         name: 'TAKTİKSEL ZAR PAKETİ',
-        icon: '🎲',
+        tag: '+2 KART YENİLEME',
+        icon: `<svg viewBox="0 0 24 24" width="34" height="34"><rect x="3" y="3" width="18" height="18" rx="4" fill="rgba(56,189,248,0.18)" stroke="#38bdf8" stroke-width="2"/><circle cx="8" cy="8" r="1.8" fill="#ffffff"/><circle cx="16" cy="8" r="1.8" fill="#ffffff"/><circle cx="12" cy="12" r="1.8" fill="#00f0ff"/><circle cx="8" cy="16" r="1.8" fill="#ffffff"/><circle cx="16" cy="16" r="1.8" fill="#ffffff"/></svg>`,
         desc: 'Seviye atlama kartlarını +2 kez ekstra yenileme hakkı verir.',
         stock: rerolls,
         cost: 150,
@@ -2947,7 +3072,8 @@ class Game {
       {
         id: 'crystal',
         name: 'KRİSTAL RADAR SİNYALİ',
-        icon: '💎',
+        tag: '+%50 KRİSTAL KAZANCI',
+        icon: `<svg viewBox="0 0 24 24" width="34" height="34"><polygon points="12,2 21,8 12,22 3,8" fill="rgba(191,90,242,0.2)" stroke="#bf5af2" stroke-width="2"/><line x1="3" y1="8" x2="21" y2="8" stroke="#ffffff" stroke-width="1.2"/></svg>`,
         desc: 'Sonraki oyunda toplanan tüm kristallere kalıcı +%50 bonus.',
         stock: crystal,
         cost: 250,
@@ -2958,7 +3084,8 @@ class Game {
       {
         id: 'shield',
         name: 'AĞIR KALKAN JENERATÖRÜ',
-        icon: '🔰',
+        tag: '+30 BAŞLANGIÇ KALKANI',
+        icon: `<svg viewBox="0 0 24 24" width="34" height="34"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="2"/><polygon points="12,6 18,9.5 18,14.5 12,18 6,14.5 6,9.5" fill="none" stroke="#ffffff" stroke-width="1.2"/></svg>`,
         desc: 'Oyuna +30 ekstra enerji kalkanı ile tam korumalı başlatır.',
         stock: shield,
         cost: 180,
@@ -2980,13 +3107,14 @@ class Game {
       const canAfford = this.totalCrystals >= item.cost;
 
       card.innerHTML = `
-        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);border-radius:10px;padding:8px;font-size:2.2rem;">
+        <div class="skin-ship-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle, ${item.color}22 0%, rgba(0,0,0,0.5) 75%);border:1px solid ${item.color}44;border-radius:12px;padding:6px;">
           ${item.icon}
         </div>
         <span class="skin-card-title">${item.name}</span>
-        <span style="font-size:0.75rem;color:#ffd700;font-weight:bold;margin:2px 0;">STOK: ${item.stock} ADET</span>
-        <span style="font-size:0.7rem;color:#94a3b8;text-align:center;margin:2px 0 6px;">${item.desc}</span>
-        <button class="skin-badge ${canAfford ? 'unlocked' : 'locked'}" style="cursor:pointer;border:none;width:100%;font-weight:900;">
+        <span style="font-size:0.65rem;color:${item.color};background:rgba(0,0,0,0.4);border:1px solid ${item.color}33;padding:1px 6px;border-radius:4px;font-weight:900;">${item.tag || 'TAKVİYE'}</span>
+        <div style="font-size:0.72rem;color:#ffd700;font-weight:900;margin:1px 0;">STOK: ${item.stock} ADET</div>
+        <span style="font-size:0.68rem;color:#94a3b8;text-align:center;margin:1px 0 6px;line-height:1.2;">${item.desc}</span>
+        <button class="skin-badge ${canAfford ? 'unlocked' : 'locked'}" style="cursor:pointer;border:none;width:100%;font-weight:900;padding:5px 6px;">
           ${item.cost} CR SATIN AL (+${item.amount})
         </button>
       `;

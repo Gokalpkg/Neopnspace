@@ -695,13 +695,16 @@
     <div id="hangar-modal" class="modal-overlay hidden">
       <div class="modal-card hangar-card">
         <div class="hangar-header">
-          <div class="modal-icon" style="margin-bottom: 6px;">
-            <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M4 1h8v3H4zM2 4h12v7H2zM4 11h8v2H4z" fill="#1e293b" stroke="#00f0ff" stroke-width="1.2"/><rect x="4" y="5" width="2" height="2" fill="#ff0055"/><rect x="10" y="5" width="2" height="2" fill="#00f0ff"/><rect x="7" y="8" width="2" height="2" fill="#ffbe0b"/></svg>
+          <div class="hangar-top-bar">
+            <div class="hangar-title-group">
+              <span class="hangar-sub-badge">TERSANESİ & ATÖLYE // SEKTÖR-01</span>
+              <h2 class="hangar-main-title">UZAY HANGARI</h2>
+            </div>
+            <button id="btn-hangar-close-x" class="hangar-close-x" title="Kapat">✕</button>
           </div>
-          <h2 class="game-title" style="font-size: 1.5rem; margin-bottom: 4px;">UZAY HANGARI</h2>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <div class="hangar-currency-bar">
             <div class="crystals-pill">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff" stroke="#ffffff" stroke-width="0.8"/></svg>
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff" stroke="#ffffff" stroke-width="0.8"/></svg>
               <span id="hangar-crystals-val">0</span> Kristal
             </div>
             <button id="btn-free-gold-hangar" class="btn-free-gold pulse gold-shimmer-btn" title="Reklam İzle ve +200 ~ +380 Kristal Kazan!">
@@ -712,27 +715,39 @@
         </div>
         <!-- Hangar Sekmeleri (Yatay Kaydırılabilir Siber Menü) -->
         <div class="hangar-tabs" role="tablist">
-          <button id="tab-btn-skins" class="hangar-tab-btn active" role="tab" data-tab="skins"><span class="tab-emoji">🚀</span> KOSTÜMLER</button>
-          <button id="tab-btn-trails" class="hangar-tab-btn" role="tab" data-tab="trails"><span class="tab-emoji">✨</span> İZLER</button>
-          <button id="tab-btn-drones" class="hangar-tab-btn" role="tab" data-tab="drones"><span class="tab-emoji">🛸</span> DRONLAR</button>
-          <button id="tab-btn-boosters" class="hangar-tab-btn" role="tab" data-tab="boosters"><span class="tab-emoji">⚡</span> MÜHİMMAT</button>
-          <button id="tab-btn-tech" class="hangar-tab-btn" role="tab" data-tab="tech"><span class="tab-emoji">🎖️</span> PİLOT ATÖLYESİ</button>
-          <button id="tab-btn-trophies" class="hangar-tab-btn" role="tab" data-tab="trophies"><span class="tab-emoji">🏆</span> BAŞARIMLAR</button>
+          <button id="tab-btn-skins" class="hangar-tab-btn active" role="tab" data-tab="skins">
+            <svg class="tab-icon" viewBox="0 0 16 16"><path d="M8 1l3 5-1 8H6L5 6z" fill="#00f0ff"/><rect x="7" y="11" width="2" height="4" fill="#ffbe0b"/></svg> GEMİLER
+          </button>
+          <button id="tab-btn-trails" class="hangar-tab-btn" role="tab" data-tab="trails">
+            <svg class="tab-icon" viewBox="0 0 16 16"><path d="M4 14l4-12 4 12-4-3z" fill="#ff5500"/></svg> İZLER
+          </button>
+          <button id="tab-btn-drones" class="hangar-tab-btn" role="tab" data-tab="drones">
+            <svg class="tab-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5" fill="none" stroke="#05ffa1" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="#05ffa1"/></svg> DRONLAR
+          </button>
+          <button id="tab-btn-boosters" class="hangar-tab-btn" role="tab" data-tab="boosters">
+            <svg class="tab-icon" viewBox="0 0 16 16"><path d="M9 1L4 9h4l-2 6 7-8H9z" fill="#ffd700"/></svg> MÜHİMMAT
+          </button>
+          <button id="tab-btn-tech" class="hangar-tab-btn" role="tab" data-tab="tech">
+            <svg class="tab-icon" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="2" fill="none" stroke="#bf5af2" stroke-width="2"/><path d="M8 1v4M8 11v4M1 8h4M11 8h4" stroke="#bf5af2" stroke-width="1.5"/></svg> ATÖLYE
+          </button>
+          <button id="tab-btn-trophies" class="hangar-tab-btn" role="tab" data-tab="trophies">
+            <svg class="tab-icon" viewBox="0 0 16 16"><path d="M5 2h6v5c0 2-1.5 3.5-3 3.5S5 9 5 7V2zm-2 2h2v3H3zm8 0h2v3h-2zm-3 8h2v2H8z" fill="#ffd700"/></svg> ROZETLER
+          </button>
         </div>
 
-        <div id="skins-container" class="skins-grid">
-          <!-- Dinamik Kostüm Kartları -->
+        <div id="skins-container" class="skins-view-container">
+          <!-- Canlı İnceleme Sahnesi + Dinamik Kostüm Kartları -->
         </div>
 
-        <div id="trails-container" class="skins-grid hidden">
+        <div id="trails-container" class="hangar-grid hidden">
           <!-- Dinamik Motor İzi Kartları -->
         </div>
 
-        <div id="drones-container" class="skins-grid hidden">
+        <div id="drones-container" class="hangar-grid hidden">
           <!-- Dinamik Kalıcı Drone Kartları -->
         </div>
 
-        <div id="boosters-container" class="skins-grid hidden">
+        <div id="boosters-container" class="hangar-grid hidden">
           <!-- Dinamik Taktiksel Mühimmat & Takviye Kartları -->
         </div>
 
