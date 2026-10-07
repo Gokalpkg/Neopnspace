@@ -563,74 +563,74 @@ class Game {
     this.trophyCategoryView = 'progressive';
     this.trophyDefs = [
       // 1. Düşman Avcısı (kill)
-      { id: 'kill_1', category: 'kill', tier: 1, name: 'İlk Av', desc: 'Toplam 3 düşman yok et', icon: '🎯', stat: 'totalKills', target: 3, reward: 25 },
-      { id: 'kill_2', category: 'kill', tier: 2, name: 'Kozmik Avcı', desc: 'Toplam 30 düşman yok et', icon: '⚔️', stat: 'totalKills', target: 30, reward: 50 },
-      { id: 'kill_3', category: 'kill', tier: 3, name: 'Yıldız Katili', desc: 'Toplam 300 düşman yok et', icon: '💥', stat: 'totalKills', target: 300, reward: 120 },
-      { id: 'kill_4', category: 'kill', tier: 4, name: 'Galaksi Kasırgası', desc: 'Toplam 1,000 düşman yok et', icon: '⚡', stat: 'totalKills', target: 1000, reward: 250 },
-      { id: 'kill_5', category: 'kill', tier: 5, name: 'Hiçlik Yok Edici', desc: 'Toplam 3,000 düşman yok et', icon: '👑', stat: 'totalKills', target: 3000, reward: 500 },
+      { id: 'kill_1', category: 'kill', tier: 1, name: 'İlk Av', desc: 'Toplam 15 düşman yok et', icon: '🎯', stat: 'totalKills', target: 15, reward: 15 },
+      { id: 'kill_2', category: 'kill', tier: 2, name: 'Kozmik Avcı', desc: 'Toplam 120 düşman yok et', icon: '⚔️', stat: 'totalKills', target: 120, reward: 35 },
+      { id: 'kill_3', category: 'kill', tier: 3, name: 'Yıldız Katili', desc: 'Toplam 750 düşman yok et', icon: '💥', stat: 'totalKills', target: 750, reward: 80 },
+      { id: 'kill_4', category: 'kill', tier: 4, name: 'Galaksi Kasırgası', desc: 'Toplam 2,500 düşman yok et', icon: '⚡', stat: 'totalKills', target: 2500, reward: 180 },
+      { id: 'kill_5', category: 'kill', tier: 5, name: 'Hiçlik Yok Edici', desc: 'Toplam 8,000 düşman yok et', icon: '👑', stat: 'totalKills', target: 8000, reward: 360 },
 
       // 2. Asteroit Kıran (asteroid)
-      { id: 'asteroid_1', category: 'asteroid', tier: 1, name: 'Taş Kırıcı', desc: '3 asteroit parçala', icon: '🪨', stat: 'asteroidsDestroyed', target: 3, reward: 20 },
-      { id: 'asteroid_2', category: 'asteroid', tier: 2, name: 'Meteor Yağmuru', desc: '30 asteroit parçala', icon: '☄️', stat: 'asteroidsDestroyed', target: 30, reward: 45 },
-      { id: 'asteroid_3', category: 'asteroid', tier: 3, name: 'Kuşak Temizleyici', desc: '300 asteroit parçala', icon: '🪐', stat: 'asteroidsDestroyed', target: 300, reward: 100 },
-      { id: 'asteroid_4', category: 'asteroid', tier: 4, name: 'Göktaşı Kıyameti', desc: '1,000 asteroit parçala', icon: '☄️', stat: 'asteroidsDestroyed', target: 1000, reward: 220 },
-      { id: 'asteroid_5', category: 'asteroid', tier: 5, name: 'Gezegen Parçalayıcı', desc: '3,000 asteroit parçala', icon: '🌌', stat: 'asteroidsDestroyed', target: 3000, reward: 450 },
+      { id: 'asteroid_1', category: 'asteroid', tier: 1, name: 'Taş Kırıcı', desc: '50 asteroit parçala', icon: '🪨', stat: 'asteroidsDestroyed', target: 50, reward: 15 },
+      { id: 'asteroid_2', category: 'asteroid', tier: 2, name: 'Meteor Yağmuru', desc: '350 asteroit parçala', icon: '☄️', stat: 'asteroidsDestroyed', target: 350, reward: 35 },
+      { id: 'asteroid_3', category: 'asteroid', tier: 3, name: 'Kuşak Temizleyici', desc: '1,800 asteroit parçala', icon: '🪐', stat: 'asteroidsDestroyed', target: 1800, reward: 80 },
+      { id: 'asteroid_4', category: 'asteroid', tier: 4, name: 'Göktaşı Kıyameti', desc: '6,000 asteroit parçala', icon: '☄️', stat: 'asteroidsDestroyed', target: 6000, reward: 180 },
+      { id: 'asteroid_5', category: 'asteroid', tier: 5, name: 'Gezegen Parçalayıcı', desc: '18,000 asteroit parçala', icon: '🌌', stat: 'asteroidsDestroyed', target: 18000, reward: 380 },
 
       // 3. Boss Avcısı (boss)
-      { id: 'boss_1', category: 'boss', tier: 1, name: 'Amiral Tehdidi', desc: 'İlk Amiral Boss\'unu yen', icon: '💀', stat: 'bossesDefeated', target: 1, reward: 50 },
-      { id: 'boss_2', category: 'boss', tier: 2, name: 'Filo Avcısı', desc: 'Toplam 5 Boss yok et', icon: '☠️', stat: 'bossesDefeated', target: 5, reward: 100 },
-      { id: 'boss_3', category: 'boss', tier: 3, name: 'Kozmik Ecel', desc: 'Toplam 20 Boss yok et', icon: '👑', stat: 'bossesDefeated', target: 20, reward: 250 },
-      { id: 'boss_4', category: 'boss', tier: 4, name: 'Amiral Kabusu', desc: 'Toplam 50 Boss yok et', icon: '☠️', stat: 'bossesDefeated', target: 50, reward: 500 },
-      { id: 'boss_5', category: 'boss', tier: 5, name: 'Kozmik Hükümdar', desc: 'Toplam 120 Boss yok et', icon: '👑', stat: 'bossesDefeated', target: 120, reward: 1000 },
+      { id: 'boss_1', category: 'boss', tier: 1, name: 'Amiral Tehdidi', desc: 'İlk Amiral Boss\'unu yen', icon: '💀', stat: 'bossesDefeated', target: 1, reward: 25 },
+      { id: 'boss_2', category: 'boss', tier: 2, name: 'Filo Avcısı', desc: 'Toplam 8 Boss yok et', icon: '☠️', stat: 'bossesDefeated', target: 8, reward: 50 },
+      { id: 'boss_3', category: 'boss', tier: 3, name: 'Kozmik Ecel', desc: 'Toplam 30 Boss yok et', icon: '👑', stat: 'bossesDefeated', target: 30, reward: 120 },
+      { id: 'boss_4', category: 'boss', tier: 4, name: 'Amiral Kabusu', desc: 'Toplam 80 Boss yok et', icon: '☠️', stat: 'bossesDefeated', target: 80, reward: 220 },
+      { id: 'boss_5', category: 'boss', tier: 5, name: 'Kozmik Hükümdar', desc: 'Toplam 200 Boss yok et', icon: '👑', stat: 'bossesDefeated', target: 200, reward: 400 },
 
       // 4. Kombo Ustası (combo)
-      { id: 'combo_1', category: 'combo', tier: 1, name: 'Seri Darbe', desc: '10x kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 10, reward: 25 },
-      { id: 'combo_2', category: 'combo', tier: 2, name: 'Fırtına Ritmi', desc: '25x kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 25, reward: 60 },
-      { id: 'combo_3', category: 'combo', tier: 3, name: 'Apex Akışı', desc: '50x maksimum kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 50, reward: 150 },
-      { id: 'combo_4', category: 'combo', tier: 4, name: 'Kuantum Ritim', desc: '75x maksimum kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 75, reward: 260 },
-      { id: 'combo_5', category: 'combo', tier: 5, name: 'Işık Hızı Serisi', desc: '100x maksimum kombo zincirine ulaş', icon: '🔥', stat: 'maxCombo', target: 100, reward: 450 },
+      { id: 'combo_1', category: 'combo', tier: 1, name: 'Seri Darbe', desc: '15x kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 15, reward: 20 },
+      { id: 'combo_2', category: 'combo', tier: 2, name: 'Fırtına Ritmi', desc: '35x kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 35, reward: 45 },
+      { id: 'combo_3', category: 'combo', tier: 3, name: 'Apex Akışı', desc: '65x maksimum kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 65, reward: 90 },
+      { id: 'combo_4', category: 'combo', tier: 4, name: 'Kuantum Ritim', desc: '100x maksimum kombo zincirine ulaş', icon: '⚡', stat: 'maxCombo', target: 100, reward: 180 },
+      { id: 'combo_5', category: 'combo', tier: 5, name: 'Işık Hızı Serisi', desc: '150x maksimum kombo zincirine ulaş', icon: '🔥', stat: 'maxCombo', target: 150, reward: 350 },
 
       // 5. Hayatta Kalma (survive)
-      { id: 'survive_1', category: 'survive', tier: 1, name: 'Uçuş Başlangıcı', desc: 'Tek seferde 60 saniye hayatta kal', icon: '⏱️', stat: 'maxTime', target: 60, reward: 20 },
-      { id: 'survive_2', category: 'survive', tier: 2, name: 'Zaman Savaşçısı', desc: 'Tek seferde 180 saniye hayatta kal', icon: '⏳', stat: 'maxTime', target: 180, reward: 50 },
-      { id: 'survive_3', category: 'survive', tier: 3, name: 'Sonsuz Direniş', desc: 'Tek seferde 300 saniye (5 dk) hayatta kal', icon: '⌛', stat: 'maxTime', target: 300, reward: 120 },
-      { id: 'survive_4', category: 'survive', tier: 4, name: 'Demir İrade', desc: 'Tek seferde 480 saniye (8 dk) hayatta kal', icon: '🛡️', stat: 'maxTime', target: 480, reward: 240 },
-      { id: 'survive_5', category: 'survive', tier: 5, name: 'Kozmik Ölümsüz', desc: 'Tek seferde 720 saniye (12 dk) hayatta kal', icon: '👑', stat: 'maxTime', target: 720, reward: 450 },
+      { id: 'survive_1', category: 'survive', tier: 1, name: 'Uçuş Başlangıcı', desc: 'Tek seferde 90 saniye (1.5 dk) hayatta kal', icon: '⏱️', stat: 'maxTime', target: 90, reward: 20 },
+      { id: 'survive_2', category: 'survive', tier: 2, name: 'Zaman Savaşçısı', desc: 'Tek seferde 240 saniye (4 dk) hayatta kal', icon: '⏳', stat: 'maxTime', target: 240, reward: 50 },
+      { id: 'survive_3', category: 'survive', tier: 3, name: 'Sonsuz Direniş', desc: 'Tek seferde 420 saniye (7 dk) hayatta kal', icon: '⌛', stat: 'maxTime', target: 420, reward: 110 },
+      { id: 'survive_4', category: 'survive', tier: 4, name: 'Demir İrade', desc: 'Tek seferde 660 saniye (11 dk) hayatta kal', icon: '🛡️', stat: 'maxTime', target: 660, reward: 220 },
+      { id: 'survive_5', category: 'survive', tier: 5, name: 'Kozmik Ölümsüz', desc: 'Tek seferde 900 saniye (15 dk) hayatta kal', icon: '👑', stat: 'maxTime', target: 900, reward: 360 },
 
       // 6. Kristal Zengini (crystal)
-      { id: 'crystal_1', category: 'crystal', tier: 1, name: 'Ganimet Avcısı', desc: 'Toplam 100 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 100, reward: 30 },
-      { id: 'crystal_2', category: 'crystal', tier: 2, name: 'Kozmik Madenci', desc: 'Toplam 1,000 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 1000, reward: 75 },
-      { id: 'crystal_3', category: 'crystal', tier: 3, name: 'Kristal Baronu', desc: 'Toplam 10,000 kristal topla', icon: '💠', stat: 'lifetimeCrystals', target: 10000, reward: 200 },
-      { id: 'crystal_4', category: 'crystal', tier: 4, name: 'Elmas İmparatoru', desc: 'Toplam 30,000 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 30000, reward: 400 },
-      { id: 'crystal_5', category: 'crystal', tier: 5, name: 'Evrensel Hazine', desc: 'Toplam 100,000 kristal topla', icon: '💠', stat: 'lifetimeCrystals', target: 100000, reward: 800 },
+      { id: 'crystal_1', category: 'crystal', tier: 1, name: 'Ganimet Avcısı', desc: 'Toplam 250 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 250, reward: 20 },
+      { id: 'crystal_2', category: 'crystal', tier: 2, name: 'Kozmik Madenci', desc: 'Toplam 2,500 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 2500, reward: 50 },
+      { id: 'crystal_3', category: 'crystal', tier: 3, name: 'Kristal Baronu', desc: 'Toplam 15,000 kristal topla', icon: '💠', stat: 'lifetimeCrystals', target: 15000, reward: 110 },
+      { id: 'crystal_4', category: 'crystal', tier: 4, name: 'Elmas İmparatoru', desc: 'Toplam 50,000 kristal topla', icon: '💎', stat: 'lifetimeCrystals', target: 50000, reward: 220 },
+      { id: 'crystal_5', category: 'crystal', tier: 5, name: 'Evrensel Hazine', desc: 'Toplam 150,000 kristal topla', icon: '💠', stat: 'lifetimeCrystals', target: 150000, reward: 380 },
 
       // 7. Sıyırma / Graze Ası (graze)
-      { id: 'graze_1', category: 'graze', tier: 1, name: 'Kıl Payı', desc: '10 kez mermi veya tehlike sıyır', icon: '✨', stat: 'totalGraze', target: 10, reward: 25 },
-      { id: 'graze_2', category: 'graze', tier: 2, name: 'Refleks Pilotu', desc: '50 kez tehlike sıyır', icon: '🌟', stat: 'totalGraze', target: 50, reward: 60 },
-      { id: 'graze_3', category: 'graze', tier: 3, name: 'Gölge Hayalet', desc: '200 kez tehlike sıyır', icon: '💫', stat: 'totalGraze', target: 200, reward: 150 },
-      { id: 'graze_4', category: 'graze', tier: 4, name: 'Sonsuz Dansçı', desc: '600 kez tehlike sıyır', icon: '✨', stat: 'totalGraze', target: 600, reward: 300 },
-      { id: 'graze_5', category: 'graze', tier: 5, name: 'Kuantum Hayalet', desc: '1,500 kez tehlike sıyır', icon: '🌟', stat: 'totalGraze', target: 1500, reward: 550 },
+      { id: 'graze_1', category: 'graze', tier: 1, name: 'Kıl Payı', desc: '25 kez mermi veya tehlike sıyır', icon: '✨', stat: 'totalGraze', target: 25, reward: 20 },
+      { id: 'graze_2', category: 'graze', tier: 2, name: 'Refleks Pilotu', desc: '120 kez tehlike sıyır', icon: '🌟', stat: 'totalGraze', target: 120, reward: 50 },
+      { id: 'graze_3', category: 'graze', tier: 3, name: 'Gölge Hayalet', desc: '500 kez tehlike sıyır', icon: '💫', stat: 'totalGraze', target: 500, reward: 110 },
+      { id: 'graze_4', category: 'graze', tier: 4, name: 'Sonsuz Dansçı', desc: '1,500 kez tehlike sıyır', icon: '✨', stat: 'totalGraze', target: 1500, reward: 220 },
+      { id: 'graze_5', category: 'graze', tier: 5, name: 'Kuantum Hayalet', desc: '4,500 kez tehlike sıyır', icon: '🌟', stat: 'totalGraze', target: 4500, reward: 360 },
 
       // 8. Sefer Uçuşları (flight)
-      { id: 'flight_1', category: 'flight', tier: 1, name: 'Acemi Kanatlar', desc: '3 uçuş seferine çık', icon: '🚀', stat: 'totalFlights', target: 3, reward: 20 },
-      { id: 'flight_2', category: 'flight', tier: 2, name: 'Kıdemli Filo', desc: '15 uçuş seferine çık', icon: '🛸', stat: 'totalFlights', target: 15, reward: 50 },
-      { id: 'flight_3', category: 'flight', tier: 3, name: 'Uzay Gazisi', desc: '50 uçuş seferine çık', icon: '🌌', stat: 'totalFlights', target: 50, reward: 120 },
-      { id: 'flight_4', category: 'flight', tier: 4, name: 'Galaksi Kaşifi', desc: '120 uçuş seferine çık', icon: '🛸', stat: 'totalFlights', target: 120, reward: 250 },
-      { id: 'flight_5', category: 'flight', tier: 5, name: 'Zaman Seyyahı', desc: '300 uçuş seferine çık', icon: '🌌', stat: 'totalFlights', target: 300, reward: 450 },
+      { id: 'flight_1', category: 'flight', tier: 1, name: 'Acemi Kanatlar', desc: '5 uçuş seferine çık', icon: '🚀', stat: 'totalFlights', target: 5, reward: 15 },
+      { id: 'flight_2', category: 'flight', tier: 2, name: 'Kıdemli Filo', desc: '25 uçuş seferine çık', icon: '🛸', stat: 'totalFlights', target: 25, reward: 40 },
+      { id: 'flight_3', category: 'flight', tier: 3, name: 'Uzay Gazisi', desc: '80 uçuş seferine çık', icon: '🌌', stat: 'totalFlights', target: 80, reward: 90 },
+      { id: 'flight_4', category: 'flight', tier: 4, name: 'Galaksi Kaşifi', desc: '200 uçuş seferine çık', icon: '🛸', stat: 'totalFlights', target: 200, reward: 180 },
+      { id: 'flight_5', category: 'flight', tier: 5, name: 'Zaman Seyyahı', desc: '500 uçuş seferine çık', icon: '🌌', stat: 'totalFlights', target: 500, reward: 350 },
 
       // 9. Şanslı Uzay Sandığı (chest)
-      { id: 'chest_1', category: 'chest', tier: 1, name: 'İlk Sandık', desc: '1 şanslı uzay sandığı aç', icon: '🎁', stat: 'totalChests', target: 1, reward: 30 },
-      { id: 'chest_2', category: 'chest', tier: 2, name: 'Hazine Avcısı', desc: '5 şanslı uzay sandığı aç', icon: '📦', stat: 'totalChests', target: 5, reward: 70 },
-      { id: 'chest_3', category: 'chest', tier: 3, name: 'Kozmik Zenginlik', desc: '20 şanslı uzay sandığı aç', icon: '🏆', stat: 'totalChests', target: 20, reward: 180 },
-      { id: 'chest_4', category: 'chest', tier: 4, name: 'Kadim Sandık Avcısı', desc: '50 şanslı uzay sandığı aç', icon: '🎁', stat: 'totalChests', target: 50, reward: 350 },
-      { id: 'chest_5', category: 'chest', tier: 5, name: 'Gizemler Efendisi', desc: '120 şanslı uzay sandığı aç', icon: '🏆', stat: 'totalChests', target: 120, reward: 600 },
+      { id: 'chest_1', category: 'chest', tier: 1, name: 'İlk Sandık', desc: '2 şanslı uzay sandığı aç', icon: '🎁', stat: 'totalChests', target: 2, reward: 20 },
+      { id: 'chest_2', category: 'chest', tier: 2, name: 'Hazine Avcısı', desc: '10 şanslı uzay sandığı aç', icon: '📦', stat: 'totalChests', target: 10, reward: 50 },
+      { id: 'chest_3', category: 'chest', tier: 3, name: 'Kozmik Zenginlik', desc: '35 şanslı uzay sandığı aç', icon: '🏆', stat: 'totalChests', target: 35, reward: 110 },
+      { id: 'chest_4', category: 'chest', tier: 4, name: 'Kadim Sandık Avcısı', desc: '80 şanslı uzay sandığı aç', icon: '🎁', stat: 'totalChests', target: 80, reward: 220 },
+      { id: 'chest_5', category: 'chest', tier: 5, name: 'Gizemler Efendisi', desc: '180 şanslı uzay sandığı aç', icon: '🏆', stat: 'totalChests', target: 180, reward: 360 },
 
       // 10. Bomba Patlatıcı (bomb)
-      { id: 'bomb_1', category: 'bomb', tier: 1, name: 'Fünye', desc: '3 bomba asteroit patlat', icon: '💣', stat: 'bombAsteroidsDestroyed', target: 3, reward: 20 },
-      { id: 'bomb_2', category: 'bomb', tier: 2, name: 'Şok Dalgası', desc: '20 bomba asteroit patlat', icon: '🧨', stat: 'bombAsteroidsDestroyed', target: 20, reward: 55 },
-      { id: 'bomb_3', category: 'bomb', tier: 3, name: 'Süpernova Patlaması', desc: '80 bomba asteroit patlat', icon: '☢️', stat: 'bombAsteroidsDestroyed', target: 80, reward: 140 },
-      { id: 'bomb_4', category: 'bomb', tier: 4, name: 'Atomik Patlama', desc: '250 bomba asteroit patlat', icon: '🧨', stat: 'bombAsteroidsDestroyed', target: 250, reward: 280 },
-      { id: 'bomb_5', category: 'bomb', tier: 5, name: 'Karadelik Çöküşü', desc: '600 bomba asteroit patlat', icon: '☢️', stat: 'bombAsteroidsDestroyed', target: 600, reward: 500 }
+      { id: 'bomb_1', category: 'bomb', tier: 1, name: 'Fünye', desc: '10 bomba asteroit patlat', icon: '💣', stat: 'bombAsteroidsDestroyed', target: 10, reward: 15 },
+      { id: 'bomb_2', category: 'bomb', tier: 2, name: 'Şok Dalgası', desc: '50 bomba asteroit patlat', icon: '🧨', stat: 'bombAsteroidsDestroyed', target: 50, reward: 40 },
+      { id: 'bomb_3', category: 'bomb', tier: 3, name: 'Süpernova Patlaması', desc: '200 bomba asteroit patlat', icon: '☢️', stat: 'bombAsteroidsDestroyed', target: 200, reward: 100 },
+      { id: 'bomb_4', category: 'bomb', tier: 4, name: 'Atomik Patlama', desc: '600 bomba asteroit patlat', icon: '🧨', stat: 'bombAsteroidsDestroyed', target: 600, reward: 200 },
+      { id: 'bomb_5', category: 'bomb', tier: 5, name: 'Karadelik Çöküşü', desc: '1,800 bomba asteroit patlat', icon: '☢️', stat: 'bombAsteroidsDestroyed', target: 1800, reward: 350 }
     ];
     this.sessionStats = { grazeCount: 0, deflectCount: 0, noDamageTimer: 0 };
 
@@ -3956,9 +3956,28 @@ class Game {
     const savedDate = localStorage.getItem('neon_missions_date');
     const savedMissions = localStorage.getItem('neon_daily_missions');
 
+    const poolMap = {
+      kill_asteroids: { goal: 120, reward: 40, desc: '120 adet meteor yok et' },
+      collect_crystals: { goal: 300, reward: 45, desc: '300 kristal topla' },
+      survive_time: { goal: 120, reward: 50, desc: 'Tek oyunda 120 saniye dayan' },
+      reach_combo: { goal: 30, reward: 45, desc: '30x veya üzeri kombo yap' },
+      defeat_boss: { goal: 2, reward: 60, desc: '2 Amiral Boss yok et' },
+      detonate_bomb: { goal: 15, reward: 45, desc: '15 bomba asteroid patlat' }
+    };
+
     if (savedDate === today && savedMissions) {
       try {
         this.dailyMissions = JSON.parse(savedMissions);
+        if (Array.isArray(this.dailyMissions)) {
+          this.dailyMissions.forEach(m => {
+            if (poolMap[m.id]) {
+              m.goal = poolMap[m.id].goal;
+              m.reward = poolMap[m.id].reward;
+              m.desc = poolMap[m.id].desc;
+            }
+          });
+          localStorage.setItem('neon_daily_missions', JSON.stringify(this.dailyMissions));
+        }
       } catch (e) {
         this.dailyMissions = null;
       }
@@ -3966,12 +3985,12 @@ class Game {
 
     if (!this.dailyMissions || this.dailyMissions.length === 0) {
       const pool = [
-        { id: 'kill_asteroids', icon: 'target', name: 'Asteroit Avcısı', desc: '35 adet meteor yok et', goal: 35, progress: 0, reward: 80, claimed: false },
-        { id: 'collect_crystals', icon: 'crystal', name: 'Kristal Madencisi', desc: '100 kristal topla', goal: 100, progress: 0, reward: 90, claimed: false },
-        { id: 'survive_time', icon: 'speed', name: 'Hayatta Kalan', desc: 'Tek oyunda 75 saniye dayan', goal: 75, progress: 0, reward: 100, claimed: false },
-        { id: 'reach_combo', icon: 'energy', name: 'Kombo Ustası', desc: '10x veya üzeri kombo yap', goal: 10, progress: 0, reward: 75, claimed: false },
-        { id: 'defeat_boss', icon: 'skull', name: 'Amiral Avcısı', desc: '1 Amiral Boss yok et', goal: 1, progress: 0, reward: 150, claimed: false },
-        { id: 'detonate_bomb', icon: 'bomb', name: 'Patlayıcı Uzmanı', desc: '6 bomba asteroid patlat', goal: 6, progress: 0, reward: 85, claimed: false }
+        { id: 'kill_asteroids', icon: 'target', name: 'Asteroit Avcısı', desc: '120 adet meteor yok et', goal: 120, progress: 0, reward: 40, claimed: false },
+        { id: 'collect_crystals', icon: 'crystal', name: 'Kristal Madencisi', desc: '300 kristal topla', goal: 300, progress: 0, reward: 45, claimed: false },
+        { id: 'survive_time', icon: 'speed', name: 'Hayatta Kalan', desc: 'Tek oyunda 120 saniye dayan', goal: 120, progress: 0, reward: 50, claimed: false },
+        { id: 'reach_combo', icon: 'energy', name: 'Kombo Ustası', desc: '30x veya üzeri kombo yap', goal: 30, progress: 0, reward: 45, claimed: false },
+        { id: 'defeat_boss', icon: 'skull', name: 'Amiral Avcısı', desc: '2 Amiral Boss yok et', goal: 2, progress: 0, reward: 60, claimed: false },
+        { id: 'detonate_bomb', icon: 'bomb', name: 'Patlayıcı Uzmanı', desc: '15 bomba asteroid patlat', goal: 15, progress: 0, reward: 45, claimed: false }
       ];
 
       this.dailyMissions = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
