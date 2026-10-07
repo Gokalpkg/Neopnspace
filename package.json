@@ -15,9 +15,12 @@
     "vite": "^6.2.0"
   },
   "dependencies": {
-    "@capacitor/core": "^7.0.1",
-    "@capacitor/cli": "^7.0.1",
+    "@capacitor-community/admob": "^7.0.0",
     "@capacitor/android": "^7.0.1",
-    "@capacitor/haptics": "^7.0.0"
+    "@capacitor/cli": "^7.0.1",
+    "@capacitor/core": "^7.0.1",
+    "@capacitor/haptics": "^7.0.0",
+    "@fontsource/outfit": "^5.2.8",
+    "@fontsource/rajdhani": "^5.2.7"
   }
 }

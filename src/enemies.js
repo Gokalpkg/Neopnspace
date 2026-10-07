@@ -434,6 +434,34 @@ export class Enemy {
         this.shootTimer = 60 + Math.random() * 40;
         break;
 
+      case 'kamikaze':
+        this.radius = 16;
+        this.hp = Math.round(11 * waveMultiplier);
+        this.maxHp = this.hp;
+        this.speedY = (1.3 + Math.random() * 0.3) * speedMultiplier;
+        this.speedX = 0;
+        this.score = 90;
+        this.color = '#ff0055';
+        this.chargeTimer = 35;
+        this.charging = false;
+        this.chargeVx = 0;
+        this.chargeVy = 0;
+        break;
+
+      case 'volatile_asteroid':
+        this.radius = 22;
+        this.hp = Math.round(14 * waveMultiplier);
+        this.maxHp = this.hp;
+        this.speedY = (0.7 + Math.random() * 0.25) * speedMultiplier;
+        this.speedX = (Math.random() - 0.5) * 0.4 * speedMultiplier;
+        this.score = 140;
+        this.color = '#c084fc';
+        this.shape = this.generatePolygon(6, 22);
+        this.rotSpeed = (Math.random() - 0.5) * 0.04;
+        this.rot = 0;
+        this.isVolatile = true;
+        break;
+
       case 'cargo_freighter':
         this.radius = 26;
         this.hp = Math.round(16 * waveMultiplier);
@@ -615,13 +643,22 @@ export class Enemy {
       } else if (this.y < 70 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
       }
-
-      // Oyuncuya aktif olarak ateş et! (Kendini korumak için öldürmek zorunda kalırsın)
-      this.shootTimer -= dt;
-      if (this.shootTimer <= 0) {
-        this.shootTimer = 70 + Math.random() * 40;
-        const angle = Math.atan2(playerY - this.y, playerX - this.x);
-        enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 10, angle, 3.4));
+    } else if (this.type === 'kamikaze') {
+      if (!this.charging) {
+        this.y += this.speedY * dt;
+        this.chargeTimer -= dt;
+        if (this.chargeTimer <= 0 && this.y < playerY - 70) {
+          this.charging = true;
+          const dx = playerX - this.x;
+          const dy = playerY - this.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const chargeSpeed = 4.4;
+          this.chargeVx = (dx / dist) * chargeSpeed;
+          this.chargeVy = (dy / dist) * chargeSpeed;
+        }
+      } else {
+        this.x += this.chargeVx * dt;
+        this.y += this.chargeVy * dt;
       }
     } else if (this.isBoss) {
       const info = Enemy.getBossInfo(this.type);
@@ -774,19 +811,11 @@ export class Enemy {
       this.y += this.speedY * dt;
       this.x += this.speedX * dt;
 
-      // Kruvazör kaçmaz! Üst-orta savaş bölgesinde kalır ve oyuncuyu taciz eder
+      // Kruvazör: Üst-orta savaş bölgesinde kalır ve manevra yapar (Mermi atmaz)
       if (this.y > screenHeight * 0.48 && this.speedY > 0) {
         this.speedY = -Math.abs(this.speedY);
       } else if (this.y < 75 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
-      }
-
-      this.shootTimer -= dt;
-      if (this.shootTimer <= 0) {
-        this.shootTimer = 65 + Math.random() * 20;
-        const angle = Math.atan2(playerY - this.y, playerX - this.x);
-        enemyProjectiles.push(new EnemyProjectile(this.x - 8, this.y + 15, angle, 3.8));
-        enemyProjectiles.push(new EnemyProjectile(this.x + 8, this.y + 15, angle, 3.8));
       }
     } else if (this.type === 'dive_bomber') {
       if (!this.isDiving) {
@@ -832,14 +861,8 @@ export class Enemy {
         this.y = screenHeight - 65;
         this.angle = -Math.PI / 2;
       }
-
-      this.shootTimer -= dt;
-      if (this.shootTimer <= 0 && this.y < playerY - 30) {
-        this.shootTimer = 100 + Math.random() * 40;
-        enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 10, this.angle, 3.8));
-      }
     } else if (this.type === 'elite_scout') {
-      // Altın Elit Avcı: Sinüsoidal süzülme ve ikili plazma atışı
+      // Altın Elit Avcı: Sinüsoidal süzülme
       this.time += dt;
       this.x += Math.sin(this.time * this.sineFreq) * this.sineAmp * dt;
       this.y += this.speedY * dt;
@@ -848,14 +871,6 @@ export class Enemy {
         this.speedY = -Math.abs(this.speedY);
       } else if (this.y < 65 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
-      }
-
-      this.shootTimer -= dt;
-      if (this.shootTimer <= 0) {
-        this.shootTimer = 50 + Math.random() * 25;
-        const angle = Math.atan2(playerY - this.y, playerX - this.x);
-        enemyProjectiles.push(new EnemyProjectile(this.x - 8, this.y + 10, angle, 4.0));
-        enemyProjectiles.push(new EnemyProjectile(this.x + 8, this.y + 10, angle, 4.0));
       }
     } else {
       // Normal asteroidler
@@ -950,6 +965,36 @@ export class Enemy {
       ctx.fillStyle = '#ffd700';
       ctx.fillRect(-1, -1, 2, 2);
       ctx.restore();
+      ctx.restore();
+      return;
+    }
+
+    if (this.type === 'kamikaze') {
+      const angle = this.charging ? Math.atan2(this.chargeVy, this.chargeVx) + Math.PI / 2 : Math.PI;
+      ctx.rotate(angle);
+
+      const blink = Math.sin(Date.now() * 0.025) > 0;
+      ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : (this.charging ? (blink ? '#ff0055' : '#ffbe0b') : '#ff0055');
+      ctx.shadowColor = '#ff0055';
+      ctx.shadowBlur = this.charging ? 16 : 8;
+
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius * 1.3);
+      ctx.lineTo(this.radius, this.radius);
+      ctx.lineTo(0, this.radius * 0.4);
+      ctx.lineTo(-this.radius, this.radius);
+      ctx.closePath();
+      ctx.fill();
+
+      if (this.charging) {
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.moveTo(-5, this.radius * 0.5);
+        ctx.lineTo(0, this.radius * 1.6 + Math.random() * 6);
+        ctx.lineTo(5, this.radius * 0.5);
+        ctx.closePath();
+        ctx.fill();
+      }
       ctx.restore();
       return;
     }
@@ -1344,22 +1389,15 @@ export class EnemyProjectile {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
 
-    const p = 1.8;
+    // Yüksek Performanslı Neon Plazma Mermisi
+    ctx.fillStyle = '#ff0055';
+    ctx.fillRect(-5, -2.5, 10, 5);
 
-    // Net Görüş Konturu: Dış karanlık hat (Nebula ve patlamalarda mermi kaçmaz)
-    ctx.strokeStyle = '#020617';
-    ctx.lineWidth = 2.4;
-    ctx.strokeRect(-3.2 * p, -2.2 * p, 6.4 * p, 4.4 * p);
-
-    // 8-bit Retro Piksel Plazma Mermisi
-    ctx.fillStyle = 'rgba(255, 0, 85, 0.4)';
-    ctx.fillRect(-3 * p, -2 * p, 6 * p, 4 * p);
-    ctx.fillStyle = '#ff1744';
-    ctx.fillRect(-2 * p, -1.5 * p, 5 * p, 3 * p);
     ctx.fillStyle = '#ffbe0b';
-    ctx.fillRect(-p, -p, 3 * p, 2 * p);
+    ctx.fillRect(-2, -1.5, 6, 3);
+
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, -0.5 * p, 2 * p, p);
+    ctx.fillRect(1, -1, 3, 2);
 
     ctx.restore();
   }

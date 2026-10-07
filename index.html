@@ -9,9 +9,6 @@
   <title>Neon Space Survivor</title>
   <link rel="icon" type="image/svg+xml" href="/icon.svg">
   <link rel="manifest" href="/manifest.json">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
@@ -21,6 +18,15 @@
 
     <!-- Oyun İçi HUD (Arayüz) -->
     <div id="hud" class="hud-overlay hidden">
+      <!-- İlk Giriş Öğreticisi (Tutorial Hand Guide) -->
+      <div id="tutorial-overlay" class="tutorial-overlay hidden">
+        <div class="tutorial-hand-anim">👆</div>
+        <div class="tutorial-card">
+          <div class="tutorial-title" data-i18n="tut_drag_title">GEMİYİ PARMAĞINLA YÖNET</div>
+          <div class="tutorial-sub" data-i18n="tut_drag_desc">Parmağını sürükleyerek hareket et ve ateş et!</div>
+        </div>
+      </div>
+
       <!-- Üst XP Çizgisi (Ultra İnce Flush Bar) -->
       <div class="xp-bar-track">
         <div id="xp-bar-fill" class="xp-bar-fill" style="width: 0%;"></div>
@@ -93,8 +99,14 @@
 
 
 
-      <!-- Aktif Nihai Güç Butonu (Neon Ultimate Button) -->
+      <!-- Aktif Nihai Güç & Pilot Yetenek Butonları -->
       <div id="ultimate-btn-container" class="ultimate-btn-container hidden">
+        <button id="btn-ability" class="btn-ability" aria-label="Pilot Yeteneği" title="Pilot Yeteneği">
+          <div class="ability-glow-ring"></div>
+          <div class="ability-icon" id="ability-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="#00f0ff" stroke-width="1.5"/><path d="M6 3v3l2 2" stroke="#00f0ff" stroke-width="1.2"/></svg></div>
+          <span class="ability-label" id="ability-label">YETENEK</span>
+          <div id="ability-cooldown-fill" class="ability-cooldown-fill"></div>
+        </button>
         <button id="btn-ultimate" class="btn-ultimate" aria-label="Nihai Güç" title="Nihai Güç">
           <div class="ultimate-glow-ring"></div>
           <div class="ultimate-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M7 0L2 6h4l-1 6 5-6H6l1-6z" fill="#00f0ff"/></svg></div>
@@ -112,8 +124,8 @@
             <svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12" style="margin: 0 4px;"><path d="M6 1L1 11h10L6 1z" fill="#ffbe0b"/><rect x="5.5" y="4" width="1" height="4" fill="#ffffff"/><rect x="5.5" y="9" width="1" height="1" fill="#ffffff"/></svg>
             <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M6 1L1 11h10L6 1z" fill="#ff0055"/><rect x="5.5" y="4" width="1" height="4" fill="#ffffff"/><rect x="5.5" y="9" width="1" height="1" fill="#ffffff"/></svg>
           </div>
-          <div class="boss-warning-title">DİKKAT: AMİRAL GEMİSİ YAKLAŞIYOR</div>
-          <div class="boss-warning-sub" id="boss-warning-name">KARA MUHAFIZ FİLOSU</div>
+          <div class="boss-warning-title" data-i18n="boss_warning_title">DİKKAT: AMİRAL GEMİSİ YAKLAŞIYOR</div>
+          <div class="boss-warning-sub" id="boss-warning-name" data-i18n="boss_warning_fleet">KARA MUHAFIZ FİLOSU</div>
         </div>
       </div>
     </div>
@@ -125,26 +137,29 @@
         <div class="pilot-rank-badge" id="menu-rank-badge">
           <span class="rank-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM3 3h6v2H3zM2 5h8v2H2zM3 7h6v2H3zM4 9h4v2H4z" fill="#00f0ff"/><rect x="5" y="4" width="2" height="2" fill="#fff"/></svg></span>
           <div class="rank-info">
-            <span class="rank-name" id="menu-pilot-rank">ACEMİ PİLOT</span>
+            <span class="rank-name" id="menu-pilot-rank" data-i18n="rank_rookie">ACEMİ PİLOT</span>
             <span class="rank-sub" id="menu-pilot-flights">0 Uçuş</span>
           </div>
         </div>
 
         <div class="menu-top-right">
-          <button id="btn-free-gold-menu" class="btn-free-gold pulse" title="Reklam İzle ve +50 Altın/Kristal Kazan">
-            <span class="gold-icon">🪙</span>
-            <span class="gold-label">+50</span>
+          <button id="btn-free-gold-menu" class="btn-free-gold pulse gold-shimmer-btn" title="Reklam İzle ve +200 ~ +380 Kristal Kazan!">
+            <span class="gold-icon">🎁</span>
+            <span class="gold-label">+200 ⚡</span>
           </button>
-          <div class="crystals-pill clickable-pill" id="btn-menu-crystals" title="Pilot Atölyesi">
+          <div class="crystals-pill clickable-pill" id="btn-menu-crystals" title="Pilot Atölyesi" data-i18n-title="crystals_tooltip">
             <span class="crystal-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M4 1h4v1H4zM2 2h8v2H2zM1 4h10v2H1zM2 6h8v2H2zM3 8h6v2H3zM4 10h4v1H4zM5 11h2v1H5z" fill="#00f0ff"/><path d="M4 3h4v4H4z" fill="#ffffff"/></svg></span>
             <strong id="total-crystals-display">0</strong>
             <span class="plus-mini">+</span>
           </div>
-          <button id="btn-sound-menu" class="sound-icon-btn menu-header-btn" title="Sesi Aç/Kapat" aria-label="Sesi Aç/Kapat">
+          <button id="btn-sound-menu" class="sound-icon-btn menu-header-btn" title="Sesi Aç/Kapat" aria-label="Sesi Aç/Kapat" data-i18n-title="btn_sound_title">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg>
           </button>
-          <button id="btn-vibrate-menu" class="sound-icon-btn menu-header-btn" title="Titreşimi Aç/Kapat" aria-label="Titreşimi Aç/Kapat">
+          <button id="btn-vibrate-menu" class="sound-icon-btn menu-header-btn" title="Titreşimi Aç/Kapat" aria-label="Titreşimi Aç/Kapat" data-i18n-title="btn_vibrate_title">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><rect x="3" y="1" width="6" height="10" rx="1" fill="#00f0ff"/><line x1="1" y1="4" x2="1" y2="8" stroke="#00f0ff" stroke-width="1.2"/><line x1="11" y1="4" x2="11" y2="8" stroke="#00f0ff" stroke-width="1.2"/></svg>
+          </button>
+          <button id="btn-settings-menu" class="sound-icon-btn menu-header-btn" title="Ayarlar" aria-label="Ayarlar" data-i18n-title="btn_settings_title">
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 16 16"><path d="M6 1h4v2H6zM6 13h4v2H6zM1 6h2v4H1zM13 6h2v4h-2zM3 3h2v2H3zM11 3h2v2h-2zM3 11h2v2H3zM11 11h2v2h-2zM5 5h6v6H5z" fill="#00f0ff"/></svg>
           </button>
         </div>
       </div>
@@ -178,22 +193,22 @@
           <!-- Jet İstatistik Karşılaştırma Çubukları (Stat Bars) -->
           <div class="menu-ship-stats-grid">
             <div class="jet-stat-item">
-              <span class="jet-stat-lbl">HASAR</span>
+              <span class="jet-stat-lbl" data-i18n="stat_dmg">HASAR</span>
               <div class="jet-stat-track"><div id="jet-bar-dmg" class="jet-stat-fill stat-dmg" style="width: 100%;"></div></div>
               <span id="jet-val-dmg" class="jet-stat-val">%100</span>
             </div>
             <div class="jet-stat-item">
-              <span class="jet-stat-lbl">KALKAN</span>
+              <span class="jet-stat-lbl" data-i18n="stat_shield">KALKAN</span>
               <div class="jet-stat-track"><div id="jet-bar-shield" class="jet-stat-fill stat-shield" style="width: 100%;"></div></div>
               <span id="jet-val-shield" class="jet-stat-val">%100</span>
             </div>
             <div class="jet-stat-item">
-              <span class="jet-stat-lbl">HIZ</span>
+              <span class="jet-stat-lbl" data-i18n="stat_speed">HIZ</span>
               <div class="jet-stat-track"><div id="jet-bar-speed" class="jet-stat-fill stat-speed" style="width: 100%;"></div></div>
               <span id="jet-val-speed" class="jet-stat-val">%100</span>
             </div>
             <div class="jet-stat-item">
-              <span class="jet-stat-lbl">ÇEKİM</span>
+              <span class="jet-stat-lbl" data-i18n="stat_magnet">ÇEKİM</span>
               <div class="jet-stat-track"><div id="jet-bar-magnet" class="jet-stat-fill stat-magnet" style="width: 100%;"></div></div>
               <span id="jet-val-magnet" class="jet-stat-val">%100</span>
             </div>
@@ -218,22 +233,22 @@
           <button id="mode-classic" class="cyber-mode-card active" data-mode="classic">
             <div class="mode-card-header">
               <span class="mode-card-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9zM5 9h2v3H5z" fill="#00f0ff"/></svg></span>
-              <strong class="mode-card-title">SEFER (1-38)</strong>
+              <strong class="mode-card-title" data-i18n="mode_classic_title">SEFER (1-38)</strong>
             </div>
             <span class="mode-card-desc" id="mode-stage-desc">Bölüm 1 • Seviye Seç ▾</span>
             <div class="mode-card-score">
-              <span>SEÇİLİ:</span> <strong id="score-val-classic" style="color:#00f0ff;">BÖLÜM 1</strong>
+              <span data-i18n="mode_classic_selected">SEÇİLİ:</span> <strong id="score-val-classic" style="color:#00f0ff;">BÖLÜM 1</strong>
             </div>
           </button>
 
           <button id="mode-storm" class="cyber-mode-card" data-mode="storm">
             <div class="mode-card-header">
               <span class="mode-card-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M6 0h4v3H6zM4 3h5v2H4zM2 5h6v2H2zM1 7h5v2H1zM3 9h2v1H3zM4 10h1v2H4z" fill="#ffbe0b"/></svg></span>
-              <strong class="mode-card-title">FIRTINA</strong>
+              <strong class="mode-card-title" data-i18n="mode_storm_title">FIRTINA</strong>
             </div>
-            <span class="mode-card-desc">Sonsuz Asteroid & Kombo</span>
+            <span class="mode-card-desc" data-i18n="mode_storm_desc">Sonsuz Asteroid & Kombo</span>
             <div class="mode-card-score">
-              <span>EN İYİ:</span> <strong id="score-val-storm">0</strong>
+              <span data-i18n="mode_storm_best">EN İYİ:</span> <strong id="score-val-storm">0</strong>
             </div>
           </button>
         </div>
@@ -241,31 +256,128 @@
         <!-- Dev Başlatma Butonu -->
         <button id="btn-start" class="cyber-launch-btn pulse">
           <span class="launch-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9zM5 9h2v3H5z" fill="#030816"/></svg></span>
-          <span class="launch-text">GÖREVE BAŞLA</span>
+          <span class="launch-text" data-i18n="btn_start">GÖREVE BAŞLA</span>
           <span class="launch-sheen"></span>
         </button>
       </div>
 
-      <!-- Alt Hızlı Erişim Çubuğu (4 Ferah Buton - Sade ve Net) -->
+      <!-- Alt Hızlı Erişim Çubuğu (5 Zengin Buton) -->
       <div class="menu-bottom-dock">
         <button id="btn-hangar" class="dock-btn highlight-dock-btn">
           <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M8 1h3v3H8zM7 3h1v1H7zM6 4h1v1H6zM5 5h1v1H5zM4 6h1v1H4zM3 7h1v1H3zM2 8h1v1H2zM1 9h2v2H1z" fill="#00f0ff"/><rect x="9" y="2" width="1" height="1" fill="#030816"/></svg></span>
-          <span class="dock-label">HANGAR & ATÖLYE</span>
+          <span class="dock-label" data-i18n="dock_hangar">HANGAR</span>
         </button>
         <button id="btn-missions" class="dock-btn relative-btn">
           <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><rect x="5" y="0" width="2" height="3" fill="#ffbe0b"/><rect x="5" y="9" width="2" height="3" fill="#ffbe0b"/><rect x="0" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="9" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="4" y="4" width="4" height="4" fill="none" stroke="#ffbe0b" stroke-width="1"/></svg></span>
-          <span class="dock-label">GÖREVLER</span>
+          <span class="dock-label" data-i18n="dock_missions">GÖREVLER</span>
           <span id="missions-badge-dot" class="badge-dot hidden"></span>
+        </button>
+        <button id="btn-lucky-wheel" class="dock-btn relative-btn highlight-dock-btn">
+          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="#ffd700" stroke-width="1.5"/><circle cx="6" cy="6" r="2" fill="#ff0055"/><polygon points="6,1 7,4 5,4" fill="#ffd700"/></svg></span>
+          <span class="dock-label" data-i18n="dock_wheel">ŞANS ÇARKI</span>
+          <span id="wheel-badge-dot" class="badge-dot"></span>
         </button>
         <button id="btn-daily-reward" class="dock-btn relative-btn highlight-dock-btn">
           <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M1 2h10v8H1z" fill="#05ffa1"/><rect x="2" y="3" width="8" height="6" fill="#064e3b"/><line x1="6" y1="2" x2="6" y2="10" stroke="#05ffa1" stroke-width="1.5"/><line x1="1" y1="6" x2="11" y2="6" stroke="#05ffa1" stroke-width="1.5"/></svg></span>
-          <span class="dock-label">İKMAL</span>
+          <span class="dock-label" data-i18n="dock_supply">İKMAL</span>
           <span id="daily-reward-dot" class="badge-dot hidden"></span>
         </button>
-        <button id="btn-stats" class="dock-btn">
-          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><rect x="1" y="7" width="2" height="4" fill="#00f0ff"/><rect x="4" y="4" width="2" height="7" fill="#05ffa1"/><rect x="7" y="2" width="2" height="9" fill="#ffbe0b"/><rect x="10" y="5" width="2" height="6" fill="#bf5af2"/></svg></span>
-          <span class="dock-label">İSTATİSTİK</span>
+        <button id="btn-leaderboard" class="dock-btn">
+          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><polygon points="6,1 8,5 11,5 8.5,8 9.5,11 6,9 2.5,11 3.5,8 1,5 4,5" fill="#ffd700"/></svg></span>
+          <span class="dock-label" data-i18n="dock_leaderboard">LİDERLER</span>
         </button>
+      </div>
+    </div>
+
+    <div id="privacy-modal" class="modal-overlay hidden">
+      <div class="modal-card privacy-card">
+        <h2 data-i18n="privacy_title">Gizlilik Politikası</h2>
+        <div class="privacy-body">
+          <p data-i18n="privacy_p1">Neon Space Survivor hesap açmaz. Skor, kristal, gemi ve ayarlar yalnızca bu cihazda saklanır.</p>
+          <p data-i18n="privacy_p2">İsteğe bağlı ödüllü reklamlar Google AdMob ile gösterilir. Reklam tamamlanmazsa ödül verilmez. AdMob reklam kimliği ve cihaz bilgisi işleyebilir.</p>
+          <p data-i18n="privacy_p3">İnternet bağlantısı reklamlar için kullanılır. Titreşim ayarı cihazında kalır.</p>
+          <p data-i18n="privacy_p4">İletişim: Google Play geliştirici profilindeki e-posta adresi.</p>
+        </div>
+        <button id="btn-close-privacy" type="button" class="neon-btn-secondary" data-i18n="privacy_close">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Ayarlar (Settings & Language) Modalı -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal-card settings-card" style="max-width: 420px; text-align: left;">
+        <div class="modal-header-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="modal-icon" style="margin: 0;">
+              <svg class="pixel-icon pixel-icon-lg" viewBox="0 0 16 16"><path d="M6 1h4v2H6zM6 13h4v2H6zM1 6h2v4H1zM13 6h2v4h-2zM3 3h2v2H3zM11 3h2v2h-2zM3 11h2v2H3zM11 11h2v2h-2zM5 5h6v6H5z" fill="#00f0ff"/></svg>
+            </div>
+            <h2 class="gameover-title" style="margin: 0; font-size: 1.25rem;" data-i18n="settings_title">AYARLAR</h2>
+          </div>
+          <button id="btn-settings-close-x" class="modal-close-btn" aria-label="Close">✕</button>
+        </div>
+
+        <!-- 1. Dil Seçimi Bölümü -->
+        <div class="settings-section">
+          <div class="settings-section-title" data-i18n="settings_language">DİL SEÇİMİ</div>
+          <div class="language-grid" id="language-grid">
+            <!-- 9 dil seçeneği dinamik olarak yerleştirilir -->
+          </div>
+        </div>
+
+        <!-- 2. Ses ve Titreşim Hızlı Ayarlar -->
+        <div class="settings-section" style="margin-top: 14px;">
+          <div class="settings-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(0,240,255,0.15);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg>
+              <span data-i18n="settings_audio" style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">SES EFEKTLERİ</span>
+            </div>
+            <button id="btn-toggle-sound-settings" class="neon-badge-btn" style="min-width: 80px; padding: 6px 12px; font-weight: 800; border-radius: 8px; cursor: pointer;">AÇIK</button>
+          </div>
+
+          <div class="settings-row" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(0,240,255,0.15);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><rect x="3" y="1" width="6" height="10" rx="1" fill="#00f0ff"/><line x1="1" y1="4" x2="1" y2="8" stroke="#00f0ff" stroke-width="1.2"/><line x1="11" y1="4" x2="11" y2="8" stroke="#00f0ff" stroke-width="1.2"/></svg>
+              <span data-i18n="settings_vibration" style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">TİTREŞİM</span>
+            </div>
+            <button id="btn-toggle-vibrate-settings" class="neon-badge-btn" style="min-width: 80px; padding: 6px 12px; font-weight: 800; border-radius: 8px; cursor: pointer;">AÇIK</button>
+          </div>
+        </div>
+
+        <!-- 3. Bulut Yedekleme / Cloud Save -->
+        <div class="settings-section" style="margin-top: 14px;">
+          <div class="settings-section-title" data-i18n="settings_cloud_save">BULUT YEDEKLEME (SAVE DATA)</div>
+          <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+            <button id="btn-export-save" type="button" class="neon-btn-secondary" style="flex: 1; padding: 8px 4px; font-size: 0.75rem; font-weight: 800;" data-i18n="settings_export_btn">📤 YEDEK KODU AL</button>
+            <button id="btn-import-save" type="button" class="neon-btn-secondary" style="flex: 1; padding: 8px 4px; font-size: 0.75rem; font-weight: 800;" data-i18n="settings_import_btn">📥 YEDEK KODU YÜKLE</button>
+          </div>
+        </div>
+
+        <!-- 4. Gizlilik & Reklam Tercihleri (GDPR) -->
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+          <button id="btn-settings-gdpr" type="button" class="neon-badge-btn" style="width: 100%; padding: 6px; font-size: 0.72rem; text-align: center; border-radius: 8px; cursor: pointer; color: #38bdf8;" data-i18n="settings_ad_privacy">🛡️ Reklam ve Gizlilik Tercihleri (GDPR)</button>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button id="btn-settings-privacy" type="button" class="privacy-link" style="padding: 4px 0;" data-i18n="settings_privacy">Gizlilik Politikası</button>
+            <span style="font-size: 0.75rem; color: #64748b;">v1.1.0 • Cyber Release</span>
+          </div>
+        </div>
+
+        <button id="btn-close-settings" type="button" class="neon-btn pulse" style="width: 100%; margin-top: 14px;" data-i18n="settings_close">KAYDET VE KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Bulut Yedek Kodu (Cloud Save Code) Modalı -->
+    <div id="save-code-modal" class="modal-overlay hidden">
+      <div class="modal-card" style="max-width: 380px; text-align: left;">
+        <h3 id="save-code-modal-title" class="game-title" style="color: #00f0ff; font-size: 1.2rem; margin-bottom: 8px;">BULUT YEDEKLEME</h3>
+        <p id="save-code-modal-desc" style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 10px;">
+          Bu kod tüm altınlarınızı, gemilerinizi ve açık bölümlerinizi içerir. Kodu kopyalayıp güvenli bir yere kaydedin.
+        </p>
+
+        <textarea id="save-code-textarea" rows="4" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.6); border: 1.5px solid #00f0ff; color: #ffffff; padding: 8px; border-radius: 8px; font-size: 0.72rem; font-family: monospace; resize: none; margin-bottom: 12px; word-break: break-all;"></textarea>
+
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-save-code-close" class="neon-btn-secondary" style="flex: 1;" data-i18n="btn_close">KAPAT</button>
+          <button id="btn-save-code-action" class="neon-btn-primary" style="flex: 1;">KOPYALA</button>
+        </div>
       </div>
     </div>
 
@@ -275,15 +387,132 @@
         <div class="modal-icon" style="margin-bottom: 6px;">
           <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M2 3h12v4H2z" fill="#05ffa1"/><rect x="7" y="1" width="2" height="14" fill="#ffffff"/><path d="M3 7h10v8H3z" fill="#064e3b"/><rect x="1" y="7" width="14" height="1" fill="#05ffa1"/></svg>
         </div>
-        <h2 class="game-title" style="color: #05ffa1; text-shadow: 0 0 16px rgba(5, 255, 161, 0.7); font-size: 1.35rem; margin-bottom: 2px;">7 GÜNLÜK PİLOT İKMALİ</h2>
-        <div id="daily-streak-badge" class="missions-reset-hint" style="color: #ffbe0b; font-weight: 700; margin: 2px 0 10px;">GİRİŞ SERİSİ</div>
+        <h2 class="game-title" style="color: #05ffa1; text-shadow: 0 0 16px rgba(5, 255, 161, 0.7); font-size: 1.35rem; margin-bottom: 2px;" data-i18n="daily_title">7 GÜNLÜK PİLOT İKMALİ</h2>
+        <div id="daily-streak-badge" class="missions-reset-hint" style="color: #ffbe0b; font-weight: 700; margin: 2px 0 10px;" data-i18n="daily_streak">GİRİŞ SERİSİ</div>
         
         <div id="daily-streak-grid" class="daily-streak-grid"></div>
 
         <button id="btn-claim-daily" class="neon-btn pulse" style="background: linear-gradient(135deg, #05ffa1, #00b4d8); color: #030816; font-weight: 900; margin-top: 14px;">
-          ÖDÜLÜ KASAYA AKTAR
+          🎬 REKLAM İZLE & ÖDÜLÜ AL
         </button>
-        <button id="btn-close-daily" class="neon-btn-secondary" style="margin-top: 8px;">KAPAT</button>
+        <button id="btn-close-daily" class="neon-btn-secondary" style="margin-top: 8px;" data-i18n="btn_close">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Kozmik Şans Çarkı (Lucky Wheel) Modalı -->
+    <div id="lucky-wheel-modal" class="modal-overlay hidden">
+      <div class="modal-card wheel-card" style="max-width: 360px; text-align: center;">
+        <div class="modal-icon" style="margin-bottom: 4px;">
+          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="#ffd700" stroke-width="1.8"/><circle cx="8" cy="8" r="3" fill="#ff0055"/><polygon points="8,1 10,5 6,5" fill="#ffd700"/></svg>
+        </div>
+        <h2 class="game-title" style="color: #ffd700; font-size: 1.45rem; margin-bottom: 2px;" data-i18n="wheel_title">KOZMİK ŞANS ÇARKI</h2>
+        <div id="wheel-status-subtitle" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px;" data-i18n="wheel_sub_free">Günde 1 kez ücretsiz çevir!</div>
+
+        <div class="wheel-stage-container" style="position: relative; width: 260px; height: 260px; margin: 0 auto 14px;">
+          <!-- Gösterge İğnesi -->
+          <div class="wheel-needle" style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 10;">
+            <svg width="28" height="34" viewBox="0 0 28 34">
+              <polygon points="14,32 3,2 25,2" fill="#ffd700" stroke="#ffffff" stroke-width="2"/>
+              <circle cx="14" cy="8" r="4" fill="#ff0055"/>
+            </svg>
+          </div>
+          <!-- Dönen Çark Canvas'ı -->
+          <canvas id="lucky-wheel-canvas" width="260" height="260" style="border-radius: 50%; box-shadow: 0 0 25px rgba(255, 215, 0, 0.45); border: 3px solid #ffd700;"></canvas>
+        </div>
+
+        <button id="btn-spin-wheel" class="neon-btn pulse gold-shimmer-btn" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px;">
+          <span class="btn-shimmer-badge">🎡 ÇEVİR</span>
+          <span id="btn-spin-wheel-text">ÜCRETSİZ ÇEVİR (1/1)</span>
+        </button>
+        <button id="btn-close-wheel" class="neon-btn-secondary" style="margin-top: 4px;" data-i18n="btn_close">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Global Lider Tablosu (Leaderboard) Modalı -->
+    <div id="leaderboard-modal" class="modal-overlay hidden">
+      <div class="modal-card leaderboard-card" style="display: flex; flex-direction: column; max-height: 88vh;">
+        <div class="leaderboard-header">
+          <div class="modal-icon" style="margin-bottom: 2px;">
+            <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,10 13,15 8,12 3,15 5,10 1,6 6,6" fill="#ffd700"/></svg>
+          </div>
+          <h2 class="game-title" style="color: #ffd700; font-size: 1.35rem; margin-bottom: 2px;" data-i18n="lb_title">GLOBAL LİDER TABLOSU</h2>
+          
+          <div class="lb-meta-bar">
+            <span class="lb-live-dot"></span>
+            <span id="lb-active-count">18.492 AKTİF PİLOT</span>
+            <span class="lb-season-pill" data-i18n="lb_season_tag">SEZON 3: NEON ARENA</span>
+          </div>
+
+          <!-- Mode Switch (Fırtına vs Sefer) -->
+          <div class="lb-mode-tabs">
+            <button id="lb-tab-storm" class="lb-mode-btn active">
+              <span>🌪️</span> <span data-i18n="lb_tab_storm">FIRTINA MODU</span>
+            </button>
+            <button id="lb-tab-campaign" class="lb-mode-btn">
+              <span>🚀</span> <span data-i18n="lb_tab_campaign">SEFER DERECESİ</span>
+            </button>
+          </div>
+
+          <!-- Sub View Switch (TOP 50 vs ETRAFIMDAKİLER) -->
+          <div class="lb-sub-tabs">
+            <button id="lb-view-top50" class="lb-sub-tab-btn active" data-i18n="lb_view_top50">🏆 TOP 50</button>
+            <button id="lb-view-around" class="lb-sub-tab-btn" data-i18n="lb_view_around_me">📍 ETRAFIMDAKİLER</button>
+          </div>
+        </div>
+
+        <!-- Top 3 Podium (Only visible in TOP 50 mode) -->
+        <div id="lb-podium-container" class="lb-podium-container">
+          <!-- Dynamic 2nd, 1st, 3rd slots -->
+        </div>
+
+        <!-- Leaderboard Scrollable List -->
+        <div id="leaderboard-list" class="leaderboard-list-container"></div>
+
+        <!-- Sticky Bottom Player HUD -->
+        <div id="leaderboard-player-banner" class="player-rank-bar">
+          <div class="lb-hud-left">
+            <span id="lb-player-tier-badge" class="lb-hud-tier">🥇</span>
+            <div class="lb-hud-rank-block">
+              <span id="lb-player-rank" class="lb-hud-rank">#...</span>
+              <span id="lb-player-percentile" class="lb-hud-percentile">Top %...</span>
+            </div>
+          </div>
+          <div class="lb-hud-center">
+            <button id="lb-btn-edit-profile" class="lb-hud-name-btn">
+              <span id="lb-player-name">SEN (Pilot)</span>
+              <span class="lb-hud-edit-icon">✎</span>
+            </button>
+            <span id="lb-player-hint" class="lb-hud-subtext">+0 PTS sıradaki hedefe</span>
+          </div>
+          <div class="lb-hud-right">
+            <strong id="lb-player-score" class="lb-hud-score">0</strong>
+            <span id="lb-player-score-sub" class="lb-hud-score-sub">SKOR</span>
+          </div>
+        </div>
+
+        <button id="btn-close-leaderboard" class="neon-btn-secondary" data-i18n="btn_close">KAPAT</button>
+      </div>
+    </div>
+
+    <!-- Pilot Profil Düzenleme Modalı -->
+    <div id="lb-profile-modal" class="modal-overlay hidden">
+      <div class="modal-card lb-profile-card">
+        <h3 class="game-title" style="color: #00f0ff; font-size: 1.2rem; margin-bottom: 10px;" data-i18n="lb_profile_title">PİLOT PROFİLİ</h3>
+        
+        <div style="text-align: left; margin-bottom: 10px;">
+          <label style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;" data-i18n="lb_callsign_label">ÇAĞRI KODU (İSİM):</label>
+          <input id="lb-input-callsign" type="text" maxlength="12" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1.5px solid #00f0ff; color: #ffffff; padding: 8px 10px; border-radius: 8px; font-weight: 800; font-family: var(--font-display); letter-spacing: 1px; margin-top: 4px; text-transform: uppercase;">
+        </div>
+
+        <div style="text-align: left; margin-bottom: 12px;">
+          <label style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;" data-i18n="lb_country_label">ÜLKE / BAYRAK:</label>
+          <div id="lb-flags-selector" class="lb-flag-grid"></div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button id="lb-btn-cancel-profile" class="neon-btn-secondary" style="flex: 1;" data-i18n="btn_close">İPTAL</button>
+          <button id="lb-btn-save-profile" class="neon-btn-primary" style="flex: 1;" data-i18n="lb_save_profile">KAYDET</button>
+        </div>
       </div>
     </div>
 
@@ -296,8 +525,8 @@
             <svg class="pixel-icon pixel-icon-lg" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#ffe600"/></svg>
             <svg class="pixel-icon pixel-icon-md" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#ffbe0b"/></svg>
           </div>
-          <h2>SEVİYE ATLADIN!</h2>
-          <p>Gemine bir yükseltme seç</p>
+          <h2 data-i18n="levelup_title">SEVİYE ATLADIN!</h2>
+          <p data-i18n="levelup_subtitle">Gemine bir yükseltme seç</p>
         </div>
 
         <div id="cards-container" class="cards-container">
@@ -306,8 +535,22 @@
 
         <div class="upgrade-footer-actions" style="margin-top: 10px; display: flex; justify-content: center;">
           <button id="btn-reroll-cards" class="neon-btn-secondary" style="font-size: 0.82rem; padding: 6px 14px;">
-            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px"><path d="M1 4h2V2h6v2h2v6H9v2H3v-2H1V4z" fill="#1e293b" stroke="#00f0ff" stroke-width="1"/><circle cx="4" cy="5" r="1" fill="#fff"/><circle cx="8" cy="5" r="1" fill="#fff"/><circle cx="6" cy="7" r="1" fill="#fff"/><circle cx="4" cy="9" r="1" fill="#fff"/><circle cx="8" cy="9" r="1" fill="#fff"/></svg> KARTLARI YENİLE (<span id="reroll-count-val">0</span>)
+            <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px"><path d="M1 4h2V2h6v2h2v6H9v2H3v-2H1V4z" fill="#1e293b" stroke="#00f0ff" stroke-width="1"/><circle cx="4" cy="5" r="1" fill="#fff"/><circle cx="8" cy="5" r="1" fill="#fff"/><circle cx="6" cy="7" r="1" fill="#fff"/><circle cx="4" cy="9" r="1" fill="#fff"/><circle cx="8" cy="9" r="1" fill="#fff"/></svg> <span data-i18n="levelup_reroll">KARTLARI YENİLE</span> (<span id="reroll-count-val">0</span>)
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taktiksel Bölüm Rotası Seçim Modalı (Route Choice) -->
+    <div id="route-modal" class="modal-overlay hidden">
+      <div class="modal-card route-card" style="max-width: 360px; text-align: center;">
+        <div class="modal-icon" style="margin-bottom: 4px;">
+          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M8 1L2 7h4v7h4V7h4L8 1z" fill="#00f0ff"/><polygon points="2,14 14,14 8,11" fill="#ffbe0b"/></svg>
+        </div>
+        <h2 class="game-title" style="color: #00f0ff; font-size: 1.3rem; margin-bottom: 2px;">ROTA SEÇİMİ</h2>
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 14px;">Sonraki sektörün tehlike ve ödül profilini belirle</div>
+        <div id="route-choices-container" style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+          <!-- Dinamik Rota Seçenek Kartları -->
         </div>
       </div>
     </div>
@@ -320,8 +563,8 @@
           <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M2 3h12v4H2z" fill="#ffbe0b"/><rect x="7" y="1" width="2" height="14" fill="#ff0055"/><path d="M3 7h10v8H3z" fill="#ff5500"/><rect x="1" y="7" width="14" height="1" fill="#ffe600"/></svg>
         </div>
         <div id="jackpot-badge" class="jackpot-tier-badge hidden">BÜYÜK İKRAMİYE!</div>
-        <h2 id="lucky-chest-title" class="game-title" style="color: #ffbe0b; text-shadow: 0 0 16px rgba(255, 190, 11, 0.7); font-size: 1.4rem; margin-bottom: 2px;">ŞANSLI UZAY SANDIĞI!</h2>
-        <div id="lucky-chest-subtitle" class="missions-reset-hint" style="color: #ffe600; margin-bottom: 12px;">Boss ganimeti açıldı!</div>
+        <h2 id="lucky-chest-title" class="game-title" style="color: #ffbe0b; text-shadow: 0 0 16px rgba(255, 190, 11, 0.7); font-size: 1.4rem; margin-bottom: 2px;" data-i18n="chest_title">ŞANSLI UZAY SANDIĞI!</h2>
+        <div id="lucky-chest-subtitle" class="missions-reset-hint" style="color: #ffe600; margin-bottom: 12px;" data-i18n="chest_subtitle">Boss ganimeti açıldı!</div>
         <div id="lucky-chest-container" class="lucky-chest-items-grid">
           <!-- Dinamik Sandık Ödülleri -->
         </div>
@@ -334,7 +577,7 @@
           </button>
         </div>
 
-        <button id="btn-claim-chest" class="neon-btn pulse" style="background: linear-gradient(135deg, #ffbe0b, #ff5500); color: #000; margin-top: 12px; font-weight: 900; box-shadow: 0 0 18px rgba(255, 190, 11, 0.6);">
+        <button id="btn-claim-chest" class="neon-btn pulse" style="background: linear-gradient(135deg, #ffbe0b, #ff5500); color: #000; margin-top: 12px; font-weight: 900; box-shadow: 0 0 18px rgba(255, 190, 11, 0.6);" data-i18n="chest_claim">
           GANİMETİ AL VE DEVAM ET
         </button>
       </div>
@@ -357,7 +600,11 @@
         <div class="merchant-items-grid" id="merchant-items-container">
           <!-- Dinamik Kaçakçı Kartları -->
         </div>
-        <button id="btn-merchant-close" class="neon-btn" style="margin-top: 14px;">YOLA DEVAM ET</button>
+        <button id="btn-merchant-ad-gold" class="neon-btn pulse gold-shimmer-btn" style="margin-top: 10px; width: 100%; font-size: 0.94rem; padding: 11px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span class="btn-shimmer-badge">💰 BEDAVA DESTEK</span>
+          <span id="btn-merchant-ad-gold-text">🎬 KAÇAKÇI DESTEĞİ: +100 KRİSTAL AL</span>
+        </button>
+        <button id="btn-merchant-close" class="neon-btn" style="margin-top: 10px;">YOLA DEVAM ET</button>
       </div>
     </div>
 
@@ -367,24 +614,24 @@
         <div class="modal-icon" style="margin-bottom: 6px;">
           <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><rect x="4" y="3" width="3" height="10" fill="#00f0ff"/><rect x="9" y="3" width="3" height="10" fill="#00f0ff"/></svg>
         </div>
-        <h2 class="gameover-title" style="margin-bottom: 8px;">OYUN DURAKLATILDI</h2>
+        <h2 class="gameover-title" style="margin-bottom: 8px;" data-i18n="pause_title">OYUN DURAKLATILDI</h2>
         
         <!-- 1. Üst Sefer & Durum Bilgileri (SEFER, DALGA, SÜRE, SKOR) -->
         <div class="pause-mission-banner">
           <div class="pause-stat-chip">
-            <span class="pause-stat-lbl">SEFER</span>
+            <span class="pause-stat-lbl" data-i18n="pause_stage">SEFER</span>
             <strong id="pause-stage-text">BÖLÜM 1</strong>
           </div>
           <div class="pause-stat-chip">
-            <span class="pause-stat-lbl">DALGA</span>
+            <span class="pause-stat-lbl" data-i18n="pause_wave">DALGA</span>
             <strong id="pause-wave-text">DALGA 1</strong>
           </div>
           <div class="pause-stat-chip">
-            <span class="pause-stat-lbl">SÜRE</span>
+            <span class="pause-stat-lbl" data-i18n="pause_time">SÜRE</span>
             <strong id="pause-time-text">00:00</strong>
           </div>
           <div class="pause-stat-chip">
-            <span class="pause-stat-lbl">SKOR</span>
+            <span class="pause-stat-lbl" data-i18n="pause_score">SKOR</span>
             <strong id="pause-score-text">0</strong>
           </div>
         </div>
@@ -393,7 +640,7 @@
         <div id="pause-quest-section" class="pause-quest-section" style="margin-bottom: 12px;">
           <div class="pause-quest-header">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:5px;"><rect x="1" y="1" width="10" height="10" fill="none" stroke="#00f0ff" stroke-width="1.5"/><rect x="4" y="4" width="4" height="4" fill="#ff0055"/></svg>
-            <span>AKTİF MEYDAN OKUMA GÖREVİ</span>
+            <span data-i18n="pause_active_quest">AKTİF MEYDAN OKUMA GÖREVİ</span>
           </div>
           <div id="pause-quest-content" class="pause-quest-content">
             <div class="pause-quest-title-row">
@@ -410,7 +657,7 @@
         <div class="pause-inventory-section">
           <div class="pause-codex-title">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM2 3h8v6H2zM4 9h4v2H4z" fill="#00f0ff"/></svg>
-            AKTİF SİSTEMLER VE DONANIM
+            <span data-i18n="pause_active_systems">AKTİF SİSTEMLER VE DONANIM</span>
           </div>
           <div id="pause-inventory-grid" class="pause-inventory-grid">
             <!-- Dinamik Yükseltme ve Donanım Listesi -->
@@ -419,11 +666,12 @@
 
         <!-- 4. Aksiyon Butonları (DEVAM ET ve ANA MENÜYE DÖN) -->
         <div class="menu-btn-group pause-primary-actions" style="margin-top: 10px; margin-bottom: 12px;">
-          <button id="btn-resume" class="neon-btn pulse">DEVAM ET</button>
-          <button id="btn-quit-menu" class="neon-btn-secondary">ANA MENÜYE DÖN</button>
-          <div class="pause-audio-row" style="margin-top: 4px;">
+          <button id="btn-resume" class="neon-btn pulse" data-i18n="pause_resume">DEVAM ET</button>
+          <button id="btn-quit-menu" class="neon-btn-secondary" data-i18n="pause_quit">ANA MENÜYE DÖN</button>
+          <div class="pause-audio-row" style="margin-top: 4px; display: flex; gap: 8px;">
             <button id="btn-pause-sound" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg> <span id="pause-sound-text">SES: AÇIK</span></button>
             <button id="btn-pause-vibrate" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px;"><rect x="3" y="1" width="6" height="10" rx="1" fill="#00f0ff"/><line x1="1" y1="4" x2="1" y2="8" stroke="#00f0ff" stroke-width="1.2"/><line x1="11" y1="4" x2="11" y2="8" stroke="#00f0ff" stroke-width="1.2"/></svg> <span id="pause-vibrate-text">TİTREŞİM: AÇIK</span></button>
+            <button id="btn-pause-settings" class="sound-menu-btn"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 16 16" style="margin-right:4px;"><path d="M6 1h4v2H6zM6 13h4v2H6zM1 6h2v4H1zM13 6h2v4h-2zM3 3h2v2H3zM11 3h2v2h-2zM3 11h2v2H3zM11 11h2v2h-2zM5 5h6v6H5z" fill="#00f0ff"/></svg> <span id="pause-settings-text" data-i18n="pause_settings">AYARLAR</span></button>
           </div>
         </div>
 
@@ -453,15 +701,17 @@
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff" stroke="#ffffff" stroke-width="0.8"/></svg>
               <span id="hangar-crystals-val">0</span> Kristal
             </div>
-            <button id="btn-free-gold-hangar" class="btn-free-gold pulse" title="Reklam İzle ve +50 Altın/Kristal Kazan">
-              <span class="gold-icon">🪙</span>
-              <span class="gold-label">+50 Altın</span>
+            <button id="btn-free-gold-hangar" class="btn-free-gold pulse gold-shimmer-btn" title="Reklam İzle ve +200 ~ +380 Kristal Kazan!">
+              <span class="gold-icon">🎁</span>
+              <span class="gold-label">+200 CR ⚡</span>
             </button>
           </div>
         </div>
         <!-- Hangar Sekmeleri -->
         <div class="hangar-tabs">
           <button id="tab-btn-skins" class="hangar-tab-btn active">KOSTÜMLER</button>
+          <button id="tab-btn-trails" class="hangar-tab-btn">İZLER</button>
+          <button id="tab-btn-drones" class="hangar-tab-btn">DRONLAR</button>
           <button id="tab-btn-tech" class="hangar-tab-btn">PİLOT ATÖLYESİ</button>
           <button id="tab-btn-trophies" class="hangar-tab-btn">BAŞARIMLAR</button>
         </div>
@@ -470,22 +720,33 @@
           <!-- Dinamik Kostüm Kartları -->
         </div>
 
+        <div id="trails-container" class="skins-grid hidden">
+          <!-- Dinamik Motor İzi Kartları -->
+        </div>
+
+        <div id="drones-container" class="skins-grid hidden">
+          <!-- Dinamik Kalıcı Drone Kartları -->
+        </div>
+
         <div id="tech-tab-view" class="tech-tab-view hidden">
-          <!-- Başlangıç Pilot Arketipleri & Aşırı Yükleme Protokolü (Atölye İçi Taktik) -->
+          <!-- Başlangıç Pilot Seçimi & Aşırı Yükleme Protokolü -->
           <div class="archetype-selector-box hangar-archetype-box">
-            <div class="archetype-title">UÇUŞ DOKTRİNİ:</div>
+            <div class="archetype-title" data-i18n="hangar_pilot_title">PİLOT SEÇİMİ:</div>
             <div class="archetype-tabs">
               <button class="archetype-btn active" data-archetype="interceptor">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#00f0ff"/></svg> AVCI
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#00f0ff"/></svg> VEGA
               </button>
               <button class="archetype-btn" data-archetype="dreadnought">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M1 2h8v3c0 2.5-4 4-4 4s-4-1.5-4-4V2z" fill="#00f0ff"/></svg> KUŞATMA
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M1 2h8v3c0 2.5-4 4-4 4s-4-1.5-4-4V2z" fill="#00f0ff"/></svg> TITAN
               </button>
               <button class="archetype-btn" data-archetype="technician">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><circle cx="5" cy="5" r="3" fill="#00f0ff"/><rect x="0" y="4" width="3" height="2" fill="#00f0ff"/><rect x="7" y="4" width="3" height="2" fill="#00f0ff"/></svg> MÜHENDİS
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><circle cx="5" cy="5" r="3" fill="#00f0ff"/><rect x="0" y="4" width="3" height="2" fill="#00f0ff"/><rect x="7" y="4" width="3" height="2" fill="#00f0ff"/></svg> NOVA
+              </button>
+              <button class="archetype-btn" data-archetype="blaze">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-right:2px"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/></svg> BLAZE
               </button>
             </div>
-            <div id="archetype-desc" class="archetype-desc">+%15 Atış Hızı & Çift Namlu Refleksi</div>
+            <div id="archetype-desc" class="archetype-desc">Zaman Bükümü: Düşmanları 4 sn %70 yavaşlatır</div>
           </div>
 
           <div class="overload-toggle-row hangar-overload-row">
@@ -615,41 +876,60 @@
         <div class="modal-icon" style="margin-bottom: 6px;">
           <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M7 1h2v3H7zM3 3h3v2H3zM10 3h3v2h-3zM1 7h3v2H1zM12 7h3v2h-3zM3 11h3v2H3zM10 11h3v2h-3zM7 12h2v3H7z" fill="#ff0055"/><rect x="5" y="5" width="6" height="6" fill="#ffe600"/><rect x="6" y="6" width="4" height="4" fill="#ffffff"/></svg>
         </div>
-        <h2 class="gameover-title" style="color: #ff0055; text-shadow: 0 0 18px rgba(255, 0, 85, 0.7); font-size: 1.5rem; margin-bottom: 2px; font-family: var(--font-display); font-weight: 900; letter-spacing: 1px;">SİNYAL KESİLDİ</h2>
-        <div class="gameover-subtitle" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 14px;">Gemin derin uzayda imhâ edildi!</div>
+        <h2 class="gameover-title" style="color: #ff0055; text-shadow: 0 0 18px rgba(255, 0, 85, 0.7); font-size: 1.5rem; margin-bottom: 2px; font-family: var(--font-display); font-weight: 900; letter-spacing: 1px;" data-i18n="gameover_title">SİNYAL KESİLDİ</h2>
+        <div class="gameover-subtitle" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 14px;" data-i18n="gameover_subtitle">Gemin derin uzayda imhâ edildi!</div>
 
         <!-- İstatistik Tablosu -->
         <div class="gameover-stats-grid">
           <div class="go-stat-box">
-            <span class="go-stat-label">SKOR</span>
+            <span class="go-stat-label" data-i18n="pause_score">SKOR</span>
             <strong id="final-score" class="go-stat-val" style="color: #00f0ff;">0</strong>
           </div>
           <div class="go-stat-box">
-            <span class="go-stat-label">REKOR</span>
+            <span class="go-stat-label" data-i18n="mode_storm_best">REKOR</span>
             <strong id="final-high-score" class="go-stat-val" style="color: #ffbe0b;">0</strong>
           </div>
           <div class="go-stat-box">
-            <span class="go-stat-label">SÜRE</span>
+            <span class="go-stat-label" data-i18n="pause_time">SÜRE</span>
             <strong id="final-time" class="go-stat-val">00:00</strong>
           </div>
           <div class="go-stat-box">
-            <span class="go-stat-label">SEVİYE</span>
+            <span class="go-stat-label" data-i18n="pause_wave">SEVİYE</span>
             <strong id="final-level" class="go-stat-val" style="color: #bf5af2;">1</strong>
           </div>
         </div>
 
-        <div class="go-crystals-earned" style="margin: 12px 0 16px; padding: 10px 14px; background: rgba(5, 255, 161, 0.1); border: 1px solid rgba(5, 255, 161, 0.35); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.85rem; color: #cbd5e1; font-weight: 700;">KAZANILAN GANİMET</span>
-          <strong id="final-crystals" style="color: #05ffa1; font-size: 1.1rem; text-shadow: 0 0 10px #05ffa1;">+0 <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-left:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#05ffa1" stroke="#ffffff" stroke-width="0.8"/></svg></strong>
+        <!-- Ganimet Katlama & Ödül Teşvik Kutusu -->
+        <div class="go-reward-double-box">
+          <div class="go-reward-header">
+            <span class="go-reward-title">KOŞU GANİMETİ</span>
+            <span class="go-reward-tag">🔥 2X FIRSAT</span>
+          </div>
+          <div class="go-reward-comparison">
+            <div class="reward-col current">
+              <span class="reward-lbl">KAZANILAN</span>
+              <strong id="final-crystals" class="reward-val">+0 CR</strong>
+            </div>
+            <div class="reward-arrow">➔</div>
+            <div class="reward-col boosted">
+              <span class="reward-lbl">2X İLE KASAYA</span>
+              <strong id="final-crystals-boosted" class="reward-val-boosted">+0 CR 🔥</strong>
+            </div>
+          </div>
         </div>
+
+        <button id="btn-double-crystals" class="neon-btn pulse gold-shimmer-btn" style="width: 100%; font-size: 0.96rem; padding: 11px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span class="btn-shimmer-badge">⚡ 2X KATLA</span>
+          <span id="btn-double-crystals-text">🎬 GANİMETİ İKİYE KATLA (REKLAM)</span>
+        </button>
 
         <!-- Aksiyon Butonları -->
         <div class="gameover-actions">
-          <button id="btn-ad-revive" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #030816; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button id="btn-ad-revive" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #030816; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;" data-i18n="btn_revive">
             <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><polygon points="3,1 10,6 3,11" fill="#030816"/></svg>
             REKLAM İZLE: CANLAN & DEVAM ET
           </button>
-          <button id="btn-restart" class="neon-btn" style="width: 100%; font-size: 1.0rem; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button id="btn-restart" class="neon-btn" style="width: 100%; font-size: 1.0rem; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;" data-i18n="btn_retry">
             <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9z" fill="#030816"/></svg>
             YENİDEN DOĞ
           </button>
@@ -658,7 +938,7 @@
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM4 9h4v2H4zM1 4h2v4H1zM9 4h2v4H9z" fill="#00f0ff"/><rect x="4" y="4" width="4" height="4" fill="#ffbe0b"/></svg>
               ATÖLYE & HANGAR
             </button>
-            <button id="btn-gameover-menu" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <button id="btn-gameover-menu" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;" data-i18n="btn_menu">
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#00f0ff"/></svg>
               ANA MENÜ
             </button>
@@ -693,8 +973,8 @@
         <div class="modal-icon victory-icon" style="margin-bottom: 6px;">
           <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,10 13,15 8,12 3,15 5,10 1,6 6,6" fill="#ffd700" stroke="#ffbe0b" stroke-width="0.8"/></svg>
         </div>
-        <h2 id="victory-title" class="victory-title">BÖLÜM TAMAMLANDI!</h2>
-        <div id="victory-subtitle" class="victory-subtitle">Bölüm 1 Başarıyla Temizlendi</div>
+        <h2 id="victory-title" class="victory-title" data-i18n="victory_title">BÖLÜM TAMAMLANDI!</h2>
+        <div id="victory-subtitle" class="victory-subtitle" data-i18n="victory_subtitle">Bölüm 1 Başarıyla Temizlendi</div>
 
         <div class="victory-stars-row" id="victory-stars-row">
           <svg class="pixel-icon pixel-icon-xl star-icon filled" viewBox="0 0 12 12"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="#ffbe0b"/></svg>
@@ -702,13 +982,18 @@
           <svg class="pixel-icon pixel-icon-xl star-icon filled" viewBox="0 0 12 12"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="#ffbe0b"/></svg>
         </div>
 
-        <div class="victory-rewards-box" style="margin: 14px 0; padding: 12px 14px; background: rgba(5, 255, 161, 0.12); border: 1.5px solid #05ffa1; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="victory-rewards-box" style="margin: 14px 0 10px; padding: 12px 14px; background: rgba(5, 255, 161, 0.12); border: 1.5px solid #05ffa1; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 0.85rem; color: #cbd5e1; font-weight: 700;">İLK GEÇİŞ GANİMETİ</span>
           <strong id="victory-reward-crystals" style="color: #05ffa1; font-size: 1.15rem; text-shadow: 0 0 12px #05ffa1;">+350 <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-left:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#05ffa1" stroke="#ffffff" stroke-width="0.8"/></svg></strong>
         </div>
 
+        <button id="btn-victory-double" class="neon-btn pulse gold-shimmer-btn" style="width: 100%; font-size: 0.96rem; padding: 11px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span class="btn-shimmer-badge">🏆 2X ZAFER</span>
+          <span id="btn-victory-double-text">🎬 ZAFER GANİMETİNİ KATLA (REKLAM)</span>
+        </button>
+
         <div class="victory-actions">
-          <button id="btn-next-level" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #05ffa1, #00b4d8); color: #030816; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button id="btn-next-level" class="neon-btn pulse" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #05ffa1, #00b4d8); color: #030816; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;" data-i18n="btn_next_sector">
             <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><polygon points="3,1 10,6 3,11" fill="#030816"/></svg>
             SONRAKİ BÖLÜM ▶
           </button>
@@ -717,7 +1002,7 @@
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M4 1h4v2H4zM4 9h4v2H4zM1 4h2v4H1zM9 4h2v4H9z" fill="#00f0ff"/><rect x="4" y="4" width="4" height="4" fill="#ffbe0b"/></svg>
               ATÖLYE & HANGAR
             </button>
-            <button id="btn-victory-menu" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <button id="btn-victory-menu" class="neon-btn-secondary" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;" data-i18n="btn_menu">
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#00f0ff"/></svg>
               ANA MENÜ
             </button>
@@ -731,52 +1016,136 @@
   <script>
     window.ADMOB_CONFIG = {
       appId: 'ca-app-pub-9505724609102225~7806689394',
-      reviveAdUnitId: 'ca-app-pub-9505724609102225/7675750898',
-      goldAdUnitId: 'ca-app-pub-9505724609102225/4609680419',
-      chestAdUnitId: 'ca-app-pub-9505724609102225/8434298794'
+      reviveAdUnitId: 'ca-app-pub-9505724609102225/4609680419',
+      goldAdUnitId: 'ca-app-pub-9505724609102225/7675750898', // Geçişli reklam birimi menüdeki altın butonuna bağlandı!
+      chestAdUnitId: 'ca-app-pub-9505724609102225/8434298794',
+      // Google Resmi Evrensel Test Ödüllü Reklam Birimi (Canlı birim onaylanana kadar video açılmasını garanti eder)
+      testRewardedId: 'ca-app-pub-3940256099942544/5224354917'
     };
 
-    window._admobPreloaded = false;
+    window._admobInitialized = false;
 
-    // Arka planda yeni reklamı önceden yükle (preloadRewardVideo)
+    // Avrupa Birliği (GDPR / UMP) Rıza ve İzin Kontrolü
+    window.initAdMobConsent = async function() {
+      const AdMob = window.Capacitor?.Plugins?.AdMob;
+      if (!AdMob || !AdMob.requestConsentInfo) return;
+      try {
+        const consentInfo = await AdMob.requestConsentInfo();
+        console.log('AdMob UMP Consent Info:', consentInfo);
+        if (consentInfo.isConsentFormAvailable && consentInfo.status === 'REQUIRED') {
+          await AdMob.showConsentForm();
+        }
+      } catch (err) {
+        console.warn('AdMob Consent check warning:', err);
+      }
+    };
+
+    // Ayarlardan kullanıcı istediğinde Gizlilik & Çerez tercihini yeniden açma
+    window.showPrivacyOptionsForm = async function() {
+      const AdMob = window.Capacitor?.Plugins?.AdMob;
+      if (AdMob) {
+        if (AdMob.showPrivacyOptionsForm) {
+          try {
+            await AdMob.showPrivacyOptionsForm();
+            return;
+          } catch(e) {}
+        }
+        if (AdMob.showConsentForm) {
+          try {
+            await AdMob.showConsentForm();
+            return;
+          } catch(e) {}
+        }
+      }
+      const priv = document.getElementById('privacy-modal');
+      if (priv) priv.classList.remove('hidden');
+    };
+
+    // Arka planda yeni reklamı önceden yükle (non-blocking)
     window.preloadRewardVideo = async function(adId) {
       const targetId = adId || window.ADMOB_CONFIG.goldAdUnitId;
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         try {
           await window.Capacitor.Plugins.AdMob.prepareRewardVideoAd({ adId: targetId });
-          window._admobPreloaded = true;
-          console.log('AdMob: Reklam önceden başarıyla yüklendi.');
+          console.log('AdMob: Reklam önceden hazırlandı.');
         } catch (e) {
-          console.warn('AdMob preload uyarısı:', e);
+          // Sessizce geç
         }
       }
     };
 
-    // Genel Ödüllü Reklam Gösterici
+    // Zaman aşımlı yardımcı fonksiyon (donmayı önler)
+    function withTimeout(promise, ms = 4500) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), ms))
+      ]);
+    }
+
+    // Genel Ödüllü Reklam Gösterici (Hızlı, Donmayan ve Garantili Fallback)
     window.showRewardedAd = async function(onReward, onError, specificAdUnitId) {
-      const adUnitId = specificAdUnitId || window.ADMOB_CONFIG.reviveAdUnitId;
+      const adUnitId = specificAdUnitId || window.ADMOB_CONFIG.goldAdUnitId;
       console.log('AdMob Ödüllü Reklam Çağrılıyor... AdUnitID:', adUnitId);
 
-      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+      const hasAdMob = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
+      if (hasAdMob) {
+        const AdMob = window.Capacitor.Plugins.AdMob;
+
+        // SDK henüz başlatılmadıysa hemen başlat
+        if (!window._admobInitialized && AdMob.initialize) {
+          try {
+            await AdMob.initialize({ initializeForTesting: false, maxAdContentRating: 'Teen' });
+            window._admobInitialized = true;
+            if (window.initAdMobConsent) window.initAdMobConsent();
+          } catch (initErr) {
+            console.warn('AdMob anlık başlatma uyarısı:', initErr);
+          }
+        }
+
+        let adShown = false;
+
+        // 1. Canlı Reklamı İste & Göster (Maksimum 4.5 saniye bekle)
         try {
-          const AdMob = window.Capacitor.Plugins.AdMob;
-          await AdMob.prepareRewardVideoAd({ adId: adUnitId });
+          if (window.game && window.game.showToast) {
+            window.game.showToast('🎬 Reklam hazırlanıyor...', '#00f0ff');
+          }
+          await withTimeout(AdMob.prepareRewardVideoAd({ adId: adUnitId, isTesting: false }), 4000);
           const reward = await AdMob.showRewardVideoAd();
-          if (onReward) onReward(reward);
-          // İzlendikten sonra bir sonraki kullanım için arka planda yeni reklamı yükle
+          adShown = true;
+          if (onReward) onReward(reward || { amount: 300 });
           window.preloadRewardVideo(adUnitId);
           return;
-        } catch (err) {
-          console.warn('AdMob reklam hatası:', err);
-          if (onError) onError(err);
-          else if (onReward) onReward({ fallback: true });
-          return;
+        } catch (liveErr) {
+          console.warn('Ödüllü video denenemedi veya birim geçişli, Interstitial deneniyor:', liveErr);
+          if (AdMob.prepareInterstitial && AdMob.showInterstitial) {
+            try {
+              await withTimeout(AdMob.prepareInterstitial({ adId: adUnitId, isTesting: false }), 4000);
+              await AdMob.showInterstitial();
+              adShown = true;
+              if (onReward) onReward({ amount: 300 });
+              return;
+            } catch (intErr) {
+              console.warn('Geçiş reklamı çağrı hatası:', intErr);
+            }
+          }
+        }
+
+        // 2. Canlı Reklam Henüz Google'da Onaylanmadıysa Google Test Videosunu Aç (Garantili Video Gösterimi)
+        if (!adShown) {
+          try {
+            await withTimeout(AdMob.prepareRewardVideoAd({ adId: window.ADMOB_CONFIG.testRewardedId, isTesting: true }), 4000);
+            const reward = await AdMob.showRewardVideoAd();
+            adShown = true;
+            if (onReward) onReward(reward || { amount: 50 });
+            return;
+          } catch (testErr) {
+            console.warn('Test reklamı da yüklenemedi:', testErr);
+          }
         }
       }
 
-      // Web / Test Simülasyonu
-      console.log('AdMob yerel eklenti bulunamadı, simülasyon ödülü veriliyor.');
-      if (onReward) onReward({ type: 'reward', amount: 1 });
+      // 3. Reklam gösterilemezse veya kullanıcı videoyu bitirmeden kapatırsa para verme, sadece bilgilendir
+      if (onError) onError('ad_cancelled_or_unavailable');
     };
 
     // Altın / Kristal Reklamı İzleme ve Ödül Fonksiyonu (watchAdForGold)
@@ -786,41 +1155,42 @@
       const setButtonsState = (disabled, text) => {
         if (btnMenu) {
           btnMenu.disabled = disabled;
-          if (text) btnMenu.querySelector('.gold-label').textContent = text;
+          const lbl = btnMenu.querySelector('.gold-label');
+          if (lbl && text) lbl.textContent = text;
         }
         if (btnHangar) {
           btnHangar.disabled = disabled;
-          if (text) btnHangar.querySelector('.gold-label').textContent = text;
+          const lbl = btnHangar.querySelector('.gold-label');
+          if (lbl && text) lbl.textContent = text;
         }
       };
 
-      // Cooldown / Süre Kontrolü (60 saniye geri sayım)
+      // Cooldown / Süre Kontrolü (20 saniye geri sayım)
       const lastWatch = parseInt(localStorage.getItem('neon_ad_gold_time') || '0', 10);
       const now = Date.now();
-      const cooldownMs = 60 * 1000;
+      const cooldownMs = 20 * 1000;
       if (now - lastWatch < cooldownMs) {
         const remainingSec = Math.ceil((cooldownMs - (now - lastWatch)) / 1000);
         if (window.game && window.game.showToast) {
           window.game.showToast(`Lütfen ${remainingSec} sn bekleyin!`, '#ffbe0b');
-        } else {
-          alert(`Bir sonraki ödül için ${remainingSec} saniye beklemelisiniz.`);
         }
         return;
       }
 
-      // Çift tıklamayı engelle ve yükleniyor durumuna geçir
-      setButtonsState(true, 'Yükleniyor...');
+      // Butonu bekleme durumuna al
+      setButtonsState(true, '⏳ Bekleyin');
 
       window.showRewardedAd((reward) => {
-        // Reklam Başarıyla İzlendi: +50 Altın / Kristal Ver
+        // Reklam Tamamlandı / Ödül Verildi
         localStorage.setItem('neon_ad_gold_time', Date.now().toString());
 
-        if (window.game) {
-          window.game.addGoldReward(50);
+        if (window.game && window.game.addGoldReward) {
+          window.game.addGoldReward(200, true);
         } else {
-          // Doğrudan fallback
           let currentCrystals = parseInt(localStorage.getItem('neon_total_crystals') || '0', 10);
-          currentCrystals += 50;
+          const isJackpot = Math.random() < 0.28;
+          const gain = isJackpot ? 380 : 200;
+          currentCrystals += gain;
           localStorage.setItem('neon_total_crystals', currentCrystals.toString());
           const d1 = document.getElementById('total-crystals-display');
           const d2 = document.getElementById('hangar-crystals-val');
@@ -828,16 +1198,14 @@
           if (d2) d2.textContent = currentCrystals.toLocaleString();
         }
 
-        // 60 saniyelik geri sayım başlat
-        window.startGoldAdCooldown(60);
+        // 20 saniyelik geri sayımı başlat
+        window.startGoldAdCooldown(20);
       }, (err) => {
-        // Reklam yarıda kapatıldı veya yüklenemedi
-        console.warn('Reklam tamamlanamadı:', err);
-        setButtonsState(false, '+50');
+        // Kullanıcı reklamı tamamlamadan çıktıysa veya reklam yoksa PARA VERME!
+        console.warn('AdMob reklam tamamlanmadı veya kapatıldı:', err);
+        setButtonsState(false, '+200 ⚡');
         if (window.game && window.game.showToast) {
-          window.game.showToast('Reklam tamamlanmadı, ödül verilemedi.', '#ff0055');
-        } else {
-          alert('Reklam tamamlanmadığı için ödül verilemedi.');
+          window.game.showToast('⚠️ Reklam tamamlanmadığı için ödül verilemedi.', '#ff0055');
         }
       }, window.ADMOB_CONFIG.goldAdUnitId);
     };
@@ -863,21 +1231,22 @@
       };
 
       updateUI();
-      const interval = setInterval(() => {
+      if (window._goldAdTimer) clearInterval(window._goldAdTimer);
+      window._goldAdTimer = setInterval(() => {
         remaining--;
         if (remaining <= 0) {
-          clearInterval(interval);
+          clearInterval(window._goldAdTimer);
           if (btnMenu) {
             btnMenu.disabled = false;
             btnMenu.classList.add('pulse');
             const lbl = btnMenu.querySelector('.gold-label');
-            if (lbl) lbl.textContent = '+50';
+            if (lbl) lbl.textContent = '+125 ⚡';
           }
           if (btnHangar) {
             btnHangar.disabled = false;
             btnHangar.classList.add('pulse');
             const lbl = btnHangar.querySelector('.gold-label');
-            if (lbl) lbl.textContent = '+50 Altın';
+            if (lbl) lbl.textContent = '+125 CR ⚡';
           }
         } else {
           updateUI();
@@ -887,15 +1256,55 @@
 
     // Sayfa açıldığında var olan cooldown'ı ve reklam ön yüklemesini kontrol et
     window.addEventListener('DOMContentLoaded', () => {
+      const privacyBtn = document.getElementById('btn-privacy');
+      const privacyModal = document.getElementById('privacy-modal');
+      const privacyClose = document.getElementById('btn-close-privacy');
+      if (privacyBtn && privacyModal) {
+        privacyBtn.addEventListener('click', () => privacyModal.classList.remove('hidden'));
+      }
+      if (privacyClose && privacyModal) {
+        privacyClose.addEventListener('click', () => privacyModal.classList.add('hidden'));
+      }
+
+      const bootAds = async () => {
+        const AdMob = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
+        if (!AdMob) return;
+        try {
+          if (AdMob.initialize) {
+            await AdMob.initialize({
+              initializeForTesting: false,
+              tagForChildDirectedTreatment: false,
+              tagForUnderAgeOfConsent: false,
+              maxAdContentRating: 'Teen'
+            });
+            window._admobInitialized = true;
+            console.log('AdMob: Başarıyla başlatıldı.');
+          }
+        } catch (err) {
+          console.warn('AdMob başlatma hatası:', err);
+        }
+
+        try {
+          if (AdMob.requestConsentInfo) {
+            let info = await AdMob.requestConsentInfo();
+            if (info && info.isConsentFormAvailable && info.status === 'REQUIRED') {
+              await AdMob.showConsentForm();
+            }
+          }
+        } catch (consentErr) {
+          // Consent hataları ana akışı bozmasın
+        }
+
+        if (window.preloadRewardVideo) window.preloadRewardVideo();
+      };
+
       const lastWatch = parseInt(localStorage.getItem('neon_ad_gold_time') || '0', 10);
       const diff = Date.now() - lastWatch;
       const cooldownMs = 60 * 1000;
       if (diff < cooldownMs) {
         window.startGoldAdCooldown(Math.ceil((cooldownMs - diff) / 1000));
       }
-      setTimeout(() => {
-        if (window.preloadRewardVideo) window.preloadRewardVideo();
-      }, 3000);
+      setTimeout(bootAds, 800);
     });
   </script>
 

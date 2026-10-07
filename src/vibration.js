@@ -21,9 +21,15 @@ export const vibrate = {
     return this.enabled;
   },
 
+  _lastLightTime: 0,
+  _lastMediumTime: 0,
+
   // Hafif dokunma / mermi atış titreşimi
   light() {
     if (!this.enabled) return;
+    const now = Date.now();
+    if (now - this._lastLightTime < 70) return;
+    this._lastLightTime = now;
     try {
       if (Haptics && Haptics.impact) {
         Haptics.impact({ style: 'LIGHT' });
@@ -36,6 +42,9 @@ export const vibrate = {
   // Düşman vurulma / orta patlama titreşimi
   medium() {
     if (!this.enabled) return;
+    const now = Date.now();
+    if (now - this._lastMediumTime < 90) return;
+    this._lastMediumTime = now;
     try {
       if (Haptics && Haptics.impact) {
         Haptics.impact({ style: 'MEDIUM' });

@@ -1,4 +1,4 @@
-package com.antigravity.spacesurvivor;
+package com.kaunos.neonspace;
 
 import com.getcapacitor.BridgeActivity;
 

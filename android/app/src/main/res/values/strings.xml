@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Neon Space Survivor</string>
     <string name="title_activity_main">Neon Space Survivor</string>
-    <string name="package_name">com.antigravity.spacesurvivor</string>
-    <string name="custom_url_scheme">com.antigravity.spacesurvivor</string>
+    <string name="package_name">com.kaunos.neonspace</string>
+    <string name="custom_url_scheme">com.kaunos.neonspace</string>
 </resources>

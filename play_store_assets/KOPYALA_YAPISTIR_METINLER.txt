@@ -1,0 +1,40 @@
+====================================================================
+NEON SPACE SURVIVOR - GOOGLE PLAY STORE KOPYALA-YAPISTIR METINLERI
+====================================================================
+
+1. UYGULAMA ADI (Title - Maks 30 Karakter):
+Neon Space Survivor
+
+--------------------------------------------------------------------
+2. KISA ACIKLAMA (Short Description - Maks 80 Karakter):
+Neon uzay derinliklerinde hayatta kal, filoları yok et ve gemini geliştir!
+
+--------------------------------------------------------------------
+3. TAM ACIKLAMA (Full Description):
+Neon Space Survivor ile retro-fütüristik ve neon ışıklı kozmik bir hayatta kalma mücadelesine hazır olun!
+
+Uzayın derinliklerinde acımasız düşman filoları ve devasa amiral gemileri üzerinize akın ediyor. Geminizi geliştirin, ölümcül silah sinerjilerini keşfedin ve sonsuz uzay dalgalarına karşı hayatta kalın!
+
+ÖNE ÇIKAN OYUN ÖZELLİKLERİ:
+⚡ Yoğun Rogue-lite Aksiyonu: Her koşuda farklı yetenek kombinasyonları ve dinamik savaş taktikleri.
+🚀 Güçlü Silah Evrimleri: Plazma Lazeri, Güdümlü Mikro-Füzeler, EMP Şok Dalgaları ve Tesla Fırtınası.
+🌌 Efsanevi Boss Savaşları: Devasa amiral gemilerine karşı taktiksel kaçışlar ve nihai saldırılar.
+💎 Hangar & Kalıcı Geliştirmeler: Kazandığınız kristallerle geminizin zırhını, hızını ve teknolojisini kalıcı olarak yükseltin.
+🎁 Şanslı Uzay Sandıkları: Bossları yenerek gizemli uzay sandıklarını açın, efsanevi yükseltmeleri ve nadir ganimetleri toplayın!
+🎵 Retro Synthwave Atmosferi: Büyüleyici neon görseller, synthwave müzikler ve tatmin edici patlama efektleri.
+
+Neon evreninde hayatta kalabilecek misin? Hemen indir, motorları ateşle ve savaşa katıl!
+
+--------------------------------------------------------------------
+4. GIZLILIK POLITIKASI LINKI (Privacy Policy URL):
+https://gokalpkg.github.io/Neopnspace/privacy-policy.html
+
+--------------------------------------------------------------------
+5. DIJITAL IMZA VE SURUM BILGILERI:
+Paket: app-release.aab (16.3 MB)
+Keystore: android/app/neon-release-key.jks
+Alias: neonkey
+Sifre: NeonSurvivor2026!
+Target SDK: 35 (Android 15)
+Min SDK: 23 (Android 6.0+)
+====================================================================

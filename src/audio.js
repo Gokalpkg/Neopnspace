@@ -214,19 +214,46 @@ class SoundEngine {
       } catch (e) {}
     }
 
-    // 2. Siber Davul Ritimleri (Kick ve Hi-Hat)
-    // Her 4 adımda bir Kick
-    if (step % 4 === 0) {
+    // 2. Siber Davul Ritimleri (Punchy Kick, 80s Snare ve Hi-Hat)
+    // Kick (0, 4, 8, 12, 16, 20, 24, 28) - Öfkeli Boss modunda çift kick
+    const isKick = (step % 4 === 0) || (this.isBossEnraged && (step % 4 === 2));
+    if (isKick) {
       this.playSynthKick(now);
+      this.applySidechainPump(now);
+    }
+    // 80s Analog Snare (4, 12, 20, 28)
+    if (step % 8 === 4) {
+      this.playSynthSnare(now);
     }
     // 16'lık Hi-Hat çıtırtısı
     if (step % 2 === 0) {
-      this.playSynthHiHat(now, step % 4 === 2 ? 0.05 : 0.02);
+      this.playSynthHiHat(now, step % 4 === 2 ? 0.05 : 0.025);
     }
 
-    // 3. Synth Arpej Lead (Uzay Hissiyatı)
+    // 3. Synthwave Akor Padleri (8 adımda bir lush padler)
+    if (step % 8 === 0) {
+      const chordsNormal = [
+        [220, 261.6, 329.6], // Am
+        [174.6, 220, 261.6], // F
+        [196, 246.9, 293.7], // G
+        [164.8, 207.6, 246.9] // Em
+      ];
+      const chordsBoss = [
+        [220, 261.6, 311.1], // Adim
+        [233.1, 293.7, 349.2], // Bb
+        [220, 246.9, 293.7], // Asus2
+        [196, 233.1, 293.7]  // Gm
+      ];
+      const chordIdx = Math.floor(step / 8) % 4;
+      const chords = this.isBossMode ? chordsBoss : chordsNormal;
+      this.playSynthPad(now, chords[chordIdx]);
+    }
+
+    // 4. Synth Arpej Lead (Uzay Hissiyatı & Yüksek Adrenalin)
     if (step % 2 === 1) {
-      const arpNotes = [220, 261.6, 329.6, 440, 523.2, 659.2, 523.2, 392];
+      const arpNotes = this.isBossMode 
+        ? [440, 523.2, 587.3, 659.2, 784, 880, 784, 659.2]
+        : [220, 261.6, 329.6, 440, 523.2, 659.2, 523.2, 392];
       const note = arpNotes[(step + (this.isBossMode ? 3 : 0)) % arpNotes.length];
       this.playSynthLead(now, note);
     }
@@ -236,18 +263,96 @@ class SoundEngine {
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.frequency.setValueAtTime(140, now);
-      osc.frequency.exponentialRampToValueAtTime(35, now + 0.09);
+      osc.frequency.setValueAtTime(this.isBossMode ? 165 : 140, now);
+      osc.frequency.exponentialRampToValueAtTime(32, now + 0.11);
 
-      gain.gain.setValueAtTime(0.22, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      gain.gain.setValueAtTime(this.isBossMode ? 0.28 : 0.24, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
 
       osc.connect(gain);
       gain.connect(this.musicGain);
 
       this._autoDisconnect(osc, gain);
       osc.start(now);
-      osc.stop(now + 0.1);
+      osc.stop(now + 0.12);
+    } catch (e) {}
+  }
+
+  applySidechainPump(now) {
+    if (!this.musicGain || !this.ctx || this.isMuted) return;
+    try {
+      const baseGain = 0.35;
+      this.musicGain.gain.cancelScheduledValues(now);
+      this.musicGain.gain.setValueAtTime(baseGain * 0.45, now);
+      this.musicGain.gain.exponentialRampToValueAtTime(baseGain, now + 0.14);
+    } catch (e) {}
+  }
+
+  playSynthSnare(now) {
+    try {
+      if (!this.sharedNoiseBuffer) return;
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = this.sharedNoiseBuffer;
+      const noiseFilter = this.ctx.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.setValueAtTime(this.isBossMode ? 900 : 1200, now);
+
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(this.isBossMode ? 0.22 : 0.18, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(this.musicGain);
+
+      const osc = this.ctx.createOscillator();
+      const oscGain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(185, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+
+      oscGain.gain.setValueAtTime(0.20, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+      osc.connect(oscGain);
+      oscGain.connect(this.musicGain);
+
+      this._autoDisconnect(noise, noiseFilter, noiseGain);
+      this._autoDisconnect(osc, oscGain);
+      noise.start(now);
+      noise.stop(now + 0.18);
+      osc.start(now);
+      osc.stop(now + 0.09);
+    } catch (e) {}
+  }
+
+  playSynthPad(now, chordFreqs) {
+    try {
+      chordFreqs.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.detune.setValueAtTime((idx - 1) * 8, now);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(900, now);
+        filter.frequency.linearRampToValueAtTime(1600, now + 0.3);
+        filter.frequency.exponentialRampToValueAtTime(500, now + 0.7);
+
+        gain.gain.setValueAtTime(0.03, now);
+        gain.gain.linearRampToValueAtTime(0.07, now + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.musicGain);
+
+        this._autoDisconnect(osc, filter, gain);
+        osc.start(now);
+        osc.stop(now + 0.7);
+      });
     } catch (e) {}
   }
 
@@ -279,18 +384,18 @@ class SoundEngine {
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = 'triangle';
+      osc.type = this.isBossMode ? 'sawtooth' : 'triangle';
       osc.frequency.setValueAtTime(freq, now);
 
-      gain.gain.setValueAtTime(0.06, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      gain.gain.setValueAtTime(this.isBossMode ? 0.08 : 0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
 
       osc.connect(gain);
       gain.connect(this.musicGain);
 
       this._autoDisconnect(osc, gain);
       osc.start(now);
-      osc.stop(now + 0.1);
+      osc.stop(now + 0.11);
     } catch (e) {}
   }
 
@@ -329,11 +434,13 @@ class SoundEngine {
   playMissile() {
     if (this.isMuted || !this.ctx) return;
     try {
+      const now = this.ctx.currentTime;
+      if (this._lastMissileTime && now - this._lastMissileTime < 0.08) return;
+      this._lastMissileTime = now;
+
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle';
-
-      const now = this.ctx.currentTime;
       osc.frequency.setValueAtTime(180, now);
       osc.frequency.exponentialRampToValueAtTime(650, now + 0.16);
 
@@ -697,6 +804,9 @@ class SoundEngine {
     if (this.isMuted || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
+      if (this._lastNukeTime && now - this._lastNukeTime < 0.12) return;
+      this._lastNukeTime = now;
+
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine';
