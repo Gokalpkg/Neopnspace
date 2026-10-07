@@ -1426,28 +1426,24 @@ class Game {
       });
     }
 
-    // Aktif Nihai Güç (Ultimate) Buton Dinleyicisi
+    // Aktif Nihai Güç (Ultimate) Buton Dinleyicisi (Tekil ve anında tetikleme)
     if (btnUltimate) {
-      btnUltimate.addEventListener('click', (e) => {
+      const handleUlt = (e) => {
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         this.triggerUltimate();
-      });
-      btnUltimate.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-        this.triggerUltimate();
-      }, { passive: true });
+      };
+      btnUltimate.addEventListener('pointerdown', handleUlt);
     }
 
-    // Aktif Pilot Yeteneği Buton Dinleyicisi
+    // Aktif Pilot Yeteneği Buton Dinleyicisi (Tekil ve anında tetikleme)
     if (btnAbility) {
-      btnAbility.addEventListener('click', (e) => {
+      const handleAbi = (e) => {
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         this.triggerPilotAbility();
-      });
-      btnAbility.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-        this.triggerPilotAbility();
-      }, { passive: true });
+      };
+      btnAbility.addEventListener('pointerdown', handleAbi);
     }
 
 
@@ -8281,22 +8277,27 @@ class Game {
       const vortex = this.vortices[v];
       vortex.timer -= dt;
 
-      // Kristalleri girdaba doğru çek
+      // Kristalleri girdaba doğru çek (optimize kare mesafe)
+      const pullRadiusSq = 130 * 130;
       for (let gem of this.gems) {
-        const d = Math.hypot(gem.x - vortex.x, gem.y - vortex.y);
-        if (d < 130) {
-          gem.x += (vortex.x - gem.x) * 0.1 * dt;
-          gem.y += (vortex.y - gem.y) * 0.1 * dt;
+        const dx = gem.x - vortex.x;
+        const dy = gem.y - vortex.y;
+        const dSq = dx * dx + dy * dy;
+        if (dSq < pullRadiusSq && dSq > 1) {
+          gem.x -= dx * 0.1 * dt;
+          gem.y -= dy * 0.1 * dt;
         }
       }
 
-      // Yakındaki düşmanlara hasar ver
+      // Yakındaki düşmanlara hasar ver (optimize kare mesafe)
       for (let enemy of this.enemies) {
-        const d = Math.hypot(enemy.x - vortex.x, enemy.y - vortex.y);
-        if (d < vortex.radius + enemy.radius) {
+        const dx = enemy.x - vortex.x;
+        const dy = enemy.y - vortex.y;
+        const rSum = vortex.radius + enemy.radius;
+        if (dx * dx + dy * dy < rSum * rSum) {
           enemy.hp -= 0.24 * dt;
-          if (Math.random() < 0.25 * dt) {
-            this.particles.spawnExplosion(vortex.x, vortex.y, '#d946ef', 2, 1);
+          if (Math.random() < 0.08 * dt) {
+            this.particles.spawnExplosion(vortex.x, vortex.y, '#d946ef', 1, 1);
           }
         }
       }
@@ -9812,11 +9813,7 @@ class Game {
       }
     }
 
-    // Normal düşman öldürmede mikro hit-stop (daha tatmin edici his)
-    if (!isThisBoss && this.comboCount >= 5) {
-      this.particles.triggerHitstop(1);
-      this.slowMoTimer = Math.max(this.slowMoTimer || 0, 2);
-    }
+    // Normal düşman öldürmede takılma/kasma olmaması için hit-stop ve slowMo kaldırıldı
 
     // Bomba Asteroit Alan Patlaması & Zincirleme Reaksiyon
     if (enemy.type === 'asteroid_bomb') {
@@ -10417,10 +10414,8 @@ class Game {
     ctx.save();
     ctx.beginPath();
     ctx.ellipse(cx, haloY, 68, 22, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
     ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#00f0ff';
-    ctx.shadowBlur = 10;
     ctx.stroke();
 
     // Dönen kesikli lazer halkası
@@ -10466,8 +10461,6 @@ class Game {
 
     // Alev pırıltısı
     ctx.fillStyle = this.launching ? '#00f0ff' : skin.flame;
-    ctx.shadowColor = ctx.fillStyle;
-    ctx.shadowBlur = this.launching ? 20 : 12;
     const flameLen = (this.launching ? 24 : 10) * flamePulse;
     ctx.beginPath();
     ctx.moveTo(-9, r * 0.85);
@@ -10492,8 +10485,6 @@ class Game {
     ctx.fillStyle = '#111827';
     ctx.strokeStyle = primaryColor;
     ctx.lineWidth = 1.5;
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = primaryColor;
     ctx.fillRect(-9, r * 0.55, 5, 8);
     ctx.strokeRect(-9, r * 0.55, 5, 8);
     ctx.fillRect(4, r * 0.55, 5, 8);
@@ -10512,8 +10503,6 @@ class Game {
     ctx.fillStyle = '#090d1a';
     ctx.strokeStyle = primaryColor;
     ctx.lineWidth = 2.4;
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = primaryColor;
     ctx.beginPath();
     ctx.moveTo(0, -r * 1.55);
     ctx.lineTo(r * 0.26, -r * 0.9);
@@ -10552,7 +10541,6 @@ class Game {
     // Neon enerji akış çizgileri
     ctx.strokeStyle = secondaryColor;
     ctx.lineWidth = 1.2;
-    ctx.shadowBlur = 5;
     ctx.beginPath();
     ctx.moveTo(-r * 0.22, -r * 0.1);
     ctx.lineTo(-r * 0.78, r * 0.48);
@@ -10562,8 +10550,6 @@ class Game {
 
     // Kokpit
     ctx.fillStyle = cockpitColor;
-    ctx.shadowColor = cockpitColor;
-    ctx.shadowBlur = 10;
     ctx.beginPath();
     ctx.moveTo(0, -r * 0.85);
     ctx.lineTo(r * 0.24, -r * 0.25);
@@ -10573,6 +10559,7 @@ class Game {
     ctx.lineTo(-r * 0.24, -r * 0.25);
     ctx.closePath();
     ctx.fill();
+
 
     ctx.restore();
     ctx.restore();

@@ -186,8 +186,11 @@ export class ParticleSystem {
     });
   }
 
-  // Uçuşan Yazılar (Kritik Vuruş, Hasar, Şok ve Seviye Popupları)
+  // Uçuşan Yazılar (Kritik Vuruş, Hasar, Şok ve Seviye Popupları - Sıkı limitli, sıfır gecikme)
   spawnFloatingText(x, y, text, color = '#ffbe0b', size = 14) {
+    if (this.floatingTexts.length >= 10) {
+      this.floatingTexts.shift();
+    }
     this.floatingTexts.push({
       x,
       y,
@@ -195,8 +198,8 @@ export class ParticleSystem {
       color,
       size,
       alpha: 1.0,
-      vy: -1.4,
-      decay: 0.024
+      vy: -1.6,
+      decay: 0.035
     });
   }
 
