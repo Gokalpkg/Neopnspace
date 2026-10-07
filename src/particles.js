@@ -9,6 +9,8 @@ export class ParticleSystem {
     this.nebulae = [];
     this.lightnings = [];
     this.shards = [];
+    this.blastFireballs = [];
+    this.rockDebris = [];
     this.glitchTimer = 0;
     this.currentSector = 'void';
     this.bgBase = '#02040a';
@@ -118,43 +120,101 @@ export class ParticleSystem {
 
   // Meteor / Taş Parçalanma Patlama Animasyonu (Birden yok olmayı önleyen organik parçalanma)
   spawnAsteroidBreakAnimation(x, y, radius = 25, isBomb = false) {
-    // 1. Dışa doğru savrulan kaya parçaları (Rock Chunks)
-    const chunkCount = Math.max(5, Math.min(10, Math.round(radius * 0.35)));
-    const baseColors = isBomb ? ['#ff4d00', '#ffbe0b', '#7c2d12', '#451a03'] : ['#94a3b8', '#64748b', '#cbd5e1', '#334155'];
+    const r = Math.max(16, radius);
+
+    // 1. Çok Katmanlı Genişleyen Patlama Ateş Topu (Blooming Fireball Blast)
+    // Bu ateş topu, tam taşın yok olduğu karede ortaya çıkıp hacmini doldurur ve organik olarak genişleyip dağılır.
+    const baseCore = '#ffffff';
+    const baseMid = isBomb ? '#ffbe0b' : '#38bdf8';
+    const baseOuter = isBomb ? '#ff3d00' : '#475569';
+
+    this.blastFireballs.push({
+      x,
+      y,
+      radius: r * 0.45,
+      maxRadius: r * (isBomb ? 2.6 : 1.8),
+      growSpeed: isBomb ? 4.6 : 3.0,
+      alpha: 1.0,
+      decay: isBomb ? 0.032 : 0.046,
+      isBomb,
+      colorCore: baseCore,
+      colorMid: baseMid,
+      colorOuter: baseOuter
+    });
+
+    // Bomba ise çevresinde ikincil patlama halkaları ve köz saçılması
+    if (isBomb) {
+      for (let b = 0; b < 3; b++) {
+        const offAng = (b * (Math.PI * 2 / 3)) + (Math.random() - 0.5) * 0.4;
+        const offDist = r * (0.3 + Math.random() * 0.35);
+        this.blastFireballs.push({
+          x: x + Math.cos(offAng) * offDist,
+          y: y + Math.sin(offAng) * offDist,
+          radius: r * 0.3,
+          maxRadius: r * (1.6 + Math.random() * 0.8),
+          growSpeed: 3.2 + Math.random() * 2.2,
+          alpha: 0.9,
+          decay: 0.036,
+          isBomb: true,
+          colorCore: '#ffe600',
+          colorMid: '#ff3d00',
+          colorOuter: '#7c2d12'
+        });
+      }
+    }
+
+    // 2. Büyük Poligonal Parçalanan Kaya Blokları (Gerçek Taş Çatlaması - Asla birden yok olmaz!)
+    const chunkCount = Math.max(6, Math.min(9, Math.round(r * 0.36)));
+    const fillCol = isBomb ? '#5c122a' : '#334155';
+    const strokeCol = isBomb ? '#ff0055' : '#94a3b8';
+    const crackCol = isBomb ? '#ffe600' : '#38bdf8';
+
     for (let i = 0; i < chunkCount; i++) {
-      const angle = (i * (Math.PI * 2 / chunkCount)) + (Math.random() - 0.5) * 0.5;
-      const speed = 1.8 + Math.random() * 3.8;
-      const rotSpeed = (Math.random() - 0.5) * 0.25;
-      this.shards.push({
-        x: x + (Math.random() - 0.5) * (radius * 0.5),
-        y: y + (Math.random() - 0.5) * (radius * 0.5),
+      const angle = (i * (Math.PI * 2 / chunkCount)) + (Math.random() - 0.5) * 0.55;
+      const speed = 2.0 + Math.random() * 3.4;
+      const rotSpeed = (Math.random() - 0.5) * 0.28;
+      const chunkR = Math.max(7, Math.min(18, (r * 0.42) + Math.random() * 3.5));
+
+      // 4-6 köşeli düzensiz kaya poligonu
+      const polyPoints = [];
+      const numPts = 5;
+      for (let p = 0; p < numPts; p++) {
+        const pAng = (p / numPts) * Math.PI * 2;
+        const dist = chunkR * (0.65 + Math.random() * 0.6);
+        polyPoints.push({ x: Math.cos(pAng) * dist, y: Math.sin(pAng) * dist });
+      }
+
+      this.rockDebris.push({
+        x: x + Math.cos(angle) * (r * 0.35),
+        y: y + Math.sin(angle) * (r * 0.35),
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        size: Math.max(3, Math.min(8, (radius * 0.25) + Math.random() * 3)),
-        color: baseColors[Math.floor(Math.random() * baseColors.length)],
-        alpha: 1.0,
         rot: Math.random() * Math.PI * 2,
         rotSpeed: rotSpeed,
-        decay: 0.032 + Math.random() * 0.018
+        alpha: 1.0,
+        decay: 0.024 + Math.random() * 0.012, // ~35 - 45 frame boyunca ekranda takla atarak uçar!
+        polygon: polyPoints,
+        fillColor: fillCol,
+        strokeColor: strokeCol,
+        crackColor: crackCol
       });
     }
 
-    // 2. Genişleyen köz & alev / toz parçacıkları
-    const dustCount = Math.min(12, Math.round(radius * 0.45));
-    const dustColor = isBomb ? '#ff9100' : '#94a3b8';
+    // 3. Genişleyen Duman Püskürmeleri ve Kızgın Közler
+    const dustCount = Math.min(16, Math.round(r * 0.5));
     for (let i = 0; i < dustCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 0.8 + Math.random() * 2.5;
+      const speed = 0.8 + Math.random() * 2.8;
       this.particles.push({
-        x: x + Math.cos(angle) * (radius * 0.3),
-        y: y + Math.sin(angle) * (radius * 0.3),
+        x: x + Math.cos(angle) * (r * 0.3),
+        y: y + Math.sin(angle) * (r * 0.3),
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        radius: 2.2 + Math.random() * 3.0,
-        isPixel: true,
-        color: isBomb ? (Math.random() < 0.5 ? '#ff4d00' : '#ffbe0b') : dustColor,
+        radius: 3.5 + Math.random() * 4.5,
+        isPixel: Math.random() < 0.4,
+        color: isBomb ? (Math.random() < 0.5 ? '#ff4d00' : '#ffbe0b') : (Math.random() < 0.5 ? '#94a3b8' : '#64748b'),
         alpha: 0.95,
-        decay: 0.04 + Math.random() * 0.03
+        decay: 0.038 + Math.random() * 0.025
       });
     }
   }
@@ -446,6 +506,57 @@ export class ParticleSystem {
       }
     }
 
+    // Patlama Ateş Topları (Blast Fireballs)
+    if (this.blastFireballs && this.blastFireballs.length > 0) {
+      if (this.blastFireballs.length > 25) {
+        this.blastFireballs.splice(0, this.blastFireballs.length - 25);
+      }
+      for (let i = this.blastFireballs.length - 1; i >= 0; i--) {
+        const b = this.blastFireballs[i];
+        b.radius += b.growSpeed * dt;
+        b.alpha -= b.decay * dt;
+        b.rot = (b.rot || 0) + 0.04 * dt;
+        if (b.alpha <= 0 || b.radius >= b.maxRadius * 1.5) {
+          this.blastFireballs.splice(i, 1);
+        }
+      }
+    }
+
+    // Parçalanan Kaya Blokları (Chunky Polygonal Rock Debris)
+    if (this.rockDebris && this.rockDebris.length > 0) {
+      if (this.rockDebris.length > 40) {
+        this.rockDebris.splice(0, this.rockDebris.length - 40);
+      }
+      for (let i = this.rockDebris.length - 1; i >= 0; i--) {
+        const rk = this.rockDebris[i];
+        rk.x += rk.vx * dt;
+        rk.y += rk.vy * dt;
+        rk.rot += rk.rotSpeed * dt;
+        rk.vx *= Math.pow(0.96, dt);
+        rk.vy *= Math.pow(0.96, dt);
+        rk.alpha -= rk.decay * dt;
+
+        // Uçarken arkasında hafif kızgın kıvılcım veya köz bırakır
+        if (rk.alpha > 0.45 && Math.random() < 0.22 * dt && this.particles.length < 80) {
+          this.particles.push({
+            x: rk.x,
+            y: rk.y,
+            vx: (Math.random() - 0.5) * 1.2,
+            vy: (Math.random() - 0.5) * 1.2,
+            radius: 1.6,
+            isPixel: true,
+            color: rk.crackColor || '#ff9100',
+            alpha: rk.alpha * 0.8,
+            decay: 0.06
+          });
+        }
+
+        if (rk.alpha <= 0) {
+          this.rockDebris.splice(i, 1);
+        }
+      }
+    }
+
     if (this.glitchTimer > 0) {
       this.glitchTimer -= dt;
       if (this.glitchTimer < 0) this.glitchTimer = 0;
@@ -518,6 +629,52 @@ export class ParticleSystem {
     // 3. Şok Dalgaları (Devre dışı - boş döngü)
     this.shockwaves.length = 0;
 
+    // 3.5. Patlama Ateş Topları (Çok Katmanlı Parlayan Blast Fireballs)
+    if (this.blastFireballs && this.blastFireballs.length > 0) {
+      for (let b of this.blastFireballs) {
+        if (b.alpha <= 0) continue;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha));
+
+        const r = Math.max(1, b.radius);
+        // Volumetrik Yumuşak Alev Gradyanı (Bulutsu / Kor Alev Topu)
+        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+        grad.addColorStop(0, '#ffffff'); // Akkor beyaz merkez
+        grad.addColorStop(0.25, b.colorCore || '#ffe600');
+        grad.addColorStop(0.55, b.colorMid || '#ff5500');
+        grad.addColorStop(0.82, b.colorOuter || '#ff0055');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Kenarlarda yumuşak tütsülü geçiş
+
+        ctx.fillStyle = grad;
+
+        // Ana alev küresi
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Organik dalgalanan 4 alev yumrusu (Mushroom / Billowing Cloud Lobes)
+        const lobeDist = r * 0.45;
+        const lobeR = r * 0.58;
+        for (let k = 0; k < 4; k++) {
+          const ang = (b.rot || 0) + k * (Math.PI / 2);
+          ctx.beginPath();
+          ctx.arc(b.x + Math.cos(ang) * lobeDist, b.y + Math.sin(ang) * lobeDist, lobeR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Bomba ise parlayan genişleyen dış enerji çemberi
+        if (b.isBomb && b.alpha > 0.15) {
+          ctx.strokeStyle = `rgba(255, 60, 0, ${b.alpha * 0.8})`;
+          ctx.lineWidth = Math.max(1.5, 3.5 * b.alpha);
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, r * 1.15, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+
     // 4. Parçacıklar (Kuantize Retro-Pixel ve Normal Kıvılcımlar)
     for (let p of this.particles) {
       ctx.fillStyle = p.color;
@@ -532,7 +689,43 @@ export class ParticleSystem {
       }
     }
 
-    // 4.5. Metal & Taş Enkaz Parçaları (Debris & Shards - Dönüşlü Organik Çizim)
+    // 4.2. Kaya Enkaz Parçaları (Gerçek Poligonal Taş Parçalanması - Asla birden yok olmaz!)
+    if (this.rockDebris && this.rockDebris.length > 0) {
+      for (let rk of this.rockDebris) {
+        if (rk.alpha <= 0) continue;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, rk.alpha));
+        ctx.translate(rk.x, rk.y);
+        ctx.rotate(rk.rot);
+
+        ctx.fillStyle = rk.fillColor;
+        ctx.strokeStyle = rk.strokeColor;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        if (rk.polygon && rk.polygon.length > 0) {
+          ctx.moveTo(rk.polygon[0].x, rk.polygon[0].y);
+          for (let p = 1; p < rk.polygon.length; p++) {
+            ctx.lineTo(rk.polygon[p].x, rk.polygon[p].y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // İç magma / enerji çatlağı
+          if (rk.crackColor) {
+            ctx.strokeStyle = rk.crackColor;
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(rk.polygon[0].x * 0.4, rk.polygon[0].y * 0.4);
+            ctx.lineTo(rk.polygon[2 % rk.polygon.length].x * 0.5, rk.polygon[2 % rk.polygon.length].y * 0.5);
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    // 4.5. Metal & Diğer Enkaz Parçaları (Shards)
     if (this.shards && this.shards.length > 0) {
       for (let s of this.shards) {
         ctx.fillStyle = s.color;

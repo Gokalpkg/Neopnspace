@@ -1029,6 +1029,12 @@ export class Enemy {
         strokeColor = '#c084fc';
       }
 
+      if (this.hitFlash > 0) {
+        this.hitFlash--;
+        fillColor = '#ffffff';
+        strokeColor = '#ffffff';
+      }
+
       ctx.strokeStyle = strokeColor;
       ctx.fillStyle = fillColor;
       ctx.lineWidth = 2.4;

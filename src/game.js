@@ -9366,7 +9366,21 @@ class Game {
       const enemy = this.enemies[i];
       enemy.update(this.player.x, this.player.y, this.enemyProjectiles, this.width, this.height, dt);
 
-      // Boss Öfke Modu (2. Faz) Bildirimi
+      // Bomba Taşı Zincirleme Patlama Gecikmesi (Organik kademeli patlama)
+      if (enemy.delayedBombBlast) {
+        enemy.delayedBombBlast.timer -= dt;
+        // Patlama dalgası taşı sararken taş şiddetle titrer ve beyaz-kırmızı akkor parlar
+        enemy.x += (Math.random() - 0.5) * 2.5;
+        enemy.y += (Math.random() - 0.5) * 2.5;
+        enemy.hitFlash = Math.max(enemy.hitFlash || 0, 5);
+
+        if (enemy.delayedBombBlast.timer <= 0) {
+          const dmg = enemy.delayedBombBlast.damage;
+          enemy.delayedBombBlast = null;
+          enemy.hp -= dmg;
+          this.particles.spawnExplosion(enemy.x, enemy.y, '#ff4d00', 8, 2.2);
+        }
+      }
       if ((enemy.isBoss || enemy.type.startsWith('boss')) && enemy.justEnraged) {
         enemy.justEnraged = false;
         sounds.playBossAlarm();
@@ -9446,6 +9460,7 @@ class Game {
           }
 
           enemy.hp -= hitDamage;
+          enemy.hitFlash = 4;
           if (!enemy.isBoss && !(enemy.type && enemy.type.startsWith('boss'))) enemy.y -= 1.4;
 
           // Tesla Zincirleme Yıldırım (Dengeli hayatta kalma ölçeklemesi)
@@ -9500,6 +9515,7 @@ class Game {
           const dist = Math.hypot(missile.x - enemy.x, missile.y - enemy.y);
           if (dist < enemy.radius + 8) {
             enemy.hp -= missile.damage;
+            enemy.hitFlash = 4;
           if (missile.isCluster || this.player.evolutions.clusterMissiles) {
             sounds.playNuke();
             this.screenShake = 3;
@@ -9833,24 +9849,29 @@ class Game {
 
     // Normal düşman öldürmede takılma/kasma olmaması için hit-stop ve slowMo kaldırıldı
 
-    // Bomba Asteroit Alan Patlaması & Zincirleme Reaksiyon
+    // Bomba Asteroit Alan Patlaması & Kademeli Zincirleme Reaksiyon
     if (enemy.type === 'asteroid_bomb') {
       sounds.playExplosion(true);
       this.screenShake = 8;
-      this.particles.spawnShockwave(enemy.x, enemy.y, '#ff4d00', 125);
+      this.particles.spawnShockwave(enemy.x, enemy.y, '#ff4d00', 140);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#ff9100', 26, 4);
-      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 25, true);
 
-      // Çevredeki tüm düşman ve taşlara zincirleme hasar!
+      // Çevredeki tüm düşman ve taşlara kademeli zincirleme patlama dalgası!
+      const bombX = enemy.x;
+      const bombY = enemy.y;
       for (let other of this.enemies) {
         if (other !== enemy && !other.toRemove && other.hp > 0) {
-          const d = Math.hypot(other.x - enemy.x, other.y - enemy.y);
-          if (d < 115) {
-            other.hp -= 20;
-            this.particles.spawnExplosion(other.x, other.y, '#ff4d00', 6, 2);
-            if (other.hp <= 0 && other.type && other.type.startsWith('asteroid')) {
-              this.particles.spawnAsteroidBreakAnimation(other.x, other.y, other.radius || 18, other.type === 'asteroid_bomb');
-            }
+          const d = Math.hypot(other.x - bombX, other.y - bombY);
+          if (d < 155) {
+            // Şok dalgası varış süresine göre kademeli gecikme (3 ila 13 kare, ~50-220ms)
+            const delayFrames = Math.max(3, Math.min(13, Math.floor(d * 0.08)));
+            other.delayedBombBlast = {
+              timer: delayFrames,
+              damage: 25,
+              fromX: bombX,
+              fromY: bombY
+            };
+            other.hitFlash = Math.max(other.hitFlash || 0, 8);
           }
         }
       }
@@ -9917,21 +9938,33 @@ class Game {
       // === ESKİ SİSTEM (BOSS SONRASI) ===
       if (enemy.type === 'asteroid_l') {
         // Büyük taş 2 orta taşa bölünür
-        this.enemies.push(new Enemy(enemy.x - 12, enemy.y, 'asteroid_m', 1, fragSpeed));
-        this.enemies.push(new Enemy(enemy.x + 12, enemy.y, 'asteroid_m', 1, fragSpeed));
+        const leftM = new Enemy(enemy.x - 12, enemy.y, 'asteroid_m', 1, fragSpeed);
+        leftM.speedX = -1.0;
+        const rightM = new Enemy(enemy.x + 12, enemy.y, 'asteroid_m', 1, fragSpeed);
+        rightM.speedX = 1.0;
+        this.enemies.push(leftM);
+        this.enemies.push(rightM);
         this.particles.spawnExplosion(enemy.x, enemy.y, '#8b9bb4', 12, 2.5);
       } else if (enemy.type === 'asteroid_m') {
         // Orta taş 2 küçük taşa bölünür
-        this.enemies.push(new Enemy(enemy.x - 10, enemy.y, 'asteroid_s', 1, fragSpeed));
-        this.enemies.push(new Enemy(enemy.x + 10, enemy.y, 'asteroid_s', 1, fragSpeed));
+        const leftS = new Enemy(enemy.x - 10, enemy.y, 'asteroid_s', 1, fragSpeed);
+        leftS.speedX = -1.1;
+        const rightS = new Enemy(enemy.x + 10, enemy.y, 'asteroid_s', 1, fragSpeed);
+        rightS.speedX = 1.1;
+        this.enemies.push(leftS);
+        this.enemies.push(rightS);
         this.particles.spawnExplosion(enemy.x, enemy.y, '#a0aec0', 10, 2.2);
       }
       // asteroid_s patlayınca BİTER, aşağıda zengin XP kristali verir
     } else {
       // === YENİ 2 AŞAMALI SİSTEM (İLK BOSS ÖNCESİ) ===
       if (enemy.type === 'asteroid_m' || enemy.type === 'asteroid_l') {
-        this.enemies.push(new Enemy(enemy.x - 10, enemy.y, 'asteroid_s', 1, fragSpeed));
-        this.enemies.push(new Enemy(enemy.x + 10, enemy.y, 'asteroid_s', 1, fragSpeed));
+        const leftKid = new Enemy(enemy.x - 12, enemy.y, 'asteroid_s', 1, fragSpeed);
+        leftKid.speedX = -1.1;
+        const rightKid = new Enemy(enemy.x + 12, enemy.y, 'asteroid_s', 1, fragSpeed);
+        rightKid.speedX = 1.1;
+        this.enemies.push(leftKid);
+        this.enemies.push(rightKid);
         this.particles.spawnExplosion(enemy.x, enemy.y, '#a0aec0', 10, 2.2);
       }
     }
