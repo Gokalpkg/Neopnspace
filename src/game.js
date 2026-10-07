@@ -4108,13 +4108,16 @@ class Game {
 
   getWheelState() {
     const today = new Date().toISOString().slice(0, 10);
-    let state = { date: today, freeSpinsUsed: 0, adSpinsUsed: 0 };
+    let state = { date: today, spinsUsed: 0 };
     try {
       const raw = localStorage.getItem('neon_wheel_state');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed.date === today) {
-          state = parsed;
+          const used = parsed.spinsUsed !== undefined 
+            ? parsed.spinsUsed 
+            : ((parsed.freeSpinsUsed || 0) + (parsed.adSpinsUsed || 0));
+          state = { date: today, spinsUsed: Math.min(3, used) };
         }
       }
     } catch(e) {}
@@ -4132,7 +4135,7 @@ class Game {
     const state = this.getWheelState();
     const dot = document.getElementById('wheel-badge-dot');
     if (dot) {
-      if (state.freeSpinsUsed < 1) {
+      if (state.spinsUsed < 1) {
         dot.classList.remove('hidden');
       } else {
         dot.classList.add('hidden');
@@ -4155,15 +4158,15 @@ class Game {
     const textEl = document.getElementById('wheel-spin-btn-text') || document.getElementById('btn-spin-wheel-text');
     const sub = document.getElementById('wheel-status-subtitle');
 
-    if (state.freeSpinsUsed < 1) {
+    if (state.spinsUsed === 0) {
       if (sub) sub.textContent = t('wheel_sub_free');
       if (textEl) textEl.textContent = t('wheel_btn_free');
       if (btn) {
         btn.disabled = this.wheelIsSpinning;
         btn.style.opacity = '1';
       }
-    } else if (state.adSpinsUsed < 3) {
-      const remaining = 3 - state.adSpinsUsed;
+    } else if (state.spinsUsed < 3) {
+      const remaining = 3 - state.spinsUsed;
       if (sub) sub.textContent = t('wheel_sub_ad', { n: remaining });
       if (textEl) textEl.innerHTML = t('wheel_btn_ad', { n: remaining });
       if (btn) {
@@ -4256,15 +4259,20 @@ class Game {
   handleWheelSpinClick() {
     if (this.wheelIsSpinning) return;
     const state = this.getWheelState();
-    if (state.freeSpinsUsed < 1) {
-      state.freeSpinsUsed = 1;
+    if (state.spinsUsed >= 3) {
+      this.showToast('Günün tüm hakları kullanıldı! Yarın tekrar bekleriz.', '#ffbe0b');
+      return;
+    }
+
+    if (state.spinsUsed === 0) {
+      state.spinsUsed = 1;
       this.saveWheelState(state);
       this.spinWheel();
-    } else if (state.adSpinsUsed < 3) {
+    } else {
       if (window.showRewardedAd) {
         window.showRewardedAd(
           () => {
-            state.adSpinsUsed += 1;
+            state.spinsUsed += 1;
             this.saveWheelState(state);
             this.spinWheel();
           },
@@ -4275,7 +4283,7 @@ class Game {
           }
         );
       } else {
-        state.adSpinsUsed += 1;
+        state.spinsUsed += 1;
         this.saveWheelState(state);
         this.spinWheel();
       }
@@ -4287,8 +4295,16 @@ class Game {
     this.wheelIsSpinning = true;
     this.updateWheelUI();
 
-    // Kazanılacak dilimi belirle (Ağırlıklı rastgele)
-    const weights = [24, 10, 16, 12, 6, 14, 12, 6];
+    // Kazanılacak dilimi belirle (Düşük ödüller kullanıcıya hissettirilmeden daha yüksek şanslı)
+    // 0: +100 CR (26%)
+    // 1: Canlanma (5%)
+    // 2: +200 CR (9%)
+    // 3: Kalkan (14%)
+    // 4: 500 CR Jackpot (2%)
+    // 5: +75 CR (28%)
+    // 6: +150 CR (12%)
+    // 7: Süper Şarj (4%)
+    const weights = [26, 5, 9, 14, 2, 28, 12, 4];
     const totalW = weights.reduce((a, b) => a + b, 0);
     let rand = Math.random() * totalW;
     let winningIndex = 0;
@@ -4304,8 +4320,9 @@ class Game {
     const sliceAngle = (Math.PI * 2) / numSectors;
     const fullSpins = 6 + Math.floor(Math.random() * 3);
 
-    // İğne tepede (-PI/2). Hedef açı:
-    const targetAngleOffset = -Math.PI / 2 - (winningIndex + 0.5) * sliceAngle;
+    // İğne tepede (-PI/2). Hafif doğal jitter ile dilimin içine otursun
+    const jitter = (Math.random() * 0.4 - 0.2) * sliceAngle;
+    const targetAngleOffset = -Math.PI / 2 - (winningIndex + 0.5) * sliceAngle + jitter;
     const currentNorm = this.wheelRotation % (Math.PI * 2);
     let delta = targetAngleOffset - currentNorm;
     while (delta < 0) delta += Math.PI * 2;
