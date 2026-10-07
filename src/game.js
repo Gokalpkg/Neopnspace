@@ -1560,26 +1560,53 @@ class Game {
       });
     }
 
-    // Hangar Sekmeleri Dinleyicileri (Pürüzsüz Tek Dokunuş ve Çift Tetikleme Korumalı)
+    // Hangar Sekmeleri Dinleyicileri (Pürüzsüz Tek Dokunuş, Yatay Kaydırma ve Çift Tetikleme Korumalı)
     const bindHangarTabBtn = (btn, tabKey) => {
       if (!btn) return;
-      let lastTouchTime = 0;
-      const onActivate = (e) => {
-        if (e && e.cancelable) e.preventDefault();
+      let startX = 0;
+      let startY = 0;
+      let isMoved = false;
+      let lastActivateTime = 0;
+
+      const activateTab = (e) => {
+        const now = Date.now();
+        if (now - lastActivateTime < 250) return;
+        lastActivateTime = now;
         sounds.init();
         sounds.playCardSelect();
         vibrate.light();
         this.switchHangarTab(tabKey);
       };
 
+      btn.addEventListener('touchstart', (e) => {
+        isMoved = false;
+        if (e.touches && e.touches[0]) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      btn.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) {
+          const dx = Math.abs(e.touches[0].clientX - startX);
+          const dy = Math.abs(e.touches[0].clientY - startY);
+          if (dx > 10 || dy > 10) {
+            isMoved = true;
+          }
+        }
+      }, { passive: true });
+
       btn.addEventListener('touchend', (e) => {
-        lastTouchTime = Date.now();
-        onActivate(e);
+        if (!isMoved) {
+          if (e && e.cancelable) e.preventDefault();
+          activateTab(e);
+        }
       }, { passive: false });
 
       btn.addEventListener('click', (e) => {
-        if (Date.now() - lastTouchTime < 450) return; // Çift tıklama filtresi
-        onActivate(e);
+        if (!isMoved) {
+          activateTab(e);
+        }
       });
     };
 
@@ -1751,6 +1778,7 @@ class Game {
     }
 
     this.setupMenuSwipeNavigation();
+    this.setupHangarSwipeNavigation();
     this.initLuckyWheel();
     this.initLeaderboard();
     this.applyMenuProgression();
@@ -1929,6 +1957,78 @@ class Game {
         container.addEventListener('touchend', handleTouchEnd, { passive: true });
       }
     });
+  }
+
+  setupHangarSwipeNavigation() {
+    const hangarModalElem = document.getElementById('hangar-modal');
+    if (!hangarModalElem) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let isSwiping = false;
+
+    const HANGAR_TAB_KEYS = ['skins', 'trails', 'drones', 'boosters', 'tech', 'trophies'];
+
+    const handleTouchStart = (e) => {
+      if (hangarModalElem.classList.contains('hidden')) return;
+      if (!e.touches || e.touches.length !== 1) return;
+
+      const target = e.target;
+      // Tab butonları çubuğu üzerinde parmak kaydırılırken buton şeridi kaysın, tüm sekme değişmesin
+      if (target && target.closest && target.closest('.hangar-tabs')) {
+        isSwiping = false;
+        return;
+      }
+
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartTime = Date.now();
+      isSwiping = true;
+    };
+
+    const handleTouchEnd = (e) => {
+      if (!isSwiping || hangarModalElem.classList.contains('hidden')) return;
+      isSwiping = false;
+      if (!e.changedTouches || e.changedTouches.length !== 1) return;
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      const deltaTime = Date.now() - touchStartTime;
+
+      if (deltaTime > 650) return;
+      if (Math.abs(deltaX) < 45) return;
+      // Dikey kaydırmayı (rozetler, atölye ağacı vs.) bozmamak için yatay hareket dikeyden belirgin olmalı
+      if (Math.abs(deltaX) < Math.abs(deltaY) * 1.3) return;
+
+      const currentIdx = HANGAR_TAB_KEYS.indexOf(this.activeHangarTab || 'skins');
+      if (currentIdx === -1) return;
+
+      if (deltaX < -45) {
+        // Parmağı sola kaydır -> Sonraki sekmeye geç (örn: MÜHİMMAT -> ATÖLYE)
+        if (currentIdx < HANGAR_TAB_KEYS.length - 1) {
+          const nextTab = HANGAR_TAB_KEYS[currentIdx + 1];
+          sounds.init();
+          sounds.playCardSelect();
+          vibrate.light();
+          this.switchHangarTab(nextTab);
+        }
+      } else if (deltaX > 45) {
+        // Parmağı sağa kaydır -> Önceki sekmeye geç (örn: ATÖLYE -> MÜHİMMAT)
+        if (currentIdx > 0) {
+          const prevTab = HANGAR_TAB_KEYS[currentIdx - 1];
+          sounds.init();
+          sounds.playCardSelect();
+          vibrate.light();
+          this.switchHangarTab(prevTab);
+        }
+      }
+    };
+
+    hangarModalElem.addEventListener('touchstart', handleTouchStart, { passive: true });
+    hangarModalElem.addEventListener('touchend', handleTouchEnd, { passive: true });
   }
 
   async requestWakeLock() {
@@ -2444,8 +2544,16 @@ class Game {
         if (isTarget) {
           tab.btn.classList.add('active');
           try {
-            tab.btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-          } catch(e) {}
+            const tabsContainer = tab.btn.parentElement;
+            if (tabsContainer && tabsContainer.clientWidth > 0) {
+              const targetScroll = tab.btn.offsetLeft - (tabsContainer.clientWidth / 2) + (tab.btn.clientWidth / 2);
+              tabsContainer.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+            } else {
+              tab.btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+          } catch(e) {
+            try { tab.btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(err) {}
+          }
         } else {
           tab.btn.classList.remove('active');
         }
