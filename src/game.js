@@ -4885,25 +4885,41 @@ class Game {
     // VIP Reklamları Kaldır (No-Ads) Satın Alma & Geri Yükleme
     const btnBuyNoAds = document.getElementById('btn-buy-no-ads');
     const txtBuyNoAds = document.getElementById('txt-buy-no-ads');
+    const iconBuyNoAds = document.getElementById('icon-buy-no-ads');
+    const badgeNoAds = document.getElementById('badge-no-ads');
     const btnRestoreNoAds = document.getElementById('btn-restore-no-ads');
 
     const updateNoAdsUI = () => {
       const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
       if (btnBuyNoAds) {
         if (isNoAds) {
-          btnBuyNoAds.style.background = 'linear-gradient(135deg, rgba(5, 255, 161, 0.25), rgba(0, 240, 255, 0.2))';
-          btnBuyNoAds.style.borderColor = '#05ffa1';
-          btnBuyNoAds.style.color = '#05ffa1';
-          btnBuyNoAds.style.boxShadow = '0 0 12px rgba(5, 255, 161, 0.35)';
-          btnBuyNoAds.style.cursor = 'default';
-          if (txtBuyNoAds) txtBuyNoAds.textContent = t('settings_no_ads_active') || '✨ NO-ADS AKTİF';
+          btnBuyNoAds.classList.add('is-active');
+          if (iconBuyNoAds) {
+            iconBuyNoAds.innerHTML = '<svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M10 2L4 8 2 6l-1 1 3 3 7-7z" fill="#05ffa1"/></svg>';
+          }
+          if (txtBuyNoAds) {
+            txtBuyNoAds.textContent = t('settings_no_ads_active') || 'KALKAN AKTİF';
+          }
+          if (badgeNoAds) {
+            badgeNoAds.textContent = t('settings_no_ads_active') || 'AKTİF';
+            badgeNoAds.style.color = '#05ffa1';
+            badgeNoAds.style.borderColor = 'rgba(5, 255, 161, 0.4)';
+            badgeNoAds.style.background = 'rgba(5, 255, 161, 0.12)';
+          }
         } else {
-          btnBuyNoAds.style.background = 'linear-gradient(135deg, #00f0ff, #05ffa1)';
-          btnBuyNoAds.style.borderColor = '#00f0ff';
-          btnBuyNoAds.style.color = '#050b18';
-          btnBuyNoAds.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.4)';
-          btnBuyNoAds.style.cursor = 'pointer';
-          if (txtBuyNoAds) txtBuyNoAds.textContent = t('settings_no_ads_btn') || 'REKLAMLARI KALDIR - 49.99 ₺';
+          btnBuyNoAds.classList.remove('is-active');
+          if (iconBuyNoAds) {
+            iconBuyNoAds.innerHTML = '<svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M5 0h2v12H5zM0 5h12v2H0z" fill="#050b18"/></svg>';
+          }
+          if (txtBuyNoAds) {
+            txtBuyNoAds.textContent = t('settings_no_ads_btn') || 'REKLAMLARI KALDIR • 49.99 ₺';
+          }
+          if (badgeNoAds) {
+            badgeNoAds.textContent = t('settings_no_ads_badge') || 'KALICI';
+            badgeNoAds.style.color = 'var(--accent-gold)';
+            badgeNoAds.style.borderColor = 'rgba(255, 190, 11, 0.4)';
+            badgeNoAds.style.background = 'rgba(255, 190, 11, 0.12)';
+          }
         }
       }
     };
@@ -4914,7 +4930,7 @@ class Game {
         sounds.playCardSelect();
         const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
         if (isNoAds) {
-          this.showToast(t('settings_no_ads_active') || '✨ NO-ADS AKTİF', '#05ffa1');
+          this.showToast(t('toast_no_ads_success') || 'Reklam kalkanı aktif! Geçiş reklamları engellendi.', '#05ffa1');
           return;
         }
 
@@ -4928,7 +4944,7 @@ class Game {
         updateNoAdsUI();
         if (sounds.playPowerup) sounds.playPowerup();
         if (vibrate.success) vibrate.success();
-        this.showToast(t('toast_no_ads_success') || 'Tüm geçiş reklamları kaldırıldı!', '#05ffa1');
+        this.showToast(t('toast_no_ads_success') || 'Reklam kalkanı aktif! Geçiş reklamları engellendi.', '#05ffa1');
       });
     }
 
@@ -4941,7 +4957,7 @@ class Game {
         } catch (e) {}
         updateNoAdsUI();
         if (vibrate.success) vibrate.success();
-        this.showToast(t('toast_restore_success') || 'Satın alımlar başarıyla geri yüklendi!', '#05ffa1');
+        this.showToast(t('toast_restore_success') || 'VIP lisansı başarıyla doğrulandı!', '#05ffa1');
       });
     }
 

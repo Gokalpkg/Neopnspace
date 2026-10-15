@@ -12,7 +12,7 @@ class AnalyticsManager {
       if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.isNativePlatform()) {
         this.isNative = true;
         await FirebaseAnalytics.setUserId({ userId: this.getOrCreateAnonymousId() });
-        await FirebaseAnalytics.setUserProperty({ key: 'game_version', value: '1.3.7' });
+        await FirebaseAnalytics.setUserProperty({ key: 'game_version', value: '1.3.8' });
         console.log('[Analytics] Firebase Analytics native bridge initialized.');
       } else {
         console.log('[Analytics] Web browser mode - analytics active in local logger.');
