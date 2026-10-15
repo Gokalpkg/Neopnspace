@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "871503811212",
+    "project_id": "neon-space-survivor",
+    "storage_bucket": "neon-space-survivor.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:871503811212:android:f4cded69a11b67fc06e1a9",
+        "android_client_info": {
+          "package_name": "com.kaunos.neonspace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAIR01toKj4pZ17gGGo0TDCSgTno9B31s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

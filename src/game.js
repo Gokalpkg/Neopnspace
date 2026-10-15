@@ -4,6 +4,7 @@ import { vibrate } from './vibration.js';
 import { ParticleSystem } from './particles.js';
 import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
 import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslationsToDOM } from './i18n.js';
+import { analytics } from './analytics.js';
 
 function txt(key, fallback) {
   const v = t(key);
@@ -2165,6 +2166,7 @@ class Game {
     localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
     this.updateCrystalsDisplay();
     localStorage.setItem('neon_ftue_welcomed', 'true');
+    analytics.logFtueClaimed(500);
 
     ftueModal.classList.remove('hidden');
 
@@ -5518,6 +5520,7 @@ class Game {
 
   triggerLevelVictory() {
     const completedLevel = this.selectedLevel || 1;
+    analytics.logLevelVictory(completedLevel, this.player ? this.player.score : 0, this.gameTime || 0, this.crystalsCollected || 0);
     sounds.playJackpot();
     sounds.playLevelUp();
     sounds.playWarpDrive();
@@ -7786,6 +7789,7 @@ class Game {
 
   startNewGame() {
     this.state = 'PLAYING';
+    analytics.logGameStart(this.currentMode, this.selectedSkin, this.selectedPilot, this.player ? this.player.level : 1);
     this.showTutorialIfNeeded();
     this.gameTime = 0;
     this.frames = 0;
@@ -9435,6 +9439,7 @@ class Game {
 
     const evoName = t('evo_' + key + '_name') || (typeof evoKey === 'string' ? evoKey : 'EVOLUTION');
     const evoDesc = t('evo_' + key + '_desc') || '';
+    analytics.logWeaponEvolution(key, evoName);
 
     this.hitStopTimer = Math.max(this.hitStopTimer || 0, 8);
     this.screenShake = Math.max(this.screenShake || 0, 18);
@@ -10251,6 +10256,7 @@ class Game {
     this.modalTransition = null;
     this.resumeRampTimer = 0;
     this.state = 'GAME_OVER';
+    analytics.logGameOver(this.currentMode, this.player ? this.player.score : 0, this.gameTime || 0, this.wave || 1, this.lastKillerType || 'hazard');
     this.releaseWakeLock();
     sounds.setBossEnraged(false);
     sounds.setBossMode(false);
