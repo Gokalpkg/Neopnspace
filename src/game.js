@@ -4673,6 +4673,7 @@ class Game {
 
     const updateSettingsToggles = () => {
       this.updateAudioButtons();
+      if (this.updateNoAdsUI) this.updateNoAdsUI();
     };
     this.updateSettingsToggles = updateSettingsToggles;
 
@@ -4881,7 +4882,71 @@ class Game {
       });
     }
 
+    // VIP Reklamları Kaldır (No-Ads) Satın Alma & Geri Yükleme
+    const btnBuyNoAds = document.getElementById('btn-buy-no-ads');
+    const txtBuyNoAds = document.getElementById('txt-buy-no-ads');
+    const btnRestoreNoAds = document.getElementById('btn-restore-no-ads');
+
+    const updateNoAdsUI = () => {
+      const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
+      if (btnBuyNoAds) {
+        if (isNoAds) {
+          btnBuyNoAds.style.background = 'linear-gradient(135deg, rgba(5, 255, 161, 0.25), rgba(0, 240, 255, 0.2))';
+          btnBuyNoAds.style.borderColor = '#05ffa1';
+          btnBuyNoAds.style.color = '#05ffa1';
+          btnBuyNoAds.style.boxShadow = '0 0 12px rgba(5, 255, 161, 0.35)';
+          btnBuyNoAds.style.cursor = 'default';
+          if (txtBuyNoAds) txtBuyNoAds.textContent = t('settings_no_ads_active') || '✨ NO-ADS AKTİF';
+        } else {
+          btnBuyNoAds.style.background = 'linear-gradient(135deg, #00f0ff, #05ffa1)';
+          btnBuyNoAds.style.borderColor = '#00f0ff';
+          btnBuyNoAds.style.color = '#050b18';
+          btnBuyNoAds.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.4)';
+          btnBuyNoAds.style.cursor = 'pointer';
+          if (txtBuyNoAds) txtBuyNoAds.textContent = t('settings_no_ads_btn') || 'REKLAMLARI KALDIR - 49.99 ₺';
+        }
+      }
+    };
+    this.updateNoAdsUI = updateNoAdsUI;
+
+    if (btnBuyNoAds) {
+      btnBuyNoAds.addEventListener('click', () => {
+        sounds.playCardSelect();
+        const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
+        if (isNoAds) {
+          this.showToast(t('settings_no_ads_active') || '✨ NO-ADS AKTİF', '#05ffa1');
+          return;
+        }
+
+        // Satın alma işlemi (Yerel ve Firebase Analytics kaydı)
+        localStorage.setItem('neon_no_ads', 'true');
+        try {
+          analytics.logNoAdsPurchased();
+        } catch (e) {
+          console.warn('[NoAds] Analytics error:', e);
+        }
+        updateNoAdsUI();
+        if (sounds.playPowerup) sounds.playPowerup();
+        if (vibrate.success) vibrate.success();
+        this.showToast(t('toast_no_ads_success') || 'Tüm geçiş reklamları kaldırıldı!', '#05ffa1');
+      });
+    }
+
+    if (btnRestoreNoAds) {
+      btnRestoreNoAds.addEventListener('click', () => {
+        sounds.playCardSelect();
+        localStorage.setItem('neon_no_ads', 'true');
+        try {
+          analytics.logNoAdsPurchased();
+        } catch (e) {}
+        updateNoAdsUI();
+        if (vibrate.success) vibrate.success();
+        this.showToast(t('toast_restore_success') || 'Satın alımlar başarıyla geri yüklendi!', '#05ffa1');
+      });
+    }
+
     updateSettingsToggles();
+    updateNoAdsUI();
   }
 
   exportSaveCode() {
