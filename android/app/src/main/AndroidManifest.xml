@@ -35,10 +35,10 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!-- Google AdMob Uygulama Kimliği (App ID - Kaunos Games) -->
+        <!-- Google AdMob Uygulama Kimliği (App ID - Neon Space Survivor) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-9694275729123906~5576073886" />
+            android:value="ca-app-pub-9694275729123906~6102595607" />
     </application>
 
     <!-- İzinler -->
