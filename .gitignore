@@ -22,3 +22,6 @@ screen*.png
 # IDEs
 .vscode/
 .idea/
+
+# Internal agent data
+.agents/

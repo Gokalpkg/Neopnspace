@@ -71,10 +71,38 @@ export class ParticleSystem {
       });
     }
 
-    this.nebulae = [];
+    this.nebulae = [
+      { x: width * 0.25, y: height * 0.2, radius: Math.min(width * 0.45, 180), vy: 0.12, color: 'rgba(147, 51, 234, 0.08)' },
+      { x: width * 0.8, y: height * 0.65, radius: Math.min(width * 0.5, 210), vy: 0.08, color: 'rgba(6, 182, 212, 0.07)' },
+      { x: width * 0.5, y: -80, radius: Math.min(width * 0.38, 160), vy: 0.15, color: 'rgba(236, 72, 153, 0.06)' }
+    ];
   }
 
   // Patlama Kıvılcımları (Mobil 60fps Optimize)
+  spawnHitSparks(x, y, dx, dy, color = '#ffffff') {
+    const count = this.particles.length > 60 ? 3 : 5;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len;
+    const uy = dy / len;
+    for (let i = 0; i < count; i++) {
+      const spread = (Math.random() - 0.5) * 0.85;
+      const px = ux + (-uy * spread);
+      const py = uy + (ux * spread);
+      const speed = 1.15 + Math.random() * 1.5;
+      this.particles.push({
+        x,
+        y,
+        vx: px * speed,
+        vy: py * speed,
+        radius: 1.05 + Math.random() * 1.05,
+        isPixel: true,
+        color: i === 0 ? '#ffffff' : color,
+        alpha: 1,
+        decay: 0.09 + Math.random() * 0.04
+      });
+    }
+  }
+
   spawnExplosion(x, y, color = '#ff0077', count = 10, maxSpeed = 3.5) {
     if (this.particles.length > 70) {
       count = Math.min(count, 3);
@@ -119,24 +147,29 @@ export class ParticleSystem {
   }
 
   // Meteor / Taş Parçalanma Patlama Animasyonu (Birden yok olmayı önleyen organik parçalanma)
-  spawnAsteroidBreakAnimation(x, y, radius = 25, isBomb = false) {
+  spawnAsteroidBreakAnimation(x, y, radius = 25, isBomb = false, theme = null) {
     const r = Math.max(16, radius);
+    const isPurple = theme === 'purple';
 
     // 1. Çok Katmanlı Genişleyen Patlama Ateş Topu (Blooming Fireball Blast)
     // Bu ateş topu, tam taşın yok olduğu karede ortaya çıkıp hacmini doldurur ve organik olarak genişleyip dağılır.
     const baseCore = '#ffffff';
-    const baseMid = isBomb ? '#ffbe0b' : '#38bdf8';
-    const baseOuter = isBomb ? '#ff3d00' : '#475569';
+    let baseMid = isBomb ? '#ffbe0b' : '#38bdf8';
+    let baseOuter = isBomb ? '#ff3d00' : '#475569';
+    if (isPurple) {
+      baseMid = '#e879f9';
+      baseOuter = '#a855f7';
+    }
 
     this.blastFireballs.push({
       x,
       y,
       radius: r * 0.45,
-      maxRadius: r * (isBomb ? 2.6 : 1.8),
-      growSpeed: isBomb ? 4.6 : 3.0,
+      maxRadius: r * (isBomb || isPurple ? 2.6 : 1.8),
+      growSpeed: isBomb || isPurple ? 4.6 : 3.0,
       alpha: 1.0,
-      decay: isBomb ? 0.032 : 0.046,
-      isBomb,
+      decay: isBomb || isPurple ? 0.032 : 0.046,
+      isBomb: isBomb || isPurple,
       colorCore: baseCore,
       colorMid: baseMid,
       colorOuter: baseOuter
@@ -165,9 +198,14 @@ export class ParticleSystem {
 
     // 2. Büyük Poligonal Parçalanan Kaya Blokları (Gerçek Taş Çatlaması - Asla birden yok olmaz!)
     const chunkCount = Math.max(6, Math.min(9, Math.round(r * 0.36)));
-    const fillCol = isBomb ? '#5c122a' : '#334155';
-    const strokeCol = isBomb ? '#ff0055' : '#94a3b8';
-    const crackCol = isBomb ? '#ffe600' : '#38bdf8';
+    let fillCol = isBomb ? '#5c122a' : '#334155';
+    let strokeCol = isBomb ? '#ff0055' : '#94a3b8';
+    let crackCol = isBomb ? '#ffe600' : '#38bdf8';
+    if (isPurple) {
+      fillCol = '#3b0764';
+      strokeCol = '#c084fc';
+      crackCol = '#f0abfc';
+    }
 
     for (let i = 0; i < chunkCount; i++) {
       const angle = (i * (Math.PI * 2 / chunkCount)) + (Math.random() - 0.5) * 0.55;
@@ -259,10 +297,21 @@ export class ParticleSystem {
     });
   }
 
-  // Şok Dalgası (Kullanıcı talebi doğrultusunda ekrandaki yuvarlak halkalar ve göz yorucu epilepsi tetikleyicileri tamamen devre dışı bırakıldı)
-  spawnShockwave(x, y, color = '#00f0ff', maxRadius = 160) {
-    // Devre dışı: ekranda yuvarlak halka / şok dalgası oluşturulmaz
-    return;
+  // Şok Dalgası (Sadece büyük patlamalar, EMP, Boss ve Evrim anları için zarif neon halka: maxRadius >= 90)
+  spawnShockwave(x, y, color = '#00f0ff', maxRadius = 110) {
+    if (maxRadius < 90) return;
+    if (this.shockwaves.length >= 10) {
+      this.shockwaves.shift();
+    }
+    this.shockwaves.push({
+      x,
+      y,
+      radius: 10,
+      maxRadius,
+      speed: Math.max(5.5, maxRadius / 18),
+      color: color || '#00f0ff',
+      alpha: 0.85
+    });
   }
 
   // Tesla Zincirleme Yıldırım Arkı (Elektrik Arkı)
@@ -471,7 +520,7 @@ export class ParticleSystem {
     // Şok Dalgaları
     for (let i = this.shockwaves.length - 1; i >= 0; i--) {
       const sw = this.shockwaves[i];
-      sw.radius += 5.5 * dt;
+      sw.radius += (sw.speed || 5.5) * dt;
       sw.alpha = 1 - (sw.radius / sw.maxRadius);
       if (sw.radius >= sw.maxRadius) {
         this.shockwaves.splice(i, 1);
@@ -582,10 +631,20 @@ export class ParticleSystem {
       ctx.fillStyle = this.bgBase;
       ctx.fillRect(-60, -60, ctx.canvas.width + 120, ctx.canvas.height + 120);
     }
-
-
-
-
+    // 1. Kozmik Parallax Nebulalar (Derinlikli Uzay)
+    if (this.nebulae && this.nebulae.length > 0) {
+      for (let neb of this.nebulae) {
+        ctx.save();
+        const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.radius);
+        grad.addColorStop(0, neb.color);
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(neb.x, neb.y, neb.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
 
     // 2. Retro-Pixel Yıldızlar (3 Katmanlı 8-Bit Parallaks & Çapraz Yıldız Parıltıları)
     const isWarp = this.warpTimer > 0;
@@ -626,8 +685,20 @@ export class ParticleSystem {
       }
     }
 
-    // 3. Şok Dalgaları (Devre dışı - boş döngü)
-    this.shockwaves.length = 0;
+    // 3. Şok Dalgaları (Zarif Neon Genişleme Halkaları)
+    if (this.shockwaves && this.shockwaves.length > 0) {
+      ctx.save();
+      for (let sw of this.shockwaves) {
+        if (sw.alpha <= 0) continue;
+        ctx.globalAlpha = Math.max(0, Math.min(1, sw.alpha * 0.72));
+        ctx.strokeStyle = sw.color || '#00f0ff';
+        ctx.lineWidth = Math.max(1.4, 3.2 * sw.alpha);
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, Math.max(2, sw.radius), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     // 3.5. Patlama Ateş Topları (Çok Katmanlı Parlayan Blast Fireballs)
     if (this.blastFireballs && this.blastFireballs.length > 0) {

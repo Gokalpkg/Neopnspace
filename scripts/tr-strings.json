@@ -1,0 +1,3491 @@
+[
+  {
+    "s": "[!] ${bInfo.name} • FAZ 2 [ÇEKİRDEK AÇIK!] [!]",
+    "loc": [
+      "src/game.js:7524"
+    ]
+  },
+  {
+    "s": "[!] ASTEROİT SAĞANAĞI! (8 SN)",
+    "loc": [
+      "src/game.js:10031",
+      "src/game.js:10037"
+    ]
+  },
+  {
+    "s": "[!] SÜPERNOVA PATLAMASI!",
+    "loc": [
+      "src/game.js:10145"
+    ]
+  },
+  {
+    "s": "[2X İKMAL] +${gain} CR Kasaya Eklendi!",
+    "loc": [
+      "src/game.js:5765"
+    ]
+  },
+  {
+    "s": "[AÇILDI] 2. Ganimet Alındı",
+    "loc": [
+      "src/game.js:9200"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] ${isReviveRequest ? 'CANLANMA' : 'HIZLI'} Adım ${i + 1}/${waterfallQueue.length}:",
+    "loc": [
+      "index.html:1354"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] ${runsCount} oynanış tamamlandı, Ödüllü Geçiş şelalesi (Group 7863371906) tetikleniyor...",
+    "loc": [
+      "index.html:1402"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Birim (${unitId}) geçişli olarak da yüklenemedi:",
+    "loc": [
+      "index.html:1284"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Canlı birimler doldurulamadı, test birimi deneniyor...",
+    "loc": [
+      "index.html:1365"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Geçiş birimi yüklenemedi:",
+    "loc": [
+      "index.html:1427"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Geçişli reklam başarıyla gösterildi ->",
+    "loc": [
+      "index.html:1423"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Ödüllü birim (${unitId}) yüklenemedi:",
+    "loc": [
+      "index.html:1270"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Ödüllü Geçiş birimi (${unitId}) yüklenemedi:",
+    "loc": [
+      "index.html:1257"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Ödüllü Geçiş reklamı başarıyla gösterildi ->",
+    "loc": [
+      "index.html:1417"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Reklam BAŞARIYLA gösterildi! Birim:",
+    "loc": [
+      "index.html:1357"
+    ]
+  },
+  {
+    "s": "[AdMob Mediation] Test reklamı da başarısız:",
+    "loc": [
+      "index.html:1372"
+    ]
+  },
+  {
+    "s": "[ALARM] GÜDÜMLÜ FÜZE!",
+    "loc": [
+      "src/game.js:13251"
+    ]
+  },
+  {
+    "s": "[BOOST] +%50 KRİSTAL RADARI!",
+    "loc": [
+      "src/game.js:7282"
+    ]
+  },
+  {
+    "s": "[BOOST] +2 TAKTİKSEL REROLL!",
+    "loc": [
+      "src/game.js:7276"
+    ]
+  },
+  {
+    "s": "[BOOST] AĞIR KALKAN (+30)!",
+    "loc": [
+      "src/game.js:7301"
+    ]
+  },
+  {
+    "s": "[BOOST] GRAVİTASYON VAKUMU!",
+    "loc": [
+      "src/game.js:7294"
+    ]
+  },
+  {
+    "s": "[BOOST] OVERDRIVE BATARYASI AKTİF!",
+    "loc": [
+      "src/game.js:7270"
+    ]
+  },
+  {
+    "s": "[BÜYÜK İKRAMİYE SANDIĞI]",
+    "loc": [
+      "src/game.js:9112"
+    ]
+  },
+  {
+    "s": "[BÜYÜK İKRAMİYE: 3X]",
+    "loc": [
+      "src/game.js:9108"
+    ]
+  },
+  {
+    "s": "[CANLANMA] +1 Canlanma Hakkı Depoya Eklendi!",
+    "loc": [
+      "src/game.js:6106"
+    ]
+  },
+  {
+    "s": "[CANLANMA] Depodaki Canlanma Hakkı Kullanıldı!",
+    "loc": [
+      "src/game.js:1264"
+    ]
+  },
+  {
+    "s": "[CANLANMA] SAVAŞA DÖNDÜN!",
+    "loc": [
+      "src/game.js:9496"
+    ]
+  },
+  {
+    "s": "[COMBO 40X] KATLİAM!",
+    "loc": [
+      "src/game.js:12249"
+    ]
+  },
+  {
+    "s": "[COMBO 50X] EFSANEVİ!",
+    "loc": [
+      "src/game.js:12251"
+    ]
+  },
+  {
+    "s": "[DEV] Geliştirici Modu Kapatıldı",
+    "loc": [
+      "src/game.js:2929"
+    ]
+  },
+  {
+    "s": "[DEV] GELİŞTİRİCİ MODU: Sınırsız Kaynak Aktif!",
+    "loc": [
+      "src/game.js:2921"
+    ]
+  },
+  {
+    "s": "[DRONE] ${drone.name} Göreve Atandı!",
+    "loc": [
+      "src/game.js:3652"
+    ]
+  },
+  {
+    "s": "[DRONE] ${drone.name} Seviye ${currentLvl + 1}'e Yükseltildi!",
+    "loc": [
+      "src/game.js:3699"
+    ]
+  },
+  {
+    "s": "[ETKİNLİK] ALTIN KRİSTAL BULUTU! (6 SN)",
+    "loc": [
+      "src/game.js:10027",
+      "src/game.js:10041"
+    ]
+  },
+  {
+    "s": "[GANİMET] 2. Ganimet Açıldı!",
+    "loc": [
+      "src/game.js:9190"
+    ]
+  },
+  {
+    "s": "[GANİMET] GİZLİ KARGO ELE GEÇİRİLDİ!",
+    "loc": [
+      "src/game.js:12622"
+    ]
+  },
+  {
+    "s": "[GANİMET] İkiye Katlandı! (+${baseGain} Kristal)",
+    "loc": [
+      "src/game.js:3029"
+    ]
+  },
+  {
+    "s": "[GEMİ] ${inspected.name} Kuşanıldı!",
+    "loc": [
+      "src/game.js:3498"
+    ]
+  },
+  {
+    "s": "[GEMİ] ${skin.name} Kuşanıldı!",
+    "loc": [
+      "src/game.js:5470"
+    ]
+  },
+  {
+    "s": "[GEMİ] ${skin.name} zaten aktif donanımında!",
+    "loc": [
+      "src/game.js:5460"
+    ]
+  },
+  {
+    "s": "[GÖREV] İLK UÇUŞ",
+    "loc": [
+      "src/game.js:7465"
+    ]
+  },
+  {
+    "s": "[HANGAR] ${drone.name} Hangara Katıldı!",
+    "loc": [
+      "src/game.js:3664"
+    ]
+  },
+  {
+    "s": "[HANGAR] ${inspected.name} Satın Alındı ve Kuşanıldı!",
+    "loc": [
+      "src/game.js:3516"
+    ]
+  },
+  {
+    "s": "[HANGAR] ${skin.name} Satın Alındı ve Kuşanıldı!",
+    "loc": [
+      "src/game.js:5493"
+    ]
+  },
+  {
+    "s": "[HANGAR] ${tr.name} İtkisi Açıldı ve Kuşanıldı!",
+    "loc": [
+      "src/game.js:3779"
+    ]
+  },
+  {
+    "s": "[HATA] Geçersiz yedekleme kodu!",
+    "loc": [
+      "src/game.js:4388"
+    ]
+  },
+  {
+    "s": "[HAZİNE] KOZMİK KRİSTAL AKINTISI!",
+    "loc": [
+      "src/game.js:11354"
+    ]
+  },
+  {
+    "s": "[HEDEF] KIRMIZI METEORU VUR: ÇEVRESİNİ PATLAT!",
+    "loc": [
+      "src/game.js:7113"
+    ]
+  },
+  {
+    "s": "[İKMAL] ${info.streak}. Gün Ödülü (+${baseGain} CR) Kasaya Aktarıldı!",
+    "loc": [
+      "src/game.js:5704"
+    ]
+  },
+  {
+    "s": "[İMHA] ÖNCÜ KOMUTAN DÜŞÜRÜLDÜ!",
+    "loc": [
+      "src/game.js:12608"
+    ]
+  },
+  {
+    "s": "[İTKİ] ${tr.name} İtkisi Kuşanıldı!",
+    "loc": [
+      "src/game.js:3766"
+    ]
+  },
+  {
+    "s": "[JACKPOT] +${prize.value} KRİSTAL KAZANDIN!",
+    "loc": [
+      "src/game.js:6093"
+    ]
+  },
+  {
+    "s": "[JACKPOT] 2X ÖDÜL KAZANDIN (+${finalAmount} CR)!",
+    "loc": [
+      "src/game.js:2970"
+    ]
+  },
+  {
+    "s": "[KALKAN] FAZ KALKANI AKTİF!",
+    "loc": [
+      "src/game.js:12714"
+    ]
+  },
+  {
+    "s": "[KALKAN] Sıradaki Uçuş İçin Kalkan Takviyesi Hazır!",
+    "loc": [
+      "src/game.js:6111"
+    ]
+  },
+  {
+    "s": "[KİLİTLİ] Pilot ${p.name} (${p.cost} CR)",
+    "loc": [
+      "src/game.js:1921"
+    ]
+  },
+  {
+    "s": "[KOPYALANDI] Rekor panoya kopyalandı!",
+    "loc": [
+      "src/game.js:1247"
+    ]
+  },
+  {
+    "s": "[KRİSTAL] +125 Kristal Yüklendi!",
+    "loc": [
+      "src/game.js:4192"
+    ]
+  },
+  {
+    "s": "[LİDER] ZİRVEDESİN! (DÜNYA #1)",
+    "loc": [
+      "src/game.js:6476"
+    ]
+  },
+  {
+    "s": "[MOD: VULCAN] SERİ SAVUNMA",
+    "loc": [
+      "src/game.js:9745"
+    ]
+  },
+  {
+    "s": "[NEON SPACE] ${score.toLocaleString()} puan yaptım! (${modeName})\\nBu rekoru geçebilir misin?",
+    "loc": [
+      "src/game.js:1234"
+    ]
+  },
+  {
+    "s": "[NOVA] KUANTUM TEKİLLİK!",
+    "loc": [
+      "src/game.js:7071"
+    ]
+  },
+  {
+    "s": "[ONAY] ${best.item.name} geliştirildi!",
+    "loc": [
+      "src/game.js:9375"
+    ]
+  },
+  {
+    "s": "[OVERDRIVE] Sıradaki Uçuş İçin Süper Şarj Hazır!",
+    "loc": [
+      "src/game.js:6116"
+    ]
+  },
+  {
+    "s": "[ÖDÜL] +${finalAmount} Kristal Eklendi!",
+    "loc": [
+      "src/game.js:2972"
+    ]
+  },
+  {
+    "s": "[ÖDÜL] +${prize.value} Kristal Kasaya Eklendi!",
+    "loc": [
+      "src/game.js:6098"
+    ]
+  },
+  {
+    "s": "[PİLOT] ${p.name} Başarıyla Açıldı!",
+    "loc": [
+      "src/game.js:1895"
+    ]
+  },
+  {
+    "s": "[PİLOT] ${p.name} Göreve Atandı!",
+    "loc": [
+      "src/game.js:1919"
+    ]
+  },
+  {
+    "s": "[PROFİL] Pilot Profili Güncellendi!",
+    "loc": [
+      "src/game.js:6271"
+    ]
+  },
+  {
+    "s": "[REKLAM] Hazırlanıyor...",
+    "loc": [
+      "index.html:1311"
+    ]
+  },
+  {
+    "s": "[REKOR] YENİ REKOR!",
+    "loc": [
+      "src/game.js:7458"
+    ]
+  },
+  {
+    "s": "[SÜPER JACKPOT] +${finalAmount} CR!",
+    "loc": [
+      "src/game.js:2978"
+    ]
+  },
+  {
+    "s": "[ŞANSLI SANDIK]",
+    "loc": [
+      "src/game.js:9108"
+    ]
+  },
+  {
+    "s": "[TEMİZLENDİ] AÇILIŞ DALGASI İMHA EDİLDİ!",
+    "loc": [
+      "src/game.js:9562"
+    ]
+  },
+  {
+    "s": "[TITAN] ÇİFT KALKAN",
+    "loc": [
+      "src/game.js:7044"
+    ]
+  },
+  {
+    "s": "[TÜCCAR] Kaçakçı Desteği: +100 Kristal Eklendi!",
+    "loc": [
+      "src/game.js:3173"
+    ]
+  },
+  {
+    "s": "[TÜCCAR] Kaçakçı Desteği: +200 Kristal!",
+    "loc": [
+      "src/game.js:3171"
+    ]
+  },
+  {
+    "s": "[UYARI] Reklam servisi şu anda hazır değil.",
+    "loc": [
+      "src/game.js:3049",
+      "src/game.js:3117",
+      "src/game.js:3187"
+    ]
+  },
+  {
+    "s": "[UYARI] Reklam tamamlanmadığı için çark çevrilemedi.",
+    "loc": [
+      "src/game.js:6002"
+    ]
+  },
+  {
+    "s": "[UYARI] Reklam tamamlanmadığı için ganimet katlanamadı.",
+    "loc": [
+      "src/game.js:3044",
+      "src/game.js:3112"
+    ]
+  },
+  {
+    "s": "[UYARI] Reklam tamamlanmadığı için kristal verilemedi.",
+    "loc": [
+      "src/game.js:3182"
+    ]
+  },
+  {
+    "s": "[UYARI] Reklam tamamlanmadığı için ödül verilemedi.",
+    "loc": [
+      "src/game.js:4196",
+      "src/game.js:5742",
+      "index.html:1491"
+    ]
+  },
+  {
+    "s": "[UYARI] Yükseltme için ${nextCost - this.totalCrystals} CR eksik!",
+    "loc": [
+      "src/game.js:3704"
+    ]
+  },
+  {
+    "s": "[YÖRÜNGE] KLON AŞIRI GÜÇ! (+%${petPowerPct} GÜÇ)",
+    "loc": [
+      "src/game.js:8961"
+    ]
+  },
+  {
+    "s": "[YÖRÜNGE] KLON MAKSİMUM GÜÇ! (+%${petPowerPct} GÜÇ)",
+    "loc": [
+      "src/game.js:8961"
+    ]
+  },
+  {
+    "s": "[YÖRÜNGE] MİKRO KLON AKTİF! (+%${petPowerPct} GÜÇ)",
+    "loc": [
+      "src/game.js:8961"
+    ]
+  },
+  {
+    "s": "[ZAFER] BÖLÜM ${completedLevel} TEMİZLENDİ! (+${rewardCrystals} CR)",
+    "loc": [
+      "src/game.js:5254"
+    ]
+  },
+  {
+    "s": "[ZAFER] BÖLÜM ${this.selectedLevel} TAMAMLANDI!",
+    "loc": [
+      "src/game.js:12591"
+    ]
+  },
+  {
+    "s": "[ZAFER] Ganimet İkiye Katlandı! (+${bonus} Kristal)",
+    "loc": [
+      "src/game.js:3097"
+    ]
+  },
+  {
+    "s": "#{r} geçmek için +{n} PTS",
+    "loc": [
+      "src/game.js:6471"
+    ]
+  },
+  {
+    "s": "#{r} geçmek için sonraki bölümü bitir",
+    "loc": [
+      "src/game.js:6473"
+    ]
+  },
+  {
+    "s": "%50 HAZIR SÜPER GÜÇ",
+    "loc": [
+      "src/game.js:3841"
+    ]
+  },
+  {
+    "s": "+%${lvl * 8} Şarj",
+    "loc": [
+      "src/game.js:4046"
+    ]
+  },
+  {
+    "s": "+%15 Seri Yıkım",
+    "loc": [
+      "src/game.js:4023"
+    ]
+  },
+  {
+    "s": "+%50 KRİSTAL KAZANCI",
+    "loc": [
+      "src/game.js:3865"
+    ]
+  },
+  {
+    "s": "+%60 kristal çekim menzili ve arkasında yakıcı asit közleri saçar.",
+    "loc": [
+      "src/game.js:684"
+    ]
+  },
+  {
+    "s": "+%80 ÇEKİM ALANI",
+    "loc": [
+      "src/game.js:3829"
+    ]
+  },
+  {
+    "s": "+${finalAmount} KRİSTAL!",
+    "loc": [
+      "src/game.js:2978"
+    ]
+  },
+  {
+    "s": "+${gain} KRİSTAL!",
+    "loc": [
+      "src/game.js:8927"
+    ]
+  },
+  {
+    "s": "+1 CAN YEDEĞİ",
+    "loc": [
+      "src/game.js:3805"
+    ]
+  },
+  {
+    "s": "+1 Ekstra Hata Payı",
+    "loc": [
+      "src/game.js:4013"
+    ]
+  },
+  {
+    "s": "+1 FÜZE",
+    "loc": [
+      "src/game.js:8430"
+    ]
+  },
+  {
+    "s": "+1 FÜZE & GÜÇ",
+    "loc": [
+      "src/game.js:9088"
+    ]
+  },
+  {
+    "s": "+100 KRİSTAL AL (REKLAM)",
+    "loc": [
+      "src/game.js:3180",
+      "src/game.js:3190",
+      "src/game.js:6828"
+    ]
+  },
+  {
+    "s": "+15 CAN / +25 TAMİR",
+    "loc": [
+      "src/game.js:8484",
+      "src/game.js:9094"
+    ]
+  },
+  {
+    "s": "+2 KART YENİLEME",
+    "loc": [
+      "src/game.js:3853"
+    ]
+  },
+  {
+    "s": "+20 MENZİL",
+    "loc": [
+      "src/game.js:8475",
+      "src/game.js:9093"
+    ]
+  },
+  {
+    "s": "+30 BAŞLANGIÇ KALKANI",
+    "loc": [
+      "src/game.js:3877"
+    ]
+  },
+  {
+    "s": "+ARK ELEKTRİK",
+    "loc": [
+      "src/game.js:8439",
+      "src/game.js:9089"
+    ]
+  },
+  {
+    "s": "+MİKRO KLON",
+    "loc": [
+      "src/game.js:9095"
+    ]
+  },
+  {
+    "s": "+MİKRO KLON (%4 GÜÇ)",
+    "loc": [
+      "src/game.js:8493"
+    ]
+  },
+  {
+    "s": "<button class=\"tech-ad-boost-btn pulse\" title=\"Reklam İzle ve +125 Kristal Kazan\">EKSİK: ${missing} CR (+125 AL)</button>",
+    "loc": [
+      "src/game.js:4137"
+    ]
+  },
+  {
+    "s": "<button class=\"tech-buy-btn\">${nextCost} CR GELİŞTİR</button>",
+    "loc": [
+      "src/game.js:4134"
+    ]
+  },
+  {
+    "s": "<div class=\"gallery-section-title\">FİLO ENVANTERİ // GEMİLER (${this.unlockedSkins.length}/${Object.keys(this.skins).length})</div>",
+    "loc": [
+      "src/game.js:3536"
+    ]
+  },
+  {
+    "s": "<div class=\"lb-target-hint\">ÇEVRİMİÇİ</div>",
+    "loc": [
+      "src/game.js:6586"
+    ]
+  },
+  {
+    "s": "<div style=\"color: #64748b; font-size: 11px; grid-column: 1/-1; padding: 6px;\">Henüz aktif bir silah seçilmedi.</div>",
+    "loc": [
+      "src/game.js:2394"
+    ]
+  },
+  {
+    "s": "<span class=\"card-level-badge evolution-tag\">EFSANEVİ EVRİM</span>",
+    "loc": [
+      "src/game.js:8601",
+      "src/game.js:9150"
+    ]
+  },
+  {
+    "s": "<span class=\"card-level-badge\" style=\"background: rgba(255, 190, 11, 0.2); color: #ffbe0b; border: 1px solid #ffbe0b;\">AŞIRI YÜKLEME</span>",
+    "loc": [
+      "src/game.js:8603"
+    ]
+  },
+  {
+    "s": "<span class=\"card-level-badge\">SEVİYE ${upgrade.level + 1} / ${upgrade.maxLevel}</span>",
+    "loc": [
+      "src/game.js:8605"
+    ]
+  },
+  {
+    "s": "<span class=\"card-level-badge\">ÜCRETSİZ GELİŞTİRME</span>",
+    "loc": [
+      "src/game.js:9150"
+    ]
+  },
+  {
+    "s": "<span style=\"color:#05ffa1; font-weight:800; font-size:0.8rem; letter-spacing:0.5px;\">[GÖREVDE] AKTİF PİLOT</span>",
+    "loc": [
+      "src/game.js:1879"
+    ]
+  },
+  {
+    "s": "<span>[HEDEF] Rekora <strong>${left.toLocaleString()}</strong> puan kaldı!</span> <em>(En İyi: ${prevBest.toLocaleString()})</em>",
+    "loc": [
+      "src/game.js:9347"
+    ]
+  },
+  {
+    "s": "<span>[REKOR] İLK REKORUN!</span> <strong>${score.toLocaleString()}</strong>",
+    "loc": [
+      "src/game.js:9343"
+    ]
+  },
+  {
+    "s": "<span>[REKOR] YENİ REKOR!</span> <strong>${score.toLocaleString()}</strong> <em>(Önceki: ${prevBest.toLocaleString()})</em>",
+    "loc": [
+      "src/game.js:9340"
+    ]
+  },
+  {
+    "s": "<span>2X ZAFER GANİMETİ ALINDI (+${bonus} CR)</span>",
+    "loc": [
+      "src/game.js:3091"
+    ]
+  },
+  {
+    "s": "<svg class=\"pixel-icon pixel-icon-md\" viewBox=\"0 0 12 12\"><polygon points=\"3,1 10,6 3,11\" fill=\"#030816\"/></svg> 2X ZAFER GANİMETİ AL (REKLAM)",
+    "loc": [
+      "src/game.js:5136"
+    ]
+  },
+  {
+    "s": ">> GİZLİ KARGO GEMİSİ SIZDI! (8 SN)",
+    "loc": [
+      "src/game.js:10045"
+    ]
+  },
+  {
+    "s": ">> GİZLİ KARGO GEMİSİ!",
+    "loc": [
+      "src/game.js:10098"
+    ]
+  },
+  {
+    "s": ">> UZAY KAÇAKÇISI YANAŞIYOR <<",
+    "loc": [
+      "src/game.js:6798"
+    ]
+  },
+  {
+    "s": ">>> ANKA DİRİLİŞİ! <<<",
+    "loc": [
+      "src/game.js:12812"
+    ]
+  },
+  {
+    "s": ">>> HİPERSÜRÜŞ: BÖLÜM ${this.selectedLevel} BAŞLIYOR <<<",
+    "loc": [
+      "src/game.js:5255"
+    ]
+  },
+  {
+    "s": ">>> OVERDRIVE AKTİF <<<",
+    "loc": [
+      "src/game.js:6974"
+    ]
+  },
+  {
+    "s": "▲ TUK-TUK ELEKTRO-RAY (AĞIR BALYOZ)",
+    "loc": [
+      "src/game.js:13376"
+    ]
+  },
+  {
+    "s": "▼ SERİ SALDIRI MODU",
+    "loc": [
+      "src/game.js:13379"
+    ]
+  },
+  {
+    "s": "★ ŞANSLI SANDIK! ★",
+    "loc": [
+      "src/game.js:8979"
+    ]
+  },
+  {
+    "s": "⚠️ FAZ 2: ZIRH DÖKÜLDÜ & ÇEKİRDEK SAVUNMASIZ! ⚠️",
+    "loc": [
+      "src/game.js:11716"
+    ]
+  },
+  {
+    "s": "⚡ EVRİM: ${evoName}!",
+    "loc": [
+      "src/game.js:8723"
+    ]
+  },
+  {
+    "s": "⚡ SEVİYE ATLADIN! ⚡",
+    "loc": [
+      "src/game.js:8090"
+    ]
+  },
+  {
+    "s": "⚡ SİLAH EVRİMİ: ${evoName} (+3sn OVERDRIVE!)",
+    "loc": [
+      "src/game.js:8724"
+    ]
+  },
+  {
+    "s": "🏆 SEFER TAMAMLANDI! (ANA MENÜ)",
+    "loc": [
+      "src/game.js:5140"
+    ]
+  },
+  {
+    "s": "🚀 [TEST SÜRÜŞÜ] ${this.skins[skinId].name} (15 Sn Simülasyon)",
+    "loc": [
+      "src/game.js:3344"
+    ]
+  },
+  {
+    "s": "🚀 ${testedName} Test Sürüşü Tamamlandı! Hangardan Kilidini Açabilirsin.",
+    "loc": [
+      "src/game.js:3381"
+    ]
+  },
+  {
+    "s": "🚀 DENEME UÇUŞU • ${remSec}sn KALDI",
+    "loc": [
+      "src/game.js:13426"
+    ]
+  },
+  {
+    "s": "${earnedCount}/5 Tamamlandı",
+    "loc": [
+      "src/game.js:2675"
+    ]
+  },
+  {
+    "s": "${getPixelIconSvg('check', 'sm')} <span>${t('status_equipped') || 'AKTİF KUŞANILDI'}</span>",
+    "loc": [
+      "src/game.js:5412"
+    ]
+  },
+  {
+    "s": "${getPixelIconSvg('check', 'sm')} <span>${t('status_equipped') || 'GÖREVDE KUŞANILDI'}</span>",
+    "loc": [
+      "src/game.js:3407"
+    ]
+  },
+  {
+    "s": "${getPixelIconSvg('energy', 'sm')} <span>${t('btn_equip') || 'KUŞAN'}</span>",
+    "loc": [
+      "src/game.js:3410",
+      "src/game.js:5415"
+    ]
+  },
+  {
+    "s": "${getPixelIconSvg('skull', 'sm')} AĞIR ZIRHLI KRUVAZÖR TESPİT EDİLDİ!",
+    "loc": [
+      "src/game.js:11380"
+    ]
+  },
+  {
+    "s": "${getPixelIconSvg('target', 'sm')} DÜŞMAN ÖNCÜ FİLOSU YAKLAŞIYOR!",
+    "loc": [
+      "src/game.js:11596"
+    ]
+  },
+  {
+    "s": "${info.streak}. GÜN ALINDI • REKLAMLA 2X KATLA!",
+    "loc": [
+      "src/game.js:5586"
+    ]
+  },
+  {
+    "s": "${info.streak}. GÜN İKMALİ HAZIR!",
+    "loc": [
+      "src/game.js:5593"
+    ]
+  },
+  {
+    "s": "${info.streak}. GÜN SERİSİ TAMAMLANDI",
+    "loc": [
+      "src/game.js:5589"
+    ]
+  },
+  {
+    "s": "1,500 kez tehlike sıyır",
+    "loc": [
+      "src/game.js:626"
+    ]
+  },
+  {
+    "s": "1,800 asteroit parçala",
+    "loc": [
+      "src/game.js:590"
+    ]
+  },
+  {
+    "s": "1. GÜN",
+    "loc": [
+      "src/game.js:5571"
+    ]
+  },
+  {
+    "s": "10 şanslı uzay sandığı aç",
+    "loc": [
+      "src/game.js:638"
+    ]
+  },
+  {
+    "s": "100x maksimum kombo zincirine ulaş",
+    "loc": [
+      "src/game.js:605"
+    ]
+  },
+  {
+    "s": "12 saniye boyunca tüm düşman ve mermileri %65 dondurur.",
+    "loc": [
+      "src/game.js:6861"
+    ]
+  },
+  {
+    "s": "120 kez tehlike sıyır",
+    "loc": [
+      "src/game.js:624"
+    ]
+  },
+  {
+    "s": "15 Saniye Ücretsiz Test Sürüşü",
+    "loc": [
+      "src/game.js:3471"
+    ]
+  },
+  {
+    "s": "15 sn boyunca ekrandaki tüm kristalleri anında gemiye çeker.",
+    "loc": [
+      "src/game.js:6860"
+    ]
+  },
+  {
+    "s": "15 Sn Hasarsız Uç",
+    "loc": [
+      "src/game.js:6673"
+    ]
+  },
+  {
+    "s": "150x maksimum kombo zincirine ulaş",
+    "loc": [
+      "src/game.js:606"
+    ]
+  },
+  {
+    "s": "15x kombo zincirine ulaş",
+    "loc": [
+      "src/game.js:602"
+    ]
+  },
+  {
+    "s": "18,000 asteroit parçala",
+    "loc": [
+      "src/game.js:592"
+    ]
+  },
+  {
+    "s": "180 şanslı uzay sandığı aç",
+    "loc": [
+      "src/game.js:641"
+    ]
+  },
+  {
+    "s": "2 şanslı uzay sandığı aç",
+    "loc": [
+      "src/game.js:637"
+    ]
+  },
+  {
+    "s": "2. Ganimeti Aç (Reklam İzle)",
+    "loc": [
+      "src/game.js:9211"
+    ]
+  },
+  {
+    "s": "2. GÜN",
+    "loc": [
+      "src/game.js:5572"
+    ]
+  },
+  {
+    "s": "200 uçuş seferine çık",
+    "loc": [
+      "src/game.js:633"
+    ]
+  },
+  {
+    "s": "25 Düşman Yok Et",
+    "loc": [
+      "src/game.js:6670"
+    ]
+  },
+  {
+    "s": "25 kez mermi veya tehlike sıyır",
+    "loc": [
+      "src/game.js:623"
+    ]
+  },
+  {
+    "s": "25 uçuş seferine çık",
+    "loc": [
+      "src/game.js:631"
+    ]
+  },
+  {
+    "s": "2X Ganimet & Elit Sandık",
+    "loc": [
+      "src/game.js:5202"
+    ]
+  },
+  {
+    "s": "2X Ganimet reklamı tamamlanmadı:",
+    "loc": [
+      "src/game.js:3036"
+    ]
+  },
+  {
+    "s": "3. GÜN",
+    "loc": [
+      "src/game.js:5573"
+    ]
+  },
+  {
+    "s": "3.2 saniyede bir en yakın 3 düşmana zincirleme elektrik yıldırımı saçar",
+    "loc": [
+      "src/game.js:806"
+    ]
+  },
+  {
+    "s": "3.5 saniyede bir düşmanlara güdümlü mini roket fırlatır",
+    "loc": [
+      "src/game.js:786"
+    ]
+  },
+  {
+    "s": "30x veya üzeri kombo yap",
+    "loc": [
+      "src/game.js:4637",
+      "src/game.js:4665"
+    ]
+  },
+  {
+    "s": "35 şanslı uzay sandığı aç",
+    "loc": [
+      "src/game.js:639"
+    ]
+  },
+  {
+    "s": "350 asteroit parçala",
+    "loc": [
+      "src/game.js:589"
+    ]
+  },
+  {
+    "s": "35x kombo zincirine ulaş",
+    "loc": [
+      "src/game.js:603"
+    ]
+  },
+  {
+    "s": "4,500 kez tehlike sıyır",
+    "loc": [
+      "src/game.js:627"
+    ]
+  },
+  {
+    "s": "4. GÜN",
+    "loc": [
+      "src/game.js:5574"
+    ]
+  },
+  {
+    "s": "5 uçuş seferine çık",
+    "loc": [
+      "src/game.js:630"
+    ]
+  },
+  {
+    "s": "5. GÜN",
+    "loc": [
+      "src/game.js:5575"
+    ]
+  },
+  {
+    "s": "50 asteroit parçala",
+    "loc": [
+      "src/game.js:588"
+    ]
+  },
+  {
+    "s": "500 kez tehlike sıyır",
+    "loc": [
+      "src/game.js:625"
+    ]
+  },
+  {
+    "s": "500 uçuş seferine çık",
+    "loc": [
+      "src/game.js:634"
+    ]
+  },
+  {
+    "s": "6,000 asteroit parçala",
+    "loc": [
+      "src/game.js:591"
+    ]
+  },
+  {
+    "s": "6. GÜN",
+    "loc": [
+      "src/game.js:5576"
+    ]
+  },
+  {
+    "s": "65x maksimum kombo zincirine ulaş",
+    "loc": [
+      "src/game.js:604"
+    ]
+  },
+  {
+    "s": "7. GÜN [MAKS]",
+    "loc": [
+      "src/game.js:5577"
+    ]
+  },
+  {
+    "s": "8 saniyede bir +6 kalkan onarır ve destek ateşi açar",
+    "loc": [
+      "src/game.js:796"
+    ]
+  },
+  {
+    "s": "80 şanslı uzay sandığı aç",
+    "loc": [
+      "src/game.js:640"
+    ]
+  },
+  {
+    "s": "80 uçuş seferine çık",
+    "loc": [
+      "src/game.js:632"
+    ]
+  },
+  {
+    "s": "ACİL DURUM DİRİLME",
+    "loc": [
+      "src/game.js:3804"
+    ]
+  },
+  {
+    "s": "AÇIK",
+    "loc": [
+      "src/game.js:4265"
+    ]
+  },
+  {
+    "s": "AdMob başlatma hatası:",
+    "loc": [
+      "index.html:1613"
+    ]
+  },
+  {
+    "s": "AdMob başlatma uyarısı:",
+    "loc": [
+      "index.html:1306"
+    ]
+  },
+  {
+    "s": "AdMob Mediation: Ödüllü Geçiş reklamı önceden hazırlandı ->",
+    "loc": [
+      "index.html:1226"
+    ]
+  },
+  {
+    "s": "AdMob Mediation: Ödüllü Video reklamı önceden hazırlandı ->",
+    "loc": [
+      "index.html:1229"
+    ]
+  },
+  {
+    "s": "AdMob reklam tamamlanmadı veya kapatıldı:",
+    "loc": [
+      "index.html:1488"
+    ]
+  },
+  {
+    "s": "AdMob: Başarıyla başlatıldı.",
+    "loc": [
+      "index.html:1610"
+    ]
+  },
+  {
+    "s": "Agresif elit düşmanlar, Tamir yok & 2X ÇİFTE GANİMET",
+    "loc": [
+      "src/game.js:5199"
+    ]
+  },
+  {
+    "s": "AĞIR BARİYER",
+    "loc": [
+      "src/game.js:3908"
+    ]
+  },
+  {
+    "s": "AĞIR DREADNOUGHT",
+    "loc": [
+      "src/enemies.js:20"
+    ]
+  },
+  {
+    "s": "AĞIR KALKAN JENERATÖRÜ",
+    "loc": [
+      "src/game.js:3876"
+    ]
+  },
+  {
+    "s": "Ağır Taarruz Jeti",
+    "loc": [
+      "src/game.js:667"
+    ]
+  },
+  {
+    "s": "Akkor altın dev yıldız parlaması saçar",
+    "loc": [
+      "src/game.js:840"
+    ]
+  },
+  {
+    "s": "Akkor sıcak plazma kıvılcımları saçar",
+    "loc": [
+      "src/game.js:836"
+    ]
+  },
+  {
+    "s": "AKTİF",
+    "loc": [
+      "src/game.js:2421",
+      "src/game.js:3437"
+    ]
+  },
+  {
+    "s": "ALMAK İÇİN DOKUN!",
+    "loc": [
+      "src/game.js:5613"
+    ]
+  },
+  {
+    "s": "Altın Zaman Kruvazörü",
+    "loc": [
+      "src/game.js:711"
+    ]
+  },
+  {
+    "s": "Amiral Avcısı",
+    "loc": [
+      "src/game.js:4666"
+    ]
+  },
+  {
+    "s": "Anka Protokolü",
+    "loc": [
+      "src/game.js:4071"
+    ]
+  },
+  {
+    "s": "Apex Akışı",
+    "loc": [
+      "src/game.js:604"
+    ]
+  },
+  {
+    "s": "Arkasında mor elektro arklar bırakır",
+    "loc": [
+      "src/game.js:837"
+    ]
+  },
+  {
+    "s": "Asteroit Avcısı",
+    "loc": [
+      "src/game.js:4662"
+    ]
+  },
+  {
+    "s": "Asteroit Kıran",
+    "loc": [
+      "src/game.js:2637"
+    ]
+  },
+  {
+    "s": "ASTEROİT KUŞAĞI",
+    "loc": [
+      "src/game.js:5190"
+    ]
+  },
+  {
+    "s": "AŞIRI GÜÇ",
+    "loc": [
+      "src/enemies.js:1852"
+    ]
+  },
+  {
+    "s": "AŞIRI GÜÇ (%8 GÜÇ)",
+    "loc": [
+      "src/game.js:8493"
+    ]
+  },
+  {
+    "s": "AŞIRI İTKİ",
+    "loc": [
+      "src/game.js:661"
+    ]
+  },
+  {
+    "s": "AŞIRI VOLTAJ",
+    "loc": [
+      "src/game.js:8382",
+      "src/game.js:9059"
+    ]
+  },
+  {
+    "s": "AŞIRI YÜKLEME",
+    "loc": [
+      "src/game.js:6964"
+    ]
+  },
+  {
+    "s": "AŞIRI YÜKLEME REAKTÖRÜ",
+    "loc": [
+      "src/game.js:8501"
+    ]
+  },
+  {
+    "s": "AŞIRI YÜKLEMELİ PLAZMA",
+    "loc": [
+      "src/game.js:2411",
+      "src/game.js:8391"
+    ]
+  },
+  {
+    "s": "Atış hızı: +%${12*(lvl+1)}",
+    "loc": [
+      "src/game.js:8681"
+    ]
+  },
+  {
+    "s": "Atış hızı: +%35",
+    "loc": [
+      "src/game.js:8691"
+    ]
+  },
+  {
+    "s": "BARİYER BASKISI -${breachDmg}",
+    "loc": [
+      "src/game.js:12851"
+    ]
+  },
+  {
+    "s": "Boss Avcısı",
+    "loc": [
+      "src/game.js:2639"
+    ]
+  },
+  {
+    "s": "BOŞLUK YARIĞI",
+    "loc": [
+      "src/game.js:6651"
+    ]
+  },
+  {
+    "s": "BÖLÜM ${lvl}",
+    "loc": [
+      "src/game.js:5065",
+      "src/game.js:5067"
+    ]
+  },
+  {
+    "s": "Bölüm ${lvl} • Seviye Seç ▾",
+    "loc": [
+      "src/game.js:5066"
+    ]
+  },
+  {
+    "s": "BÖLÜM ${this.selectedLevel || 1}",
+    "loc": [
+      "src/game.js:2267"
+    ]
+  },
+  {
+    "s": "Bölüm ${this.selectedLevel}",
+    "loc": [
+      "src/game.js:1233"
+    ]
+  },
+  {
+    "s": "BÖLÜM ${this.selectedLevel} • ${sec.subtitle}",
+    "loc": [
+      "src/game.js:7487"
+    ]
+  },
+  {
+    "s": "Bu kod tüm altınlarınızı, gemilerinizi ve açık bölümlerinizi içerir. Kodu kopyalayıp güvenli bir yere kaydedin:",
+    "loc": [
+      "src/game.js:4336"
+    ]
+  },
+  {
+    "s": "BUGÜNKÜ İKMAL ALINDI (${info.streak}. GÜN ✓)",
+    "loc": [
+      "src/game.js:5675"
+    ]
+  },
+  {
+    "s": "Bugünkü ikmal zaten tamamen alındı!",
+    "loc": [
+      "src/game.js:5721"
+    ]
+  },
+  {
+    "s": "CAN SİGORTASI",
+    "loc": [
+      "src/game.js:3902"
+    ]
+  },
+  {
+    "s": "Çark reklamı tamamlanmadı:",
+    "loc": [
+      "src/game.js:6001"
+    ]
+  },
+  {
+    "s": "ÇEKİM ALANI",
+    "loc": [
+      "src/game.js:2353"
+    ]
+  },
+  {
+    "s": "Çekim menzili: ${60+lvl*20} → ${60+(lvl+1)*20}px",
+    "loc": [
+      "src/game.js:8687"
+    ]
+  },
+  {
+    "s": "ÇİFT KALKAN",
+    "loc": [
+      "src/game.js:747"
+    ]
+  },
+  {
+    "s": "Çift Kalkan: Kalkanı yeniler & 5 sn hasarı yarıya indirir",
+    "loc": [
+      "src/game.js:750"
+    ]
+  },
+  {
+    "s": "ÇİFT NAMLU",
+    "loc": [
+      "src/game.js:8412"
+    ]
+  },
+  {
+    "s": "ÇİFT NAMLU açılır",
+    "loc": [
+      "src/game.js:8680"
+    ]
+  },
+  {
+    "s": "Daha Hızlı Seviye Atlama",
+    "loc": [
+      "src/game.js:4033"
+    ]
+  },
+  {
+    "s": "Daha önce aldığınız yedek kodunu (NEON-SAVE-...) aşağıdaki alana yapıştırıp YÜKLE butonuna basın:",
+    "loc": [
+      "src/game.js:4351"
+    ]
+  },
+  {
+    "s": "Darbe aldığında 1.25 sn kuantum fazına geçerek hasarsızlık kazanır.",
+    "loc": [
+      "src/game.js:695"
+    ]
+  },
+  {
+    "s": "DELİCİ PLAZMA",
+    "loc": [
+      "src/game.js:8392"
+    ]
+  },
+  {
+    "s": "Demir İrade",
+    "loc": [
+      "src/game.js:612"
+    ]
+  },
+  {
+    "s": "DEMİR TİTAN",
+    "loc": [
+      "src/enemies.js:45"
+    ]
+  },
+  {
+    "s": "DENEYİM",
+    "loc": [
+      "src/game.js:2452"
+    ]
+  },
+  {
+    "s": "Dengeli Saldırı Jeti",
+    "loc": [
+      "src/game.js:656"
+    ]
+  },
+  {
+    "s": "DİKENLİ ÇEMBER",
+    "loc": [
+      "src/game.js:9049"
+    ]
+  },
+  {
+    "s": "DÖNEN BİÇİCİ",
+    "loc": [
+      "src/game.js:8372"
+    ]
+  },
+  {
+    "s": "Dron Lvl 3 + Atış Hızı Lvl 4",
+    "loc": [
+      "src/game.js:2408"
+    ]
+  },
+  {
+    "s": "Dron Lvl 3 + Mıknatıs Lvl 3",
+    "loc": [
+      "src/game.js:2412"
+    ]
+  },
+  {
+    "s": "Dronlar tüm haritadaki kristalleri otomatik olarak toplayıp reaktöre taşır; topladıkları her kristalle çift namlulu seri lazer saçar!",
+    "loc": [
+      "src/game.js:8404"
+    ]
+  },
+  {
+    "s": "Düşman Avcısı",
+    "loc": [
+      "src/game.js:2638"
+    ]
+  },
+  {
+    "s": "Düşman mermileri yavaşlar, kritik vuruş hasarı 2.5x katlanır!",
+    "loc": [
+      "src/game.js:6651"
+    ]
+  },
+  {
+    "s": "Düşman mermilerini düşmanlara geri fırlatır!",
+    "loc": [
+      "src/game.js:9071"
+    ]
+  },
+  {
+    "s": "Düşmanlar %25 yavaşlar, donanlar şok dalgası saçar!",
+    "loc": [
+      "src/game.js:6649"
+    ]
+  },
+  {
+    "s": "ELİT KARAKOL",
+    "loc": [
+      "src/game.js:5198"
+    ]
+  },
+  {
+    "s": "Elmas İmparatoru",
+    "loc": [
+      "src/game.js:619"
+    ]
+  },
+  {
+    "s": "EMP & ULTİ",
+    "loc": [
+      "src/game.js:8778"
+    ]
+  },
+  {
+    "s": "EMP MERMİ BARİYERİ AKTİF!",
+    "loc": [
+      "src/game.js:6932"
+    ]
+  },
+  {
+    "s": "EMP MİKRO-NUKE",
+    "loc": [
+      "src/game.js:8332",
+      "src/game.js:9009"
+    ]
+  },
+  {
+    "s": "EMP ŞOK DALGASI",
+    "loc": [
+      "src/game.js:2357"
+    ]
+  },
+  {
+    "s": "EMP ŞOKU",
+    "loc": [
+      "src/game.js:8502"
+    ]
+  },
+  {
+    "s": "En yakın düşmana kesintisiz lazer ateşi açar",
+    "loc": [
+      "src/game.js:776"
+    ]
+  },
+  {
+    "s": "ENERJİ KALKANI",
+    "loc": [
+      "src/game.js:2352"
+    ]
+  },
+  {
+    "s": "Etki alanı: +${15*(lvl+1)}px",
+    "loc": [
+      "src/game.js:8685"
+    ]
+  },
+  {
+    "s": "EVRİM",
+    "loc": [
+      "src/game.js:9252"
+    ]
+  },
+  {
+    "s": "Fırtına Modu",
+    "loc": [
+      "src/game.js:1233"
+    ]
+  },
+  {
+    "s": "Fırtına Ritmi",
+    "loc": [
+      "src/game.js:603"
+    ]
+  },
+  {
+    "s": "Filo Avcısı",
+    "loc": [
+      "src/game.js:596"
+    ]
+  },
+  {
+    "s": "Fünye",
+    "loc": [
+      "src/game.js:644"
+    ]
+  },
+  {
+    "s": "FÜZE",
+    "loc": [
+      "src/game.js:8775"
+    ]
+  },
+  {
+    "s": "Füze Lvl 4 + EMP Lvl 1",
+    "loc": [
+      "src/game.js:2404"
+    ]
+  },
+  {
+    "s": "Füze Lvl 4 + Tesla Lvl 3",
+    "loc": [
+      "src/game.js:2409"
+    ]
+  },
+  {
+    "s": "Füze: ${lvl} → ${lvl+1}",
+    "loc": [
+      "src/game.js:8682"
+    ]
+  },
+  {
+    "s": "Füzeler çarptığında mini EMP nükleer şokuyla devasa alan hasarı saçar!",
+    "loc": [
+      "src/game.js:9011"
+    ]
+  },
+  {
+    "s": "Füzeler çarptığında mini EMP nükleer şokuyla düşman mermilerini siler ve devasa alan hasarı saçar!",
+    "loc": [
+      "src/game.js:8334"
+    ]
+  },
+  {
+    "s": "Galaksi Kasırgası",
+    "loc": [
+      "src/game.js:584"
+    ]
+  },
+  {
+    "s": "Galaksi Kaşifi",
+    "loc": [
+      "src/game.js:633"
+    ]
+  },
+  {
+    "s": "Ganimet Avcısı",
+    "loc": [
+      "src/game.js:616"
+    ]
+  },
+  {
+    "s": "GANİMETLERİ AL VE DEVAM ET",
+    "loc": [
+      "src/game.js:9204"
+    ]
+  },
+  {
+    "s": "Gemi etrafında dönen süpersonik testereler dokunan düşmanları biçer!",
+    "loc": [
+      "src/game.js:9051"
+    ]
+  },
+  {
+    "s": "Gemi etrafında yüksek hızda dönen neon plazma testereleri oluşur; temas eden tüm hedefleri anında biçer!",
+    "loc": [
+      "src/game.js:8374"
+    ]
+  },
+  {
+    "s": "Gemi Gücü: +%${(lvl+1)*4}",
+    "loc": [
+      "src/game.js:8689"
+    ]
+  },
+  {
+    "s": "Gemi maksimum gövde canını her kademede +15 artırır",
+    "loc": [
+      "src/game.js:4012"
+    ]
+  },
+  {
+    "s": "Gemi patladığında reklamsız anında dirilme hakkı depolar.",
+    "loc": [
+      "src/game.js:3807"
+    ]
+  },
+  {
+    "s": "Gemi, dronlar ve düşmanlar arasında sürekli bir yıldırım ağı örer; 4 saniyede bir tüm zincirlere dev EMP şoku verir!",
+    "loc": [
+      "src/game.js:8384"
+    ]
+  },
+  {
+    "s": "Gemiyle kol kola uçar ve sürekli ikiz plazma destek ateşi açar",
+    "loc": [
+      "src/game.js:816"
+    ]
+  },
+  {
+    "s": "Gezegen Parçalayıcı",
+    "loc": [
+      "src/game.js:592"
+    ]
+  },
+  {
+    "s": "GİRDAP ÇEKİMİ",
+    "loc": [
+      "src/game.js:705"
+    ]
+  },
+  {
+    "s": "GİRDAP DELME",
+    "loc": [
+      "src/game.js:8322",
+      "src/game.js:8999"
+    ]
+  },
+  {
+    "s": "Gökkuşağı Neon",
+    "loc": [
+      "src/game.js:839"
+    ]
+  },
+  {
+    "s": "Göktaşı Kıyameti",
+    "loc": [
+      "src/game.js:591"
+    ]
+  },
+  {
+    "s": "Gölge Hayalet",
+    "loc": [
+      "src/game.js:625"
+    ]
+  },
+  {
+    "s": "GÖREV TAMAMLANDI! +${q.reward} CR",
+    "loc": [
+      "src/game.js:6700"
+    ]
+  },
+  {
+    "s": "GÖREVDE",
+    "loc": [
+      "src/game.js:3638"
+    ]
+  },
+  {
+    "s": "Gövde Kalkanı",
+    "loc": [
+      "src/game.js:4001"
+    ]
+  },
+  {
+    "s": "Gövde Lvl 3 + Atış Hızı Lvl 4",
+    "loc": [
+      "src/game.js:2411"
+    ]
+  },
+  {
+    "s": "Gövde Onarımı",
+    "loc": [
+      "src/game.js:8550"
+    ]
+  },
+  {
+    "s": "GÖVDE UYARISI -${Math.round(breachDmg * 0.5)}",
+    "loc": [
+      "src/game.js:12854"
+    ]
+  },
+  {
+    "s": "Gözcü & Hasatçı",
+    "loc": [
+      "src/game.js:678"
+    ]
+  },
+  {
+    "s": "GRAVİTASYON VAKUMU",
+    "loc": [
+      "src/game.js:3828"
+    ]
+  },
+  {
+    "s": "GÜDÜMLÜ DART",
+    "loc": [
+      "src/game.js:8520"
+    ]
+  },
+  {
+    "s": "GÜDÜMLÜ ROKET",
+    "loc": [
+      "src/game.js:3591"
+    ]
+  },
+  {
+    "s": "GÜMÜŞ",
+    "loc": [
+      "src/game.js:6375"
+    ]
+  },
+  {
+    "s": "GÜNCEL SIRALAMA LİGİ",
+    "loc": [
+      "src/game.js:6403"
+    ]
+  },
+  {
+    "s": "GÜNEŞ FIRTINASI",
+    "loc": [
+      "src/game.js:666",
+      "src/game.js:6650"
+    ]
+  },
+  {
+    "s": "GÜNEŞ PATLAMASI",
+    "loc": [
+      "src/game.js:672"
+    ]
+  },
+  {
+    "s": "Günlük ikmal reklamı tamamlanmadı:",
+    "loc": [
+      "src/game.js:5737"
+    ]
+  },
+  {
+    "s": "Günün tüm hakları kullanıldı! Yarın tekrar bekleriz.",
+    "loc": [
+      "src/game.js:5984"
+    ]
+  },
+  {
+    "s": "GÜVENLİ ROTA",
+    "loc": [
+      "src/game.js:5182"
+    ]
+  },
+  {
+    "s": "Hangar sekme çizim hatası:",
+    "loc": [
+      "src/game.js:2836"
+    ]
+  },
+  {
+    "s": "Hazine Avcısı",
+    "loc": [
+      "src/game.js:638"
+    ]
+  },
+  {
+    "s": "Her 3.5 saniyede gökyüzünden kozmik şimşekler boşalarak 5-8 düşmanı aynı anda çarpar ve sersemletir!",
+    "loc": [
+      "src/game.js:8344"
+    ]
+  },
+  {
+    "s": "Her 3.5 sn gökyüzünden kozmik şimşekler 5-8 düşmana yıldırım boşaltır!",
+    "loc": [
+      "src/game.js:9021"
+    ]
+  },
+  {
+    "s": "Her 7 atışta bir alanı yakan ağır plazma bombası fırlatır.",
+    "loc": [
+      "src/game.js:673"
+    ]
+  },
+  {
+    "s": "Her 7 Kristalde Otomatik Güdümlü Plazma Dartı",
+    "loc": [
+      "src/game.js:8524"
+    ]
+  },
+  {
+    "s": "Her 8 sn düşmanları 1.5 sn donduran altın süpernova şok dalgası saçar.",
+    "loc": [
+      "src/game.js:717"
+    ]
+  },
+  {
+    "s": "Her oyunda seviye atlama kartlarını +1 yenileme hakkı verir",
+    "loc": [
+      "src/game.js:4062"
+    ]
+  },
+  {
+    "s": "Her seviyede +%2.5 kalıcı kritik vuruş şansı sağlar",
+    "loc": [
+      "src/game.js:4022"
+    ]
+  },
+  {
+    "s": "Her seviyede +12 maksimum başlangıç kalkanı kazandırır",
+    "loc": [
+      "src/game.js:4002"
+    ]
+  },
+  {
+    "s": "Hiçlik Yok Edici",
+    "loc": [
+      "src/game.js:585"
+    ]
+  },
+  {
+    "s": "HİPER IŞIN KILICI",
+    "loc": [
+      "src/game.js:8872"
+    ]
+  },
+  {
+    "s": "Hiper Kılıç",
+    "loc": [
+      "src/game.js:8641",
+      "src/game.js:8644"
+    ]
+  },
+  {
+    "s": "Hiper Overdrive Şarjı",
+    "loc": [
+      "src/game.js:6856"
+    ]
+  },
+  {
+    "s": "HİPER YERÇEKİMİ",
+    "loc": [
+      "src/game.js:6653"
+    ]
+  },
+  {
+    "s": "Hücum Hattında +%35 Ekstra Seri Atış Hızı ve Yüksek Delicilik",
+    "loc": [
+      "src/game.js:8515"
+    ]
+  },
+  {
+    "s": "Işık Hızı Serisi",
+    "loc": [
+      "src/game.js:606"
+    ]
+  },
+  {
+    "s": "Işık hızında takyon siber izleri bırakır",
+    "loc": [
+      "src/game.js:841"
+    ]
+  },
+  {
+    "s": "İkiz Foton",
+    "loc": [
+      "src/game.js:8648"
+    ]
+  },
+  {
+    "s": "İlerleme başarıyla geri yüklendi!",
+    "loc": [
+      "src/game.js:4384"
+    ]
+  },
+  {
+    "s": "İlk Amiral Boss\\'unu yen",
+    "loc": [
+      "src/game.js:595"
+    ]
+  },
+  {
+    "s": "İlk Av",
+    "loc": [
+      "src/game.js:581"
+    ]
+  },
+  {
+    "s": "İlk Sandık",
+    "loc": [
+      "src/game.js:637"
+    ]
+  },
+  {
+    "s": "İstediğin Build’i Kurma Garantisi",
+    "loc": [
+      "src/game.js:4063"
+    ]
+  },
+  {
+    "s": "İyon Fırtınası",
+    "loc": [
+      "src/game.js:8618",
+      "src/game.js:8640"
+    ]
+  },
+  {
+    "s": "Kaçakçı desteği reklamı tamamlanmadı:",
+    "loc": [
+      "src/game.js:3177"
+    ]
+  },
+  {
+    "s": "KADİM ALTIN AMİRAL",
+    "loc": [
+      "src/enemies.js:59"
+    ]
+  },
+  {
+    "s": "Kadim Sandık Avcısı",
+    "loc": [
+      "src/game.js:640"
+    ]
+  },
+  {
+    "s": "Kalkan Çekirdeği",
+    "loc": [
+      "src/game.js:6859"
+    ]
+  },
+  {
+    "s": "Kalkan kırılınca 360° EMP",
+    "loc": [
+      "src/game.js:8690"
+    ]
+  },
+  {
+    "s": "Kalkan Kırılmasında 360° EMP • Tüm Mermileri Siler",
+    "loc": [
+      "src/game.js:8506"
+    ]
+  },
+  {
+    "s": "Kalkan ve dronelar birleşerek düşman mermilerini eriten ve temas eden düşmanları eriten Plazma Bariyeri kurar!",
+    "loc": [
+      "src/game.js:8354"
+    ]
+  },
+  {
+    "s": "KARA DELİK",
+    "loc": [
+      "src/game.js:757"
+    ]
+  },
+  {
+    "s": "Kara Delik Mıknatısı: Tüm kristalleri çeker & şok dalgası saçar",
+    "loc": [
+      "src/game.js:760"
+    ]
+  },
+  {
+    "s": "Karadelik Çöküşü",
+    "loc": [
+      "src/game.js:648"
+    ]
+  },
+  {
+    "s": "KART MANİPÜLASYONU",
+    "loc": [
+      "src/game.js:3906"
+    ]
+  },
+  {
+    "s": "KAYNAK MADENİ",
+    "loc": [
+      "src/game.js:3907"
+    ]
+  },
+  {
+    "s": "Kıdemli Filo",
+    "loc": [
+      "src/game.js:631"
+    ]
+  },
+  {
+    "s": "Kıl Payı",
+    "loc": [
+      "src/game.js:623"
+    ]
+  },
+  {
+    "s": "Kıyamet Matrisi",
+    "loc": [
+      "src/game.js:8619",
+      "src/game.js:8629"
+    ]
+  },
+  {
+    "s": "KIYAMET TESLA MATRİSİ",
+    "loc": [
+      "src/game.js:2410",
+      "src/game.js:8381",
+      "src/game.js:8865"
+    ]
+  },
+  {
+    "s": "Kızıl Alev",
+    "loc": [
+      "src/game.js:836"
+    ]
+  },
+  {
+    "s": "KİLİTLİ",
+    "loc": [
+      "src/game.js:2418",
+      "src/game.js:3437",
+      "src/game.js:3632"
+    ]
+  },
+  {
+    "s": "KLASİK UÇUŞ",
+    "loc": [
+      "src/game.js:737"
+    ]
+  },
+  {
+    "s": "Klasik Uçuş: +%12 Hız ve +%15 Seri Ateş ile çevik saf manevra",
+    "loc": [
+      "src/game.js:740"
+    ]
+  },
+  {
+    "s": "Klon Hasarı: +%40",
+    "loc": [
+      "src/game.js:8689"
+    ]
+  },
+  {
+    "s": "Kombo Ustası",
+    "loc": [
+      "src/game.js:2640",
+      "src/game.js:4665"
+    ]
+  },
+  {
+    "s": "KORSAN ÖNCÜ GEMİSİ",
+    "loc": [
+      "src/enemies.js:7"
+    ]
+  },
+  {
+    "s": "Koşu boyunca silah hasarını kalıcı +%25 artırır.",
+    "loc": [
+      "src/game.js:6858"
+    ]
+  },
+  {
+    "s": "Kozmik Avcı",
+    "loc": [
+      "src/game.js:582"
+    ]
+  },
+  {
+    "s": "Kozmik Girdap Avcısı",
+    "loc": [
+      "src/game.js:700"
+    ]
+  },
+  {
+    "s": "Kozmik Hükümdar",
+    "loc": [
+      "src/game.js:599"
+    ]
+  },
+  {
+    "s": "Kozmik Ölümsüz",
+    "loc": [
+      "src/game.js:613"
+    ]
+  },
+  {
+    "s": "Kozmik Sandık",
+    "loc": [
+      "src/game.js:2645"
+    ]
+  },
+  {
+    "s": "Kozmik Şans Çarkı",
+    "loc": [
+      "index.html:169"
+    ]
+  },
+  {
+    "s": "KRİSTAL",
+    "loc": [
+      "src/game.js:2453",
+      "src/game.js:3237",
+      "src/game.js:3513"
+    ]
+  },
+  {
+    "s": "Kristal Çekici",
+    "loc": [
+      "src/game.js:4031"
+    ]
+  },
+  {
+    "s": "Kristal çekiminde mini yerçekimi girdabı açar ve kristalleri otomatik toplar.",
+    "loc": [
+      "src/game.js:706"
+    ]
+  },
+  {
+    "s": "Kristal Madenciliği",
+    "loc": [
+      "src/game.js:4051"
+    ]
+  },
+  {
+    "s": "KRİSTAL RADAR SİNYALİ",
+    "loc": [
+      "src/game.js:3864"
+    ]
+  },
+  {
+    "s": "KRİSTAL ŞARAPNELİ",
+    "loc": [
+      "src/game.js:8519"
+    ]
+  },
+  {
+    "s": "Kristal Vakum Dalgası",
+    "loc": [
+      "src/game.js:6860"
+    ]
+  },
+  {
+    "s": "Kristalleri otomatik toplar ve seri plazma saçar!",
+    "loc": [
+      "src/game.js:9081"
+    ]
+  },
+  {
+    "s": "Kristalleri ve ganimetleri çekme menzilini +18 artırır",
+    "loc": [
+      "src/game.js:4032"
+    ]
+  },
+  {
+    "s": "KRİTİK",
+    "loc": [
+      "src/game.js:2450"
+    ]
+  },
+  {
+    "s": "Kritik çizim/geçiş hatası engellendi:",
+    "loc": [
+      "src/game.js:14604"
+    ]
+  },
+  {
+    "s": "Kritik oyun döngüsü hatası engellendi:",
+    "loc": [
+      "src/game.js:14596"
+    ]
+  },
+  {
+    "s": "Kritik vuruş şansı +%30, kristaller anında toplanır!",
+    "loc": [
+      "src/game.js:6652"
+    ]
+  },
+  {
+    "s": "KRİYO-BLASTER",
+    "loc": [
+      "src/game.js:8847"
+    ]
+  },
+  {
+    "s": "KRİYO-BUZ FIRTINASI",
+    "loc": [
+      "src/game.js:8361"
+    ]
+  },
+  {
+    "s": "KRİYOJENİK NEBULA",
+    "loc": [
+      "src/game.js:6649"
+    ]
+  },
+  {
+    "s": "KRONO SÜPERNOVA",
+    "loc": [
+      "src/game.js:716"
+    ]
+  },
+  {
+    "s": "KRONOS HÜKÜMDARI",
+    "loc": [
+      "src/enemies.js:58"
+    ]
+  },
+  {
+    "s": "KUANTUM AURORASI & UÇURUM",
+    "loc": [
+      "src/game.js:176"
+    ]
+  },
+  {
+    "s": "KUANTUM UÇURUMU",
+    "loc": [
+      "src/game.js:4896"
+    ]
+  },
+  {
+    "s": "Kuşak Temizleyici",
+    "loc": [
+      "src/game.js:590"
+    ]
+  },
+  {
+    "s": "KUŞAN",
+    "loc": [
+      "src/game.js:3638",
+      "src/game.js:3740"
+    ]
+  },
+  {
+    "s": "KUŞANILDI",
+    "loc": [
+      "src/game.js:3556",
+      "src/game.js:3740"
+    ]
+  },
+  {
+    "s": "KÜRESEL ŞOK",
+    "loc": [
+      "src/game.js:8342",
+      "src/game.js:9019"
+    ]
+  },
+  {
+    "s": "LAZER AĞI",
+    "loc": [
+      "src/game.js:8448"
+    ]
+  },
+  {
+    "s": "Lazer ağı açılır",
+    "loc": [
+      "src/game.js:8684"
+    ]
+  },
+  {
+    "s": "Lazer Lvl 4 + Gövde/Kalkan Lvl 3",
+    "loc": [
+      "src/game.js:2407"
+    ]
+  },
+  {
+    "s": "Lazer Lvl 5 + Mıknatıs Lvl 1",
+    "loc": [
+      "src/game.js:2403"
+    ]
+  },
+  {
+    "s": "Lazerler hedefleri dondurarak yavaşlatır; donan düşman patladığında tüm ekrana buz şarapnelleri saçar!",
+    "loc": [
+      "src/game.js:8364"
+    ]
+  },
+  {
+    "s": "Lütfen ${remainingSec} sn bekleyin!",
+    "loc": [
+      "index.html:1458"
+    ]
+  },
+  {
+    "s": "MAKS KLON (%12 GÜÇ)",
+    "loc": [
+      "src/game.js:8493"
+    ]
+  },
+  {
+    "s": "MAKS SEVİYE",
+    "loc": [
+      "src/game.js:4128"
+    ]
+  },
+  {
+    "s": "MAKSİMUM",
+    "loc": [
+      "src/game.js:2478"
+    ]
+  },
+  {
+    "s": "Maksimum Kalkanı +30 artırır ve anında tam doldurur.",
+    "loc": [
+      "src/game.js:6859"
+    ]
+  },
+  {
+    "s": "MAKSİMUM KAPASİTE (${item.formatVal(currentLvl)})",
+    "loc": [
+      "src/game.js:4147"
+    ]
+  },
+  {
+    "s": "MAKSİMUM ZORLUK TAMAM",
+    "loc": [
+      "src/game.js:2685"
+    ]
+  },
+  {
+    "s": "MEKA SAVAŞ GEMİSİ",
+    "loc": [
+      "src/enemies.js:46"
+    ]
+  },
+  {
+    "s": "MERMİ SAPTIRMA",
+    "loc": [
+      "src/game.js:9069"
+    ]
+  },
+  {
+    "s": "Mermi sıyırmada (graze) anında +%35 seri atış hızı kazanır.",
+    "loc": [
+      "src/game.js:662"
+    ]
+  },
+  {
+    "s": "Mermiler düşmanları %50 dondurur; ölen düşmanlar buz şarapneli saçar!",
+    "loc": [
+      "src/game.js:9041"
+    ]
+  },
+  {
+    "s": "Mermiler tüm hedefleri delip geçer ve çarptığı yerde kristalleri çeken yerçekimi girdabı açar!",
+    "loc": [
+      "src/game.js:8324"
+    ]
+  },
+  {
+    "s": "Mermiler tüm hedefleri delip geçer ve yerçekimi girdabı açar!",
+    "loc": [
+      "src/game.js:9001"
+    ]
+  },
+  {
+    "s": "Meteor Yağmuru",
+    "loc": [
+      "src/game.js:589"
+    ]
+  },
+  {
+    "s": "Mıknatıs menzili 2 katına çıkar, düşmanlar çift kristal saçar!",
+    "loc": [
+      "src/game.js:6653"
+    ]
+  },
+  {
+    "s": "MİKRO KLON PET",
+    "loc": [
+      "src/game.js:815",
+      "src/game.js:3594"
+    ]
+  },
+  {
+    "s": "MİKRO-FÜZE",
+    "loc": [
+      "src/game.js:2351"
+    ]
+  },
+  {
+    "s": "MUTLAK SIFIR KRİYO-BLASTER",
+    "loc": [
+      "src/game.js:2407",
+      "src/game.js:9038"
+    ]
+  },
+  {
+    "s": "NANİT GÖVDE",
+    "loc": [
+      "src/game.js:2358"
+    ]
+  },
+  {
+    "s": "Nanitler gövdeyi onarır. Anında +45 HP can yeniler.",
+    "loc": [
+      "src/game.js:8551"
+    ]
+  },
+  {
+    "s": "NEBULA GÖZCÜSÜ",
+    "loc": [
+      "src/enemies.js:32"
+    ]
+  },
+  {
+    "s": "Neon zümrüt asit közleri saçar",
+    "loc": [
+      "src/game.js:838"
+    ]
+  },
+  {
+    "s": "NEON-SAVE-...-END kodunu buraya yapıştırın...",
+    "loc": [
+      "src/game.js:4354"
+    ]
+  },
+  {
+    "s": "Neonspace - Ödüllü Geçiş Reklamları",
+    "loc": [
+      "index.html:1144"
+    ]
+  },
+  {
+    "s": "Neonspace - Ödüllü Reklamlar",
+    "loc": [
+      "index.html:1143"
+    ]
+  },
+  {
+    "s": "Nihai Güç",
+    "loc": [
+      "index.html:133",
+      "index.html:133"
+    ]
+  },
+  {
+    "s": "Nihai Güç (Ultimate) barını anında %100 doldurur.",
+    "loc": [
+      "src/game.js:6856"
+    ]
+  },
+  {
+    "s": "Nükleer Sürü",
+    "loc": [
+      "src/game.js:8614",
+      "src/game.js:8628"
+    ]
+  },
+  {
+    "s": "NÜKLEER SÜRÜ FÜZESİ",
+    "loc": [
+      "src/game.js:2404",
+      "src/game.js:8331",
+      "src/game.js:8827"
+    ]
+  },
+  {
+    "s": "ORBİTAL BASTİON",
+    "loc": [
+      "src/game.js:8841"
+    ]
+  },
+  {
+    "s": "ORBİTAL BASTİON HALKASI",
+    "loc": [
+      "src/game.js:2406",
+      "src/game.js:8351",
+      "src/game.js:9028"
+    ]
+  },
+  {
+    "s": "ORBİTAL PLAZMA TESTERELERİ",
+    "loc": [
+      "src/game.js:9048"
+    ]
+  },
+  {
+    "s": "OTOMATİK HASAT",
+    "loc": [
+      "src/game.js:8402",
+      "src/game.js:9079"
+    ]
+  },
+  {
+    "s": "OVERDRIVE REAKTÖR",
+    "loc": [
+      "src/game.js:3905"
+    ]
+  },
+  {
+    "s": "OVERDRIVE REAKTÖRÜ",
+    "loc": [
+      "src/game.js:3840"
+    ]
+  },
+  {
+    "s": "Oyun başlatma hatası:",
+    "loc": [
+      "src/game.js:14639"
+    ]
+  },
+  {
+    "s": "Oyuna +30 ekstra enerji kalkanı ile tam korumalı başlatır.",
+    "loc": [
+      "src/game.js:3879"
+    ]
+  },
+  {
+    "s": "Ölümcül hasarda dev süpernova şok dalgasıyla dirilme sağlar",
+    "loc": [
+      "src/game.js:4072"
+    ]
+  },
+  {
+    "s": "Ölümden Dönüp Rekor Kırma",
+    "loc": [
+      "src/game.js:4073"
+    ]
+  },
+  {
+    "s": "Önceki Gemi",
+    "loc": [
+      "index.html:206"
+    ]
+  },
+  {
+    "s": "ÖNCÜ KOMUTAN",
+    "loc": [
+      "src/enemies.js:6"
+    ]
+  },
+  {
+    "s": "ÖZEL YETENEK",
+    "loc": [
+      "src/game.js:3443"
+    ]
+  },
+  {
+    "s": "Patlayıcı Uzmanı",
+    "loc": [
+      "src/game.js:2646",
+      "src/game.js:4667"
+    ]
+  },
+  {
+    "s": "Periyodik iyon alevi geçer, kristal değeri +%50 artar!",
+    "loc": [
+      "src/game.js:6650"
+    ]
+  },
+  {
+    "s": "Pilot Atölyesi",
+    "loc": [
+      "index.html:177"
+    ]
+  },
+  {
+    "s": "Pilot Yeteneği",
+    "loc": [
+      "index.html:127",
+      "index.html:127"
+    ]
+  },
+  {
+    "s": "PLATİN",
+    "loc": [
+      "src/game.js:6373"
+    ]
+  },
+  {
+    "s": "Plazma Katalizörü",
+    "loc": [
+      "src/game.js:6858"
+    ]
+  },
+  {
+    "s": "PLAZMA LAZERİ",
+    "loc": [
+      "src/game.js:2350"
+    ]
+  },
+  {
+    "s": "Plazma Reaktörü",
+    "loc": [
+      "src/game.js:4041"
+    ]
+  },
+  {
+    "s": "Plazma Rezonansı",
+    "loc": [
+      "src/game.js:3991"
+    ]
+  },
+  {
+    "s": "PLAZMA SİPERİ",
+    "loc": [
+      "src/game.js:8352",
+      "src/game.js:9029"
+    ]
+  },
+  {
+    "s": "PLAZMA SÜPERŞARJ",
+    "loc": [
+      "src/game.js:3816"
+    ]
+  },
+  {
+    "s": "PLAZMA TESTERELERİ",
+    "loc": [
+      "src/game.js:2408",
+      "src/game.js:8371",
+      "src/game.js:8853"
+    ]
+  },
+  {
+    "s": "PROLOG • ÖNCÜ BASKINI",
+    "loc": [
+      "src/enemies.js:8"
+    ]
+  },
+  {
+    "s": "Reaktör çekirdeği zorlanır. Kalıcı +%6 Genel Hasar Çarpanı ekler.",
+    "loc": [
+      "src/game.js:8567"
+    ]
+  },
+  {
+    "s": "Reklam Hazırlanıyor...",
+    "loc": [
+      "src/game.js:9175"
+    ]
+  },
+  {
+    "s": "Reklam İzle ve +${r.crystals} CR Katla!",
+    "loc": [
+      "src/game.js:5642"
+    ]
+  },
+  {
+    "s": "Reklam İzle ve +200 ~ +380 Kristal Kazan!",
+    "loc": [
+      "index.html:173",
+      "index.html:767"
+    ]
+  },
+  {
+    "s": "Reklam yüklenemedi, lütfen tekrar deneyin.",
+    "loc": [
+      "src/game.js:9212"
+    ]
+  },
+  {
+    "s": "Reklam yüklenemedi:",
+    "loc": [
+      "src/game.js:1269"
+    ]
+  },
+  {
+    "s": "REKLAM YÜKLENİYOR...",
+    "loc": [
+      "src/game.js:2991",
+      "src/game.js:3065",
+      "src/game.js:3134"
+    ]
+  },
+  {
+    "s": "ROKETÇİ DRONE",
+    "loc": [
+      "src/game.js:785"
+    ]
+  },
+  {
+    "s": "SAHİPSİN",
+    "loc": [
+      "src/game.js:3556"
+    ]
+  },
+  {
+    "s": "SALDIRI GÜCÜ",
+    "loc": [
+      "src/game.js:3903"
+    ]
+  },
+  {
+    "s": "Savaş Jeti",
+    "loc": [
+      "src/game.js:3434"
+    ]
+  },
+  {
+    "s": "Sefer Uçuşları",
+    "loc": [
+      "src/game.js:2644"
+    ]
+  },
+  {
+    "s": "SEKTÖR 1",
+    "loc": [
+      "src/game.js:173"
+    ]
+  },
+  {
+    "s": "SEKTÖR 1 • AMİRAL",
+    "loc": [
+      "src/enemies.js:21"
+    ]
+  },
+  {
+    "s": "SEKTÖR 2",
+    "loc": [
+      "src/game.js:174"
+    ]
+  },
+  {
+    "s": "SEKTÖR 2 • GÖZCÜ",
+    "loc": [
+      "src/enemies.js:34"
+    ]
+  },
+  {
+    "s": "SEKTÖR 3",
+    "loc": [
+      "src/game.js:175"
+    ]
+  },
+  {
+    "s": "SEKTÖR 3 • YIKICI",
+    "loc": [
+      "src/enemies.js:47"
+    ]
+  },
+  {
+    "s": "SEKTÖR 4",
+    "loc": [
+      "src/game.js:176"
+    ]
+  },
+  {
+    "s": "SEKTÖR 4 • HÜKÜMDAR",
+    "loc": [
+      "src/enemies.js:60"
+    ]
+  },
+  {
+    "s": "SEKTÖR 5 • UÇURUM HAKİMİ",
+    "loc": [
+      "src/enemies.js:73"
+    ]
+  },
+  {
+    "s": "SEKTÖR ANOMALİSİ: ${this.currentAnomaly.name}",
+    "loc": [
+      "src/game.js:6658"
+    ]
+  },
+  {
+    "s": "Ses: Açık",
+    "loc": [
+      "src/game.js:2318"
+    ]
+  },
+  {
+    "s": "Ses: Kapalı",
+    "loc": [
+      "src/game.js:2318"
+    ]
+  },
+  {
+    "s": "Sesi Aç/Kapat",
+    "loc": [
+      "index.html:185",
+      "index.html:185"
+    ]
+  },
+  {
+    "s": "Seviye atlama kartlarını +2 kez ekstra yenileme hakkı verir.",
+    "loc": [
+      "src/game.js:3855"
+    ]
+  },
+  {
+    "s": "Sık Ultimate / Dalga Silici",
+    "loc": [
+      "src/game.js:4043"
+    ]
+  },
+  {
+    "s": "Sıyırma Refleksi",
+    "loc": [
+      "src/game.js:2643"
+    ]
+  },
+  {
+    "s": "Siber Aşırı Yükleme",
+    "loc": [
+      "src/game.js:8566"
+    ]
+  },
+  {
+    "s": "SİBER NEON BOŞLUĞU",
+    "loc": [
+      "src/game.js:173",
+      "src/game.js:4893"
+    ]
+  },
+  {
+    "s": "Siber Sürü",
+    "loc": [
+      "src/game.js:8647"
+    ]
+  },
+  {
+    "s": "SİBERNETİK ÇEKİRDEK",
+    "loc": [
+      "src/enemies.js:33"
+    ]
+  },
+  {
+    "s": "SİBERPUNK",
+    "loc": [
+      "src/game.js:655"
+    ]
+  },
+  {
+    "s": "Skoru Paylaş",
+    "loc": [
+      "index.html:1064"
+    ]
+  },
+  {
+    "s": "SONRAKİ BÖLÜM ➔",
+    "loc": [
+      "src/game.js:5151"
+    ]
+  },
+  {
+    "s": "Sonraki oyuna %50 hazır Süper Güç barıyla başlatır.",
+    "loc": [
+      "src/game.js:3843"
+    ]
+  },
+  {
+    "s": "Sonraki oyunda kristal çekim menzilini +%80 artırır.",
+    "loc": [
+      "src/game.js:3831"
+    ]
+  },
+  {
+    "s": "Sonraki oyunda toplanan tüm kristallere kalıcı +%50 bonus.",
+    "loc": [
+      "src/game.js:3867"
+    ]
+  },
+  {
+    "s": "Sonraki oyunda tüm silahlara +%25 saf hasar bonusu sağlar.",
+    "loc": [
+      "src/game.js:3819"
+    ]
+  },
+  {
+    "s": "Sonsuz Dansçı",
+    "loc": [
+      "src/game.js:626"
+    ]
+  },
+  {
+    "s": "Sonsuz Direniş",
+    "loc": [
+      "src/game.js:611"
+    ]
+  },
+  {
+    "s": "Standart düşman dalgaları & +%40 Kalkan/Gövde Onarımı",
+    "loc": [
+      "src/game.js:5183"
+    ]
+  },
+  {
+    "s": "Standart İyon",
+    "loc": [
+      "src/game.js:835"
+    ]
+  },
+  {
+    "s": "Standart neon iyon itki hattı",
+    "loc": [
+      "src/game.js:835"
+    ]
+  },
+  {
+    "s": "Süper Güç (Overdrive) dolum hızını kalıcı %8 artırır",
+    "loc": [
+      "src/game.js:4042"
+    ]
+  },
+  {
+    "s": "SÜPER YAYLIM",
+    "loc": [
+      "src/game.js:8412"
+    ]
+  },
+  {
+    "s": "Süpernova",
+    "loc": [
+      "src/game.js:8615",
+      "src/game.js:8620"
+    ]
+  },
+  {
+    "s": "SÜPERNOVA ÇEKİRDEĞİ",
+    "loc": [
+      "src/game.js:2409"
+    ]
+  },
+  {
+    "s": "Süpernova Patlaması",
+    "loc": [
+      "src/game.js:646"
+    ]
+  },
+  {
+    "s": "SÜPERNOVA REAKTÖRÜ",
+    "loc": [
+      "src/game.js:8859"
+    ]
+  },
+  {
+    "s": "Süpernova Tacı",
+    "loc": [
+      "src/game.js:840"
+    ]
+  },
+  {
+    "s": "Sürekli renk değiştiren prizmatik iz",
+    "loc": [
+      "src/game.js:839"
+    ]
+  },
+  {
+    "s": "Sürekli yıldırım ağı kurar ve aşırı voltaj patlamaları saçar!",
+    "loc": [
+      "src/game.js:9061"
+    ]
+  },
+  {
+    "s": "ŞAMPİYON",
+    "loc": [
+      "src/game.js:6371"
+    ]
+  },
+  {
+    "s": "Şans Çarkı",
+    "loc": [
+      "index.html:169"
+    ]
+  },
+  {
+    "s": "ŞOK BOMBASI",
+    "loc": [
+      "src/game.js:8457",
+      "src/game.js:9091"
+    ]
+  },
+  {
+    "s": "Şok Dalgası",
+    "loc": [
+      "src/game.js:645"
+    ]
+  },
+  {
+    "s": "TAKTİK TAKVİYE",
+    "loc": [
+      "src/game.js:3916"
+    ]
+  },
+  {
+    "s": "Taktiksel EMP Kalkanı",
+    "loc": [
+      "src/game.js:6857"
+    ]
+  },
+  {
+    "s": "TAKTİKSEL ZAR PAKETİ",
+    "loc": [
+      "src/game.js:3852"
+    ]
+  },
+  {
+    "s": "TAMİRCİ DRONE",
+    "loc": [
+      "src/game.js:795"
+    ]
+  },
+  {
+    "s": "Taş Kırıcı",
+    "loc": [
+      "src/game.js:588"
+    ]
+  },
+  {
+    "s": "TESLA BOBİNİ",
+    "loc": [
+      "src/game.js:2356"
+    ]
+  },
+  {
+    "s": "TESLA İYON FIRTINASI",
+    "loc": [
+      "src/game.js:2405",
+      "src/game.js:8341",
+      "src/game.js:8833"
+    ]
+  },
+  {
+    "s": "Tesla Lvl 4 + Atış Hızı Lvl 4",
+    "loc": [
+      "src/game.js:2405"
+    ]
+  },
+  {
+    "s": "Titanyum Zırh",
+    "loc": [
+      "src/game.js:4011"
+    ]
+  },
+  {
+    "s": "Titreşim: Açık",
+    "loc": [
+      "src/game.js:2322"
+    ]
+  },
+  {
+    "s": "Titreşim: Kapalı",
+    "loc": [
+      "src/game.js:2322"
+    ]
+  },
+  {
+    "s": "Titreşimi Aç/Kapat",
+    "loc": [
+      "index.html:188",
+      "index.html:188"
+    ]
+  },
+  {
+    "s": "Toplam 120 düşman yok et",
+    "loc": [
+      "src/game.js:582"
+    ]
+  },
+  {
+    "s": "Toplam 15 düşman yok et",
+    "loc": [
+      "src/game.js:581"
+    ]
+  },
+  {
+    "s": "Toplam 2,500 düşman yok et",
+    "loc": [
+      "src/game.js:584"
+    ]
+  },
+  {
+    "s": "Toplam 750 düşman yok et",
+    "loc": [
+      "src/game.js:583"
+    ]
+  },
+  {
+    "s": "Toplam 8,000 düşman yok et",
+    "loc": [
+      "src/game.js:585"
+    ]
+  },
+  {
+    "s": "Toplanan her kristalden kalıcı %8 daha fazla kaynak sağlar",
+    "loc": [
+      "src/game.js:4052"
+    ]
+  },
+  {
+    "s": "Turlarda +%30 Hızlı Zenginleşme",
+    "loc": [
+      "src/game.js:4053"
+    ]
+  },
+  {
+    "s": "Tüm Can ve Kalkanı anında %100 tamir eder.",
+    "loc": [
+      "src/game.js:6855"
+    ]
+  },
+  {
+    "s": "Tüm düşman mermilerini anında siler ve 4 sn acil durum dokunulmazlığı verir.",
+    "loc": [
+      "src/game.js:6857"
+    ]
+  },
+  {
+    "s": "Tüm kademe zorlukları başarıyla fethedildi!",
+    "loc": [
+      "src/game.js:2680"
+    ]
+  },
+  {
+    "s": "Tüm kalıcı geliştirmeleri sıfırlar ve harcanan tüm kristalleri eksiksiz iade eder",
+    "loc": [
+      "index.html:859"
+    ]
+  },
+  {
+    "s": "Tüm plazma mermileri hedefleri delip geçer ve isabet ettiği noktalarda yıkıcı elektrik plazma şoku patlatır!",
+    "loc": [
+      "src/game.js:8394"
+    ]
+  },
+  {
+    "s": "TÜM SEFER TAMAMLANDI!",
+    "loc": [
+      "src/game.js:5143"
+    ]
+  },
+  {
+    "s": "Tüm silahlara her seviyede kalıcı +%6 hasar artışı sağlar",
+    "loc": [
+      "src/game.js:3992"
+    ]
+  },
+  {
+    "s": "Türkiye",
+    "loc": [
+      "src/game.js:6127"
+    ]
+  },
+  {
+    "s": "Uçuş Başlangıcı",
+    "loc": [
+      "src/game.js:609"
+    ]
+  },
+  {
+    "s": "ÜÇLÜ ODAK",
+    "loc": [
+      "src/game.js:8412"
+    ]
+  },
+  {
+    "s": "ÜÇLÜ ODAK açılır",
+    "loc": [
+      "src/game.js:8680"
+    ]
+  },
+  {
+    "s": "Vakum Dronları",
+    "loc": [
+      "src/game.js:8624",
+      "src/game.js:8637"
+    ]
+  },
+  {
+    "s": "Victory trigger hatası:",
+    "loc": [
+      "src/game.js:12600"
+    ]
+  },
+  {
+    "s": "VORTEX KARADELİK LAZERİ",
+    "loc": [
+      "src/game.js:2403",
+      "src/game.js:8321",
+      "src/game.js:8998"
+    ]
+  },
+  {
+    "s": "VORTEX LAZERİ",
+    "loc": [
+      "src/game.js:8821"
+    ]
+  },
+  {
+    "s": "YANSITICI HİPER IŞIN KILICI",
+    "loc": [
+      "src/game.js:9068"
+    ]
+  },
+  {
+    "s": "Yedek kodu panoya kopyalandı!",
+    "loc": [
+      "src/game.js:4376"
+    ]
+  },
+  {
+    "s": "YEDEK KODU YÜKLE (IMPORT)",
+    "loc": [
+      "src/game.js:4350"
+    ]
+  },
+  {
+    "s": "Yeni Görev Bekleniyor...",
+    "loc": [
+      "src/game.js:2301"
+    ]
+  },
+  {
+    "s": "YENİDEN",
+    "loc": [
+      "src/game.js:2454"
+    ]
+  },
+  {
+    "s": "Yenileme hızı +%15",
+    "loc": [
+      "src/game.js:8686"
+    ]
+  },
+  {
+    "s": "Yıldırım Arkı",
+    "loc": [
+      "src/game.js:837"
+    ]
+  },
+  {
+    "s": "Yıldız Katili",
+    "loc": [
+      "src/game.js:583"
+    ]
+  },
+  {
+    "s": "Yoğun altın asteroitler & +%50 Ekstra Kristal Ganimeti",
+    "loc": [
+      "src/game.js:5191"
+    ]
+  },
+  {
+    "s": "YOLDAŞ DRONE",
+    "loc": [
+      "src/game.js:3607"
+    ]
+  },
+  {
+    "s": "YÜKLE",
+    "loc": [
+      "src/game.js:4357"
+    ]
+  },
+  {
+    "s": "Yüksek saflıkta kristal önbelleği. +60 Kristal ve +1200 Puan kazandırır.",
+    "loc": [
+      "src/game.js:8559"
+    ]
+  },
+  {
+    "s": "Zafer ganimeti reklamı tamamlanmadı:",
+    "loc": [
+      "src/game.js:3104"
+    ]
+  },
+  {
+    "s": "Zaman Savaşçısı",
+    "loc": [
+      "src/game.js:610"
+    ]
+  },
+  {
+    "s": "Zaman Seyyahı",
+    "loc": [
+      "src/game.js:634"
+    ]
+  },
+  {
+    "s": "Zaman Yavaşlatıcı",
+    "loc": [
+      "src/game.js:6861"
+    ]
+  },
+  {
+    "s": "Zehir Közü",
+    "loc": [
+      "src/game.js:838"
+    ]
+  },
+  {
+    "s": "ZEHİR NEON",
+    "loc": [
+      "src/game.js:677"
+    ]
+  },
+  {
+    "s": "ZÜMRÜT ASİT DİVRİĞİ",
+    "loc": [
+      "src/game.js:175",
+      "src/game.js:4899"
+    ]
+  },
+  {
+    "s": "ZÜMRÜT SÜZÜLME",
+    "loc": [
+      "src/game.js:683"
+    ]
+  }
+]

@@ -5,7 +5,13 @@
 class SoundEngine {
   constructor() {
     this.ctx = null;
-    this.isMuted = localStorage.getItem('neon_audio_muted') === 'true';
+    const savedLevel = localStorage.getItem('neon_audio_level');
+    if (savedLevel !== null && savedLevel !== '') {
+      this.audioLevel = Math.max(1, Math.min(8, parseInt(savedLevel, 10) || 8));
+    } else {
+      this.audioLevel = localStorage.getItem('neon_audio_muted') === 'true' ? 1 : 8;
+    }
+    this.isMuted = false;
     this.bgmPlaying = false;
     this.bgmTimer = null;
     this.bgmStep = 0;
@@ -71,16 +77,32 @@ class SoundEngine {
 
         // Ses Kanalları
         this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 1, this.ctx.currentTime);
+        this.masterGain.gain.setValueAtTime(this.audioLevel / 8, this.ctx.currentTime);
         this.masterGain.connect(this.ctx.destination);
 
+        this.sfxCompressor = this.ctx.createDynamicsCompressor();
+        this.sfxCompressor.threshold.setValueAtTime(-6, this.ctx.currentTime);
+        this.sfxCompressor.knee.setValueAtTime(8, this.ctx.currentTime);
+        this.sfxCompressor.ratio.setValueAtTime(6, this.ctx.currentTime);
+        this.sfxCompressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
+        this.sfxCompressor.release.setValueAtTime(0.08, this.ctx.currentTime);
+
         this.sfxGain = this.ctx.createGain();
-        this.sfxGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
-        this.sfxGain.connect(this.masterGain);
+        this.sfxGain.gain.setValueAtTime(0.72, this.ctx.currentTime);
+        this.sfxGain.connect(this.sfxCompressor);
+        this.sfxCompressor.connect(this.masterGain);
+
+        // Dinamik Synthwave Filtresi (Komboya ve duraklatmaya duyarlı)
+        this.mainMusicFilter = this.ctx.createBiquadFilter();
+        this.mainMusicFilter.type = 'lowpass';
+        this.mainMusicFilter.frequency.setValueAtTime(2200, this.ctx.currentTime);
+        this.mainMusicFilter.Q.value = 1.0;
+        this.mainMusicFilter.connect(this.masterGain);
 
         this.musicGain = this.ctx.createGain();
-        this.musicGain.gain.setValueAtTime(0.35, this.ctx.currentTime);
-        this.musicGain.connect(this.masterGain);
+        this.isBgmActive = localStorage.getItem('neon_bgm_enabled') !== 'false';
+        this.musicGain.gain.setValueAtTime(this.isBgmActive ? 0.48 : 0, this.ctx.currentTime);
+        this.musicGain.connect(this.mainMusicFilter);
 
         // Performans: Paylaşımlı tek gürültü tamponu (Her patlamada yeniden buffer üretmeyi önler)
         if (!this.sharedNoiseBuffer) {
@@ -100,13 +122,50 @@ class SoundEngine {
     }
   }
 
-  toggleMute() {
-    this.isMuted = !this.isMuted;
-    localStorage.setItem('neon_audio_muted', this.isMuted.toString());
+  applyLevel() {
+    this.audioLevel = Math.max(1, Math.min(8, this.audioLevel | 0));
+    this.isMuted = false;
+    localStorage.setItem('neon_audio_level', String(this.audioLevel));
+    localStorage.setItem('neon_audio_muted', 'false');
     if (this.masterGain && this.ctx) {
-      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 1, this.ctx.currentTime);
+      this.masterGain.gain.setValueAtTime(this.audioLevel / 8, this.ctx.currentTime);
     }
-    return this.isMuted;
+    return this.audioLevel;
+  }
+
+  setLevel(level) {
+    this.audioLevel = level;
+    return this.applyLevel();
+  }
+
+  stepLevel(dir) {
+    let next = this.audioLevel + dir;
+    if (next < 1) next = 8;
+    if (next > 8) next = 1;
+    return this.setLevel(next);
+  }
+
+  toggleMute() {
+    return this.stepLevel(-1) <= 0;
+  }
+
+  toggleBGM() {
+    this.isBgmActive = !this.isBgmActive;
+    localStorage.setItem('neon_bgm_enabled', this.isBgmActive.toString());
+    if (this.musicGain && this.ctx) {
+      this.musicGain.gain.setValueAtTime(this.isBgmActive ? 0.48 : 0, this.ctx.currentTime);
+    }
+    return this.isBgmActive;
+  }
+
+  setComboFilter(combo, isFever = false) {
+    if (!this.mainMusicFilter || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const progress = Math.min(1.0, (combo || 0) / 45);
+      const freq = isFever ? 4800 : (1300 + progress * 2600);
+      this.mainMusicFilter.frequency.setTargetAtTime(freq, now, 0.15);
+    } catch (e) {}
   }
 
   // WebAudio Grafı Düğüm Temizliği (Hafıza Sızıntısı Önleyici)
@@ -126,10 +185,28 @@ class SoundEngine {
   // DİNAMİK PROCEDURAL SYNTHWAVE BGM
   // ==========================================
   startBGM() {
-    if (this.bgmPlaying || !this.ctx) return;
+    if (!this.ctx) this.init();
+    if (!this.ctx) return;
+    if (this.bgmPlaying && this.bgmTimer) return;
     this.bgmPlaying = true;
     this.bgmStep = 0;
-    this.scheduleNextBeat();
+    if (this.bgmTimer) {
+      clearTimeout(this.bgmTimer);
+      this.bgmTimer = null;
+    }
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().then(() => {
+        if (this.bgmPlaying && !this.bgmTimer) {
+          this.scheduleNextBeat();
+        }
+      }).catch(() => {
+        if (this.bgmPlaying && !this.bgmTimer) {
+          this.scheduleNextBeat();
+        }
+      });
+    } else {
+      this.scheduleNextBeat();
+    }
   }
 
   stopBGM() {
@@ -215,19 +292,34 @@ class SoundEngine {
     }
 
     // 2. Siber Davul Ritimleri (Punchy Kick, 80s Snare ve Hi-Hat)
-    // Kick (0, 4, 8, 12, 16, 20, 24, 28) - Öfkeli Boss modunda çift kick
-    const isKick = (step % 4 === 0) || (this.isBossEnraged && (step % 4 === 2));
+    // Dinamik Katmanlama: 0-60s sakin nabız, 60s+ tam ritim ve snare, 180s+ veya Boss'ta overdrive
+    const isBoss = this.isBossMode;
+    const intensity = isBoss ? 1.0 : (this.combatIntensity || 0);
+
+    // Kick: Düşük yoğunlukta sakin yarım-tempo (0 ve 16), yüksek yoğunlukta veya Boss'ta her 4 adımda bir
+    let isKick = false;
+    if (isBoss) {
+      isKick = (step % 4 === 0) || (this.isBossEnraged && (step % 4 === 2));
+    } else if (intensity >= 0.25) {
+      isKick = (step % 4 === 0);
+    } else {
+      isKick = (step === 0 || step === 16); // 0-60s sakin nabız
+    }
+
     if (isKick) {
       this.playSynthKick(now);
       this.applySidechainPump(now);
     }
-    // 80s Analog Snare (4, 12, 20, 28)
-    if (step % 8 === 4) {
+
+    // 80s Analog Snare: 60 saniye / 0.25 yoğunluk sonrasında devreye girer (4, 12, 20, 28)
+    if ((isBoss || intensity >= 0.25) && (step % 8 === 4)) {
       this.playSynthSnare(now);
     }
-    // 16'lık Hi-Hat çıtırtısı
+
+    // 16'lık Hi-Hat çıtırtısı (yoğunlukla beraber açılır)
     if (step % 2 === 0) {
-      this.playSynthHiHat(now, step % 4 === 2 ? 0.05 : 0.025);
+      const vol = intensity < 0.25 ? 0.015 : (step % 4 === 2 ? 0.045 : 0.025);
+      this.playSynthHiHat(now, vol);
     }
 
     // 3. Synthwave Akor Padleri (8 adımda bir lush padler)
@@ -250,7 +342,7 @@ class SoundEngine {
     }
 
     // 4. Synth Arpej Lead (Uzay Hissiyatı & Yüksek Adrenalin)
-    if (step % 2 === 1) {
+    if (step % 2 === 1 && (isBoss || intensity >= 0.2 || step % 4 === 1)) {
       const arpNotes = this.isBossMode 
         ? [440, 523.2, 587.3, 659.2, 784, 880, 784, 659.2]
         : [220, 261.6, 329.6, 440, 523.2, 659.2, 523.2, 392];
@@ -263,28 +355,28 @@ class SoundEngine {
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.frequency.setValueAtTime(this.isBossMode ? 165 : 140, now);
-      osc.frequency.exponentialRampToValueAtTime(32, now + 0.11);
+      osc.frequency.setValueAtTime(this.isBossMode ? 175 : 150, now);
+      osc.frequency.exponentialRampToValueAtTime(36, now + 0.12);
 
-      gain.gain.setValueAtTime(this.isBossMode ? 0.28 : 0.24, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      gain.gain.setValueAtTime(this.isBossMode ? 0.38 : 0.32, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
 
       osc.connect(gain);
       gain.connect(this.musicGain);
 
       this._autoDisconnect(osc, gain);
       osc.start(now);
-      osc.stop(now + 0.12);
+      osc.stop(now + 0.14);
     } catch (e) {}
   }
 
   applySidechainPump(now) {
     if (!this.musicGain || !this.ctx || this.isMuted) return;
     try {
-      const baseGain = 0.35;
+      const baseGain = this.isBgmActive ? 0.48 : 0;
       this.musicGain.gain.cancelScheduledValues(now);
-      this.musicGain.gain.setValueAtTime(baseGain * 0.45, now);
-      this.musicGain.gain.exponentialRampToValueAtTime(baseGain, now + 0.14);
+      this.musicGain.gain.setValueAtTime(baseGain * 0.4, now);
+      this.musicGain.gain.exponentialRampToValueAtTime(baseGain, now + 0.13);
     } catch (e) {}
   }
 
@@ -384,18 +476,25 @@ class SoundEngine {
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = this.isBossMode ? 'sawtooth' : 'triangle';
+      const filter = this.ctx.createBiquadFilter();
+
+      osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(freq, now);
 
-      gain.gain.setValueAtTime(this.isBossMode ? 0.08 : 0.05, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2600, now);
+      filter.frequency.exponentialRampToValueAtTime(750, now + 0.12);
 
-      osc.connect(gain);
+      gain.gain.setValueAtTime(this.isBossMode ? 0.13 : 0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+      osc.connect(filter);
+      filter.connect(gain);
       gain.connect(this.musicGain);
 
-      this._autoDisconnect(osc, gain);
+      this._autoDisconnect(osc, filter, gain);
       osc.start(now);
-      osc.stop(now + 0.11);
+      osc.stop(now + 0.12);
     } catch (e) {}
   }
 
@@ -403,7 +502,7 @@ class SoundEngine {
   // SES EFEKTLERİ (SFX)
   // ==========================================
 
-  // Standart Lazer Atışı (Tok & Akıcı)
+  // Standart Lazer Atışı (Tok & Akıcı - Pitch Randomization & Punchy Low-End)
   playLaser() {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -411,22 +510,51 @@ class SoundEngine {
       if (this.lastLaserTime && now - this.lastLaserTime < 0.045) return;
       this.lastLaserTime = now;
 
+      // Dinamik pitch varyasyonu (%±6 rastgele sapma - monotonlaşmayı kırar ama uyumu bozmaz)
+      const pitchVariance = 1 + (Math.random() - 0.5) * 0.12;
+      const startFreq = 640 * pitchVariance;
+      const endFreq = 120 * pitchVariance;
+
+      // Üst frekansları yumuşatan ve kulak yorgunluğunu önleyen sıcak analog low-pass filtre
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1400, now);
+      filter.frequency.exponentialRampToValueAtTime(320, now + 0.085);
+      filter.Q.value = 1.1;
+
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = 'sawtooth';
+      osc.type = 'triangle'; // Sert testere yerine sıcak üçgen dalga
+      osc.frequency.setValueAtTime(startFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.085);
 
-      osc.frequency.setValueAtTime(920, now);
-      osc.frequency.exponentialRampToValueAtTime(140, now + 0.1);
+      gain.gain.setValueAtTime(0.13, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
 
-      gain.gain.setValueAtTime(0.16, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      // Göğüste hissedilen yumuşak sub-punch darbesi (Tokluk hissi)
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(190 * pitchVariance, now);
+      subOsc.frequency.exponentialRampToValueAtTime(55, now + 0.065);
 
-      osc.connect(gain);
+      subGain.gain.setValueAtTime(0.09, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+
+      osc.connect(filter);
+      filter.connect(gain);
       gain.connect(this.sfxGain);
 
+      subOsc.connect(subGain);
+      subGain.connect(this.sfxGain);
+
       this._autoDisconnect(osc, gain);
+      this._autoDisconnect(subOsc, subGain);
+
       osc.start(now);
-      osc.stop(now + 0.1);
+      osc.stop(now + 0.085);
+      subOsc.start(now);
+      subOsc.stop(now + 0.065);
     } catch (e) {}
   }
 
@@ -456,7 +584,7 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // Patlama Sesi (Büyük & Küçük) - Sıfır GC Tahsisi ve Yüksek Performans
+  // Patlama Sesi (Büyük & Küçük) - Sinematik Sub-Bass Katmanı ile Gerçek Tokluk
   playExplosion(isLarge = false) {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -464,26 +592,80 @@ class SoundEngine {
       if (this.lastExplosionTime && now - this.lastExplosionTime < 0.04 && !isLarge) return;
       this.lastExplosionTime = now;
 
-      const duration = isLarge ? 0.45 : 0.22;
+      const duration = isLarge ? 0.48 : 0.24;
       const noise = this.ctx.createBufferSource();
       noise.buffer = this.sharedNoiseBuffer;
 
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(isLarge ? 380 : 750, now);
-      filter.frequency.exponentialRampToValueAtTime(30, now + duration);
+      filter.frequency.setValueAtTime(isLarge ? 420 : 750, now);
+      filter.frequency.exponentialRampToValueAtTime(28, now + duration);
 
       const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(isLarge ? 0.38 : 0.2, now);
+      gain.gain.setValueAtTime(isLarge ? 0.38 : 0.22, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
       noise.connect(filter);
       filter.connect(gain);
       gain.connect(this.sfxGain);
 
+      // Sinematik Sub-Bass Titremesi (65Hz -> 20Hz Sub Darbe)
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(isLarge ? 72 : 55, now);
+      subOsc.frequency.exponentialRampToValueAtTime(20, now + duration);
+
+      subGain.gain.setValueAtTime(isLarge ? 0.32 : 0.16, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      subOsc.connect(subGain);
+      subGain.connect(this.sfxGain);
+
       this._autoDisconnect(noise, filter, gain);
+      this._autoDisconnect(subOsc, subGain);
+
       noise.start(now);
       noise.stop(now + duration);
+      subOsc.start(now);
+      subOsc.stop(now + duration);
+    } catch (e) {}
+  }
+
+  // Kritik Vuruş & Büyük Darbe (Tatmin Edici Çift Harmonik Altın Zil Çınlaması)
+  playCrit() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      if (this._lastCritTime && now - this._lastCritTime < 0.08) return;
+      this._lastCritTime = now;
+
+      const dur = 0.24;
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'triangle';
+      osc1.frequency.setValueAtTime(1760, now);
+      osc1.frequency.exponentialRampToValueAtTime(880, now + dur);
+      osc2.frequency.setValueAtTime(2640, now);
+      osc2.frequency.exponentialRampToValueAtTime(1320, now + dur);
+
+      gain.gain.setValueAtTime(0.24, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(this.sfxGain);
+
+      this._autoDisconnect(osc1, gain);
+      this._autoDisconnect(osc2);
+
+      osc1.start(now);
+      osc1.stop(now + dur);
+      osc2.start(now);
+      osc2.stop(now + dur);
     } catch (e) {}
   }
 
@@ -749,28 +931,36 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // Düşmana Mermi Çarpma Tok Sesi (Hitmarker Crunch)
+  // Düşmana Mermi Çarpma Tok Sesi (Smooth Hitmarker - Tokluk & Sıfır Kulak Yorgunluğu)
   playHitmarker() {
     if (this.isMuted || !this.ctx) return;
     const now = this.ctx.currentTime;
-    if (this.lastHitmarker && now - this.lastHitmarker < 0.04) return;
+    if (this.lastHitmarker && now - this.lastHitmarker < 0.042) return;
     this.lastHitmarker = now;
     try {
+      // Dinamik pitch varyasyonu (%±7) sayesinde arka arkaya çarpan mermiler kulak tırmalamaz
+      const variance = 1 + (Math.random() - 0.5) * 0.14;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1400, now);
-      osc.frequency.exponentialRampToValueAtTime(350, now + 0.035);
+      osc.frequency.setValueAtTime(540 * variance, now);
+      osc.frequency.exponentialRampToValueAtTime(140 * variance, now + 0.028);
 
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.028);
 
-      osc.connect(gain);
+      // Üst frekans parazitini kesen analog filtre
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(950, now);
+
+      osc.connect(filter);
+      filter.connect(gain);
       gain.connect(this.sfxGain);
 
       this._autoDisconnect(osc, gain);
       osc.start(now);
-      osc.stop(now + 0.035);
+      osc.stop(now + 0.028);
     } catch (e) {}
   }
 
@@ -825,50 +1015,78 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // Kritik Vuruş Çıtırtısı (Crisp Crit Ping)
+  // Kritik Vuruş Çıtırtısı (Harmonik Kristal Çınlama - Tiz Çığlık Yerine Müzikal Ödül)
   playCrit() {
     if (this.isMuted || !this.ctx) return;
     const now = this.ctx.currentTime;
     try {
-      const osc = this.ctx.createOscillator();
+      const oscA = this.ctx.createOscillator();
+      const oscB = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(2200, now);
-      osc.frequency.exponentialRampToValueAtTime(700, now + 0.05);
+      oscA.type = 'sine';
+      oscB.type = 'triangle';
+      oscA.frequency.setValueAtTime(880, now); // A5
+      oscA.frequency.exponentialRampToValueAtTime(440, now + 0.06);
+      oscB.frequency.setValueAtTime(1320, now); // E6
+      oscB.frequency.exponentialRampToValueAtTime(660, now + 0.06);
 
-      gain.gain.setValueAtTime(0.16, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
 
-      osc.connect(gain);
+      oscA.connect(gain);
+      oscB.connect(gain);
       gain.connect(this.sfxGain);
 
-      this._autoDisconnect(osc, gain);
-      osc.start(now);
-      osc.stop(now + 0.05);
+      this._autoDisconnect(oscA, gain);
+      this._autoDisconnect(oscB, gain);
+      oscA.start(now);
+      oscB.start(now);
+      oscA.stop(now + 0.06);
+      oscB.stop(now + 0.06);
     } catch (e) {}
   }
 
-  // Süper Silah Evrimleşme Fanfarı (Triumphant Evolution Arpeggio)
+  // Süper Silah Evrimleşme Fanfarı (Epik Siberpunk Kuantum Zafer Arpeji)
   playEvolution() {
     if (this.isMuted || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
-      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50]; // C4 -> C6 arpej
+      // 1. Derin Sub-Bass Yükselişi (Dopamin hissi ve zemin titreşimi)
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(55, now);
+      subOsc.frequency.exponentialRampToValueAtTime(110, now + 0.45);
+      subGain.gain.setValueAtTime(0.24, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+
+      subOsc.connect(subGain);
+      subGain.connect(this.sfxGain);
+      this._autoDisconnect(subOsc, subGain);
+      subOsc.start(now);
+      subOsc.stop(now + 0.55);
+
+      // 2. Sıcak ve Parlak Synth Arpeji (C4 -> G5 -> C6)
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
       notes.forEach((freq, idx) => {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+        const filter = this.ctx.createBiquadFilter();
+        osc.type = 'triangle'; // Sert sawtooth yerine zengin triangle dalga
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2200, now + idx * 0.055);
 
-        gain.gain.setValueAtTime(0.18, now + idx * 0.06);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.25);
+        osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+        gain.gain.setValueAtTime(0.14, now + idx * 0.055);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.35);
 
-        osc.connect(gain);
+        osc.connect(filter);
+        filter.connect(gain);
         gain.connect(this.sfxGain);
 
         this._autoDisconnect(osc, gain);
-        osc.start(now + idx * 0.06);
-        osc.stop(now + idx * 0.06 + 0.25);
+        osc.start(now + idx * 0.055);
+        osc.stop(now + idx * 0.055 + 0.35);
       });
     } catch (e) {}
   }
@@ -1443,58 +1661,9 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // 1. Sıyırma / Graze Kıvılcım Sesi
-  playGraze() {
-    if (this.isMuted || !this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1400, now);
-      osc.frequency.exponentialRampToValueAtTime(3200, now + 0.05);
-
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-
-      osc.connect(gain);
-      gain.connect(this.sfxGain);
-      this._autoDisconnect(osc, gain);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    } catch (e) {}
-  }
-
-  // 2. Silecek Mermi Savurma / Deflect Metalik Parri Sesi
-  playDeflect() {
-    if (this.isMuted || !this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      const osc1 = this.ctx.createOscillator();
-      const osc2 = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc1.type = 'triangle';
-      osc1.frequency.setValueAtTime(880, now);
-      osc1.frequency.exponentialRampToValueAtTime(1760, now + 0.12);
-
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(1320, now);
-      osc2.frequency.exponentialRampToValueAtTime(2640, now + 0.1);
-
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-      osc1.connect(gain);
-      osc2.connect(gain);
-      gain.connect(this.sfxGain);
-      this._autoDisconnect(osc1, gain);
-      this._autoDisconnect(osc2, gain);
-      osc1.start(now);
-      osc2.start(now);
-      osc1.stop(now + 0.12);
-      osc2.stop(now + 0.12);
-    } catch (e) {}
+  // Zafer / Çark Ödülü Kutlama Sesi
+  playVictory() {
+    this.playJackpot();
   }
 
   // 8. Gövde Hasarı / Kalp Atışı & Statik Glitch Sesi

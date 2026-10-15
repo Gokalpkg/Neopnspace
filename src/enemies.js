@@ -1,4 +1,5 @@
 // === DÜŞMANLAR, METEORLAR, XP KRİSTALLERİ & MERMİLER ===
+import { t } from './i18n.js';
 
 export const BOSS_ROSTER = {
   boss_vanguard: {
@@ -10,9 +11,9 @@ export const BOSS_ROSTER = {
     enragedColor: '#ff5500',
     coreColor: '#00f0ff',
     radius: 38,
-    baseHp: 110,
-    speedX: 1.35,
-    score: 800
+    baseHp: 580,
+    speedX: 1.45,
+    score: 1200
   },
   boss_dreadnought: {
     id: 'boss_dreadnought',
@@ -23,9 +24,9 @@ export const BOSS_ROSTER = {
     enragedColor: '#ff1744',
     coreColor: '#ffbe0b',
     radius: 52,
-    baseHp: 340,
-    speedX: 1.05,
-    score: 2000
+    baseHp: 950,
+    speedX: 1.15,
+    score: 2500
   },
   boss_nebula: {
     id: 'boss_nebula',
@@ -36,9 +37,9 @@ export const BOSS_ROSTER = {
     enragedColor: '#bf5af2',
     coreColor: '#05ffa1',
     radius: 56,
-    baseHp: 480,
-    speedX: 1.2,
-    score: 2800
+    baseHp: 1380,
+    speedX: 1.25,
+    score: 3400
   },
   boss_titan: {
     id: 'boss_titan',
@@ -49,9 +50,9 @@ export const BOSS_ROSTER = {
     enragedColor: '#10b981',
     coreColor: '#f59e0b',
     radius: 55,
-    baseHp: 640,
-    speedX: 1.15,
-    score: 3600
+    baseHp: 1850,
+    speedX: 1.2,
+    score: 4200
   },
   boss_chrono: {
     id: 'boss_chrono',
@@ -62,9 +63,9 @@ export const BOSS_ROSTER = {
     enragedColor: '#ff5500',
     coreColor: '#ffffff',
     radius: 58,
-    baseHp: 820,
-    speedX: 1.3,
-    score: 4500
+    baseHp: 2400,
+    speedX: 1.35,
+    score: 5200
   },
   boss_apex: {
     id: 'boss_apex',
@@ -75,9 +76,9 @@ export const BOSS_ROSTER = {
     enragedColor: '#f43f5e',
     coreColor: '#38bdf8',
     radius: 60,
-    baseHp: 1050,
-    speedX: 1.4,
-    score: 6000
+    baseHp: 3100,
+    speedX: 1.45,
+    score: 7000
   }
 };
 
@@ -349,14 +350,42 @@ export const PIXEL_SHIPS = {
       [0, 2, 2, 0, 0, 0],
       [0, 3, 0, 0, 0, 0]
     ]
+  },
+  interceptor: {
+    p: 3.6,
+    palette: {
+      1: '#0f172a',
+      2: '#00f0ff',
+      3: '#ffffff',
+      4: '#38bdf8',
+      5: '#0284c7',
+      6: '#ff0055'
+    },
+    rows: [
+      [0, 6, 6, 0],
+      [2, 1, 1, 2],
+      [2, 4, 3, 2],
+      [5, 1, 4, 2],
+      [0, 2, 3, 0]
+    ]
   }
 };
 
 export class Enemy {
   static currentSector = 'void';
   static getBossInfo(type) {
-    if (type === 'boss') return BOSS_ROSTER.boss_dreadnought;
-    return BOSS_ROSTER[type] || BOSS_ROSTER.boss_dreadnought;
+    const base = type === 'boss' ? BOSS_ROSTER.boss_dreadnought : (BOSS_ROSTER[type] || BOSS_ROSTER.boss_dreadnought);
+    const pick = (suffix, fallback) => {
+      const key = `boss_${base.id}_${suffix}`;
+      const v = t(key);
+      return v && v !== key ? v : fallback;
+    };
+    return {
+      ...base,
+      name: pick('name', base.name),
+      subtitle: pick('sub', base.subtitle),
+      title: pick('title', base.title)
+    };
   }
 
   constructor(x, y, type, waveMultiplier = 1, speedMultiplier = 1, sector = null) {
@@ -411,41 +440,45 @@ export class Enemy {
 
       case 'scout':
         this.radius = 14;
-        this.hp = Math.round(8 * waveMultiplier);
+        this.hp = Math.round(18 * waveMultiplier);
         this.maxHp = this.hp;
-        this.speedY = (1.5 + Math.random() * 0.4) * speedMultiplier;
+        this.speedY = (1.25 + Math.random() * 0.3) * speedMultiplier;
         this.speedX = 0;
         this.sineFreq = 0.03 + Math.random() * 0.02;
         this.sineAmp = 1.8;
         this.time = Math.random() * 100;
-        this.score = 40;
+        this.score = 45;
         this.color = '#ff0077';
-        this.shootTimer = 65 + Math.random() * 45;
+        this.shootTimer = 95 + Math.random() * 45; // Baştaki düşmanlar hemen kurşun yağdırmaz, oyuncuya kaçma fırsatı verir
+        this.maxDamagePerHitRatio = 0.42;
         break;
 
       case 'cruiser':
         this.radius = 24;
-        this.hp = Math.round(34 * waveMultiplier);
+        this.hp = Math.round(70 * waveMultiplier);
         this.maxHp = this.hp;
-        this.speedY = 0.7 * speedMultiplier;
-        this.speedX = (Math.random() - 0.5) * 0.35 * speedMultiplier;
-        this.score = 120;
+        this.speedY = 0.65 * speedMultiplier;
+        this.speedX = (Math.random() < 0.5 ? -1 : 1) * 0.42 * speedMultiplier;
+        this.score = 150;
         this.color = '#ff3366';
-        this.shootTimer = 60 + Math.random() * 40;
+        this.shootTimer = 80 + Math.random() * 40;
+        this.maxDamagePerHitRatio = 0.25;
         break;
 
       case 'kamikaze':
         this.radius = 16;
-        this.hp = Math.round(11 * waveMultiplier);
-        this.maxHp = this.hp;
-        this.speedY = (1.3 + Math.random() * 0.3) * speedMultiplier;
+        this.hp = 999;
+        this.maxHp = 999;
+        this.speedY = 1.6 * (speedMultiplier || 1.0);
         this.speedX = 0;
-        this.score = 90;
+        this.score = 50;
         this.color = '#ff0055';
-        this.chargeTimer = 35;
+        this.chargeTimer = 22;
         this.charging = false;
         this.chargeVx = 0;
         this.chargeVy = 0;
+        this.isIndestructible = true; // Kullanıcı talebi: Güdümlü füzeler yok edilemez olsun
+        this.lifeTimer = 0;
         break;
 
       case 'volatile_asteroid':
@@ -464,13 +497,14 @@ export class Enemy {
 
       case 'cargo_freighter':
         this.radius = 26;
-        this.hp = Math.round(16 * waveMultiplier);
+        this.hp = Math.round(28 * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (0.55 + Math.random() * 0.20) * speedMultiplier;
         this.speedX = (Math.random() < 0.5 ? -1 : 1) * 0.45 * speedMultiplier;
         this.score = 250;
         this.color = '#ffd700';
         this.isCargo = true;
+        this.maxDamagePerHitRatio = 0.35;
         break;
 
       case 'boss':
@@ -484,20 +518,22 @@ export class Enemy {
         this.radius = info.radius;
         this.hp = Math.round(info.baseHp * waveMultiplier);
         this.maxHp = this.hp;
-        this.speedY = 0.32 * (speedMultiplier || 1.0);
+        this.speedY = 0.45 * (speedMultiplier || 1.0);
         this.speedX = info.speedX * (speedMultiplier || 1.0);
         this.score = info.score;
         this.color = info.color;
-        this.shootTimer = 40;
+        this.shootTimer = 32;
         this.dirX = 1;
         this.phase = 1;
         this.isEnraged = false;
         this.justEnraged = false;
+        this.enrageShieldTimer = 0;
+        this.maxDamagePerHitRatio = 0.045; // Tek vuruşta maksimum %4.5 hasar alabilir (Asla tek yemez!)
         this.shieldPlateAngle = 0;
         this.spiralAngle = 0;
         this.bossAttackTick = 0;
-        this.leftPodHp = Math.round(this.hp * 0.25);
-        this.rightPodHp = Math.round(this.hp * 0.25);
+        this.leftPodHp = Math.round(this.hp * 0.28);
+        this.rightPodHp = Math.round(this.hp * 0.28);
         this.leftPodDestroyed = false;
         this.rightPodDestroyed = false;
         break;
@@ -529,54 +565,141 @@ export class Enemy {
 
       case 'asteroid_bomb':
         this.radius = 20;
-        this.hp = Math.round(9 * waveMultiplier);
+        this.hp = Math.round(8 * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (0.75 + Math.random() * 0.35) * speedMultiplier;
         this.speedX = (Math.random() - 0.5) * 0.4 * speedMultiplier;
-        this.score = 45;
+        this.score = 50;
         this.color = '#ff4d00';
         this.shape = this.generatePolygon(6, 20);
         this.rotSpeed = (Math.random() - 0.5) * 0.04;
         this.rot = 0;
         break;
 
-      case 'dive_bomber':
-        this.radius = 13;
-        this.hp = Math.round(5 * waveMultiplier);
+      case 'asteroid_purple':
+        this.radius = 24;
+        this.hp = Math.round(18 * waveMultiplier);
         this.maxHp = this.hp;
-        this.speedY = 1.1 * speedMultiplier;
+        this.speedY = (0.70 + Math.random() * 0.25) * speedMultiplier;
+        this.speedX = (Math.random() - 0.5) * 0.3 * speedMultiplier;
+        this.score = 150;
+        this.color = '#bf5af2';
+        this.shape = this.generatePolygon(7, 24);
+        this.rotSpeed = (Math.random() - 0.5) * 0.05;
+        this.rot = 0;
+        this.isPurple = true;
+        break;
+
+      case 'asteroid_vortex':
+        this.radius = 23;
+        this.hp = Math.round(14 * waveMultiplier);
+        this.maxHp = this.hp;
+        this.speedY = (0.65 + Math.random() * 0.25) * speedMultiplier;
+        this.speedX = (Math.random() - 0.5) * 0.25 * speedMultiplier;
+        this.score = 85;
+        this.color = '#9333ea';
+        this.shape = this.generatePolygon(8, 23);
+        this.rotSpeed = (Math.random() - 0.5) * 0.07;
+        this.rot = 0;
+        this.isVortexHazard = true;
+        break;
+
+      case 'asteroid_cryo':
+        this.radius = 21;
+        this.hp = Math.round(10 * waveMultiplier);
+        this.maxHp = this.hp;
+        this.speedY = (0.72 + Math.random() * 0.3) * speedMultiplier;
+        this.speedX = (Math.random() - 0.5) * 0.3 * speedMultiplier;
+        this.score = 65;
+        this.color = '#38bdf8';
+        this.shape = this.generatePolygon(6, 21);
+        this.rotSpeed = (Math.random() - 0.5) * 0.04;
+        this.rot = 0;
+        this.isCryoHazard = true;
+        break;
+
+      case 'asteroid_geode':
+        this.radius = 19;
+        this.hp = Math.round(8 * waveMultiplier);
+        this.maxHp = this.hp;
+        this.speedY = (0.8 + Math.random() * 0.35) * speedMultiplier;
+        this.speedX = (Math.random() - 0.5) * 0.35 * speedMultiplier;
+        this.score = 90;
+        this.color = '#05ffa1';
+        this.shape = this.generatePolygon(7, 19);
+        this.rotSpeed = (Math.random() - 0.5) * 0.05;
+        this.rot = 0;
+        this.isGeode = true;
+        break;
+
+      case 'shield_vanguard':
+        this.radius = 20;
+        this.hp = Math.round(44 * waveMultiplier);
+        this.maxHp = this.hp;
+        this.speedY = 0.85 * speedMultiplier;
+        this.speedX = (Math.random() - 0.5) * 0.3 * speedMultiplier;
+        this.score = 120;
+        this.color = '#3b82f6';
+        this.hasFrontShield = true;
+        this.shootTimer = 55 + Math.random() * 35;
+        this.maxDamagePerHitRatio = 0.28;
+        break;
+
+      case 'tether_drone':
+        this.radius = 16;
+        this.hp = Math.round(18 * waveMultiplier);
+        this.maxHp = this.hp;
+        this.speedY = 0.88 * speedMultiplier;
         this.speedX = 0;
-        this.score = 45;
+        this.score = 80;
+        this.color = '#00f0ff';
+        this.isTetherDrone = true;
+        this.tetherId = null;
+        this.tetherPartner = null;
+        this.sparkTimer = 0;
+        break;
+
+      case 'dive_bomber':
+        this.radius = 14;
+        this.hp = 999;
+        this.maxHp = 999;
+        this.speedY = 1.4 * (speedMultiplier || 1.0);
+        this.speedX = 0;
+        this.score = 50;
         this.color = '#ff9100';
         this.isDiving = false;
         this.diveTimer = 0;
         this.diveTargetAngle = 0;
-        this.diveSpeed = 3.6 * speedMultiplier;
+        this.diveSpeed = 4.4 * (speedMultiplier || 1.0);
+        this.isIndestructible = true; // Kullanıcı talebi: Güdümlü füzeler yok edilemez olsun
+        this.lifeTimer = 0;
         break;
 
       case 'escort_fighter':
         this.radius = 13;
-        this.hp = Math.round(4 * waveMultiplier);
+        this.hp = Math.round(14 * waveMultiplier);
         this.maxHp = this.hp;
-        this.speed = 2.4 * speedMultiplier;
+        this.speed = 2.1 * speedMultiplier;
         this.color = '#00f0ff';
         this.angle = Math.PI / 2;
-        this.shootTimer = 75 + Math.random() * 45;
-        this.score = 50;
+        this.shootTimer = 65 + Math.random() * 40;
+        this.score = 60;
+        this.maxDamagePerHitRatio = 0.5;
         break;
 
       case 'elite_scout':
         this.radius = 18;
-        this.hp = Math.round(24 * waveMultiplier);
+        this.hp = Math.round(58 * waveMultiplier);
         this.maxHp = this.hp;
-        this.speedY = (0.85 + Math.random() * 0.25) * speedMultiplier;
+        this.speedY = (0.75 + Math.random() * 0.25) * speedMultiplier;
         this.speedX = 0;
         this.sineFreq = 0.025;
         this.sineAmp = 2.2;
         this.time = Math.random() * 100;
-        this.score = 250;
+        this.score = 260;
         this.color = '#ffbe0b';
-        this.shootTimer = 45 + Math.random() * 25;
+        this.shootTimer = 38 + Math.random() * 22;
+        this.maxDamagePerHitRatio = 0.22;
         break;
     }
 
@@ -622,12 +745,42 @@ export class Enemy {
   }
 
   update(playerX, playerY, enemyProjectiles, screenWidth, screenHeight, dt = 1.0) {
+    if (this.knockX || this.knockY) {
+      this.x += (this.knockX || 0) * dt;
+      this.y += (this.knockY || 0) * dt;
+      this.knockX *= 0.55;
+      this.knockY *= 0.55;
+      if (Math.abs(this.knockX) < 0.04) this.knockX = 0;
+      if (Math.abs(this.knockY) < 0.04) this.knockY = 0;
+    }
+    if (this.freezeTimer > 0) {
+      this.freezeTimer -= dt;
+      return;
+    }
+    if (this.slowTimer > 0) {
+      this.slowTimer -= dt;
+      dt *= 0.4;
+    }
+    if (this.isPrimedForDomino) {
+      this.x += (Math.random() - 0.5) * 3.2 * dt;
+      this.y += (Math.random() - 0.5) * 3.2 * dt;
+    }
     if (this.frozen > 0) {
       this.frozen -= dt;
       dt *= 0.5;
     }
     if (this.shape) {
       this.rot += this.rotSpeed * dt;
+    }
+    if (this.isVortexHazard && playerX !== undefined && typeof window !== 'undefined' && window.game && window.game.player) {
+      const vDx = this.x - playerX;
+      const vDy = this.y - playerY;
+      const vDist = Math.hypot(vDx, vDy);
+      if (vDist < 165 && vDist > 25) {
+        const pull = (1 - vDist / 165) * 1.35 * dt;
+        window.game.player.targetX += (vDx / vDist) * pull;
+        window.game.player.targetY += (vDy / vDist) * pull;
+      }
     }
 
     if (this.type === 'scout') {
@@ -637,46 +790,76 @@ export class Enemy {
       this.x += Math.sin(this.time * this.sineFreq) * this.sineAmp * dt + Math.sign(targetDx) * Math.min(Math.abs(targetDx) * 0.02, 0.9) * dt;
       this.y += this.speedY * dt;
 
-      // Aşağıya kaçmayı engelle: Oyuncu seviyesine yaklaşınca yukarı kavis çizer
-      if (this.y > screenHeight - 95 && this.speedY > 0) {
+      // Filo üyesi veya devriye avcısı üst-orta savaş alanında kalarak oyuncuyu zorlar
+      const maxScoutY = this.isFleetMember ? screenHeight * 0.45 : screenHeight - 95;
+      if (this.y > maxScoutY && this.speedY > 0) {
         this.speedY = -Math.abs(this.speedY);
       } else if (this.y < 70 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
       }
+
+      if (this.y > 20 && enemyProjectiles) {
+        this.shootTimer = (this.shootTimer || 120) - dt;
+        if (this.shootTimer <= 0) {
+          // Ekranda çok mermi varsa bekle, oyuncuyu mermi cehennemine boğma
+          if (enemyProjectiles.length >= 14) {
+            this.shootTimer = 35 + Math.random() * 25;
+          } else {
+            this.shootTimer = this.isFleetMember ? (115 + Math.random() * 45) : (145 + Math.random() * 55);
+            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 12, aimAngle, 2.8));
+          }
+        }
+      }
     } else if (this.type === 'kamikaze') {
+      this.lifeTimer = (this.lifeTimer || 0) + dt;
       if (!this.charging) {
         this.y += this.speedY * dt;
         this.chargeTimer -= dt;
-        if (this.chargeTimer <= 0 && this.y < playerY - 70) {
+        if (this.chargeTimer <= 0) {
           this.charging = true;
           const dx = playerX - this.x;
-          const dy = playerY - this.y;
+          const dy = Math.max(50, playerY - this.y);
           const dist = Math.hypot(dx, dy) || 1;
-          const chargeSpeed = 4.4;
+          const chargeSpeed = 4.8;
           this.chargeVx = (dx / dist) * chargeSpeed;
-          this.chargeVy = (dy / dist) * chargeSpeed;
+          this.chargeVy = Math.max(2.8, (dy / dist) * chargeSpeed);
         }
       } else {
         this.x += this.chargeVx * dt;
         this.y += this.chargeVy * dt;
       }
+      // Ekranın altına geçince veya yanlardan çıkınca temizlenir, asla ortada asılı kalmaz
+      if (this.y > screenHeight + 35 || this.x < -60 || this.x > screenWidth + 60 || this.lifeTimer > 300) {
+        this.toRemove = true;
+      }
     } else if (this.isBoss) {
       const info = Enemy.getBossInfo(this.type);
       const enrageThreshold = this.type === 'boss_apex' ? 0.45 : 0.50;
+
+      if (this.enrageShieldTimer > 0) {
+        this.enrageShieldTimer -= dt;
+      }
 
       // 2. Faz (Öfke Modu) Kontrolü
       if (this.phase === 1 && this.hp <= this.maxHp * enrageThreshold) {
         this.phase = 2;
         this.isEnraged = true;
         this.justEnraged = true;
-        this.speedX = info.speedX * 1.35;
+        this.enrageShieldTimer = 45; // Faz geçişinde kısa zırh koruması
+        this.hp = Math.max(this.hp, Math.round(this.maxHp * enrageThreshold));
+        this.speedX = info.speedX * 1.38;
         this.color = info.enragedColor;
       }
 
       // Boss ekranın üst yarısında süzülür
       const targetHoverY = this.type === 'boss_apex' ? 135 : 120;
       if (this.y < targetHoverY) {
-        this.y += this.speedY * dt;
+        this.y += Math.max(0.85, this.speedY * 2.2) * dt;
+      } else {
+        // Hafif dikey salınım ile canlı amiral gemisi hissi
+        this.bossAttackTick = (this.bossAttackTick || 0) + 0.03 * dt;
+        this.y = targetHoverY + Math.sin(this.bossAttackTick) * 8;
       }
       this.x += this.speedX * this.dirX * dt;
       if (this.x > screenWidth - this.radius - 12) {
@@ -695,104 +878,114 @@ export class Enemy {
         const baseAngle = Math.atan2(playerY - this.y, playerX - this.x);
 
         if (this.type === 'boss_vanguard') {
-          this.shootTimer = 42;
-          enemyProjectiles.push(new EnemyProjectile(this.x - 14, this.y + 16, baseAngle - 0.08, 3.8));
-          enemyProjectiles.push(new EnemyProjectile(this.x + 14, this.y + 16, baseAngle + 0.08, 3.8));
-        } else if (this.type === 'boss_dreadnought' || this.type === 'boss') {
           if (this.phase === 2) {
-            this.shootTimer = 28;
-            this.spiralAngle += 0.38;
-            for (let s = 0; s < 6; s++) {
-              const ang = this.spiralAngle + (s * Math.PI / 3);
-              if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
-              if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 4.5));
-            }
-          } else {
-            this.shootTimer = 44;
-            for (let offset of [-0.28, 0, 0.28]) {
+            this.shootTimer = 56;
+            this.spiralAngle += 0.35;
+            for (let offset of [-0.32, -0.16, 0, 0.16, 0.32]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 4.2));
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 30, this.y + 18, baseAngle + offset, 3.4));
+            }
+          } else {
+            this.shootTimer = 68;
+            enemyProjectiles.push(new EnemyProjectile(this.x - 14, this.y + 16, baseAngle - 0.14, 3.1));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle, 3.3));
+            enemyProjectiles.push(new EnemyProjectile(this.x + 14, this.y + 16, baseAngle + 0.14, 3.1));
+          }
+        } else if (this.type === 'boss_dreadnought' || this.type === 'boss') {
+          if (this.phase === 2) {
+            this.shootTimer = 54;
+            this.spiralAngle += 0.38;
+            for (let s = 0; s < 5; s++) {
+              const ang = this.spiralAngle + (s * Math.PI * 2 / 5);
+              if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
+              if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.4));
+            }
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 22, baseAngle, 3.6));
+          } else {
+            this.shootTimer = 65;
+            for (let offset of [-0.24, 0, 0.24]) {
+              if (offset < 0 && this.leftPodDestroyed) continue;
+              if (offset > 0 && this.rightPodDestroyed) continue;
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2));
             }
           }
         } else if (this.type === 'boss_nebula') {
           if (this.phase === 2) {
-            this.shootTimer = 26;
+            this.shootTimer = 52;
             this.spiralAngle += 0.45;
-            for (let s = 0; s < 8; s++) {
-              const ang = this.spiralAngle + (s * Math.PI / 4);
+            for (let s = 0; s < 6; s++) {
+              const ang = this.spiralAngle + (s * Math.PI / 3);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 4.6));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.4));
             }
-            // Çift keskin nişancı atışı (Podlara bağlı)
             if (!this.leftPodDestroyed) {
-              enemyProjectiles.push(new EnemyProjectile(this.x - 15, this.y + 20, baseAngle - 0.08, 5.0));
+              enemyProjectiles.push(new EnemyProjectile(this.x - 15, this.y + 20, baseAngle - 0.08, 3.7));
             }
             if (!this.rightPodDestroyed) {
-              enemyProjectiles.push(new EnemyProjectile(this.x + 15, this.y + 20, baseAngle + 0.08, 5.0));
+              enemyProjectiles.push(new EnemyProjectile(this.x + 15, this.y + 20, baseAngle + 0.08, 3.7));
             }
           } else {
-            this.shootTimer = 40;
-            for (let offset of [-0.4, -0.15, 0.15, 0.4]) {
+            this.shootTimer = 66;
+            for (let offset of [-0.3, -0.1, 0.1, 0.3]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 4.1));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2));
             }
           }
         } else if (this.type === 'boss_titan') {
           if (this.phase === 2) {
-            this.shootTimer = 24;
-            // 10 yönlü zümrüt flak patlaması
-            for (let s = 0; s < 10; s++) {
-              const ang = (s * Math.PI / 5) + (Math.random() * 0.1);
+            this.shootTimer = 50;
+            for (let s = 0; s < 8; s++) {
+              const ang = (s * Math.PI / 4) + (Math.random() * 0.1);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 4.4));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.3));
             }
           } else {
-            this.shootTimer = 42;
-            for (let offset of [-0.45, 0, 0.45]) {
+            this.shootTimer = 64;
+            for (let offset of [-0.35, 0, 0.35]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 4.3));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2));
             }
           }
         } else if (this.type === 'boss_chrono') {
           if (this.phase === 2) {
-            this.shootTimer = 22;
+            this.shootTimer = 48;
             this.spiralAngle += 0.52;
-            for (let s = 0; s < 12; s++) {
-              const ang = this.spiralAngle + (s * Math.PI / 6);
+            for (let s = 0; s < 8; s++) {
+              const ang = this.spiralAngle + (s * Math.PI / 4);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 4.8));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.5));
             }
           } else {
-            this.shootTimer = 38;
-            for (let offset of [-0.5, -0.25, 0, 0.25, 0.5]) {
+            this.shootTimer = 62;
+            for (let offset of [-0.36, -0.18, 0, 0.18, 0.36]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 4.2));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.3));
             }
           }
         } else if (this.type === 'boss_apex') {
           if (this.phase === 2) {
-            this.shootTimer = 20;
+            this.shootTimer = 46;
             this.spiralAngle += 0.42;
-            for (let s = 0; s < 14; s++) {
-              const ang = this.spiralAngle + (s * Math.PI / 7);
+            for (let s = 0; s < 9; s++) {
+              const ang = this.spiralAngle + (s * Math.PI * 2 / 9);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 5.0));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.6));
             }
           } else {
-            this.shootTimer = 34;
-            for (let offset of [-0.35, -0.15, 0.15, 0.35]) {
+            this.shootTimer = 60;
+            for (let offset of [-0.28, -0.1, 0.1, 0.28]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 4.5));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.4));
             }
           }
         }
@@ -811,41 +1004,76 @@ export class Enemy {
       this.y += this.speedY * dt;
       this.x += this.speedX * dt;
 
-      // Kruvazör: Üst-orta savaş bölgesinde kalır ve manevra yapar (Mermi atmaz)
-      if (this.y > screenHeight * 0.48 && this.speedY > 0) {
+      // Kruvazör: Üst-orta savaş bölgesinde kalır, manevra yapar ve oyuncuya üçlü plazma yaylım ateşi açar
+      if (this.y > screenHeight * 0.44 && this.speedY > 0) {
         this.speedY = -Math.abs(this.speedY);
       } else if (this.y < 75 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
       }
+
+      if (this.y > 25 && enemyProjectiles) {
+        this.shootTimer = (this.shootTimer || 100) - dt;
+        if (this.shootTimer <= 0) {
+          if (enemyProjectiles.length >= 14) {
+            this.shootTimer = 40 + Math.random() * 25;
+          } else {
+            this.shootTimer = 130 + Math.random() * 40;
+            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
+            for (let offset of [-0.15, 0, 0.15]) {
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, aimAngle + offset, 2.9));
+            }
+          }
+        }
+      }
+    } else if (this.type === 'shield_vanguard') {
+      this.y += this.speedY * dt;
+      this.x += this.speedX * dt;
+      if (this.isFleetMember) {
+        if (this.y > screenHeight * 0.48 && this.speedY > 0) {
+          this.speedY = -Math.abs(this.speedY);
+        } else if (this.y < 80 && this.speedY < 0) {
+          this.speedY = Math.abs(this.speedY);
+        }
+      }
+      if (this.y > 25 && enemyProjectiles) {
+        this.shootTimer = (this.shootTimer || 100) - dt;
+        if (this.shootTimer <= 0) {
+          if (enemyProjectiles.length >= 14) {
+            this.shootTimer = 40 + Math.random() * 25;
+          } else {
+            this.shootTimer = 125 + Math.random() * 45;
+            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle, 2.8));
+          }
+        }
+      }
     } else if (this.type === 'dive_bomber') {
+      this.lifeTimer = (this.lifeTimer || 0) + dt;
       if (!this.isDiving) {
         this.y += this.speedY * dt;
-        if (this.y > 80 && Math.abs(this.x - playerX) < 180) {
+        if (this.y > 60 || this.lifeTimer > 35) {
           this.isDiving = true;
-          this.diveTimer = 22;
-          this.diveTargetAngle = Math.atan2(playerY - this.y, playerX - this.x);
-        }
-        if (this.y > screenHeight - 90 && this.speedY > 0) {
-          this.speedY = -Math.abs(this.speedY);
-        } else if (this.y < 65 && this.speedY < 0) {
-          this.speedY = Math.abs(this.speedY);
+          this.diveTimer = 16;
+          const dx = playerX - this.x;
+          const dy = Math.max(60, playerY - this.y);
+          this.diveTargetAngle = Math.atan2(dy, dx);
         }
       } else if (this.diveTimer > 0) {
         this.diveTimer -= dt;
-        this.y += 0.4 * dt;
+        this.y += 0.8 * dt;
       } else {
-        // Hızlı açılı dalış
-        this.x += Math.cos(this.diveTargetAngle) * this.diveSpeed * dt;
-        this.y += Math.sin(this.diveTargetAngle) * this.diveSpeed * dt;
-        // Dalış tamamlanınca ve alt sınıra yaklaşınca yukarı geri tırman
-        if (this.y > screenHeight - 75) {
-          this.isDiving = false;
-          this.diveTimer = 35;
-          this.y = screenHeight - 78;
-          this.speedY = -1.2;
-        }
+        // Hızlı açılı dalış - daima aşağıya doğru iner (asla geri yukarı sekmez!)
+        const vx = Math.cos(this.diveTargetAngle) * this.diveSpeed;
+        const vy = Math.max(3.4, Math.abs(Math.sin(this.diveTargetAngle)) * this.diveSpeed);
+        this.x += vx * dt;
+        this.y += vy * dt;
+      }
+      // Dalış tamamlanıp ekranın altına veya yanlara geçtiğinde temizlenir (asla ortada kalmaz)
+      if (this.y > screenHeight + 35 || this.x < -60 || this.x > screenWidth + 60 || this.lifeTimer > 300) {
+        this.toRemove = true;
       }
     } else if (this.type === 'escort_fighter') {
+      this.lifeTimer = (this.lifeTimer || 0) + dt;
       // Güdümlü Boss Muhafızı: Oyuncunun yönüne doğru yumuşak kavisle döner ve takip eder
       const targetAngle = Math.atan2(playerY - this.y, playerX - this.x);
       let diff = targetAngle - this.angle;
@@ -856,25 +1084,60 @@ export class Enemy {
       this.x += Math.cos(this.angle) * this.speed * dt;
       this.y += Math.sin(this.angle) * this.speed * dt;
 
-      // Ekran altına kaçamaz, oyuncunun etrafında döner
+      if (this.y > 30 && enemyProjectiles) {
+        this.shootTimer = (this.shootTimer || 80) - dt;
+        if (this.shootTimer <= 0) {
+          if (enemyProjectiles.length >= 14) {
+            this.shootTimer = 35 + Math.random() * 20;
+          } else {
+            this.shootTimer = 95 + Math.random() * 35;
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 10, targetAngle, 3.2));
+          }
+        }
+      }
+
+      // Ekran altına kaçamaz, oyuncunun etrafında döner ama sonsuza kadar takılmaz
       if (this.y > screenHeight - 65) {
         this.y = screenHeight - 65;
         this.angle = -Math.PI / 2;
       }
+      if (this.lifeTimer > 450) {
+        this.toRemove = true;
+      }
     } else if (this.type === 'elite_scout') {
-      // Altın Elit Avcı: Sinüsoidal süzülme
+      // Altın Elit Avcı / Filo Komutanı: Sinüsoidal süzülme ve nişancı atışı
       this.time += dt;
       this.x += Math.sin(this.time * this.sineFreq) * this.sineAmp * dt;
       this.y += this.speedY * dt;
 
-      if (this.y > screenHeight - 80 && this.speedY > 0) {
+      const maxEliteY = this.isFleetMember ? screenHeight * 0.42 : screenHeight - 80;
+      if (this.y > maxEliteY && this.speedY > 0) {
         this.speedY = -Math.abs(this.speedY);
       } else if (this.y < 65 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
       }
+
+      if (this.y > 20 && enemyProjectiles) {
+        this.shootTimer = (this.shootTimer || 70) - dt;
+        if (this.shootTimer <= 0) {
+          if (enemyProjectiles.length >= 14) {
+            this.shootTimer = 30 + Math.random() * 25;
+          } else {
+            this.shootTimer = 85 + Math.random() * 35;
+            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle - 0.14, 3.3));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle + 0.14, 3.3));
+          }
+        }
+      }
     } else {
-      // Normal asteroidler
-      this.y += this.speedY * dt;
+      // Normal asteroidler ve açılış meteor kümesi
+      if (this.isOpeningCluster && this.y < 90) {
+        // Ekrana bir anda dökülür, görüş alanına girince yavaşlayıp parçalanmaya durur
+        this.y += (this.speedY * 2.2) * dt;
+      } else {
+        this.y += this.speedY * dt;
+      }
       this.x += this.speedX * dt;
     }
 
@@ -897,8 +1160,8 @@ export class Enemy {
       if (this.speedX) this.speedX = -Math.abs(this.speedX);
     }
 
-    // Yalnızca ekranın altına çarpan asteroidler temizlenir
-    if (this.y > screenHeight + 40 && this.shape) {
+    // Ekranın altına inen düşmanlar ve mermiler temizlenir (Bosslar hariç)
+    if (this.y > screenHeight + 40 && !this.isBoss && !(this.type && this.type.startsWith('boss'))) {
       this.toRemove = true;
     }
   }
@@ -906,9 +1169,12 @@ export class Enemy {
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
-
-    // Hit-Flash: Düşman hasar aldığında beyaz flaş
+    if (this._ballooning) {
+      const swell = 1 + Math.min(1, (this.balloonT || 0) / 5) * 0.55;
+      ctx.scale(swell, swell);
+    }
     if (this.hitFlash > 0) {
+      ctx.filter = 'brightness(8) saturate(0)';
       this.hitFlash -= 1;
     }
 
@@ -1011,6 +1277,22 @@ export class Enemy {
         fillColor = '#3b0d1a';
         crackColor = '#ff3d00';
         strokeColor = '#ff0055';
+      } else if (this.type === 'asteroid_purple') {
+        fillColor = '#240830';
+        crackColor = '#f0abfc';
+        strokeColor = '#c084fc';
+      } else if (this.type === 'asteroid_vortex') {
+        fillColor = '#150324';
+        crackColor = '#c084fc';
+        strokeColor = '#9333ea';
+      } else if (this.type === 'asteroid_cryo') {
+        fillColor = '#062033';
+        crackColor = '#e0f2fe';
+        strokeColor = '#38bdf8';
+      } else if (this.type === 'asteroid_geode') {
+        fillColor = '#241a0d';
+        crackColor = '#6ee7b7';
+        strokeColor = '#05ffa1';
       } else if (this.type === 'asteroid_gold') {
         fillColor = '#3d2e05';
         crackColor = '#ffd700';
@@ -1029,8 +1311,12 @@ export class Enemy {
         strokeColor = '#c084fc';
       }
 
-      if (this.hitFlash > 0) {
-        this.hitFlash--;
+      if (this.isPrimedForDomino) {
+        const blink = Math.sin(Date.now() * 0.05) > 0;
+        fillColor = blink ? '#ffffff' : '#9333ea';
+        strokeColor = '#f0abfc';
+        crackColor = '#ffffff';
+      } else if (this.hitFlash > 0) {
         fillColor = '#ffffff';
         strokeColor = '#ffffff';
       }
@@ -1073,6 +1359,28 @@ export class Enemy {
         ctx.fillRect(0, 2, 2, 2);
       }
 
+      // Mor Kozmik Domino Asteroidi (Kozmik TNT Çekirdeği)
+      if (this.type === 'asteroid_purple') {
+        const pulse = 0.5 + Math.sin(this.rot * 6) * 0.5;
+        // Mor Plazma Hale Aurası
+        ctx.fillStyle = `rgba(192, 132, 252, ${0.5 + pulse * 0.45})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, 9 + pulse * 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Parlak Mor/Beyaz Kristal Çekirdek
+        ctx.fillStyle = '#f0abfc';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5 + pulse * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 8-bit Retro Pixel Çekirdek Yıldızı
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-2, -4, 4, 2);
+        ctx.fillRect(-4, -1, 8, 2);
+        ctx.fillRect(-2, 2, 4, 2);
+      }
+
       // Altın İkram Asteroiti (Hızlı Başlangıç & Seviye 2 Dopingi)
       if (this.type === 'asteroid_gold') {
         const pulse = 0.5 + Math.sin(this.rot * 6) * 0.5;
@@ -1088,6 +1396,45 @@ export class Enemy {
         ctx.fillRect(-2, -2, 4, 4);
         ctx.fillStyle = '#ffbe0b';
         ctx.fillRect(-1, -1, 2, 2);
+      }
+
+      // Girdap / Kara Delik Taşı (Singularity Vortex Core)
+      if (this.type === 'asteroid_vortex') {
+        const pulse = 0.5 + Math.sin(this.rot * 8) * 0.5;
+        ctx.fillStyle = `rgba(147, 51, 234, ${0.45 + pulse * 0.45})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, 9 + pulse * 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0a0014';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#c084fc';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      }
+
+      // Kriyojenik / Buz Taşı (Cryo Frost Shards)
+      if (this.type === 'asteroid_cryo') {
+        const pulse = 0.5 + Math.sin(this.rot * 5) * 0.5;
+        ctx.fillStyle = `rgba(56, 189, 248, ${0.5 + pulse * 0.4})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, 8 + pulse * 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-2, -2, 4, 4);
+      }
+
+      // Zümrüt Geod Taşı (Emerald Crystal Cluster)
+      if (this.type === 'asteroid_geode') {
+        const pulse = 0.5 + Math.sin(this.rot * 7) * 0.5;
+        ctx.fillStyle = `rgba(5, 255, 161, ${0.7 + pulse * 0.3})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, 7 + pulse * 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-1, -3, 2, 6);
+        ctx.fillRect(-3, -1, 6, 2);
       }
 
       // Küçük Asteroit İçi Parıldayan Kristal Çekirdek (Yetenek / Zengin XP Kaynağı)
@@ -1140,6 +1487,35 @@ export class Enemy {
     } else if (this.type === 'cruiser') {
       // 8-bit Retro Piksel Zırhlı Kruvazör
       this.drawPixelShip(ctx, 'cruiser');
+    } else if (this.type === 'shield_vanguard') {
+      this.drawPixelShip(ctx, 'cruiser');
+      // Ön Koruyucu Mavi Neon Kuvvet Kalkanı (Frontal Energy Forcefield)
+      const shieldPulse = 0.65 + Math.sin(Date.now() * 0.008) * 0.35;
+      ctx.save();
+      ctx.strokeStyle = `rgba(56, 189, 248, ${shieldPulse})`;
+      ctx.lineWidth = 3.5;
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(0, 4, this.radius * 1.35, Math.PI * 0.15, Math.PI * 0.85);
+      ctx.stroke();
+      ctx.restore();
+    } else if (this.type === 'tether_drone') {
+      this.drawPixelShip(ctx, 'interceptor');
+      // Çift Rezonatörlü Elektrik Halesi
+      const sparkPulse = 0.6 + Math.sin(Date.now() * 0.015) * 0.4;
+      ctx.save();
+      ctx.strokeStyle = `rgba(0, 240, 255, ${sparkPulse})`;
+      ctx.lineWidth = 2.2;
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(0, 0, this.radius * 1.15, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#00f0ff';
+      ctx.fillRect(-this.radius * 0.85, -2, 4, 4);
+      ctx.fillRect(this.radius * 0.85 - 4, -2, 4, 4);
+      ctx.restore();
     } else if (this.isBoss) {
       this.drawPixelArtBoss(ctx);
     } else if (this.type === 'dive_bomber') {
@@ -1160,6 +1536,24 @@ export class Enemy {
       ctx.arc(0, 0, this.radius * 1.35, 0, Math.PI * 2);
       ctx.stroke();
       this.drawPixelShip(ctx, 'elite_scout');
+    }
+
+    // Zırhlı Filo Gemileri, Avcılar ve Darbe Alan Karşı Gemiler İçin Net Can Barı
+    const isShip = this.type === 'scout' || this.type === 'cruiser' || this.type === 'elite_scout' || this.type === 'shield_vanguard' || this.type === 'dive_bomber' || this.type === 'escort_fighter' || this.isFleetMember || this.isChampion;
+    const isDamaged = this.hp < this.maxHp;
+    if (!this.isBoss && !this.isIndestructible && ((isShip && (isDamaged || this.maxHp >= 20)) || (isDamaged && this.maxHp >= 30))) {
+      const barW = Math.max(22, this.radius * 1.6);
+      const barH = 3.5;
+      const barX = -barW / 2;
+      const barY = -this.radius - 12;
+      const hpRatio = Math.max(0, Math.min(1, this.hp / this.maxHp));
+      ctx.fillStyle = 'rgba(3, 8, 22, 0.9)';
+      ctx.fillRect(barX - 1.5, barY - 1.5, barW + 3, barH + 3);
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(barX - 1.5, barY - 1.5, barW + 3, barH + 3);
+      ctx.fillStyle = this.isFleetCommander ? '#ffbe0b' : (hpRatio > 0.5 ? '#00f0ff' : (hpRatio > 0.25 ? '#ffbe0b' : '#ff0055'));
+      ctx.fillRect(barX, barY, barW * hpRatio, barH);
     }
 
     ctx.restore();
@@ -1356,14 +1750,21 @@ export class Enemy {
       ctx.restore();
     }
 
-    // Hit-Flash beyaz parıltı katmanı
+    // Hit-Flash: Güçlü, tok beyaz parıltı ve neon parlama katmanı
     if (this.hitFlash > 0) {
-      ctx.globalAlpha = Math.min(0.6, this.hitFlash * 0.15);
+      ctx.save();
+      ctx.globalAlpha = Math.min(0.92, this.hitFlash * 0.28);
       ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 14;
       ctx.beginPath();
-      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+      ctx.arc(0, 0, this.radius * 1.08, 0, Math.PI * 2);
       ctx.fill();
-      ctx.globalAlpha = 1;
+      // İç parlak çekirdek
+      ctx.beginPath();
+      ctx.arc(0, 0, this.radius * 0.72, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
     ctx.restore();
@@ -1383,6 +1784,10 @@ export class EnemyProjectile {
   }
 
   update(screenWidth, screenHeight, dt = 1.0) {
+    if (this.freezeTimer > 0) {
+      this.freezeTimer -= dt;
+      return;
+    }
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     if (this.y > screenHeight + 20 || this.y < -20 || this.x < -20 || this.x > screenWidth + 20) {
@@ -1415,8 +1820,9 @@ export class Gem {
     this.x = x;
     this.y = y;
     this.value = value;
-    this.radius = value >= 10 ? 7 : (value >= 3 ? 5 : 3.5);
-    this.color = value >= 10 ? '#ffbe0b' : (value >= 3 ? '#05ffa1' : '#00f0ff');
+    // 4 Kademeli Görsel & Fiziksel Ölçeklendirme
+    this.radius = value >= 15 ? 7.5 : (value >= 8 ? 6.5 : (value >= 3 ? 5 : 3.5));
+    this.color = value >= 15 ? '#bf5af2' : (value >= 8 ? '#ffbe0b' : (value >= 3 ? '#05ffa1' : '#00f0ff'));
     this.toRemove = false;
     this.pulse = Math.random() * Math.PI * 2;
     this.speedY = 0.55 + Math.random() * 0.3; // Arka planla birlikte yavaş ve akıcı süzülme
@@ -1449,7 +1855,15 @@ export class Gem {
     ctx.save();
     ctx.translate(this.x, this.y);
     const pulseOffset = Math.sin(this.pulse) * 0.4;
-    const p = (this.value >= 10 ? 2.4 : (this.value >= 3 ? 1.8 : 1.3)) + pulseOffset * 0.2;
+    const p = (this.value >= 15 ? 2.8 : (this.value >= 8 ? 2.3 : (this.value >= 3 ? 1.8 : 1.3))) + pulseOffset * 0.2;
+
+    // Yüksek Değerli Kristaller İçin Parlayan Neon Parıltı Halesi
+    if (this.value >= 8) {
+      ctx.beginPath();
+      ctx.arc(0, 0, this.radius + 2 + Math.sin(this.pulse * 1.5) * 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = this.value >= 15 ? 'rgba(191, 90, 242, 0.24)' : 'rgba(255, 190, 11, 0.22)';
+      ctx.fill();
+    }
 
     // 8-bit Retro Piksel Kristal Deseni
     const gemRows = [
@@ -1493,22 +1907,22 @@ export class PowerUp {
       case 'overcharge':
         this.color = '#bf5af2';
         this.icon = 'overcharge';
-        this.name = 'AŞIRI GÜÇ';
+        this.name = t('pickup_overcharge');
         break;
       case 'shield':
         this.color = '#00f0ff';
         this.icon = 'shield';
-        this.name = 'KALKAN';
+        this.name = t('pickup_shield');
         break;
       case 'magnet':
         this.color = '#05ffa1';
         this.icon = 'magnet';
-        this.name = 'VAKUM';
+        this.name = t('pickup_magnet');
         break;
       case 'nuke':
         this.color = '#ffbe0b';
         this.icon = 'nuke';
-        this.name = 'EMP BOMBA';
+        this.name = t('pickup_nuke');
         break;
     }
   }
@@ -1611,10 +2025,12 @@ export class LuckyChest {
   }
 
   update(screenHeight, dt = 1.0) {
-    this.pulse += 0.07 * dt;
-    this.life -= dt;
-    this.y += this.speedY * dt;
-    if (this.life <= 0 || this.y > screenHeight + 40) {
+    const actualDt = (typeof screenHeight === 'number' && screenHeight < 10) ? screenHeight : dt;
+    const actualScreenHeight = (typeof screenHeight === 'number' && screenHeight >= 100) ? screenHeight : 850;
+    this.pulse += 0.07 * actualDt;
+    this.life -= actualDt;
+    this.y += this.speedY * actualDt;
+    if (this.life <= 0 || this.y > actualScreenHeight + 40) {
       this.toRemove = true;
     }
   }
