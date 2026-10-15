@@ -706,22 +706,22 @@ class Game {
       { id: 'bomb_5', category: 'bomb', tier: 5, name: 'Karadelik Çöküşü', desc: '1,800 bomba asteroit patlat', icon: 'crown', stat: 'bombAsteroidsDestroyed', target: 1800, reward: 350 }
     ];
     const trophyLadders = {
-      kill: [15, 80, 250, 800, 2000],
-      asteroid: [40, 160, 500, 1200, 3000],
-      boss: [1, 4, 10, 22, 45],
-      combo: [12, 25, 40, 60, 80],
-      survive: [45, 90, 150, 210, 300],
-      crystal: [200, 800, 2500, 8000, 20000],
-      graze: [20, 60, 150, 400, 900],
-      flight: [3, 10, 25, 50, 100],
-      chest: [1, 4, 10, 20, 40],
-      bomb: [5, 15, 40, 90, 180]
+      kill: [25, 120, 500, 2500, 10000],
+      asteroid: [50, 250, 1000, 4500, 20000],
+      boss: [1, 5, 15, 45, 150],
+      combo: [15, 30, 60, 100, 160],
+      survive: [60, 120, 240, 480, 900],
+      crystal: [500, 2000, 8000, 35000, 150000],
+      graze: [30, 100, 350, 1200, 4000],
+      flight: [5, 20, 60, 180, 500],
+      chest: [2, 6, 18, 50, 150],
+      bomb: [10, 35, 120, 400, 1500]
     };
     for (const def of this.trophyDefs) {
       const ladder = trophyLadders[def.category];
       if (ladder) def.target = ladder[(def.tier || 1) - 1];
-      if (def.tier === 4) def.reward = Math.max(40, Math.round(def.reward * 0.7));
-      if (def.tier === 5) def.reward = Math.max(60, Math.round(def.reward * 0.55));
+      if (def.tier === 4) def.reward = Math.max(80, Math.round(def.reward * 1.2));
+      if (def.tier === 5) def.reward = Math.max(150, Math.round(def.reward * 1.5));
     }
     this.sessionStats = { grazeCount: 0, deflectCount: 0, noDamageTimer: 0 };
 
@@ -1403,6 +1403,13 @@ class Game {
       btnAdRevive.addEventListener('click', () => {
         sounds.init();
         sounds.playCardSelect();
+        const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
+        if (isNoAds && !this.vipReviveUsedThisRun) {
+          this.vipReviveUsedThisRun = true;
+          this.executeRevive();
+          this.showToast(t('toast_vip_revive') || '[VIP CANLANMA] Reklam Kalkanı Canlanma Protokolü Devrede!', '#05ffa1');
+          return;
+        }
         const freeRevives = parseInt(localStorage.getItem('neon_bonus_revives') || '0', 10);
         if (freeRevives > 0) {
           localStorage.setItem('neon_bonus_revives', (freeRevives - 1).toString());
@@ -2021,7 +2028,13 @@ class Game {
     const updatePilotUI = () => {
       const p = this.pilots[this.activeArchetype] || this.pilots.interceptor;
       if (archetypeDesc) {
-        archetypeDesc.textContent = t(`pilot_${p.id}_desc`) !== `pilot_${p.id}_desc` ? t(`pilot_${p.id}_desc`) : p.desc;
+        const pilotKeyMap = {
+          interceptor: 'pilot_vega_desc',
+          dreadnought: 'pilot_titan_desc',
+          technician: 'pilot_nova_desc'
+        };
+        const key = pilotKeyMap[p.id] || `pilot_${p.id}_desc`;
+        archetypeDesc.textContent = (t(key) && t(key) !== key) ? t(key) : p.desc;
       }
 
       archetypeBtns.forEach(btn => {
@@ -4935,6 +4948,7 @@ class Game {
         }
 
         // Satın alma işlemi (Yerel ve Firebase Analytics kaydı)
+        localStorage.setItem('neon_no_ads_purchased', 'true');
         localStorage.setItem('neon_no_ads', 'true');
         try {
           analytics.logNoAdsPurchased();
@@ -4951,13 +4965,19 @@ class Game {
     if (btnRestoreNoAds) {
       btnRestoreNoAds.addEventListener('click', () => {
         sounds.playCardSelect();
-        localStorage.setItem('neon_no_ads', 'true');
-        try {
-          analytics.logNoAdsPurchased();
-        } catch (e) {}
-        updateNoAdsUI();
-        if (vibrate.success) vibrate.success();
-        this.showToast(t('toast_restore_success') || 'VIP lisansı başarıyla doğrulandı!', '#05ffa1');
+        const hasPurchased = localStorage.getItem('neon_no_ads_purchased') === 'true';
+        if (hasPurchased) {
+          localStorage.setItem('neon_no_ads', 'true');
+          try {
+            analytics.logNoAdsPurchased();
+          } catch (e) {}
+          updateNoAdsUI();
+          if (vibrate.success) vibrate.success();
+          this.showToast(t('toast_restore_success') || 'VIP lisansı başarıyla doğrulandı!', '#05ffa1');
+        } else {
+          if (vibrate.medium) vibrate.medium();
+          this.showToast(t('toast_restore_not_found') || 'Bu cihazda kayıtlı bir VIP satın alımı bulunamadı.', '#ff5500');
+        }
       });
     }
 
@@ -5176,12 +5196,12 @@ class Game {
     const savedMissions = localStorage.getItem('neon_daily_missions');
 
     const poolMap = {
-      kill_asteroids: { goal: 120, reward: 40, desc: '120 adet meteor yok et' },
-      collect_crystals: { goal: 300, reward: 45, desc: '300 kristal topla' },
-      survive_time: { goal: 120, reward: 50, desc: 'Tek oyunda 120 saniye dayan' },
-      reach_combo: { goal: 30, reward: 45, desc: '30x veya üzeri kombo yap' },
-      defeat_boss: { goal: 2, reward: 60, desc: '2 Amiral Boss yok et' },
-      detonate_bomb: { goal: 15, reward: 45, desc: '15 bomba asteroid patlat' }
+      kill_asteroids: { goal: 350, reward: 70, desc: '350 adet meteor yok et' },
+      collect_crystals: { goal: 800, reward: 80, desc: '800 kristal topla' },
+      survive_time: { goal: 240, reward: 85, desc: 'Tek oyunda 240 saniye dayan' },
+      reach_combo: { goal: 50, reward: 75, desc: '50x veya üzeri kombo yap' },
+      defeat_boss: { goal: 4, reward: 100, desc: '4 Amiral Boss yok et' },
+      detonate_bomb: { goal: 30, reward: 75, desc: '30 bomba asteroid patlat' }
     };
 
     if (savedDate === today && savedMissions) {
@@ -5204,12 +5224,12 @@ class Game {
 
     if (!this.dailyMissions || this.dailyMissions.length === 0) {
       const pool = [
-        { id: 'kill_asteroids', icon: 'target', name: 'Asteroit Avcısı', desc: '120 adet meteor yok et', goal: 120, progress: 0, reward: 40, claimed: false },
-        { id: 'collect_crystals', icon: 'crystal', name: 'Kristal Madencisi', desc: '300 kristal topla', goal: 300, progress: 0, reward: 45, claimed: false },
-        { id: 'survive_time', icon: 'speed', name: 'Hayatta Kalan', desc: 'Tek oyunda 120 saniye dayan', goal: 120, progress: 0, reward: 50, claimed: false },
-        { id: 'reach_combo', icon: 'energy', name: 'Kombo Ustası', desc: '30x veya üzeri kombo yap', goal: 30, progress: 0, reward: 45, claimed: false },
-        { id: 'defeat_boss', icon: 'skull', name: 'Amiral Avcısı', desc: '2 Amiral Boss yok et', goal: 2, progress: 0, reward: 60, claimed: false },
-        { id: 'detonate_bomb', icon: 'bomb', name: 'Patlayıcı Uzmanı', desc: '15 bomba asteroid patlat', goal: 15, progress: 0, reward: 45, claimed: false }
+        { id: 'kill_asteroids', icon: 'target', name: 'Asteroit Avcısı', desc: '350 adet meteor yok et', goal: 350, progress: 0, reward: 70, claimed: false },
+        { id: 'collect_crystals', icon: 'crystal', name: 'Kristal Madencisi', desc: '800 kristal topla', goal: 800, progress: 0, reward: 80, claimed: false },
+        { id: 'survive_time', icon: 'speed', name: 'Hayatta Kalan', desc: 'Tek oyunda 240 saniye dayan', goal: 240, progress: 0, reward: 85, claimed: false },
+        { id: 'reach_combo', icon: 'energy', name: 'Kombo Ustası', desc: '50x veya üzeri kombo yap', goal: 50, progress: 0, reward: 75, claimed: false },
+        { id: 'defeat_boss', icon: 'skull', name: 'Amiral Avcısı', desc: '4 Amiral Boss yok et', goal: 4, progress: 0, reward: 100, claimed: false },
+        { id: 'detonate_bomb', icon: 'bomb', name: 'Patlayıcı Uzmanı', desc: '30 bomba asteroid patlat', goal: 30, progress: 0, reward: 75, claimed: false }
       ];
 
       this.dailyMissions = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
@@ -7920,6 +7940,7 @@ class Game {
     this.player.tilt = 0;
     this.player.combatZone = 'rear';
     this.revivesUsed = 0;
+    this.vipReviveUsedThisRun = false;
 
     if (this.pendingResume && this.pendingResume.skin && this.skins[this.pendingResume.skin]) {
       this.currentSkinId = this.pendingResume.skin;
@@ -10400,6 +10421,7 @@ class Game {
       btnDoubleCrystals.innerHTML = `<span id="btn-double-crystals-text">${t('gameover_double_ad', { n: baseGain })}</span>`;
     }
 
+    const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
     const freeRevives = parseInt(localStorage.getItem('neon_bonus_revives') || '0', 10);
     const btnAdRevive = document.getElementById('btn-ad-revive');
     if (btnAdRevive) {
@@ -10407,7 +10429,9 @@ class Game {
         btnAdRevive.style.display = 'none';
       } else {
         btnAdRevive.style.display = 'flex';
-        if (freeRevives > 0) {
+        if (isNoAds && !this.vipReviveUsedThisRun) {
+          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">VIP ÜCRETSİZ</span>`;
+        } else if (freeRevives > 0) {
           btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_revive_free', { n: freeRevives })}</span>`;
         } else {
           btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><polygon points="5,3 13,8 5,13" fill="currentColor"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_revive_ad')}</span>`;

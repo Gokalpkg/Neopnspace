@@ -381,6 +381,8 @@ export const TRANSLATIONS = {
     settings_restore_btn: "RESTORE",
     toast_no_ads_success: "Ad-shield protocol online! Interstitials blocked.",
     toast_restore_success: "VIP license restored successfully!",
+    toast_restore_not_found: "No active VIP purchase found for this device.",
+    toast_vip_revive: "VIP Shield activated! 1 free revival consumed.",
     settings_cloud_save: "CLOUD BACKUP & RESTORE",
     settings_cloud_desc: "This code holds your crystals, ships and cleared sectors. Copy it somewhere safe.",
     settings_export_btn: "COPY BACKUP CODE",
@@ -415,7 +417,10 @@ export const TRANSLATIONS = {
     pilot_titan_name: "TITAN",
     pilot_titan_desc: "Dual Shield: Instantly restores shield & halves incoming damage for 5s (Cooldown: 30s)",
     pilot_nova_name: "NOVA",
-    pilot_nova_desc: "Black Hole Magnet: Pulls all gems on screen & emits mini shockwave (Cooldown: 20s)"
+    pilot_nova_desc: "Black Hole Magnet: Pulls all gems on screen & emits mini shockwave (Cooldown: 20s)",
+    pilot_interceptor_desc: "Classic Flight: Pure agile maneuvering with +12% Speed and +15% Fire Rate",
+    pilot_dreadnought_desc: "Dual Shield: Instantly restores shield & halves incoming damage for 5s (Cooldown: 30s)",
+    pilot_technician_desc: "Black Hole Magnet: Pulls all gems on screen & emits mini shockwave (Cooldown: 20s)"
   },
 
   'tr-TR': {
@@ -771,6 +776,8 @@ export const TRANSLATIONS = {
     settings_restore_btn: "GERİ YÜKLE",
     toast_no_ads_success: "Reklam kalkanı aktif! Geçiş reklamları engellendi.",
     toast_restore_success: "VIP lisansı başarıyla doğrulandı!",
+    toast_restore_not_found: "Bu cihazda kayıtlı bir VIP satın alımı bulunamadı.",
+    toast_vip_revive: "VIP Reklam Kalkanı devrede! Ücretsiz canlanma hakkı kullanıldı.",
     settings_cloud_save: "BULUT YEDEKLEME & GERİ YÜKLEME",
     settings_cloud_desc: "Bu kod kristallerini, gemilerini ve açık bölümlerini tutar. Güvenli bir yere kopyala.",
     settings_export_btn: "YEDEK KODUNU KOPYALA",
@@ -805,7 +812,10 @@ export const TRANSLATIONS = {
     pilot_titan_name: "TITAN",
     pilot_titan_desc: "Çift Kalkan: Kalkanı doldurur ve 5 sn hasarı yarıya indirir (Bekleme: 30 sn)",
     pilot_nova_name: "NOVA",
-    pilot_nova_desc: "Kara Delik Mıknatısı: Ekrandaki tüm kristalleri anında çeker (Bekleme: 20 sn)"
+    pilot_nova_desc: "Kara Delik Mıknatısı: Ekrandaki tüm kristalleri anında çeker (Bekleme: 20 sn)",
+    pilot_interceptor_desc: "Klasik Uçuş: +%12 Hız ve +%15 Seri Ateş ile çevik saf manevra",
+    pilot_dreadnought_desc: "Çift Kalkan: Kalkanı doldurur ve 5 sn hasarı yarıya indirir (Bekleme: 30 sn)",
+    pilot_technician_desc: "Kara Delik Mıknatısı: Ekrandaki tüm kristalleri anında çeker (Bekleme: 20 sn)"
   },
 
   'fr-FR': {

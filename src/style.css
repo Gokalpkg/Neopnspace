@@ -824,7 +824,7 @@ html, body {
   justify-content: space-between;
   width: 100%;
   max-width: 440px;
-  margin: 8px auto 26px auto;
+  margin: 18px auto 20px auto;
   pointer-events: auto;
   min-height: 98px;
 }
@@ -1123,7 +1123,7 @@ html, body {
 .menu-center-controls {
   width: 100%;
   max-width: 440px;
-  margin: 4px auto 8px auto;
+  margin: 8px auto 8px auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -6679,7 +6679,7 @@ html, body {
     padding: max(6px, var(--safe-top)) 10px max(6px, var(--safe-bottom)) 10px;
   }
   .menu-ship-showcase {
-    margin: 6px auto 20px auto;
+    margin: 12px auto 16px auto;
   }
   .ship-display-info {
     padding: 6px 8px;

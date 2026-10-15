@@ -535,10 +535,6 @@
           </div>
           <!-- Dönen Kuantum Çekirdek Canvas'ı -->
           <canvas id="lucky-wheel-canvas" width="260" height="260" style="border-radius: 50%; box-shadow: 0 0 30px rgba(0, 240, 255, 0.45), inset 0 0 20px rgba(0, 240, 255, 0.25); border: 2.5px solid #00f0ff; touch-action: none; cursor: grab; user-select: none;"></canvas>
-          <div id="wheel-drag-hint" class="wheel-swipe-indicator">
-            <svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10"><path d="M5 8L1 4h3V1h2v3h3z" fill="#00f0ff"/></svg>
-            <span data-i18n="wheel_swipe_hint">Çevirmek için aşağı kaydır!</span>
-          </div>
         </div>
 
         <button id="btn-spin-wheel" class="neon-btn pulse quantum-charge-btn" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px;">
@@ -1311,14 +1307,15 @@
     }
 
     function isStandardInterstitialUnit(unitId) {
-      return unitId === window.ADMOB_CONFIG.interstitialNormalId ||
-             unitId === window.ADMOB_CONFIG.interstitialFallbackId;
+      return false;
     }
 
     function isRewardedInterstitialUnit(unitId) {
       return unitId === window.ADMOB_CONFIG.fastHighId ||
              unitId === window.ADMOB_CONFIG.fastMidId ||
-             unitId === window.ADMOB_CONFIG.fastLowId;
+             unitId === window.ADMOB_CONFIG.fastLowId ||
+             unitId === window.ADMOB_CONFIG.interstitialNormalId ||
+             unitId === window.ADMOB_CONFIG.interstitialFallbackId;
     }
 
     // Avrupa Birliği (GDPR / UMP) Rıza ve İzin Kontrolü
@@ -1360,16 +1357,17 @@
     // Arka planda yeni reklamı önceden yükle (non-blocking, formatına uygun olarak)
     window._preloadChain = Promise.resolve();
     window.preloadRewardVideo = function(adId) {
-      const targetId = adId || window.ADMOB_CONFIG.interstitialNormalId;
+      const targetId = adId || window.ADMOB_CONFIG.fastHighId;
       window._preloadChain = window._preloadChain.then(async () => {
         const AdMob = window.Capacitor?.Plugins?.AdMob;
-        if (!AdMob || window._adFlight || window._adPrepareUnit || window._adReady) return;
+        if (!AdMob || window._adFlight || window._adPrepareUnit) return;
+        if (window._adReady && window._adReady.unitId === targetId) return;
         try {
           let job = null;
-          if (isStandardInterstitialUnit(targetId) && AdMob.prepareInterstitial) {
-            job = AdMob.prepareInterstitial({ adId: targetId, isTesting: false });
-          } else if (isRewardedInterstitialUnit(targetId) && AdMob.prepareRewardInterstitialAd) {
+          if (isRewardedInterstitialUnit(targetId) && AdMob.prepareRewardInterstitialAd) {
             job = AdMob.prepareRewardInterstitialAd({ adId: targetId, isTesting: false });
+          } else if (isStandardInterstitialUnit(targetId) && AdMob.prepareInterstitial) {
+            job = AdMob.prepareInterstitial({ adId: targetId, isTesting: false });
           } else if (AdMob.prepareRewardVideoAd) {
             job = AdMob.prepareRewardVideoAd({ adId: targetId, isTesting: false });
           }
@@ -1377,9 +1375,11 @@
           const status = await settlePrepare(job, targetId, 8000);
           if (status === 'pending' && window._adPrepareJob) await window._adPrepareJob;
           if (window._adReady && window._adReady.unitId === targetId) {
-            console.log('AdMob Mediation: reklam önceden hazır ->', targetId);
+            console.log('[AdMob Mediation] Reklam önceden hazır ->', targetId);
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[AdMob Mediation] Ön yükleme uyarısı:', e);
+        }
       }).catch(() => {});
     };
 
@@ -1615,14 +1615,9 @@
       }
 
       const AdMob = window.Capacitor.Plugins.AdMob;
-      if (!AdMob.prepareInterstitial || !AdMob.showInterstitial) {
-        if (onComplete) onComplete();
-        return;
-      }
+      console.log('[AdMob Mediation] Son koşularda reklam yok, geçiş açılıyor...');
 
-      console.log('[AdMob Mediation] Son 4 koşuda reklam yok, geçilebilir geçiş açılıyor...');
-
-      // SADECE Geçilebilir Standart Geçiş Reklamları (Gecis_Normal -> Gecis_Garanti): Asla 1 dakikalık geçilemez reklam açmaz!
+      // SADECE Geçilebilir Geçiş Reklamları: Asla uzun geçilemez reklam açmaz!
       const interstitialUnits = [
         window.ADMOB_CONFIG.interstitialNormalId,
         window.ADMOB_CONFIG.interstitialFallbackId
@@ -1630,13 +1625,21 @@
 
       for (const unitId of interstitialUnits) {
         try {
-          await withTimeout(AdMob.prepareInterstitial({ adId: unitId, isTesting: false }), 2800);
-          await AdMob.showInterstitial();
-          noteAdWatched();
-          console.log('[AdMob Mediation] Geçilebilir Geçiş reklamı başarıyla gösterildi ->', unitId);
-          break;
+          if (isRewardedInterstitialUnit(unitId) && AdMob.prepareRewardInterstitialAd && AdMob.showRewardInterstitialAd) {
+            await withTimeout(AdMob.prepareRewardInterstitialAd({ adId: unitId, isTesting: false }), 3200);
+            await AdMob.showRewardInterstitialAd();
+            noteAdWatched();
+            console.log('[AdMob Mediation] Ödüllü Geçiş reklamı gösterildi ->', unitId);
+            break;
+          } else if (AdMob.prepareInterstitial && AdMob.showInterstitial) {
+            await withTimeout(AdMob.prepareInterstitial({ adId: unitId, isTesting: false }), 3200);
+            await AdMob.showInterstitial();
+            noteAdWatched();
+            console.log('[AdMob Mediation] Standart Geçiş reklamı gösterildi ->', unitId);
+            break;
+          }
         } catch (e) {
-          console.warn('[AdMob Mediation] Geçilebilir Geçiş birimi yüklenemedi:', unitId, e?.message || e);
+          console.warn('[AdMob Mediation] Geçiş birimi yüklenemedi:', unitId, e?.message || e);
         }
       }
 
