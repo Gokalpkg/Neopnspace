@@ -204,6 +204,15 @@
                 <span id="menu-ship-status" class="menu-ship-status equipped">AKTİF</span>
               </div>
               <div id="menu-ship-class" class="menu-ship-class">Dengeli Saldırı Jeti</div>
+              <div id="menu-ship-star-row" class="menu-ship-star-row">
+                <div id="menu-ship-stars" class="menu-ship-stars" title="Gemi Rütbesi">
+                  <span class="star-icon active">★</span><span class="star-icon">☆</span><span class="star-icon">☆</span><span class="star-icon">☆</span><span class="star-icon">☆</span>
+                </div>
+                <button id="btn-ship-starup" class="btn-ship-starup" type="button" title="Yıldız Yükselt">
+                  <span class="starup-icon">★+</span>
+                  <span id="ship-starup-cost" class="starup-cost">500 💎</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -271,6 +280,17 @@
             <span class="mode-card-desc" data-i18n="mode_storm_desc">Sonsuz Asteroid & Kombo</span>
             <div class="mode-card-score">
               <span data-i18n="mode_storm_best">EN İYİ:</span> <strong id="score-val-storm">0</strong>
+            </div>
+          </button>
+
+          <button id="mode-mutator" class="cyber-mode-card" data-mode="mutator">
+            <div class="mode-card-header">
+              <span class="mode-card-icon"><svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M6 1l4 2v6l-4 2-4-2V3l4-2zm0 3a2 2 0 100 4 2 2 0 000-4z" fill="#ff0055"/></svg></span>
+              <strong class="mode-card-title" data-i18n="mode_mutator_title">GÜNÜN MUTASYONU</strong>
+            </div>
+            <span class="mode-card-desc" id="mode-mutator-desc">Özel Kural & +400 Kristal</span>
+            <div class="mode-card-score">
+              <span data-i18n="mode_mutator_badge">ÖDÜL:</span> <strong id="score-val-mutator" style="color:#ff0055;">+400 💎</strong>
             </div>
           </button>
         </div>
@@ -562,34 +582,53 @@
             <span id="lb-season-countdown" class="lb-season-countdown">KALAN SÜRE: --</span>
           </div>
 
-          <!-- Mode Switch (Fırtına vs Sefer) -->
-          <div class="lb-mode-tabs">
-            <button id="lb-tab-storm" class="lb-mode-btn active" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 1h8v2H2zM3 4h6v2H3zM4 7h4v2H4zM5 10h2v2H5z" fill="#ffbe0b"/></svg> <span data-i18n="lb_tab_storm">FIRTINA MODU</span>
+          <!-- Main Tabs: Kozmik Lig vs Kariyer Kayıtları -->
+          <div class="lb-main-tabs">
+            <button id="lb-main-tab-league" class="lb-main-tab-btn active" data-i18n="lb_main_league">
+              🏆 KOZMİK LİG
             </button>
-            <button id="lb-tab-campaign" class="lb-mode-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M5 1h2v3H5zM4 4h4v4H4zM2 8h8v3H2z" fill="#00f0ff"/></svg> <span data-i18n="lb_tab_campaign">SEFER DERECESİ</span>
+            <button id="lb-main-tab-career" class="lb-main-tab-btn" data-i18n="lb_main_career">
+              📊 KARİYER KAYITLARI
             </button>
           </div>
 
-          <!-- Sub View Switch (TOP 50 vs ETRAFIMDAKİLER) -->
-          <div class="lb-sub-tabs">
-            <button id="lb-view-top50" class="lb-sub-tab-btn active" data-i18n="lb_view_top50" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 2h8v4H2zM4 6h4v2H4zM3 8h6v2H3z" fill="#ffd700"/></svg> TOP 50
-            </button>
-            <button id="lb-view-around" class="lb-sub-tab-btn" data-i18n="lb_view_around_me" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="#00f0ff" stroke-width="1.5"/><circle cx="6" cy="6" r="1.5" fill="#00f0ff"/></svg> ETRAFIMDAKİLER
-            </button>
+          <div id="lb-league-controls">
+            <!-- Mode Switch (Fırtına vs Sefer) -->
+            <div class="lb-mode-tabs">
+              <button id="lb-tab-storm" class="lb-mode-btn active" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 1h8v2H2zM3 4h6v2H3zM4 7h4v2H4zM5 10h2v2H5z" fill="#ffbe0b"/></svg> <span data-i18n="lb_tab_storm">FIRTINA MODU</span>
+              </button>
+              <button id="lb-tab-campaign" class="lb-mode-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M5 1h2v3H5zM4 4h4v4H4zM2 8h8v3H2z" fill="#00f0ff"/></svg> <span data-i18n="lb_tab_campaign">SEFER DERECESİ</span>
+              </button>
+            </div>
+
+            <!-- Sub View Switch (TOP 50 vs ETRAFIMDAKİLER) -->
+            <div class="lb-sub-tabs">
+              <button id="lb-view-top50" class="lb-sub-tab-btn active" data-i18n="lb_view_top50" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 2h8v4H2zM4 6h4v2H4zM3 8h6v2H3z" fill="#ffd700"/></svg> TOP 50
+              </button>
+              <button id="lb-view-around" class="lb-sub-tab-btn" data-i18n="lb_view_around_me" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="#00f0ff" stroke-width="1.5"/><circle cx="6" cy="6" r="1.5" fill="#00f0ff"/></svg> ETRAFIMDAKİLER
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Top 3 Podium (Only visible in TOP 50 mode) -->
-        <div id="lb-podium-container" class="lb-podium-container">
-          <!-- Dynamic 2nd, 1st, 3rd slots -->
+        <div id="lb-league-view" class="lb-view-section">
+          <!-- Top 3 Podium (Only visible in TOP 50 mode) -->
+          <div id="lb-podium-container" class="lb-podium-container">
+            <!-- Dynamic 2nd, 1st, 3rd slots -->
+          </div>
+
+          <!-- Leaderboard Scrollable List -->
+          <div id="leaderboard-list" class="leaderboard-list-container"></div>
         </div>
 
-        <!-- Leaderboard Scrollable List -->
-        <div id="leaderboard-list" class="leaderboard-list-container"></div>
+        <!-- Kariyer Kayıtları Görünümü (Career Records Tab) -->
+        <div id="lb-career-view" class="lb-career-view hidden">
+          <!-- Dinamik kariyer istatistikleri -->
+        </div>
 
         <!-- Sticky Bottom Player HUD -->
         <div id="leaderboard-player-banner" class="player-rank-bar">
@@ -872,6 +911,9 @@
             <svg class="tab-icon" width="14" height="14" viewBox="0 0 16 16"><path d="M5 2h6v5c0 2-1.5 3.5-3 3.5S5 9 5 7V2zm-2 2h2v3H3zm8 0h2v3h-2zm-3 8h2v2H8z" fill="#ffd700"/></svg> <span data-i18n="tab_badges">ROZETLER</span>
             <span id="trophies-badge-dot" class="badge-dot hidden" style="position: absolute; top: 3px; right: 4px;"></span>
           </button>
+          <button id="tab-btn-codex" class="hangar-tab-btn" role="tab" data-tab="codex">
+            <svg class="tab-icon" width="14" height="14" viewBox="0 0 16 16"><path d="M3 2h10v12H3z" fill="none" stroke="#00f0ff" stroke-width="1.8"/><path d="M6 5h4M6 8h4M6 11h2" stroke="#00f0ff" stroke-width="1.5"/></svg> <span data-i18n="tab_codex">KODEKS</span>
+          </button>
         </div>
 
         <div id="skins-container" class="skins-view-container">
@@ -964,6 +1006,21 @@
         <div id="trophies-tab-view" class="trophies-tab-view hidden">
           <div id="trophies-grid" class="trophies-grid">
             <!-- Dinamik rozet kartları -->
+          </div>
+        </div>
+
+        <div id="codex-tab-view" class="codex-tab-view hidden">
+          <div class="codex-header-bar">
+            <div class="codex-header-title">
+              <span data-i18n="codex_title">EVRİM KODEKSİ VE SİNERJİ REHBERİ</span>
+              <span class="role-hint" data-i18n="codex_subtitle">2 Silahı Birleştirerek Efsanevi Siber-Silahları Açın</span>
+            </div>
+            <div class="codex-progress-badge">
+              <span id="codex-unlocked-count">0 / 10 KEŞFEDİLDİ</span>
+            </div>
+          </div>
+          <div id="codex-grid" class="codex-grid">
+            <!-- Dinamik olarak game.js'den doldurulacak -->
           </div>
         </div>
 

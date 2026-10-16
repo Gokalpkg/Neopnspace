@@ -7725,4 +7725,300 @@ html, body {
   color: #f8fafc;
 }
 
+/* === v1.5.0 OVERHAUL: SHIP STAR-UP & ASCENSION === */
+.menu-ship-star-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.menu-ship-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.menu-ship-stars .star-icon {
+  color: rgba(255, 255, 255, 0.25);
+  transition: all 0.25s ease;
+}
+
+.menu-ship-stars .star-icon.active {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 0 16px rgba(255, 190, 11, 0.5);
+  transform: scale(1.08);
+}
+
+.btn-ship-starup {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 110, 0, 0.15));
+  border: 1px solid rgba(255, 215, 0, 0.6);
+  border-radius: 6px;
+  color: #ffd700;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ship-starup:active {
+  transform: scale(0.96);
+  background: rgba(255, 215, 0, 0.35);
+}
+
+.btn-ship-starup.maxed {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  cursor: default;
+}
+
+/* === MODE MUTATOR CARD === */
+#mode-mutator.active {
+  border-color: #ff0055;
+  box-shadow: 0 0 18px rgba(255, 0, 85, 0.45);
+}
+
+#mode-mutator .mode-card-title {
+  color: #ff3377;
+}
+
+/* === LEADERBOARD: KOZMİK LİG & KARİYER TABS === */
+.lb-main-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.lb-main-tab-btn {
+  flex: 1;
+  padding: 8px 10px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #94a3b8;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lb-main-tab-btn.active {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(0, 240, 255, 0.15));
+  border-color: #ffd700;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+.lb-career-view {
+  overflow-y: auto;
+  max-height: 52vh;
+  padding: 8px 4px;
+}
+
+.career-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.career-card {
+  background: rgba(10, 15, 30, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.05);
+}
+
+.career-card-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.career-card-value {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 900;
+  color: #00f0ff;
+}
+
+.career-card-value.gold {
+  color: #ffd700;
+}
+
+.career-card-value.rose {
+  color: #ff0055;
+}
+
+.career-card-value.green {
+  color: #05ffa1;
+}
+
+/* === EVOLUTION CODEX TAB === */
+.codex-tab-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 10px 4px;
+}
+
+.codex-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 8px;
+}
+
+.codex-header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.codex-header-title span {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: #00f0ff;
+}
+
+.codex-progress-badge {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.15);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+}
+
+.codex-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.codex-entry-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(10, 16, 32, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.codex-entry-card.discovered {
+  border-color: rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+}
+
+.codex-entry-card.discovered.legendary {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.2);
+}
+
+.codex-entry-card.unknown {
+  opacity: 0.65;
+  filter: grayscale(0.5);
+}
+
+.codex-icon-wrapper {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.codex-entry-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.codex-entry-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.codex-entry-recipe {
+  font-size: 11px;
+  color: #ffbe0b;
+  font-weight: 700;
+}
+
+.codex-entry-desc {
+  font-size: 10px;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.codex-entry-status {
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-size: 9.5px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  letter-spacing: 0.5px;
+}
+
+.codex-entry-status.discovered {
+  background: rgba(5, 255, 161, 0.2);
+  color: #05ffa1;
+  border: 1px solid rgba(5, 255, 161, 0.4);
+}
+
+.codex-entry-status.unknown {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* === PROGRESSIVE LOCK OVERLAY === */
+.feature-locked {
+  position: relative;
+  opacity: 0.55 !important;
+  filter: grayscale(0.6) !important;
+  cursor: not-allowed !important;
+}
+
+.feature-locked::after {
+  content: '🔒';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 12px;
+}
+
+
 

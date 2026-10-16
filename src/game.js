@@ -62,6 +62,8 @@ const tabBtnDrones = document.getElementById('tab-btn-drones');
 const tabBtnBoosters = document.getElementById('tab-btn-boosters');
 const tabBtnTech = document.getElementById('tab-btn-tech');
 const tabBtnTrophies = document.getElementById('tab-btn-trophies');
+const tabBtnCodex = document.getElementById('tab-btn-codex');
+const codexTabView = document.getElementById('codex-tab-view');
 const boostersContainer = document.getElementById('boosters-container');
 const techContainer = document.getElementById('tech-container');
 const techTabView = document.getElementById('tech-tab-view');
@@ -154,8 +156,16 @@ const btnContinue = document.getElementById('btn-continue');
 const btnRestart = document.getElementById('btn-restart');
 const modeClassic = document.getElementById('mode-classic');
 const modeStorm = document.getElementById('mode-storm');
+const modeMutator = document.getElementById('mode-mutator');
 const scoreValClassic = document.getElementById('score-val-classic');
 const scoreValStorm = document.getElementById('score-val-storm');
+const scoreValMutator = document.getElementById('score-val-mutator');
+const btnShipStarup = document.getElementById('btn-ship-starup');
+const shipStarupCost = document.getElementById('ship-starup-cost');
+const lbMainTabLeague = document.getElementById('lb-main-tab-league');
+const lbMainTabCareer = document.getElementById('lb-main-tab-career');
+const lbLeagueView = document.getElementById('lb-league-view');
+const lbCareerView = document.getElementById('lb-career-view');
 const btnMenuCrystals = document.getElementById('btn-menu-crystals');
 const btnPrevShip = document.getElementById('btn-prev-ship');
 const btnNextShip = document.getElementById('btn-next-ship');
@@ -1517,6 +1527,36 @@ class Game {
       });
     }
 
+    if (btnShipStarup) {
+      btnShipStarup.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.init();
+        const skinId = this.skinOrder[this.menuSkinIndex];
+        const isUnlocked = this.unlockedSkins.includes(skinId);
+        if (!isUnlocked) return;
+        const currentStars = this.getShipStars(skinId);
+        if (currentStars >= 5) {
+          this.showToast(t('starup_max'), '#ffd700');
+          return;
+        }
+        const cost = this.getStarUpCost(currentStars);
+        if (this.totalCrystals < cost) {
+          if (sounds.playError) sounds.playError();
+          vibrate.light();
+          this.showToast(t('starup_toast_insufficient'), '#ff0055');
+          return;
+        }
+        this.totalCrystals -= cost;
+        localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+        this.updateCrystalsDisplay();
+        this.setShipStars(skinId, currentStars + 1);
+        if (sounds.playUpgrade) sounds.playUpgrade();
+        vibrate.medium();
+        this.showToast(t('starup_toast_success', { n: currentStars + 1 }), '#ffd700');
+        this.updateMenuShipPreview();
+      });
+    }
+
     let crystalTapCount = 0;
     let crystalTapTimer = null;
     if (btnMenuCrystals) {
@@ -1685,7 +1725,29 @@ class Game {
       modeStorm.addEventListener('click', () => {
         sounds.init();
         sounds.playCardSelect();
+        const maxStage = (this.unlockedLevels && this.unlockedLevels.classic) || 1;
+        const flights = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
+        if (maxStage < 2 && flights === 0) {
+          vibrate.light();
+          this.showToast(t('toast_storm_locked'), '#ffbe0b');
+          return;
+        }
         this.setMode('storm');
+      });
+    }
+
+    if (modeMutator) {
+      modeMutator.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        const maxStage = (this.unlockedLevels && this.unlockedLevels.classic) || 1;
+        const flights = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
+        if (maxStage < 3 && flights < 3) {
+          vibrate.light();
+          this.showToast(t('toast_mutator_locked'), '#ff0055');
+          return;
+        }
+        this.setMode('mutator');
       });
     }
 
@@ -1973,6 +2035,7 @@ class Game {
     bindHangarTabBtn(tabBtnBoosters, 'boosters');
     bindHangarTabBtn(tabBtnTech, 'tech');
     bindHangarTabBtn(tabBtnTrophies, 'trophies');
+    bindHangarTabBtn(tabBtnCodex, 'codex');
 
     if (btnResetTech) {
       btnResetTech.addEventListener('click', () => {
@@ -2170,8 +2233,8 @@ class Game {
   }
 
   showFTUEWelcome() {
-    const ftueModal = document.getElementById('ftue-welcome-modal');
-    const btnStart = document.getElementById('btn-ftue-start');
+    const ftueModal = document.getElementById('ftue-welcome-modal') || document.getElementById('welcome-pilot-modal');
+    const btnStart = document.getElementById('btn-ftue-start') || document.getElementById('btn-start-ftue');
     if (!ftueModal) return;
 
     // 500 Hoş Geldin Kristali ver ve kaydet
@@ -2189,7 +2252,8 @@ class Game {
         sounds.playCardSelect();
         vibrate.light();
         ftueModal.classList.add('hidden');
-        this.currentMode = 'storm';
+        this.currentMode = 'classic';
+        this.selectedLevel = 1;
         this.triggerLaunch();
       };
     }
@@ -3149,7 +3213,8 @@ class Game {
         this.renderTechUpgrades();
         this.renderMasteryTree();
       }},
-      { id: 'trophies', btn: tabBtnTrophies, view: trophiesTabView, render: () => this.renderTrophies() }
+      { id: 'trophies', btn: tabBtnTrophies, view: trophiesTabView, render: () => this.renderTrophies() },
+      { id: 'codex', btn: tabBtnCodex, view: codexTabView, render: () => this.renderCodex() }
     ];
 
     allTabs.forEach(tab => {
@@ -3186,6 +3251,73 @@ class Game {
         console.error("Hangar sekme çizim hatası:", err);
       }
     }
+  }
+
+  getDiscoveredEvolutions() {
+    try {
+      return JSON.parse(localStorage.getItem('neon_discovered_evolutions') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  recordDiscoveredEvolution(evoKey) {
+    const list = this.getDiscoveredEvolutions();
+    if (!list.includes(evoKey)) {
+      list.push(evoKey);
+      localStorage.setItem('neon_discovered_evolutions', JSON.stringify(list));
+      this.showToast(t('toast_unlocked_celebration', { name: t('evo_' + evoKey + '_name') || evoKey }), '#ffd700');
+    }
+  }
+
+  renderCodex() {
+    const codexGrid = document.getElementById('codex-grid');
+    const unlockedCountEl = document.getElementById('codex-unlocked-count');
+    if (!codexGrid) return;
+    codexGrid.innerHTML = '';
+
+    const discoveredList = this.getDiscoveredEvolutions();
+    if (unlockedCountEl) {
+      unlockedCountEl.textContent = `${discoveredList.length} / 10 ${t('codex_discovered')}`;
+    }
+
+    const RECIPES = [
+      { id: 'vortex', name: 'VORTEX KARADELİK LAZERİ', recipe: 'Lazer Lv.5 + Mıknatıs Lv.1', desc: 'Kara delik anomalileri açarak meteorları ve avcıları yutar.', color: '#d946ef' },
+      { id: 'cluster', name: 'NÜKLEER SÜRÜ FÜZESİ', recipe: 'Füze Lv.4 + EMP Lv.1', desc: 'Çoklu nükleer savaş başlıkları fırlatarak geniş alan tahribatı yapar.', color: '#ffbe0b' },
+      { id: 'ion_storm', name: 'TESLA İYON FIRTINASI', recipe: 'Tesla Lv.4 + Atış Hızı Lv.4', desc: 'Tüm ekranda zincirleme elektrik şimşekleri ve felç halkası oluşturur.', color: '#38bdf8' },
+      { id: 'bastion', name: 'ORBİTAL BASTİON HALKASI', recipe: 'Kalkan Lv.4 + Dron Lv.3', desc: 'Gemiyi çevreleyen reaktif nanoteknoloji kalkanı ve mermi siperi sağlar.', color: '#05ffa1' },
+      { id: 'cryo', name: 'MUTLAK SIFIR KRİYO-BLASTER', recipe: 'Lazer Lv.4 + Kalkan Lv.2', desc: 'Düşmanları mutlak sıfırda dondurarak tuzla buz eden kriyojenik ışın.', color: '#00f0ff' },
+      { id: 'saws', name: 'PLAZMA TESTERELERİ', recipe: 'Dron Lv.3 + Atış Hızı Lv.4', desc: 'Gemi etrafında dönen ölümcül yüksek hızlı plazma testereleri.', color: '#ff5500' },
+      { id: 'supernova', name: 'SÜPERNOVA ÇEKİRDEĞİ', recipe: 'Füze Lv.4 + Tesla Lv.3', desc: 'Mermiler çarpışmada nükleer mini süpernovalar tetikleyerek çevreyi eritir.', color: '#ff3d00' },
+      { id: 'matrix', name: 'KIYAMET TESLA MATRİSİ', recipe: 'Tesla Lv.4 + EMP Lv.3', desc: 'Tüm düşmanları birbirine bağlayan kıyamet ark ağı ve anlık felç.', color: '#bf5af2' },
+      { id: 'hyper_plasma', name: 'AŞIRI YÜKLEMELİ PLAZMA', recipe: 'Gövde Lv.3 + Atış Hızı Lv.4', desc: 'Aşırı kinetik enerjiyle düşmanların içinden geçen dev plazma dalgaları.', color: '#05ffa1' },
+      { id: 'void_drones', name: 'VAKUM AVCI DRONLARI', recipe: 'Dron Lv.3 + Mıknatıs Lv.3', desc: 'Otonom avcı dron filosu düşmanları avlarken kristalleri anında merkeze taşır.', color: '#ffd700' }
+    ];
+
+    RECIPES.forEach(r => {
+      const isDiscovered = discoveredList.includes(r.id);
+      const card = document.createElement('div');
+      card.className = `codex-entry-card ${isDiscovered ? 'discovered' : 'unknown'}`;
+
+      const iconSvg = this.getUpgradeSvg('evo_' + r.id) || this.getUpgradeSvg(r.id) || getPixelIconSvg('energy', 'md');
+      const statusClass = isDiscovered ? 'discovered' : 'unknown';
+      const statusText = isDiscovered ? t('codex_discovered') : t('codex_unknown');
+
+      card.innerHTML = `
+        <div class="codex-icon-wrapper" style="border-color: ${isDiscovered ? r.color : 'rgba(255,255,255,0.2)'};">
+          ${iconSvg}
+        </div>
+        <div class="codex-entry-info">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span class="codex-entry-name" style="color: ${isDiscovered ? r.color : '#94a3b8'};">${isDiscovered ? r.name : '??? SİBER ANOMALİ'}</span>
+            <span class="codex-entry-status ${statusClass}">${statusText}</span>
+          </div>
+          <span class="codex-entry-recipe" style="color: ${isDiscovered ? '#ffbe0b' : '#64748b'};">${t('codex_recipe')} ${r.recipe}</span>
+          <span class="codex-entry-desc">${isDiscovered ? r.desc : 'Bu silah evrimini savaş alanında ilk kez birleştirerek kodekse kaydedin.'}</span>
+        </div>
+      `;
+      codexGrid.appendChild(card);
+    });
   }
 
   openHangar(targetSkinId) {
@@ -4523,6 +4655,42 @@ class Game {
         maxLevel: 3,
         costs: [850, 2800, 7500],
         formatVal: (lvl) => lvl >= 1 ? t('tech_tier_n', { n: lvl }) : t('tech_locked')
+      },
+      {
+        id: 'overclock_damage',
+        icon: 'energy',
+        name: t('tech_overclock_dmg_name'),
+        desc: t('tech_overclock_dmg_desc'),
+        scoreImpact: '+%3',
+        maxLevel: 999,
+        isInfinite: true,
+        baseCost: 1000,
+        costMult: 1.15,
+        formatVal: (lvl) => `+${lvl * 3}%`
+      },
+      {
+        id: 'overclock_defense',
+        icon: 'shield',
+        name: t('tech_overclock_def_name'),
+        desc: t('tech_overclock_def_desc'),
+        scoreImpact: '+%3',
+        maxLevel: 999,
+        isInfinite: true,
+        baseCost: 1000,
+        costMult: 1.15,
+        formatVal: (lvl) => `+${lvl * 3}%`
+      },
+      {
+        id: 'overclock_crystals',
+        icon: 'crystal',
+        name: t('tech_overclock_cry_name'),
+        desc: t('tech_overclock_cry_desc'),
+        scoreImpact: '+%5',
+        maxLevel: 999,
+        isInfinite: true,
+        baseCost: 1200,
+        costMult: 1.15,
+        formatVal: (lvl) => `+${lvl * 5}%`
       }
     ];
   }
@@ -4536,9 +4704,15 @@ class Game {
       const lvl = this.techUpgrades[item.id] || 0;
       if (lvl > 0) {
         upgradedCount += lvl;
-        for (let i = 0; i < lvl; i++) {
-          if (this.isAdRank(i + 1, item.maxLevel)) continue;
-          refundAmount += item.costs[i] || 0;
+        if (item.isInfinite) {
+          for (let i = 0; i < lvl; i++) {
+            refundAmount += Math.round(item.baseCost * Math.pow(item.costMult || 1.15, i));
+          }
+        } else {
+          for (let i = 0; i < lvl; i++) {
+            if (this.isAdRank(i + 1, item.maxLevel)) continue;
+            refundAmount += item.costs[i] || 0;
+          }
         }
         this.techUpgrades[item.id] = 0;
       }
@@ -4570,14 +4744,14 @@ class Game {
       const currentLvl = this.techUpgrades[item.id] || 0;
       const isMaxed = currentLvl >= item.maxLevel;
       const nextRank = currentLvl + 1;
-      const adRank = !isMaxed && this.isAdRank(nextRank, item.maxLevel);
-      const nextCost = isMaxed ? 0 : item.costs[currentLvl];
+      const adRank = !isMaxed && !item.isInfinite && this.isAdRank(nextRank, item.maxLevel);
+      const nextCost = isMaxed ? 0 : (item.costs ? item.costs[currentLvl] : Math.round(item.baseCost * Math.pow(item.costMult || 1.15, currentLvl)));
       const canAfford = !adRank && this.totalCrystals >= nextCost && !isMaxed;
 
       const card = document.createElement('div');
-      card.className = `tech-card ${isMaxed ? 'maxed' : ''}`;
+      card.className = `tech-card ${isMaxed ? 'maxed' : ''} ${item.isInfinite ? 'infinite-tech' : ''}`;
 
-      const levelPillText = isMaxed ? t('tech_max_level') : `${currentLvl} / ${item.maxLevel}`;
+      const levelPillText = item.isInfinite ? `Lv. ${currentLvl}` : (isMaxed ? t('tech_max_level') : `${currentLvl} / ${item.maxLevel}`);
       let actionBtnHtml = '';
 
       if (isMaxed) {
@@ -4592,9 +4766,14 @@ class Game {
       }
 
       let notchesHtml = '<div class="tech-led-track">';
-      for (let i = 1; i <= item.maxLevel; i++) {
-        const gate = this.isAdRank(i, item.maxLevel) ? ' ad-gate' : '';
-        notchesHtml += `<div class="tech-led-notch ${i <= currentLvl ? 'active' : ''}${gate}"></div>`;
+      if (item.isInfinite) {
+        const fillPct = Math.min(100, (currentLvl % 10) * 10 || (currentLvl > 0 ? 100 : 0));
+        notchesHtml += `<div class="tech-led-notch active" style="width: ${fillPct}%; border-radius: 3px; background: linear-gradient(90deg, #ffd700, #ff0055); box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);"></div>`;
+      } else {
+        for (let i = 1; i <= item.maxLevel; i++) {
+          const gate = this.isAdRank(i, item.maxLevel) ? ' ad-gate' : '';
+          notchesHtml += `<div class="tech-led-notch ${i <= currentLvl ? 'active' : ''}${gate}"></div>`;
+        }
       }
       notchesHtml += '</div>';
 
@@ -5420,15 +5599,40 @@ class Game {
     if (this.updateDockActiveTab) this.updateDockActiveTab(2);
   }
 
+  getDailyMutator() {
+    const today = new Date().toISOString().slice(0, 10);
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) {
+      hash = ((hash << 5) - hash) + today.charCodeAt(i);
+      hash |= 0;
+    }
+    const MUTATORS = [
+      { id: 'hyper_plasma', name: 'AŞIRI PLAZMA', desc: '+%50 Jet Hasarı • Düşmanlar +%30 Hızlı', playerDmg: 1.5, enemySpeed: 1.3, xpMult: 1.2 },
+      { id: 'glass_cannon', name: 'CAM SAVAŞÇI', desc: '1 HP ile Başla! • +%150 Plazma Hasarı', oneHp: true, playerDmg: 2.5, crystalMult: 2.0 },
+      { id: 'meteor_swarm', name: 'METEOR SAĞANAĞI', desc: '2x Meteor Yoğunluğu • 2x Kristal Verimi', meteorRate: 2.0, crystalMult: 2.0 },
+      { id: 'boss_rush', name: 'BOSS AV PROTOKOLÜ', desc: 'Her 25s Elit Filo • +%100 XP Çıktısı', bossFreq: 25, xpMult: 2.0 }
+    ];
+    const index = Math.abs(hash) % MUTATORS.length;
+    const mut = MUTATORS[index];
+    const isCompleted = localStorage.getItem('neon_mutator_done_' + today) === 'true';
+    return { ...mut, date: today, completed: isCompleted };
+  }
+
   setMode(mode) {
     this.currentMode = mode;
     localStorage.setItem('neon_current_mode', mode);
     if (mode === 'classic') {
       if (modeClassic) modeClassic.classList.add('active');
       if (modeStorm) modeStorm.classList.remove('active');
-    } else {
+      if (modeMutator) modeMutator.classList.remove('active');
+    } else if (mode === 'storm') {
       if (modeClassic) modeClassic.classList.remove('active');
       if (modeStorm) modeStorm.classList.add('active');
+      if (modeMutator) modeMutator.classList.remove('active');
+    } else if (mode === 'mutator') {
+      if (modeClassic) modeClassic.classList.remove('active');
+      if (modeStorm) modeStorm.classList.remove('active');
+      if (modeMutator) modeMutator.classList.add('active');
     }
     this.updateHighScoreDisplay();
     this.updateLevelDisplay();
@@ -5441,9 +5645,27 @@ class Game {
       if (this.currentMode === 'classic') {
         modeClassic.classList.add('active');
         modeStorm.classList.remove('active');
-      } else {
+        if (modeMutator) modeMutator.classList.remove('active');
+      } else if (this.currentMode === 'storm') {
         modeClassic.classList.remove('active');
         modeStorm.classList.add('active');
+        if (modeMutator) modeMutator.classList.remove('active');
+      } else if (this.currentMode === 'mutator') {
+        modeClassic.classList.remove('active');
+        modeStorm.classList.remove('active');
+        if (modeMutator) modeMutator.classList.add('active');
+      }
+    }
+    const mutatorDesc = document.getElementById('mode-mutator-desc');
+    if (mutatorDesc && scoreValMutator) {
+      const mut = this.getDailyMutator();
+      mutatorDesc.textContent = `${mut.name}: ${mut.desc}`;
+      if (mut.completed) {
+        scoreValMutator.textContent = t('mode_mutator_completed');
+        scoreValMutator.style.color = '#05ffa1';
+      } else {
+        scoreValMutator.textContent = '+400 💎';
+        scoreValMutator.style.color = '#ff0055';
       }
     }
     this.updateLevelDisplay();
@@ -5891,6 +6113,28 @@ class Game {
     }
   }
 
+  getShipStars(skinId) {
+    if (!this._shipStars) {
+      try {
+        this._shipStars = JSON.parse(localStorage.getItem('neon_ship_stars') || '{}');
+      } catch (e) {
+        this._shipStars = {};
+      }
+    }
+    return this._shipStars[skinId] || 1;
+  }
+
+  setShipStars(skinId, stars) {
+    if (!this._shipStars) this._shipStars = {};
+    this._shipStars[skinId] = Math.max(1, Math.min(5, stars));
+    localStorage.setItem('neon_ship_stars', JSON.stringify(this._shipStars));
+  }
+
+  getStarUpCost(currentStars) {
+    const costs = [0, 500, 1200, 2500, 5000];
+    return costs[currentStars] || 10000;
+  }
+
   updateMenuShipPreview() {
     const skinId = this.skinOrder[this.menuSkinIndex];
     const skin = this.skins[skinId] || this.skins.cyberpunk;
@@ -5916,26 +6160,35 @@ class Game {
     if (perkTitleEl) perkTitleEl.textContent = t(`ship_${skin.id}_perk_title`);
     if (menuShipPerk) menuShipPerk.textContent = t(`ship_${skin.id}_perk_desc`);
 
-    // Stat barlarını güncelle
-    const stats = skin.stats || { dmg: 100, shield: 100, speed: 100, magnet: 100 };
+    // Stat barlarını güncelle (Yıldız çarpanıyla güçlendirilir)
+    const shipStars = this.getShipStars(skin.id);
+    const starMult = 1 + (shipStars - 1) * 0.10;
+    const baseStats = skin.stats || { dmg: 100, shield: 100, speed: 100, magnet: 100 };
+    const stats = {
+      dmg: Math.round(baseStats.dmg * starMult),
+      shield: Math.round(baseStats.shield * starMult),
+      speed: Math.round(baseStats.speed * (1 + (shipStars - 1) * 0.05)),
+      magnet: baseStats.magnet
+    };
+
     const barDmg = document.getElementById('jet-bar-dmg');
     const valDmg = document.getElementById('jet-val-dmg');
     if (barDmg && valDmg) {
-      barDmg.style.width = `${Math.min(100, (stats.dmg / 150) * 100)}%`;
+      barDmg.style.width = `${Math.min(100, (stats.dmg / 180) * 100)}%`;
       valDmg.textContent = `%${stats.dmg}`;
     }
 
     const barShield = document.getElementById('jet-bar-shield');
     const valShield = document.getElementById('jet-val-shield');
     if (barShield && valShield) {
-      barShield.style.width = `${Math.min(100, (stats.shield / 150) * 100)}%`;
+      barShield.style.width = `${Math.min(100, (stats.shield / 180) * 100)}%`;
       valShield.textContent = `%${stats.shield}`;
     }
 
     const barSpeed = document.getElementById('jet-bar-speed');
     const valSpeed = document.getElementById('jet-val-speed');
     if (barSpeed && valSpeed) {
-      barSpeed.style.width = `${Math.min(100, (stats.speed / 150) * 100)}%`;
+      barSpeed.style.width = `${Math.min(100, (stats.speed / 180) * 100)}%`;
       valSpeed.textContent = `%${stats.speed}`;
     }
 
@@ -5944,6 +6197,33 @@ class Game {
     if (barMagnet && valMagnet) {
       barMagnet.style.width = `${Math.min(100, (stats.magnet / 160) * 100)}%`;
       valMagnet.textContent = `%${stats.magnet}`;
+    }
+
+    // Ship Star-Up UI update
+    const starRow = document.getElementById('menu-ship-star-row');
+    const starsContainer = document.getElementById('menu-ship-stars');
+    const starBtn = document.getElementById('btn-ship-starup');
+    const starCostEl = document.getElementById('ship-starup-cost');
+    if (starRow && starsContainer && starBtn) {
+      if (isUnlocked) {
+        starRow.style.display = 'flex';
+        const stars = this.getShipStars(skin.id);
+        let starHtml = '';
+        for (let s = 1; s <= 5; s++) {
+          starHtml += `<span class="star-icon ${s <= stars ? 'active' : ''}">${s <= stars ? '★' : '☆'}</span>`;
+        }
+        starsContainer.innerHTML = starHtml;
+        if (stars >= 5) {
+          starBtn.classList.add('maxed');
+          if (starCostEl) starCostEl.textContent = t('starup_max');
+        } else {
+          starBtn.classList.remove('maxed');
+          const cost = this.getStarUpCost(stars);
+          if (starCostEl) starCostEl.textContent = `${cost.toLocaleString()} 💎`;
+        }
+      } else {
+        starRow.style.display = 'none';
+      }
     }
 
     if (menuShipStatus) {
@@ -6905,6 +7185,39 @@ class Game {
     const btnEditProfile = document.getElementById('lb-btn-edit-profile');
     const btnCancelProfile = document.getElementById('lb-btn-cancel-profile');
     const btnSaveProfile = document.getElementById('lb-btn-save-profile');
+    const lbMainTabLeague = document.getElementById('lb-main-tab-league');
+    const lbMainTabCareer = document.getElementById('lb-main-tab-career');
+    const lbLeagueControls = document.getElementById('lb-league-controls');
+    const lbLeagueView = document.getElementById('lb-league-view');
+    const lbCareerView = document.getElementById('lb-career-view');
+
+    if (lbMainTabLeague) {
+      lbMainTabLeague.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        this.lbMainTab = 'league';
+        lbMainTabLeague.classList.add('active');
+        if (lbMainTabCareer) lbMainTabCareer.classList.remove('active');
+        if (lbLeagueControls) lbLeagueControls.classList.remove('hidden');
+        if (lbLeagueView) lbLeagueView.classList.remove('hidden');
+        if (lbCareerView) lbCareerView.classList.add('hidden');
+        this.renderLeaderboard(this.lbMode);
+      });
+    }
+
+    if (lbMainTabCareer) {
+      lbMainTabCareer.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        this.lbMainTab = 'career';
+        lbMainTabCareer.classList.add('active');
+        if (lbMainTabLeague) lbMainTabLeague.classList.remove('active');
+        if (lbLeagueControls) lbLeagueControls.classList.add('hidden');
+        if (lbLeagueView) lbLeagueView.classList.add('hidden');
+        if (lbCareerView) lbCareerView.classList.remove('hidden');
+        this.renderCareerRecords();
+      });
+    }
 
     if (lbTabStorm) {
       lbTabStorm.addEventListener('click', () => {
@@ -7161,8 +7474,59 @@ class Game {
     el.textContent = t('rec_local_hint');
   }
 
+  renderCareerRecords() {
+    const careerView = document.getElementById('lb-career-view');
+    if (!careerView) return;
+    const stats = this.pilotStats || {};
+    const clearedLevel = Math.max(1, (this.unlockedLevels && this.unlockedLevels.classic) || 1);
+    const discoveredEvos = this.getDiscoveredEvolutions ? this.getDiscoveredEvolutions() : [];
+    const currentSkinName = t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name');
+
+    careerView.innerHTML = `
+      <div class="career-grid">
+        <div class="career-card">
+          <span class="career-card-label">${t('career_total_flights')}</span>
+          <span class="career-card-value">${(stats.totalFlights || 0).toLocaleString()}</span>
+        </div>
+        <div class="career-card">
+          <span class="career-card-label">${t('career_highest_storm')}</span>
+          <span class="career-card-value gold">${(this.highScores.storm || 0).toLocaleString()}</span>
+        </div>
+        <div class="career-card">
+          <span class="career-card-label">${t('career_highest_campaign')}</span>
+          <span class="career-card-value">${clearedLevel} / 38</span>
+        </div>
+        <div class="career-card">
+          <span class="career-card-label">${t('career_bosses_defeated')}</span>
+          <span class="career-card-value rose">${(stats.bossesDefeated || 0).toLocaleString()}</span>
+        </div>
+        <div class="career-card">
+          <span class="career-card-label">${t('career_meteors_destroyed')}</span>
+          <span class="career-card-value green">${(stats.totalKills || 0).toLocaleString()}</span>
+        </div>
+        <div class="career-card">
+          <span class="career-card-label">${t('career_total_crystals')}</span>
+          <span class="career-card-value gold">${(stats.lifetimeCrystals || this.totalCrystals || 0).toLocaleString()} 💎</span>
+        </div>
+        <div class="career-card">
+          <span class="career-card-label">${t('career_favorite_ship')}</span>
+          <span class="career-card-value" style="font-size:13px;">${currentSkinName}</span>
+        </div>
+        <div class="career-card">
+          <span class="career-card-label">${t('career_evolutions_found')}</span>
+          <span class="career-card-value">${discoveredEvos.length} / 10</span>
+        </div>
+      </div>
+    `;
+  }
+
   renderLeaderboard(mode = 'storm') {
     this.lbMode = mode;
+    if (this.lbMainTab === 'career') {
+      this.renderCareerRecords();
+      return;
+    }
+
     const view = this.lbView || 'top50';
     const list = document.getElementById('leaderboard-list');
     const podium = document.getElementById('lb-podium-container');
@@ -7179,7 +7543,7 @@ class Game {
     if (!list) return;
 
     if (activeCountEl) {
-      activeCountEl.textContent = t('rec_device');
+      activeCountEl.textContent = `${(this.totalPilots || 18492).toLocaleString()} PİLOT AKTİF`;
     }
 
     this.updateSeasonCountdown();
@@ -7200,8 +7564,15 @@ class Game {
     const lbViewTop50 = document.getElementById('lb-view-top50');
     const lbViewAround = document.getElementById('lb-view-around');
     if (lbViewTop50 && lbViewAround) {
-      lbViewTop50.style.display = 'none';
-      lbViewAround.style.display = 'none';
+      lbViewTop50.style.display = 'inline-flex';
+      lbViewAround.style.display = 'inline-flex';
+      if (view === 'top50') {
+        lbViewTop50.classList.add('active');
+        lbViewAround.classList.remove('active');
+      } else {
+        lbViewAround.classList.add('active');
+        lbViewTop50.classList.remove('active');
+      }
     }
 
     // Player Data
@@ -7211,17 +7582,20 @@ class Game {
     const currentSkinName = t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name');
 
     const stormScore = this.highScores.storm || 0;
-    const clearedLevel = Math.max(1, (this.unlockedLevel || 1) - 1);
+    const clearedLevel = Math.max(1, (this.unlockedLevels && this.unlockedLevels.classic) || 1);
     const totalStars = this.getTotalStars ? this.getTotalStars() : clearedLevel * 3;
 
-    if (rankEl) rankEl.textContent = mode === 'storm' ? `${stormScore.toLocaleString()}` : `${clearedLevel}`;
+    const playerRank = this.calculatePlayerRank(mode);
+    const tier = this.getTierInfo(playerRank);
+
+    if (rankEl) rankEl.textContent = `#${playerRank.toLocaleString()}`;
     if (tierBadgeEl) {
-      tierBadgeEl.innerHTML = getPixelIconSvg('target', 'md') || '';
-      tierBadgeEl.title = t('rec_device');
+      tierBadgeEl.innerHTML = getPixelIconSvg(tier.icon, 'sm') || '';
+      tierBadgeEl.title = tier.name;
     }
     if (percentileEl) {
-      percentileEl.textContent = t('rec_device');
-      percentileEl.style.color = '#00f0ff';
+      percentileEl.textContent = tier.pctText;
+      percentileEl.style.color = tier.color;
     }
     if (nameEl) {
       nameEl.innerHTML = `${this.getCountryFlagBadge(pilotCountry)} ${pilotCallsign} <span class="lb-you-badge">${t('lb_you_badge')}</span>`;
@@ -7235,44 +7609,101 @@ class Game {
       if (scoreSubEl) scoreSubEl.textContent = `${totalStars}★`;
     }
 
-    if (hintEl) hintEl.textContent = t('rec_local_hint');
-    if (rivalTargetEl) rivalTargetEl.textContent = '';
-    if (rivalFill) rivalFill.style.width = '0%';
-    if (podium) {
-      podium.style.display = 'none';
-      podium.innerHTML = '';
+    // Rival tracking
+    const rivalRank = Math.max(1, playerRank - 1);
+    const rivalPilot = this.getPilotAtRank(rivalRank, mode);
+    const currentMetric = mode === 'storm' ? stormScore : totalStars;
+    const targetMetric = rivalPilot.score;
+    const ptsNeeded = Math.max(0, targetMetric - currentMetric);
+
+    if (hintEl) hintEl.textContent = ptsNeeded > 0 ? `+${ptsNeeded.toLocaleString()} PTS sıradaki hedefe:` : 'Zirvedesin!';
+    if (rivalTargetEl) rivalTargetEl.textContent = `#${rivalRank} ${rivalPilot.name}`;
+    if (rivalFill) {
+      const pct = ptsNeeded === 0 ? 100 : Math.min(100, Math.max(15, Math.round((1 - (ptsNeeded / (targetMetric * 0.15 || 1))) * 100)));
+      rivalFill.style.width = `${pct}%`;
     }
+
     const seasonPill = document.querySelector('.lb-season-pill');
-    if (seasonPill) seasonPill.style.display = 'none';
+    if (seasonPill) seasonPill.style.display = '';
 
     list.innerHTML = '';
-    const stats = this.pilotStats || {};
-    const shipsOwned = (this.unlockedSkins || []).length;
-    const records = [
-      [t('rec_storm'), (this.highScores.storm || 0).toLocaleString()],
-      [t('rec_chapter'), String(clearedLevel)],
-      [t('rec_kills'), (stats.totalKills || 0).toLocaleString()],
-      [t('rec_bosses'), (stats.bossesDefeated || 0).toLocaleString()],
-      [t('rec_combo'), (stats.maxCombo || 0).toLocaleString()],
-      [t('rec_time'), `${stats.maxTime || 0}s`],
-      [t('rec_crystals'), (stats.lifetimeCrystals || 0).toLocaleString()],
-      [t('rec_flights'), (stats.totalFlights || 0).toLocaleString()],
-      [t('rec_ships'), `${shipsOwned}/6`],
-      [t('rec_graze'), (stats.totalGraze || 0).toLocaleString()]
-    ];
-    records.forEach((pair, i) => {
-      list.appendChild(this.createLeaderboardRow({
-        rank: i + 1,
-        name: pair[0],
-        country: pilotCountry,
-        ship: currentSkinName,
-        title: t('rec_device'),
-        score: pair[1],
-        valueText: pair[1],
-        localRecord: true,
-        isPlayer: i === 0 && mode === 'storm'
-      }, mode));
-    });
+
+    // TOP 50 View
+    if (view === 'top50') {
+      if (podium) {
+        podium.style.display = 'flex';
+        const p1 = this.getPilotAtRank(1, mode);
+        const p2 = this.getPilotAtRank(2, mode);
+        const p3 = this.getPilotAtRank(3, mode);
+        podium.innerHTML = `
+          <div class="podium-slot rank-2">
+            <div class="podium-avatar">${this.getCountryFlagBadge(p2.country)}</div>
+            <div class="podium-name">${p2.name}</div>
+            <div class="podium-score">${mode === 'storm' ? p2.score.toLocaleString() : 'B.' + p2.level}</div>
+            <div class="podium-pedestal p2">2</div>
+          </div>
+          <div class="podium-slot rank-1">
+            <div class="podium-crown">👑</div>
+            <div class="podium-avatar">${this.getCountryFlagBadge(p1.country)}</div>
+            <div class="podium-name">${p1.name}</div>
+            <div class="podium-score">${mode === 'storm' ? p1.score.toLocaleString() : 'B.' + p1.level}</div>
+            <div class="podium-pedestal p1">1</div>
+          </div>
+          <div class="podium-slot rank-3">
+            <div class="podium-avatar">${this.getCountryFlagBadge(p3.country)}</div>
+            <div class="podium-name">${p3.name}</div>
+            <div class="podium-score">${mode === 'storm' ? p3.score.toLocaleString() : 'B.' + p3.level}</div>
+            <div class="podium-pedestal p3">3</div>
+          </div>
+        `;
+      }
+
+      for (let r = 4; r <= 50; r++) {
+        if (r === playerRank) {
+          list.appendChild(this.createLeaderboardRow({
+            rank: r,
+            name: pilotCallsign,
+            country: pilotCountry,
+            ship: currentSkinName,
+            title: tier.name,
+            score: stormScore,
+            level: clearedLevel,
+            stars: totalStars,
+            isPlayer: true
+          }, mode));
+        } else {
+          const p = this.getPilotAtRank(r, mode);
+          list.appendChild(this.createLeaderboardRow(p, mode));
+        }
+      }
+    } else {
+      // Around Me View
+      if (podium) {
+        podium.style.display = 'none';
+        podium.innerHTML = '';
+      }
+      const startRank = Math.max(1, playerRank - 5);
+      const endRank = Math.min(this.totalPilots || 18492, playerRank + 5);
+
+      for (let r = startRank; r <= endRank; r++) {
+        if (r === playerRank) {
+          list.appendChild(this.createLeaderboardRow({
+            rank: r,
+            name: pilotCallsign,
+            country: pilotCountry,
+            ship: currentSkinName,
+            title: tier.name,
+            score: stormScore,
+            level: clearedLevel,
+            stars: totalStars,
+            isPlayer: true
+          }, mode));
+        } else {
+          const p = this.getPilotAtRank(r, mode);
+          list.appendChild(this.createLeaderboardRow(p, mode));
+        }
+      }
+    }
   }
 
   createLeaderboardRow(p, mode) {
@@ -8048,6 +8479,51 @@ class Game {
     this.player.damageMultiplier = (1 + (tech.damageBoost || 0) * 0.06) * (skinCfg.dmgMult || 1.0);
     this.player.reactorChargeMult = 1 + (tech.reactorCharge || 0) * 0.08;
     this.player.rerollCount = 1 + (tech.rerollCount || 0) + (this.masteryTree ? (this.masteryTree.rerollStart || 0) : 0);
+
+    // Gemi Yıldız Yükseltmesi (★1 to ★5 Ascension Bonusları)
+    const shipStars = this.getShipStars(this.currentSkinId);
+    const starBonus = 1 + (shipStars - 1) * 0.10;
+    this.player.damageMultiplier *= starBonus;
+    this.player.maxShield = Math.round(this.player.maxShield * starBonus);
+    this.player.maxHp = Math.round(this.player.maxHp * starBonus);
+    this.player.hp = this.player.maxHp;
+    this.player.speedMultiplier = (this.player.speedMultiplier || 1.0) * (1 + (shipStars - 1) * 0.05);
+
+    // Kuantum Aşırı Yükleme Ustalığı (Tech Tree Infinite Overclock Lv.1-999)
+    const ocDmg = (tech.overclock_damage || 0) * 0.03;
+    const ocDef = (tech.overclock_defense || 0) * 0.03;
+    const ocCry = (tech.overclock_crystals || 0) * 0.05;
+    if (ocDmg > 0) this.player.damageMultiplier *= (1 + ocDmg);
+    if (ocDef > 0) {
+      this.player.maxShield = Math.round(this.player.maxShield * (1 + ocDef));
+      this.player.maxHp = Math.round(this.player.maxHp * (1 + ocDef));
+      this.player.hp = this.player.maxHp;
+    }
+    if (ocCry > 0) this.player.crystalMultiplier = (this.player.crystalMultiplier || 1.0) * (1 + ocCry);
+
+    // İlk Kez Oynayan Yeni Pilotlar için 12 Saniyelik Hyper-Start Overdrive
+    const flightCount = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
+    if (flightCount === 0) {
+      this.player.overchargeTimer = 720;
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 45, '⚡ AŞIRI ŞARJ AKTİF (12s)!', '#00f0ff', 20);
+    }
+
+    // Günün Mutasyonu Modu Kural Enjeksiyonu
+    if (this.currentMode === 'mutator') {
+      const mut = this.getDailyMutator();
+      this.activeMutator = mut;
+      if (mut.playerDmg) this.player.damageMultiplier *= mut.playerDmg;
+      if (mut.oneHp) {
+        this.player.maxHp = 1;
+        this.player.hp = 1;
+        this.player.maxShield = 0;
+        this.player.shield = 0;
+      }
+      if (mut.crystalMult) this.player.crystalMultiplier *= mut.crystalMult;
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 70, `MUTASYON: ${mut.name}!`, '#ff0055', 20);
+    } else {
+      this.activeMutator = null;
+    }
 
     // Taktiksel Mühimmat & Sarf Malzemesi Takviyelerini Uygula (Pre-Flight Boosters)
     const bOverdrive = parseInt(localStorage.getItem('neon_boost_overdrive') || '0', 10);
@@ -8889,11 +9365,11 @@ class Game {
   // - Seviye 4->5 (190 XP): Elit filoları yenerek hak edilir
   // - Seviye 5+: Sabit %36 bileşik artış formülü (sürekli kart popup yorgunluğunu önler)
   getNextLevelXp(level) {
-    if (level === 1) return 25;
-    if (level === 2) return 55;
-    if (level === 3) return 110;
-    if (level === 4) return 190;
-    return Math.round(190 * Math.pow(1.36, level - 4));
+    if (level === 1) return 15;
+    if (level === 2) return 32;
+    if (level === 3) return 80;
+    if (level === 4) return 160;
+    return Math.round(160 * Math.pow(1.36, level - 4));
   }
 
   // Derinlik / İlerleme Çarpanı: Dalga, Sektör, Süre ve Bölüme göre düşmanların XP çıktısını dengeli biçimde artırır
@@ -9220,6 +9696,16 @@ class Game {
         desc: t('evo_void_drones_desc')
       });
     }
+    if (this.player.upgrades.missiles >= 4 && (this.player.upgrades.tesla || 0) >= 3 && !this.player.evolutions.supernova) {
+      evolutions.push({
+        id: 'evo_supernova',
+        isEvolution: true,
+        name: t('evo_supernova_name'),
+        stat: t('evo_supernova_stat'),
+        color: '#ffbe0b',
+        desc: t('evo_supernova_desc')
+      });
+    }
 
     const availableUpgrades = [
       {
@@ -9354,7 +9840,21 @@ class Game {
     if (evolutions.length > 0) {
       choices.push(evolutions[0]);
     }
-    const shuffled = availableUpgrades.sort(() => 0.5 - Math.random());
+    // Akıllı Sinerji Ağırlıklandırması: Oyuncunun elindeki silaha uygun sinerji kartlarının çıkma şansı +%60 artar
+    const synergyWeights = {};
+    const upg = this.player.upgrades;
+    if ((upg.laser || 0) >= 2) { synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; }
+    if ((upg.missiles || 0) >= 2) { synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.tesla = (synergyWeights.tesla || 1) + 0.6; }
+    if ((upg.tesla || 0) >= 2) { synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.missiles = (synergyWeights.missiles || 1) + 0.6; }
+    if ((upg.shield || 0) >= 2) { synergyWeights.drones = (synergyWeights.drones || 1) + 0.6; synergyWeights.laser = (synergyWeights.laser || 1) + 0.6; }
+    if ((upg.drones || 0) >= 2) { synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; }
+    if ((upg.hull || 0) >= 2) { synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; }
+
+    const shuffled = availableUpgrades.slice().sort((a, b) => {
+      const weightA = (synergyWeights[a.id] || 1.0) * Math.random();
+      const weightB = (synergyWeights[b.id] || 1.0) * Math.random();
+      return weightB - weightA;
+    });
     while (choices.length < 2 && shuffled.length > 0) {
       choices.push(shuffled.pop());
     }
@@ -9687,6 +10187,8 @@ class Game {
       this.particles.screenFlashColor = '#ffbe0b';
       sounds.playLevelUp();
       vibrate.medium();
+      const rawEvo = id.replace(/^evo_/, '');
+      this.recordDiscoveredEvolution(rawEvo);
     }
 
     if (id === 'evo_vortex') {
@@ -10192,6 +10694,27 @@ class Game {
       const el = document.getElementById(id);
       if (el) el.style.display = '';
     });
+
+    const maxStage = (this.unlockedLevels && this.unlockedLevels.classic) || 1;
+    const flights = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
+
+    const modeStormEl = document.getElementById('mode-storm');
+    if (modeStormEl) {
+      if (maxStage < 2 && flights === 0) {
+        modeStormEl.classList.add('feature-locked');
+      } else {
+        modeStormEl.classList.remove('feature-locked');
+      }
+    }
+
+    const modeMutatorEl = document.getElementById('mode-mutator');
+    if (modeMutatorEl) {
+      if (maxStage < 3 && flights < 3) {
+        modeMutatorEl.classList.add('feature-locked');
+      } else {
+        modeMutatorEl.classList.remove('feature-locked');
+      }
+    }
   }
 
   // Ölüm ekranı kancası: rekora ne kadar kaldı + tek dokunuşla kalıcı yükseltme
@@ -10405,6 +10928,29 @@ class Game {
 
     const totalRunGain = this.crystalsEarnedThisRun || 0;
     const baseGain = Math.max(35, totalRunGain);
+
+    // Günlük Mutatör Tamamlama Bonusu (+400 Kristal)
+    if (this.currentMode === 'mutator') {
+      const todayKey = new Date().toISOString().slice(0, 10);
+      const doneKey = `neon_mutator_done_${todayKey}`;
+      if (!localStorage.getItem(doneKey) && (this.gameTime || 0) >= 60) {
+        localStorage.setItem(doneKey, 'true');
+        const bonus = 400;
+        this.totalCrystals += bonus;
+        this.crystalsEarnedThisRun = (this.crystalsEarnedThisRun || 0) + bonus;
+        localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+        setTimeout(() => {
+          this.showToast(t('mode_mutator_cleared', { bonus: 400 }), '#00f5ff');
+        }, 500);
+      }
+    }
+
+    // İlk Uçuş Tamamlama Kutlaması (FTUE)
+    if (gamesPlayed === 1) {
+      setTimeout(() => {
+        this.showToast(t('toast_unlocked_celebration'), '#39ff14');
+      }, 1000);
+    }
 
     if (finalCrystals) finalCrystals.textContent = `+${totalRunGain.toLocaleString()} CR`;
     const finalCrystalsBoosted = document.getElementById('final-crystals-boosted');
@@ -13248,6 +13794,10 @@ class Game {
     if (this.particles && this.particles.spawnGrazeSparks) {
       this.particles.spawnGrazeSparks(sourceX || this.player.x, sourceY || this.player.y);
     }
+    if (localStorage.getItem('neon_graze_hint_seen') !== 'true') {
+      localStorage.setItem('neon_graze_hint_seen', 'true');
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 45, 'SIYIRMA! +XP & +ATIŞ HIZI', '#00f0ff', 16);
+    }
     this.updateHUD();
   }
 
@@ -13716,6 +14266,9 @@ class Game {
       }
       // Can yenile
       this.player.hp = Math.min(this.player.maxHp, this.player.hp + (isIntro ? 35 : 45));
+      // Boss öldürme ödülü: +1 Ücretsiz Kart Yenileme (Reroll) hakkı!
+      this.player.rerollCount = (this.player.rerollCount || 0) + 1;
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 65, '+1 KART YENİLEME!', '#38bdf8', 18);
       this.updateMissionProgress('defeat_boss', 1);
       if (this.pilotStats) {
         this.pilotStats.bossesDefeated = (this.pilotStats.bossesDefeated || 0) + 1;
