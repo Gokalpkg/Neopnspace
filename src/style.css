@@ -542,17 +542,15 @@ html, body {
 .modal-card {
   margin: auto 0;
   width: 100%;
-  max-width: 410px;
+  max-width: 400px;
   max-height: calc(100vh - 16px - var(--safe-top) - var(--safe-bottom));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background: linear-gradient(145deg, rgba(16, 24, 48, 0.82) 0%, rgba(7, 11, 24, 0.92) 100%);
-  border: 1px solid rgba(0, 240, 255, 0.32);
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
   border-radius: 20px;
-  padding: 18px 16px max(16px, env(safe-area-inset-bottom, 12px));
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  padding: 16px 14px max(14px, env(safe-area-inset-bottom, 12px));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 240, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   text-align: center;
   box-sizing: border-box;
   animation: scaleIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
@@ -832,69 +830,48 @@ html, body {
 }
 
 .ship-nav-arrow {
-  width: 40px;
-  height: 56px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(20, 32, 64, 0.75) 0%, rgba(10, 16, 36, 0.85) 100%);
-  border: 1px solid rgba(0, 240, 255, 0.35);
+  width: 38px;
+  height: 52px;
+  border-radius: 4px;
+  background: rgba(10, 16, 34, 0.9);
+  border: 1.5px solid rgba(0, 240, 255, 0.4);
   color: #00f0ff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 12px rgba(0, 240, 255, 0.15);
-  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
   pointer-events: auto;
 }
 
-.ship-nav-arrow:hover {
-  border-color: #00f0ff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 18px rgba(0, 240, 255, 0.35);
-  transform: translateY(-2px);
-}
-
 .ship-nav-arrow:active {
-  transform: translateY(2px) scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
   border-color: #00f0ff;
 }
 
 .ship-display-info {
   flex: 1;
   text-align: left;
-  margin: 0 8px;
-  background: linear-gradient(145deg, rgba(16, 24, 48, 0.78) 0%, rgba(8, 12, 28, 0.86) 100%);
-  border: 1.5px solid var(--border-color, #00f0ff);
-  border-radius: 16px;
-  padding: 12px 14px;
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 20px rgba(0, 240, 255, 0.2);
+  margin: 0 6px;
+  background: rgba(10, 16, 34, 0.94);
+  border: 2px solid #00f0ff;
+  border-radius: 6px;
+  padding: 10px 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 0 1px #030816, 0 5px 0 rgba(0, 180, 220, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.2), 0 12px 28px rgba(0, 0, 0, 0.6);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: all 0.2s ease;
   pointer-events: auto;
-  position: relative;
-  overflow: hidden;
-}
-
-.ship-display-info::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  pointer-events: none;
 }
 
 .ship-display-info:active {
-  transform: scale(0.985);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 240, 255, 0.6);
+  background: rgba(0, 240, 255, 0.1);
 }
 
 .menu-ship-header-row {
@@ -908,15 +885,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 64px;
-  min-height: 64px;
-  position: relative;
+  min-width: 58px;
   animation: shipMenuHover 2.4s ease-in-out infinite alternate;
 }
 
 @keyframes shipMenuHover {
-  0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4)); }
-  100% { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.6)); }
+  0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.3)); }
+  100% { transform: translateY(-3px) scale(1.02); filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.5)); }
 }
 
 .ship-main-meta {
@@ -977,68 +952,63 @@ html, body {
 .menu-ship-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 10px;
-  background: rgba(4, 8, 20, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 6px 10px;
-  margin-bottom: 7px;
-  backdrop-filter: blur(8px);
+  gap: 3px 8px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 9px;
+  padding: 4px 7px;
+  margin-bottom: 5px;
 }
 
 .jet-stat-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .jet-stat-lbl {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
   color: #94a3b8;
-  width: 44px;
-  letter-spacing: 0.5px;
+  width: 42px;
+  letter-spacing: 0.4px;
 }
 
 .jet-stat-track {
   flex: 1;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .jet-stat-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 0 8px currentColor;
+  border-radius: 3px;
+  transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.stat-dmg { background: linear-gradient(90deg, #ff0055, #ff5722); color: #ff3366; }
-.stat-shield { background: linear-gradient(90deg, #00f0ff, #0284c7); color: #00f0ff; }
-.stat-speed { background: linear-gradient(90deg, #ffbe0b, #f59e0b); color: #ffbe0b; }
-.stat-magnet { background: linear-gradient(90deg, #05ffa1, #10b981); color: #05ffa1; }
+.stat-dmg { background: linear-gradient(90deg, #ff0055, #ff5722); }
+.stat-shield { background: linear-gradient(90deg, #00f0ff, #0284c7); }
+.stat-speed { background: linear-gradient(90deg, #ffbe0b, #f59e0b); }
+.stat-magnet { background: linear-gradient(90deg, #05ffa1, #10b981); }
 
 .jet-stat-val {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
-  color: #e2e8f0;
-  width: 30px;
+  color: #cbd5e1;
+  width: 28px;
   text-align: right;
 }
 
 /* Jet Özel Yetenek Kutusu */
 .menu-ship-perk-box {
-  background: rgba(14, 22, 48, 0.5);
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  border-left: 3px solid #00f0ff;
-  border-radius: 10px;
-  padding: 6px 10px;
-  backdrop-filter: blur(8px);
+  background: rgba(0, 240, 255, 0.06);
+  border: 1px solid rgba(0, 240, 255, 0.18);
+  border-radius: 9px;
+  padding: 4px 7px;
 }
 
 .perk-badge-title {
@@ -1063,11 +1033,11 @@ html, body {
 /* Canlı Gemi Aksiyon / Satın Al Butonu */
 .menu-ship-action-btn {
   width: 100%;
-  margin-top: 8px;
-  padding: 10px 14px;
-  border-radius: 12px;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
   font-family: var(--font-display);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.8px;
   display: flex;
@@ -1075,29 +1045,27 @@ html, body {
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
   outline: none;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   text-transform: uppercase;
   pointer-events: auto;
   user-select: none;
 }
 
 .menu-ship-action-btn:active {
-  transform: translateY(2px) scale(0.97);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
 }
 
 /* 1. Kuşanıldı (Aktif) Durumu */
 .menu-ship-action-btn.btn-menu-equipped {
-  background: rgba(5, 255, 161, 0.12);
+  background: rgba(5, 255, 161, 0.14);
   border-color: rgba(5, 255, 161, 0.55);
   color: #05ffa1;
   cursor: default;
-  box-shadow: 0 4px 16px rgba(5, 255, 161, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(5, 255, 161, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* 2. Kuşan (Açık ama seçilmemiş) Durumu */
@@ -1369,42 +1337,40 @@ html, body {
   text-shadow: none;
 }
 
-/* Dev Başlatma Butonu: Cyber-Glass Fusion */
+/* Dev Başlatma Butonu */
 .cyber-launch-btn {
   width: 100%;
-  height: 58px;
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.9) 0%, rgba(0, 180, 220, 0.95) 50%, rgba(0, 120, 180, 0.9) 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  border-radius: 16px;
+  height: 56px;
+  background: linear-gradient(180deg, #00f0ff 0%, #00b4d8 50%, #0077b6 100%);
+  border: 2px solid #ffffff;
+  border-radius: 6px;
   color: #030816;
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 900;
-  letter-spacing: 2.5px;
+  letter-spacing: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   cursor: pointer;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 8px 28px rgba(0, 240, 255, 0.45), 0 2px 0 #004d73, inset 0 2px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: 0 6px 0 #004d73, 0 12px 24px rgba(0, 240, 255, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.6);
   position: relative;
   overflow: hidden;
-  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
   pointer-events: auto;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .cyber-launch-btn.continue-run {
   margin-bottom: 10px;
-  background: linear-gradient(135deg, rgba(5, 255, 161, 0.95) 0%, rgba(0, 210, 180, 0.9) 100%);
-  box-shadow: 0 8px 28px rgba(5, 255, 161, 0.45), 0 2px 0 #046c4e, inset 0 2px 0 rgba(255, 255, 255, 0.7);
+  background: linear-gradient(180deg, #b6ffe0 0%, #05ffa1 48%, #00b4d8 100%);
+  box-shadow: 0 6px 0 #046c4e, 0 12px 24px rgba(5, 255, 161, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.6);
 }
 
 .cyber-launch-btn:active {
-  transform: translateY(3px) scale(0.97);
-  box-shadow: 0 3px 12px rgba(0, 240, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #004d73, 0 6px 14px rgba(0, 240, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .launch-icon {
@@ -1428,7 +1394,7 @@ html, body {
   35%, 100% { left: 160%; }
 }
 
-/* 5. Alt Hızlı Erişim Çubuğu (Bottom Dock - Floating Cyber-Glass Dock) */
+/* 5. Alt Hızlı Erişim Çubuğu (Bottom Dock - 5 Buton) */
 .menu-bottom-dock {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1438,13 +1404,13 @@ html, body {
   margin: auto auto 0 auto;
   flex-shrink: 0;
   pointer-events: auto;
-  background: linear-gradient(180deg, rgba(16, 24, 48, 0.72) 0%, rgba(8, 12, 28, 0.88) 100%);
-  border: 1px solid rgba(0, 240, 255, 0.32);
-  border-radius: 18px;
-  padding: 7px;
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 20px rgba(0, 240, 255, 0.15);
+  background: rgba(8, 12, 26, 0.95);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 6px;
+  padding: 6px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .dock-btn {
@@ -1454,27 +1420,20 @@ html, body {
   justify-content: center;
   gap: 3px;
   height: 52px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid transparent;
-  border-radius: 12px;
+  background: rgba(14, 20, 42, 0.55);
+  border: 1.5px solid transparent;
+  border-radius: 4px;
   padding: 4px 1px;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
-  backdrop-filter: blur(8px);
+  transition: all 0.12s ease;
+  backdrop-filter: blur(6px);
   pointer-events: auto;
   color: #94a3b8;
   font-family: var(--font-display);
 }
 
-.dock-btn:hover {
-  background: rgba(0, 240, 255, 0.12);
-  border-color: rgba(0, 240, 255, 0.35);
-  color: #00f0ff;
-  transform: translateY(-2px);
-}
-
 .dock-btn:active {
-  transform: translateY(2px) scale(0.95);
+  transform: translateY(2px);
   background: rgba(5, 255, 161, 0.2);
   color: #fff;
 }
@@ -6729,8 +6688,7 @@ html, body {
     margin-bottom: 3px;
   }
   .menu-ship-visual {
-    min-width: 58px;
-    min-height: 58px;
+    min-width: 44px;
   }
   .menu-ship-stats-grid {
     padding: 3px 6px;
@@ -8127,123 +8085,6 @@ html, body {
   font-size: 12px;
 }
 
-/* === UI THEME PRESET SELECTOR & THEMES === */
-.btn-theme-preset {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 10px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.22s ease;
-  font-family: 'Rajdhani', sans-serif;
-}
-
-.btn-theme-preset:hover {
-  border-color: rgba(0, 240, 255, 0.5);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.btn-theme-preset.active {
-  background: rgba(0, 240, 255, 0.15);
-  border-color: #00f0ff;
-  color: #00f0ff;
-  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
-}
-
-.theme-preset-badge {
-  font-size: 16px;
-}
-
-.theme-preset-name {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-/* 1. Theme: Minimal Cyber-Glass (Siberpunk & Minimalist Cam Füzyonu) */
-body.theme-glass .modal-card,
-body.theme-glass .card,
-body.theme-glass .hud-panel,
-body.theme-glass .ship-display-info,
-body.theme-glass .menu-bottom-dock {
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-  background: linear-gradient(145deg, rgba(16, 24, 52, 0.74) 0%, rgba(7, 12, 26, 0.86) 100%) !important;
-  border-color: rgba(0, 240, 255, 0.35) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 24px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
-  border-radius: 18px !important;
-}
-
-body.theme-glass .upgrade-card {
-  backdrop-filter: blur(22px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
-  background: linear-gradient(140deg, rgba(20, 32, 64, 0.76) 0%, rgba(9, 15, 34, 0.88) 100%) !important;
-  border: 1px solid rgba(0, 240, 255, 0.3) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
-}
-
-body.theme-glass .cyber-launch-btn {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.88) 0%, rgba(0, 180, 220, 0.92) 50%, rgba(0, 110, 180, 0.88) 100%) !important;
-  backdrop-filter: blur(20px) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 32px rgba(0, 240, 255, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.7) !important;
-}
-
-body.theme-glass .dock-btn {
-  border-radius: 12px !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  backdrop-filter: blur(10px) !important;
-}
-
-/* 2. Theme: Cyber-Mecha */
-body.theme-mecha .modal-card,
-body.theme-mecha .card,
-body.theme-mecha .hud-panel {
-  background: #0d121c !important;
-  border: 2px solid #ffbe0b !important;
-  box-shadow: 0 0 20px rgba(255, 190, 11, 0.25) !important;
-  border-radius: 4px !important;
-}
-body.theme-mecha .btn-action-cyber {
-  background: linear-gradient(135deg, #ffbe0b, #f59e0b) !important;
-  color: #05080f !important;
-  border-radius: 4px !important;
-  font-weight: 900 !important;
-}
-
-/* 3. Theme: Retro Arcade */
-body.theme-arcade .modal-card,
-body.theme-arcade .card,
-body.theme-arcade .hud-panel {
-  background: #090014 !important;
-  border: 3px solid #ff007f !important;
-  box-shadow: 0 0 18px #ff007f !important;
-  border-radius: 0px !important;
-}
-body.theme-arcade .btn-action-cyber {
-  background: #ff007f !important;
-  color: #fff !important;
-  border-radius: 0px !important;
-  box-shadow: 0 4px 0 #99004d, 0 0 15px rgba(255, 0, 127, 0.5) !important;
-}
-
-/* 4. Theme: Holographic Sci-Fi */
-body.theme-holo .modal-card,
-body.theme-holo .card,
-body.theme-holo .hud-panel {
-  background: rgba(3, 18, 33, 0.82) !important;
-  border: 1px solid #00f0ff !important;
-  box-shadow: 0 0 25px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.08) !important;
-  border-radius: 8px !important;
-}
 
 /* ==========================================================================
    === TACTILE JUICE MICRO-INTERACTIONS & 3D BUTTON PHYSICS (1 to 6) ===
