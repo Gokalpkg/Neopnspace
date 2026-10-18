@@ -5005,6 +5005,35 @@ class Game {
     };
     this.renderLanguageGrid = renderLanguageGrid;
 
+    const applyTheme = (theme) => {
+      document.body.classList.remove('theme-glass', 'theme-mecha', 'theme-arcade', 'theme-holo');
+      document.body.classList.add(`theme-${theme}`);
+      localStorage.setItem('neon_ui_theme', theme);
+      const themeBtns = document.querySelectorAll('.btn-theme-preset');
+      themeBtns.forEach(b => {
+        if (b.getAttribute('data-theme') === theme) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    };
+    this.applyTheme = applyTheme;
+
+    // Load initial theme from localStorage
+    const savedTheme = localStorage.getItem('neon_ui_theme') || 'glass';
+    applyTheme(savedTheme);
+
+    const themeGrid = document.getElementById('ui-theme-grid');
+    if (themeGrid) {
+      themeGrid.querySelectorAll('.btn-theme-preset').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sounds.playCardSelect();
+          vibrate.light();
+          const selected = btn.getAttribute('data-theme') || 'glass';
+          applyTheme(selected);
+          this.showToast(t('settings_theme_applied') || 'Arayüz Teması Güncellendi!', '#00f0ff');
+        });
+      });
+    }
+
     const btnToggleDevMode = document.getElementById('btn-toggle-dev-mode');
     const updateDevModeUI = () => {
       if (!btnToggleDevMode) return;

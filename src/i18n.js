@@ -251,6 +251,8 @@ export const TRANSLATIONS = {
     // Settings Modal
     settings_title: "SETTINGS",
     settings_language: "LANGUAGE",
+    settings_ui_theme: "UI THEME PRESET",
+    settings_theme_applied: "UI Theme preset applied!",
     settings_audio: "SOUND EFFECTS",
     settings_vibration: "HAPTIC VIBRATION",
     settings_on: "ENABLED",
@@ -741,6 +743,8 @@ export const TRANSLATIONS = {
 
     settings_title: "AYARLAR",
     settings_language: "DİL SEÇİMİ",
+    settings_ui_theme: "ARAYÜZ TEMASI",
+    settings_theme_applied: "Arayüz teması güncellendi!",
     settings_audio: "SES EFEKTLERİ",
     settings_vibration: "TİTREŞİM",
     settings_on: "AÇIK",
