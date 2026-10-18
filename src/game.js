@@ -399,31 +399,31 @@ const PIXEL_PLAYER_SKINS = {
       [0, 0, 0, 6, 0, 0, 0]  // y=12: Merkez kuantum akışı
     ]
   },
-  // 6. CHRONO APEX: Başının arkasında dönen kutsal Zaman Çarkı (Chrono Halo), üç katmanlı altın katedral kanatları ve güneş meşaleli devasa imparatorluk amiral titanı
+  // 6. CHRONO APEX: Başının arkasında dönen kutsal Zaman Çarkı (Chrono Halo), zarif anka kanatları ve güneş meşaleli imparatorluk amiral gemisi
   chrono: {
     p: 2.8,
     palette: {
-      1: '#1a1202', // Obsidyen Altını (Imperial Dark)
-      2: '#ffd700', // Saf Hükümdar Altını
-      3: '#ffffff', // İlahi Güneş Beyazı
-      4: '#ff9100', // Güneş Kehribarı
-      5: '#d97706', // Kraliyet Bronzu
-      6: '#fef08a'  // Göksel Parıltı
+      1: '#1c1917', // Derin İmparatorluk Obsidyeni (Deep Royal Charcoal)
+      2: '#ffd700', // Saf 24K Hükümdar Altını (Pure Imperial Gold)
+      3: '#ffffff', // İlahi Elmas Beyazı (Celestial Diamond Glint)
+      4: '#f59e0b', // Güneş Kehribarı / Temporal Hat (Warm Sun Amber)
+      5: '#b45309', // Yanık Bronz / Zırh Gölgelendirmesi (Rich Bronze Shadow)
+      6: '#fef08a'  // Açık Altın Parıltısı / Kokpit Camı (Radiant Pale Gold)
     },
     rows: [
-      [3, 0, 0, 0, 0, 0, 0], // y=0: Göksel Zaman Zirvesi (Divine Apex Spire)
-      [3, 2, 0, 0, 0, 2, 3], // y=1: ZAMAN ÇARKI HALO TAÇLARI (c=0 ve c=5,6 dış kavis taç boynuzları!)
-      [2, 3, 2, 0, 2, 3, 2], // y=2: İmparatorluk Güneş Tacı Kavisleri (Halo Ring Arch)
-      [1, 2, 3, 2, 4, 2, 1], // y=3: Altın Zırhlı Komuta Mabedi & Kronometre Çerçevesi
-      [3, 4, 1, 2, 5, 2, 4], // y=4: MERKEZ GÜNEŞ KRİSTALİ (c=0: Akkor beyaz/kehribar zaman taşı)
-      [2, 3, 4, 1, 2, 4, 2], // y=5: Kutsal Altın Kaburga Hatları (Sacred Ribs)
-      [1, 2, 3, 4, 1, 2, 3], // y=6: BİRİNCİ KADEME MASİF İMPARATORLUK KANATLARI (Geniş kavis, c=6)
-      [4, 1, 2, 3, 4, 1, 2], // y=7: İKİNCİ KADEME GÜNEŞ KALKANLARI
-      [2, 4, 1, 2, 3, 4, 1], // y=8: ÜÇÜNCÜ KADEME AĞIR DREADNOUGHT MAHMUZLARI
-      [1, 2, 4, 1, 2, 3, 2], // y=9: Çok Katmanlı Ağır Yan Top Bataryaları & Rezonatörler
-      [2, 1, 2, 6, 1, 2, 1], // y=10: Katedral Arka Manifold Koruma Izgarası
-      [3, 6, 2, 1, 6, 2, 0], // y=11: ÜÇLÜ MAJESTİK İTİCİ NOZÜL SİSTEMİ (c=0,1 ve c=4)
-      [6, 3, 0, 6, 4, 0, 0]  // y=12: Altın Güneş Plazması Egzoz Akımları
+      [3, 0, 0, 0, 0, 0, 0], // y=0: Elmas kesim zaman mızrağı ucu (x=6)
+      [2, 3, 0, 0, 0, 0, 0], // y=1: Altın iğne burun
+      [2, 1, 3, 0, 0, 0, 0], // y=2: Zırhlı omurga + elmas pah
+      [3, 6, 2, 0, 0, 0, 3], // y=3: Kutsal Kronometre Kokpiti (c=0..2) + Kanat Ucu Mızrağı (c=6)
+      [4, 3, 1, 2, 0, 3, 2], // y=4: Güneş Taşı Çekirdeği + Altın Ön Kanatçıklar (c=5,6)
+      [2, 4, 1, 2, 3, 2, 0], // y=5: Zırhlı Gövde Kalkanları
+      [1, 2, 4, 1, 2, 0, 0], // y=6: AERODİNAMİK DAR BEL (c=5,6 boşluk! Zarif ve estetik kavis)
+      [2, 1, 2, 4, 1, 3, 0], // y=7: Ana Katedral Kanat Kökü Genişlemesi
+      [4, 2, 1, 2, 4, 2, 3], // y=8: MAJESTİK TAM KANAT AÇIKLIĞI (c=6: jilet keskinliğinde altın elmas uç)
+      [1, 4, 2, 1, 2, 5, 2], // y=9: Kademeli Anka Tüyü Kanat Bıçakları
+      [2, 1, 5, 2, 1, 2, 0], // y=10: Arka Motor Kovanı & Aerodinamik Kademelenme
+      [3, 6, 1, 0, 6, 3, 0], // y=11: ÜÇLÜ BAĞIMSIZ MOTOR NOZÜLLERİ (Merkez ve ayrık yan iticiler)
+      [6, 3, 0, 0, 0, 6, 0]  // y=12: İyon Çıkış Alev Kanalları
     ]
   }
 };
@@ -500,15 +500,14 @@ function getShipPixelSvg(skinId, size = 52) {
       <rect x="8" y="12.5" width="0.5" height="1" fill="#ffffff"/>
     `;
   } else if (skinId === 'chrono') {
-    // Üçlü Altın İmparatorluk Güneş İticileri: Merkezde masif akkor plazma ve yanlarda güneş meşaleleri
+    // Üçlü Altın İmparatorluk Güneş İticileri: Merkezde kristal sarı/beyaz plazma ve yan nacellerde altın meşaleler
     customFlames = `
-      <rect x="5" y="11" width="3" height="2.5" fill="#ffd700" opacity="0.95"/>
-      <rect x="5.5" y="12" width="2" height="2" fill="#fef08a"/>
-      <rect x="6" y="13" width="1" height="1.5" fill="#ffffff"/>
-      <rect x="1.5" y="11" width="1.5" height="2" fill="#ff9100"/>
-      <rect x="2" y="12" width="1" height="1.5" fill="#ffd700"/>
-      <rect x="10" y="11" width="1.5" height="2" fill="#ff9100"/>
-      <rect x="10" y="12" width="1" height="1.5" fill="#ffd700"/>
+      <rect x="5.5" y="11" width="2" height="2" fill="#fef08a"/>
+      <rect x="6" y="12" width="1" height="2.5" fill="#ffffff"/>
+      <rect x="1.5" y="11" width="1" height="1.8" fill="#ffd700"/>
+      <rect x="1.5" y="12.5" width="1" height="1" fill="#fef08a"/>
+      <rect x="10.5" y="11" width="1" height="1.8" fill="#ffd700"/>
+      <rect x="10.5" y="12.5" width="1" height="1" fill="#fef08a"/>
     `;
   } else {
     // Siberpunk: İkiz delta stabilizatör nozülleri
@@ -16398,13 +16397,13 @@ class Game {
       canardTipX = r * 0.55;
       canardTipY = -r * 0.10;
     } else if (sId === 'chrono') {
-      // Chrono Apex: Üç Kademeli Kutsal İmparatorluk Katedral Kanatları
-      wingTipX = r * 1.78;
-      wingTipY = r * 0.45;
-      wingBaseX = r * 1.55;
-      wingBaseY = r * 1.15;
-      canardTipX = r * 0.95;
-      canardTipY = -r * 0.65;
+      // Chrono Apex: Üç Kademeli Kutsal İmparatorluk Katedral Kanatları & İnce Gövde Beli
+      wingTipX = r * 1.70;
+      wingTipY = r * 0.38;
+      wingBaseX = r * 1.30;
+      wingBaseY = r * 0.98;
+      canardTipX = r * 0.85;
+      canardTipY = -r * 0.50;
     }
 
     // Chrono Apex: Dönen Kutsal Zaman Çarkı (Chrono Halo & Radiating Sun Rays)
@@ -16412,21 +16411,32 @@ class Game {
       ctx.save();
       const haloRot = (this.frames || 0) * 0.015;
       ctx.translate(0, -r * 0.15);
-      ctx.rotate(haloRot);
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.55)';
+
+      // Yumuşak parlayan altın güneş halesi
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.40)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.38, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Dış kadran çemberi
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.65)';
       ctx.lineWidth = 2.0;
       ctx.beginPath();
-      ctx.arc(0, 0, r * 1.45, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 1.55, 0, Math.PI * 2);
       ctx.stroke();
-      // 8 Güneş Işını Dişlisi / Prizması
-      for (let i = 0; i < 8; i++) {
-        const ang = (i * Math.PI) / 4;
+
+      // 12 Kollu Göksel Güneş Saat Dişlileri & Prizmaları
+      ctx.rotate(haloRot);
+      for (let i = 0; i < 12; i++) {
+        const ang = (i * Math.PI) / 6;
+        const isCardinal = i % 3 === 0;
         const x1 = Math.cos(ang) * (r * 1.35);
         const y1 = Math.sin(ang) * (r * 1.35);
-        const x2 = Math.cos(ang) * (r * 1.68);
-        const y2 = Math.sin(ang) * (r * 1.68);
-        ctx.strokeStyle = i % 2 === 0 ? '#ffd700' : '#ff9100';
-        ctx.lineWidth = i % 2 === 0 ? 2.8 : 1.6;
+        const x2 = Math.cos(ang) * (r * (isCardinal ? 1.72 : 1.55));
+        const y2 = Math.sin(ang) * (r * (isCardinal ? 1.72 : 1.55));
+        ctx.strokeStyle = isCardinal ? '#ffffff' : (i % 2 === 0 ? '#ffd700' : '#f59e0b');
+        ctx.lineWidth = isCardinal ? 2.5 : 1.5;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -16564,15 +16574,37 @@ class Game {
       ctx.arc(0, 0, 8 + vPulse, 0, Math.PI * 2);
       ctx.fill();
     } else if (sId === 'chrono') {
-      // Chrono Apex: Altın Zaman Kadranı ve Kristal Prizma
+      // Chrono Apex: Dönen Altın Zaman Kadranı, Saat Akrebi ve Elmas Kalp
+      const cDialRot = (this.frames || 0) * 0.06;
       ctx.strokeStyle = '#ffd700';
-      ctx.lineWidth = 1.4;
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+      ctx.arc(0, 0, 5.8, 0, Math.PI * 2);
       ctx.stroke();
+
+      // 4 ana yön zaman çentiği
+      for (let i = 0; i < 4; i++) {
+        const a = (i * Math.PI) / 2;
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * 4.0, Math.sin(a) * 4.0);
+        ctx.lineTo(Math.cos(a) * 5.8, Math.sin(a) * 5.8);
+        ctx.stroke();
+      }
+
+      // Dönen Zaman İbresi (Chronometer Needle)
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(cDialRot) * 4.6, Math.sin(cDialRot) * 4.6);
+      ctx.stroke();
+
+      // Merkez Parlayan Elmas Çekirdek
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+      ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
       ctx.fill();
     } else {
       ctx.fillStyle = primaryColor;
