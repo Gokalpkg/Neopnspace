@@ -262,7 +262,9 @@ function pixelPips(filled, total) {
 
 
 // === 8/16-BİT RETRO ARCADE OYUNCU GEMİ PİKSEL MOTORU ===
+// === 8/16-BİT RETRO ARCADE OYUNCU GEMİ PİKSEL MOTORU ===
 const PIXEL_PLAYER_SKINS = {
+  // 1. SİBERPUNK: Klasik Vic Viper / Raiden tarzı sivri iğne burunlu, genişleyen delta kanatlı ve kanat ucu lazer namlulu saldırı jeti
   cyberpunk: {
     p: 2.8,
     palette: {
@@ -274,21 +276,22 @@ const PIXEL_PLAYER_SKINS = {
       6: '#00f0ff'
     },
     rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
+      [2, 0, 0, 0, 0, 0, 0], // y=0: Sivri iğne burun ucu
+      [3, 0, 0, 0, 0, 0, 0], // y=1: Burun parlaması
+      [1, 3, 0, 0, 0, 0, 0], // y=2: Kokpit tepe
+      [1, 4, 2, 0, 0, 0, 0], // y=3: Kokpit neon kılıfı
+      [1, 5, 4, 2, 0, 0, 0], // y=4: Kokpit tabanı
+      [1, 5, 1, 2, 2, 0, 0], // y=5: Gövde & delta kanat kökü
+      [1, 1, 5, 1, 2, 2, 4], // y=6: Delta kanat açılımı & kanat ucu namlu ucu
+      [2, 1, 1, 5, 1, 2, 4], // y=7: Genişleyen delta kanatlar
+      [2, 4, 1, 1, 5, 1, 2], // y=8: Dış kanat neon hattı
+      [1, 4, 2, 1, 1, 5, 2], // y=9: Arka denge kanatçığı
+      [0, 2, 1, 2, 0, 1, 2], // y=10: Kuyruk stabilizatörleri
+      [0, 0, 2, 1, 6, 6, 0], // y=11: İkiz motor podları
+      [0, 0, 0, 6, 6, 0, 0]  // y=12: İkiz itki çıkışı
     ]
   },
+  // 2. GÜNEŞ FIRTINASI: Çift öne uzanan ağır plazma namlulu, masif omuz zırhlı ve geniş füzyon iticili ağır taarruz kruvazörü
   solar: {
     p: 2.8,
     palette: {
@@ -300,21 +303,22 @@ const PIXEL_PLAYER_SKINS = {
       6: '#ff9100'
     },
     rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
+      [0, 0, 2, 0, 0, 0, 0], // y=0: İkiz öne fırlayan ağır plazma namluları (c=2)
+      [4, 2, 3, 0, 0, 0, 0], // y=1: Namlu gövdesi ve ön ağır zırh koçbaşı
+      [2, 2, 1, 2, 0, 0, 0], // y=2: Ön zırh plakası
+      [3, 6, 2, 4, 2, 0, 0], // y=3: Ağır zırhlı vizör kokpit
+      [1, 4, 6, 1, 2, 2, 0], // y=4: Genişleyen masif gövde
+      [1, 5, 5, 1, 1, 2, 4], // y=5: Geniş omuz zırh blokları (c=6'ya kadar)
+      [4, 5, 1, 5, 1, 1, 2], // y=6: Ağır silah istasyonları
+      [2, 1, 5, 5, 5, 1, 2], // y=7: Masif yan kalkanlar
+      [2, 4, 1, 5, 1, 1, 2], // y=8: Köşeli zırh panelleri
+      [1, 4, 1, 1, 2, 2, 0], // y=9: Arka zırh sığınakları
+      [1, 4, 1, 6, 6, 1, 0], // y=10: Geniş itici koruma kafesi
+      [0, 1, 6, 6, 6, 0, 0], // y=11: Masif füzyon nozülü
+      [0, 0, 6, 6, 0, 0, 0]  // y=12: Merkezi çekirdek alevi
     ]
   },
+  // 3. ZEHİR NEON: Gövdenin önüne uzanan yırtıcı kıskaç bıçaklı (ileri açılı kanat), dar eşek arısı belli ve zehir iğneli avcı
   toxic: {
     p: 2.8,
     palette: {
@@ -326,47 +330,22 @@ const PIXEL_PLAYER_SKINS = {
       6: '#05ffa1'
     },
     rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
+      [0, 0, 0, 0, 0, 2, 0], // y=0: Gövdeden İLERİ uzanan orak kıskaç uçları (c=5)
+      [0, 0, 0, 0, 2, 4, 0], // y=1: İleri kanat bıçağı
+      [2, 0, 0, 2, 1, 4, 0], // y=2: Merkez biyolojik iğne + orak kanat
+      [2, 3, 0, 1, 5, 1, 2], // y=3: Böceksi asit kokpit gözleri
+      [1, 4, 2, 1, 5, 1, 2], // y=4: Asit kanalları
+      [1, 4, 2, 1, 1, 2, 0], // y=5: Daralan eşek arısı beli (wasp waist)
+      [1, 5, 4, 1, 2, 0, 0], // y=6: Ultra ince orta gövde
+      [1, 1, 5, 4, 1, 2, 0], // y=7: Arka sekonder iğne kanatçıkları
+      [2, 1, 1, 5, 4, 1, 2], // y=8: Dış diken mahmuzları
+      [0, 2, 1, 1, 5, 1, 2], // y=9: Zehir kesesi gövdesi
+      [0, 0, 2, 1, 1, 2, 0], // y=10: Zehir iğnesi ucu
+      [0, 0, 0, 6, 6, 0, 0], // y=11: Odaklanmış tekil iğne itici
+      [0, 0, 0, 0, 6, 0, 0]  // y=12: Asit plazma iğne ucu
     ]
   },
-  phantom: {
-    p: 2.8,
-    palette: {
-      1: '#020617',
-      2: '#38bdf8',
-      3: '#ffffff',
-      4: '#c084fc',
-      5: '#0284c7',
-      6: '#80deea'
-    },
-    rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
-    ]
-  },
+  // 4. VORTEX NEBULA: Çift katamaran paralel gövdeli, ortası açık ve merkezde dönen mor yerçekimi tekillik çekirdekli girdap avcısı
   vortex: {
     p: 2.8,
     palette: {
@@ -378,21 +357,49 @@ const PIXEL_PLAYER_SKINS = {
       6: '#e879f9'
     },
     rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
+      [0, 0, 2, 0, 0, 0, 0], // y=0: İkiz paralel katamaran burunları (c=2)
+      [0, 0, 3, 2, 0, 0, 0], // y=1: İkiz gövde sensör uçları
+      [0, 2, 1, 4, 2, 0, 0], // y=2: Çift gövde kılıfları
+      [0, 4, 3, 1, 2, 0, 0], // y=3: Çift ayrı kokpit vizörleri
+      [2, 0, 1, 5, 1, 2, 0], // y=4: MERKEZİ BOŞLUK + Tekillik alanı başlangıcı
+      [3, 2, 0, 1, 5, 1, 2], // y=5: MERKEZDE AÇIKTA DÖNEN TEKİLLİK ÇEKİRDEĞİ (c=0)
+      [4, 3, 2, 1, 1, 5, 2], // y=6: Gövdeleri bağlayan yerçekimi kemeri
+      [2, 4, 1, 1, 5, 1, 4], // y=7: Geniş dış yerçekimi nacelleri
+      [0, 2, 1, 5, 1, 4, 2], // y=8: İkiz motor gövdeleri
+      [0, 0, 2, 1, 5, 1, 2], // y=9: Motor gövdesi daralması
+      [0, 0, 6, 1, 2, 2, 0], // y=10: İki ayrı gövdeden bağımsız çift motor çıkışı
+      [0, 0, 6, 6, 0, 0, 0], // y=11: İkiz mor iyon nozülleri
+      [0, 0, 0, 6, 0, 0, 0]  // y=12: İkiz plazma izi
     ]
   },
+  // 5. HAYALET PLAZMA: Fasetli elmas ok ucu geometrili (stealth diamond), kademeli kristal kanatlı ve gövdeye gömülü gizli egzozlu
+  phantom: {
+    p: 2.8,
+    palette: {
+      1: '#020617',
+      2: '#38bdf8',
+      3: '#ffffff',
+      4: '#c084fc',
+      5: '#0284c7',
+      6: '#80deea'
+    },
+    rows: [
+      [2, 0, 0, 0, 0, 0, 0], // y=0: Elmas zirve noktası
+      [3, 2, 0, 0, 0, 0, 0], // y=1: Kademeli faset açılımı
+      [1, 3, 2, 0, 0, 0, 0], // y=2: Kuantum kristal prizma kokpit
+      [1, 5, 3, 2, 0, 0, 0], // y=3: Pürüzsüz stealth açısı
+      [1, 4, 5, 3, 2, 0, 0], // y=4: Genişleyen radar-emici zırh çizgisi
+      [1, 1, 4, 5, 3, 2, 0], // y=5: Elmas kanat kırılımı
+      [1, 5, 1, 4, 5, 3, 2], // y=6: En geniş kuantum faz kanat uçları (c=6)
+      [2, 1, 5, 1, 4, 5, 2], // y=7: Faz kırıcı kalkan ızgarası
+      [0, 2, 1, 5, 1, 4, 2], // y=8: Fasetli arka firar kenarı
+      [0, 0, 2, 1, 5, 1, 0], // y=9: Gövdeye gömülü stealth hava girişi
+      [0, 0, 0, 2, 1, 2, 0], // y=10: İç tünel tipi gizli egzoz
+      [0, 0, 0, 6, 6, 0, 0], // y=11: Gövde içi gizlenmiş buz mavisi iyon parıltısı
+      [0, 0, 0, 0, 6, 0, 0]  // y=12: Fısıltı iyon izi
+    ]
+  },
+  // 6. CHRONO APEX: Üç kademeli imparatorluk taç kanatlı, merkez zaman küreli ve üçlü altın bağımsız nozüllü efsanevi kruvazör
   chrono: {
     p: 2.8,
     palette: {
@@ -404,19 +411,19 @@ const PIXEL_PLAYER_SKINS = {
       6: '#fef08a'
     },
     rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
+      [3, 0, 0, 0, 0, 0, 0], // y=0: Altın zaman mızrağı zirvesi
+      [2, 3, 0, 0, 0, 0, 0], // y=1: İmparatorluk pスター
+      [2, 1, 2, 0, 0, 0, 0], // y=2: İleri taç mahmuzu
+      [1, 4, 1, 2, 0, 0, 0], // y=3: Kronometre kadran yuvası
+      [3, 4, 5, 1, 2, 0, 0], // y=4: Merkez zaman taşı & kademeli taç
+      [2, 3, 4, 5, 1, 2, 2], // y=5: Masif üst taç kavis kanatları (c=6)
+      [1, 2, 1, 4, 5, 1, 4], // y=6: Altın dreadnought omurgası
+      [1, 5, 2, 1, 4, 5, 2], // y=7: İkinci kademe altın kalkan plakaları
+      [2, 1, 5, 2, 1, 4, 2], // y=8: Kademeli üçüncü kanat basamağı
+      [2, 4, 1, 5, 2, 1, 2], // y=9: Üçlü motor manifold koruyucusu
+      [1, 2, 6, 1, 6, 2, 0], // y=10: ÜÇLÜ İTİCİ NOZÜL SİSTEMİ (Merkez, İç ve Dış portlar)
+      [6, 0, 6, 6, 6, 0, 0], // y=11: Üçlü bağımsız altın temporal iticiler
+      [6, 0, 0, 6, 0, 0, 0]  // y=12: Üçlü altın ion alev akımları
     ]
   }
 };
@@ -458,10 +465,60 @@ function getShipPixelSvg(skinId, size = 52) {
     }
   });
 
+  // Her gemiye özel özgün itki motor ve alev mimarisi
+  let customFlames = '';
+  if (skinId === 'solar') {
+    // Masif geniş füzyon alev bloğu
+    customFlames = `
+      <rect x="3" y="11" width="7" height="2" fill="#ff3d00" opacity="0.95"/>
+      <rect x="4" y="12" width="5" height="1.5" fill="#ffbe0b"/>
+      <rect x="5" y="13" width="3" height="1.5" fill="#ffffff"/>
+    `;
+  } else if (skinId === 'toxic') {
+    // Odaklanmış sivri zehir iğnesi egzozu
+    customFlames = `
+      <rect x="5" y="11" width="3" height="1" fill="#05ffa1"/>
+      <rect x="6" y="12" width="1" height="3" fill="#05ffa1" opacity="0.95"/>
+      <rect x="6" y="12.5" width="1" height="1" fill="#ffffff"/>
+    `;
+  } else if (skinId === 'vortex') {
+    // Çift katamaran gövdelerinden çıkan ikiz mor ion alevleri
+    customFlames = `
+      <rect x="3" y="11" width="2" height="2" fill="#c084fc" opacity="0.95"/>
+      <rect x="7" y="11" width="2" height="2" fill="#c084fc" opacity="0.95"/>
+      <rect x="3.5" y="12" width="1" height="1.5" fill="#ffffff"/>
+      <rect x="7.5" y="12" width="1" height="1.5" fill="#ffffff"/>
+    `;
+  } else if (skinId === 'phantom') {
+    // İç tünele gömülü fısıltı tipi stealth kuantum iyon huzmesi
+    customFlames = `
+      <rect x="5" y="11" width="3" height="1.5" fill="#80deea" opacity="0.9"/>
+      <rect x="6" y="12" width="1" height="2" fill="#38bdf8"/>
+      <rect x="6" y="12.5" width="1" height="1" fill="#ffffff"/>
+    `;
+  } else if (skinId === 'chrono') {
+    // Üçlü altın imparatorluk bağımsız iticileri (Merkez + Sağ + Sol)
+    customFlames = `
+      <rect x="6" y="11" width="1" height="2" fill="#ffd700"/>
+      <rect x="6" y="12" width="1" height="1.5" fill="#ffffff"/>
+      <rect x="2" y="11" width="1" height="1.8" fill="#ffd700"/>
+      <rect x="2" y="12" width="1" height="1" fill="#ffffff"/>
+      <rect x="10" y="11" width="1" height="1.8" fill="#ffd700"/>
+      <rect x="10" y="12" width="1" height="1" fill="#ffffff"/>
+    `;
+  } else {
+    // Siberpunk: İkiz delta stabilizatör nozülleri
+    customFlames = `
+      <rect x="4" y="12" width="1" height="2" fill="#00f0ff" opacity="0.9"/>
+      <rect x="8" y="12" width="1" height="2" fill="#00f0ff" opacity="0.9"/>
+      <rect x="4" y="13" width="1" height="1" fill="#ffffff"/>
+      <rect x="8" y="13" width="1" height="1" fill="#ffffff"/>
+    `;
+  }
+
   return `<svg viewBox="-1 -1 15 17" width="${size}" height="${size}" style="filter: drop-shadow(0 0 10px ${glowCol});">
     ${rects}
-    <rect x="5.5" y="13" width="2" height="2" fill="${flameCol}" opacity="0.9"/>
-    <rect x="6" y="14" width="1" height="1.5" fill="#ffffff"/>
+    ${customFlames}
   </svg>`;
 }
 
@@ -16294,11 +16351,9 @@ class Game {
     ctx.strokeStyle = primaryColor;
     ctx.lineWidth = 2.6;
 
-    // Transformers / Pokemon Evrim Geometrisi:
-    // Hücum (front) bölgesinde: İleri ok gibi açılmış hücum kanatları (Forward-swept assault wings)
-    // Sniper (rear) bölgesinde: Gövdeye yapışık, dar süpersonik iğne profili
-    // Orta (mid) bölgede: Klasik dengeli delta kanat
-    const zone = this.player.combatZone || 'mid';
+    // 4. Ana Gemi Gövdesi ve Kanat Yapısı: Her Gemiye Özel Özgün Silüet ve Kanat Mimarisi
+    const sId = skin.id || 'cyberpunk';
+    let noseY = -r * 1.55;
     let wingTipX = r * 1.35;
     let wingTipY = r * 0.65;
     let wingBaseX = r * 1.3;
@@ -16306,22 +16361,65 @@ class Game {
     let canardTipX = r * 0.58;
     let canardTipY = -r * 0.45;
 
+    if (sId === 'solar') {
+      // Güneş Fırtınası: Masif köşeli zırhlı bombardıman gövdesi & geniş omuzlar
+      wingTipX = r * 1.55;
+      wingTipY = r * 0.50;
+      wingBaseX = r * 1.45;
+      wingBaseY = r * 1.08;
+      canardTipX = r * 0.88;
+      canardTipY = -r * 0.20;
+    } else if (sId === 'toxic') {
+      // Zehir Neon: İleri uzanan yırtıcı orak kıskaç kanatlar (forward-swept mantis)
+      wingTipX = r * 1.45;
+      wingTipY = -r * 0.70;
+      wingBaseX = r * 1.15;
+      wingBaseY = r * 0.35;
+      canardTipX = r * 0.45;
+      canardTipY = -r * 0.25;
+    } else if (sId === 'vortex') {
+      // Vortex Nebula: Katamaran çift gövde & geniş duruş
+      wingTipX = r * 1.60;
+      wingTipY = r * 0.68;
+      wingBaseX = r * 1.38;
+      wingBaseY = r * 1.15;
+      canardTipX = r * 0.82;
+      canardTipY = -r * 0.75;
+    } else if (sId === 'phantom') {
+      // Hayalet Plazma: Pürüzsüz stealth elmas ok ucu (faceted diamond)
+      wingTipX = r * 1.52;
+      wingTipY = r * 0.52;
+      wingBaseX = r * 0.95;
+      wingBaseY = r * 0.95;
+      canardTipX = r * 0.78;
+      canardTipY = -r * 0.12;
+    } else if (sId === 'chrono') {
+      // Chrono Apex: İmparatorluk taç kademeli kavisli kanatlar
+      wingTipX = r * 1.62;
+      wingTipY = r * 0.48;
+      wingBaseX = r * 1.42;
+      wingBaseY = r * 1.08;
+      canardTipX = r * 0.68;
+      canardTipY = -r * 0.60;
+    }
+
+    // Transformers / Pokemon Evrim Geometrisi:
+    // Hücum (front) bölgesinde: İleri ok gibi açılmış hücum kanatları (Forward-swept assault wings)
+    // Sniper (rear) bölgesinde: Gövdeye yapışık, dar süpersonik iğne profili
+    // Orta (mid) bölgede: Klasik dengeli delta kanat
+    const zone = this.player.combatZone || 'mid';
+
     if (zone === 'front') {
       // Hücum Hattı: Kanatlar agresif biçimde ileri doğru açılır ve silecek kılıcıyla kenetlenir
-      wingTipX = r * 1.48;
-      wingTipY = r * 0.18;
-      wingBaseX = r * 1.36;
-      wingBaseY = r * 0.72;
-      canardTipX = r * 0.72;
-      canardTipY = -r * 0.60;
+      wingTipX *= 1.12;
+      wingTipY -= r * 0.35;
+      canardTipX *= 1.2;
+      canardTipY -= r * 0.15;
     } else if (zone === 'rear') {
       // Sniper Hattı: Kanatlar daralır ve gövde boyunca iğne gibi geriye uzanır
-      wingTipX = r * 1.08;
-      wingTipY = r * 0.88;
-      wingBaseX = r * 1.02;
-      wingBaseY = r * 1.18;
-      canardTipX = r * 0.42;
-      canardTipY = -r * 0.32;
+      wingTipX *= 0.82;
+      wingTipY += r * 0.25;
+      canardTipX *= 0.75;
     }
 
     // Mekanik Dönüşüm Geçiş İnterpolasyonu (Transformers / Pokemon Evolution Morph Shift)
@@ -16330,6 +16428,22 @@ class Game {
       const morphShift = Math.sin(morph * Math.PI) * 5;
       wingTipX += morphShift;
       canardTipX += morphShift * 0.6;
+    }
+
+    // Güneş Fırtınası: Öne fırlayan masif ikiz plazma topları
+    if (sId === 'solar') {
+      ctx.save();
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#ffbe0b';
+      ctx.lineWidth = 1.6;
+      ctx.fillRect(-r * 0.55, -r * 2.1, 4.5, r * 1.0);
+      ctx.strokeRect(-r * 0.55, -r * 2.1, 4.5, r * 1.0);
+      ctx.fillRect(r * 0.55 - 4.5, -r * 2.1, 4.5, r * 1.0);
+      ctx.strokeRect(r * 0.55 - 4.5, -r * 2.1, 4.5, r * 1.0);
+      ctx.fillStyle = '#ff3d00';
+      ctx.fillRect(-r * 0.55, -r * 2.2, 4.5, 3.5);
+      ctx.fillRect(r * 0.55 - 4.5, -r * 2.2, 4.5, 3.5);
+      ctx.restore();
     }
 
     // Tam kanat & gövde poligonu
@@ -16371,16 +16485,41 @@ class Game {
     ctx.fill();
     ctx.stroke();
 
-    // Merkez Füzyon Reaktörü Çekirdeği (Parlak Neon Nabız)
+    // Merkez Füzyon Reaktörü Çekirdeği (Her Gemiye Özel Çekirdek Efekti)
     ctx.save();
-    ctx.fillStyle = primaryColor;
-    ctx.beginPath();
-    ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
-    ctx.fill();
+    if (sId === 'vortex') {
+      // Vortex Nebula: Dönen Mor Yerçekimi Tekilliği Çekirdeği
+      const vPulse = Math.sin((this.frames || 0) * 0.25) * 1.5;
+      const vGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 7 + vPulse);
+      vGrad.addColorStop(0, '#ffffff');
+      vGrad.addColorStop(0.4, '#bf5af2');
+      vGrad.addColorStop(0.8, '#38bdf8');
+      vGrad.addColorStop(1, 'rgba(191, 90, 242, 0)');
+      ctx.fillStyle = vGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 8 + vPulse, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (sId === 'chrono') {
+      // Chrono Apex: Altın Zaman Kadranı ve Kristal Prizma
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = primaryColor;
+      ctx.beginPath();
+      ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
 
 
