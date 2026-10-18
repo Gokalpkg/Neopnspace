@@ -8178,6 +8178,82 @@ body.theme-holo .hud-panel {
   border-radius: 8px !important;
 }
 
+/* ==========================================================================
+   === TACTILE JUICE MICRO-INTERACTIONS & 3D BUTTON PHYSICS (1 to 6) ===
+   ========================================================================== */
+
+/* 1. Subtle 3D Perspective Tilt & Smooth Hover Scale */
+.juicy-btn {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, box-shadow;
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, filter 0.2s ease;
+  position: relative;
+  overflow: visible !important;
+}
+
+/* 2. Press Compress Down */
+.juicy-btn.btn-compress {
+  transform: perspective(600px) scale(0.92) !important;
+  filter: brightness(1.15) !important;
+  transition: transform 0.07s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* 2. Elastic Spring Snap-Back */
+@keyframes elasticSpringBack {
+  0% { transform: perspective(600px) scale(0.92); }
+  45% { transform: perspective(600px) scale(1.065); }
+  75% { transform: perspective(600px) scale(0.985); }
+  100% { transform: perspective(600px) scale(1.0); }
+}
+
+.juicy-btn.btn-elastic-snap {
+  animation: elasticSpringBack 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 3. Expanding Glowing Neon Perimeter Wave */
+@keyframes neonPerimeterWave {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.95), 0 0 12px rgba(0, 240, 255, 0.7), inset 0 0 10px rgba(0, 240, 255, 0.5);
+  }
+  45% {
+    box-shadow: 0 0 0 12px rgba(0, 240, 255, 0.5), 0 0 26px rgba(0, 240, 255, 0.85), inset 0 0 16px rgba(0, 240, 255, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 24px rgba(0, 240, 255, 0), 0 0 40px rgba(0, 240, 255, 0), inset 0 0 0 rgba(0, 240, 255, 0);
+  }
+}
+
+.juicy-btn.btn-neon-perimeter {
+  animation: neonPerimeterWave 0.48s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+/* 5. Particle Burst Shower Spark */
+.click-spark-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999999;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+}
+
+/* 6. Kinetic Screen Shake for High Stakes Actions */
+@keyframes kineticScreenShake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  18% { transform: translate(-4px, 3px) rotate(-0.4deg); }
+  36% { transform: translate(4px, -3px) rotate(0.4deg); }
+  54% { transform: translate(-3px, -2px) rotate(-0.25deg); }
+  72% { transform: translate(3px, 2px) rotate(0.2deg); }
+  90% { transform: translate(-1px, 1px) rotate(0deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.kinetic-shake-active {
+  animation: kineticScreenShake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
+}
+
+
 
 
 

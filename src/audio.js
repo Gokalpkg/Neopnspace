@@ -858,6 +858,59 @@ class SoundEngine {
     } catch (e) {}
   }
 
+  // 1. Dokunma / Basma Anı: Snappy Tactile Pop (Mekanik haptik mikro-tık)
+  playTactilePop() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+
+      const now = this.ctx.currentTime;
+      osc.frequency.setValueAtTime(620, now);
+      osc.frequency.exponentialRampToValueAtTime(160, now + 0.035);
+
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+
+      this._autoDisconnect(osc, gain);
+      osc.start(now);
+      osc.stop(now + 0.035);
+    } catch (e) {}
+  }
+
+  // 2. Bırakma / Tetiklenme Anı: Warm Rewarding Chime (Sıcak ödüllendirici kristal çan)
+  playRewardingChime(pitchMultiplier = 1.0) {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const freqs = [1046.5 * pitchMultiplier, 1567.98 * pitchMultiplier];
+      
+      freqs.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+
+        const startTime = now + idx * 0.032;
+        osc.frequency.setValueAtTime(freq * 0.9, startTime);
+        osc.frequency.exponentialRampToValueAtTime(freq, startTime + 0.04);
+
+        gain.gain.setValueAtTime(0.09, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.22);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+
+        this._autoDisconnect(osc, gain);
+        osc.start(startTime);
+        osc.stop(startTime + 0.22);
+      });
+    } catch (e) {}
+  }
+
   // Kart Seçim / Tıklama Sesi
   playCardSelect() {
     if (this.isMuted || !this.ctx) return;

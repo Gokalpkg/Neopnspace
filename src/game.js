@@ -972,6 +972,7 @@ class Game {
     this.initCanvas();
     this.initEvents();
     this.initSettingsModal();
+    this.initJuiceMicroInteractions();
     applyTranslationsToDOM();
     this.updateCrystalsDisplay();
     this.renderHangarSkins();
@@ -5299,6 +5300,209 @@ class Game {
 
     updateSettingsToggles();
     updateNoAdsUI();
+  }
+
+  // === TACTILE JUICE MICRO-INTERACTIONS ENGINE (1-6) ===
+  initJuiceMicroInteractions() {
+    if (typeof document === 'undefined') return;
+
+    const HIGH_STAKES_SELECTORS = [
+      '#btn-start-game',
+      '#btn-start-ftue',
+      '#btn-ftue-start',
+      '#btn-level-launch',
+      '#btn-ship-starup',
+      '#btn-claim-chest',
+      '#btn-ad-revive',
+      '.evolution-card',
+      '#btn-wheel-spin',
+      '.btn-action-cyber'
+    ];
+
+    const isHighStakes = (el) => {
+      return HIGH_STAKES_SELECTORS.some(sel => {
+        try { return el.matches(sel) || (el.closest && el.closest(sel)); } catch(e) { return false; }
+      });
+    };
+
+    // 5. Particle Burst Shower Spark Spawner
+    const spawnSparkBurst = (x, y, color = '#00f0ff') => {
+      if (typeof document === 'undefined' || !document.body) return;
+      const colors = [color, '#ffffff', '#ffbe0b', '#00f0ff', '#ff007f'];
+      const sparkCount = 14;
+      for (let i = 0; i < sparkCount; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'click-spark-particle';
+        const chosenColor = colors[Math.floor(Math.random() * colors.length)];
+        const size = 3 + Math.random() * 4.5;
+        spark.style.width = `${size}px`;
+        spark.style.height = `${size}px`;
+        spark.style.background = chosenColor;
+        spark.style.color = chosenColor;
+        spark.style.left = `${x}px`;
+        spark.style.top = `${y}px`;
+
+        document.body.appendChild(spark);
+
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 35 + Math.random() * 70;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity;
+        const gravity = 45;
+
+        const startTime = performance.now();
+        const duration = 380 + Math.random() * 160;
+
+        const animateSpark = (now) => {
+          const elapsed = (now - startTime) / 1000;
+          if (elapsed >= duration / 1000) {
+            if (spark.parentNode) spark.remove();
+            return;
+          }
+          const progress = elapsed / (duration / 1000);
+          const curX = x + vx * elapsed;
+          const curY = y + vy * elapsed + 0.5 * gravity * elapsed * elapsed;
+          const opacity = Math.max(0, 1 - progress);
+          const scale = Math.max(0.1, 1 - progress * 0.7);
+
+          spark.style.transform = `translate(${curX - x}px, ${curY - y}px) scale(${scale})`;
+          spark.style.opacity = opacity;
+
+          requestAnimationFrame(animateSpark);
+        };
+        requestAnimationFrame(animateSpark);
+      }
+    };
+
+    // 6. Kinetic Screen Shake Trigger
+    const triggerKineticScreenShake = (intensity = 6) => {
+      if (this.screenShake !== undefined) {
+        this.screenShake = Math.max(this.screenShake || 0, intensity);
+      }
+      const app = document.getElementById('app') || document.body;
+      if (app) {
+        app.classList.remove('kinetic-shake-active');
+        void app.offsetWidth;
+        app.classList.add('kinetic-shake-active');
+        setTimeout(() => app.classList.remove('kinetic-shake-active'), 340);
+      }
+    };
+
+    this.spawnSparkBurst = spawnSparkBurst;
+    this.triggerKineticScreenShake = triggerKineticScreenShake;
+
+    // Attach 3D tilt and tactile physics to an interactive element
+    const attachJuice = (el) => {
+      if (!el || el._hasJuiceAttached) return;
+      el._hasJuiceAttached = true;
+      el.classList.add('juicy-btn');
+
+      let isPressed = false;
+
+      // 1. Subtle 3D Perspective Tilt on pointer move
+      const handleMove = (e) => {
+        if (isPressed) return;
+        const rect = el.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        if (clientX === undefined || clientY === undefined) return;
+
+        const normX = ((clientX - rect.left) / rect.width - 0.5);
+        const normY = ((clientY - rect.top) / rect.height - 0.5);
+
+        const rotateY = normX * 14;
+        const rotateX = -normY * 14;
+
+        el.style.transform = `perspective(600px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
+      };
+
+      const handleLeave = () => {
+        if (!isPressed) {
+          el.style.transform = '';
+        }
+      };
+
+      // 2 & 4. Compress Down + Snappy Tactile Pop on Press
+      const handleDown = () => {
+        isPressed = true;
+        el.classList.add('btn-compress');
+        el.classList.remove('btn-elastic-snap');
+
+        sounds.init();
+        if (sounds.playTactilePop) sounds.playTactilePop();
+        else sounds.playClick();
+        vibrate.light();
+      };
+
+      // 2, 3, 4, 5, 6. Release: Spring snap-back + Perimeter Wave + Chime + Sparks + Kinetic Shake
+      const handleUp = (e) => {
+        if (!isPressed) return;
+        isPressed = false;
+        el.classList.remove('btn-compress');
+        el.classList.add('btn-elastic-snap');
+
+        // 3. Expanding Glowing Neon Perimeter Wave
+        el.classList.remove('btn-neon-perimeter');
+        void el.offsetWidth;
+        el.classList.add('btn-neon-perimeter');
+
+        setTimeout(() => {
+          el.classList.remove('btn-elastic-snap');
+          el.classList.remove('btn-neon-perimeter');
+          el.style.transform = '';
+        }, 460);
+
+        // 4. Warm Rewarding Chime on Release
+        if (sounds.playRewardingChime) sounds.playRewardingChime();
+        else sounds.playCardSelect();
+
+        // 5. Particle Burst Shower
+        const rect = el.getBoundingClientRect();
+        const clientX = (e && e.clientX) || (rect.left + rect.width / 2);
+        const clientY = (e && e.clientY) || (rect.top + rect.height / 2);
+        const color = getComputedStyle(el).borderColor || '#00f0ff';
+        spawnSparkBurst(clientX, clientY, color);
+
+        // 6. Kinetic Shake for High-Stakes Actions
+        if (isHighStakes(el)) {
+          triggerKineticScreenShake(8);
+          vibrate.medium();
+        }
+      };
+
+      el.addEventListener('pointerenter', handleMove);
+      el.addEventListener('pointermove', handleMove);
+      el.addEventListener('pointerleave', handleLeave);
+      el.addEventListener('pointerdown', handleDown);
+      el.addEventListener('pointerup', handleUp);
+      el.addEventListener('pointercancel', handleLeave);
+    };
+
+    const attachAll = () => {
+      const candidates = document.querySelectorAll(`
+        button,
+        .btn-action-cyber,
+        .dock-btn,
+        .mode-card,
+        .skin-card,
+        .btn-theme-preset,
+        .lang-btn,
+        .upgrade-item-card,
+        .hangar-tab-btn,
+        .btn-ship-starup,
+        .modal-close-btn
+      `);
+      candidates.forEach(attachJuice);
+    };
+
+    this.attachJuice = attachJuice;
+    this.refreshJuiceButtons = attachAll;
+
+    attachAll();
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined' && document.body) {
+      const observer = new MutationObserver(() => attachAll());
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   exportSaveCode() {
