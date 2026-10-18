@@ -372,58 +372,58 @@ const PIXEL_PLAYER_SKINS = {
       [0, 0, 0, 6, 0, 0, 0]  // y=12: İkiz plazma izi
     ]
   },
-  // 5. HAYALET PLAZMA: Fasetli elmas ok ucu geometrili (stealth diamond), kademeli kristal kanatlı ve gövdeye gömülü gizli egzozlu
+  // 5. HAYALET PLAZMA: Fiziksel gövdeden bağımsız havada asılı kuantum kristal şarapnelleri, hilal şeklinde spektral kanatları ve parlayan faz çekirdeği olan dünya dışı kuantum varlığı
   phantom: {
     p: 2.8,
     palette: {
-      1: '#020617',
-      2: '#38bdf8',
-      3: '#ffffff',
-      4: '#c084fc',
-      5: '#0284c7',
-      6: '#80deea'
+      1: '#030712', // Hiçlik Siyahı (Void Black)
+      2: '#38bdf8', // Kuantum Siyan
+      3: '#ffffff', // Akkor Faz Beyazı
+      4: '#c084fc', // Spektral Mor (Phase Shift)
+      5: '#06b6d4', // Derin Kuantum
+      6: '#a5f3fc'  // Işıltılı Ayaz (Frost White)
     },
     rows: [
-      [2, 0, 0, 0, 0, 0, 0], // y=0: Elmas zirve noktası
-      [3, 2, 0, 0, 0, 0, 0], // y=1: Kademeli faset açılımı
-      [1, 3, 2, 0, 0, 0, 0], // y=2: Kuantum kristal prizma kokpit
-      [1, 5, 3, 2, 0, 0, 0], // y=3: Pürüzsüz stealth açısı
-      [1, 4, 5, 3, 2, 0, 0], // y=4: Genişleyen radar-emici zırh çizgisi
-      [1, 1, 4, 5, 3, 2, 0], // y=5: Elmas kanat kırılımı
-      [1, 5, 1, 4, 5, 3, 2], // y=6: En geniş kuantum faz kanat uçları (c=6)
-      [2, 1, 5, 1, 4, 5, 2], // y=7: Faz kırıcı kalkan ızgarası
-      [0, 2, 1, 5, 1, 4, 2], // y=8: Fasetli arka firar kenarı
-      [0, 0, 2, 1, 5, 1, 0], // y=9: Gövdeye gömülü stealth hava girişi
-      [0, 0, 0, 2, 1, 2, 0], // y=10: İç tünel tipi gizli egzoz
-      [0, 0, 0, 6, 6, 0, 0], // y=11: Gövde içi gizlenmiş buz mavisi iyon parıltısı
-      [0, 0, 0, 0, 6, 0, 0]  // y=12: Fısıltı iyon izi
+      [3, 0, 0, 0, 0, 0, 0], // y=0: Havada asılı kuantum prizma zirvesi (Floating Apex Crystal)
+      [3, 2, 0, 0, 0, 0, 0], // y=1: Prizma gövdesi
+      [2, 0, 0, 0, 2, 4, 0], // y=2: BOŞLUK: Yanlarda havada asılı kuantum kristal şarapnelleri (c=4,5)
+      [0, 0, 0, 2, 3, 2, 0], // y=3: Dış yüzen faz bıçakları, gövde ile sıfır temas!
+      [3, 0, 2, 4, 1, 2, 0], // y=4: Merkez Faz Reaktör Yuvası + Yüzen Dış Kanatlar
+      [3, 3, 1, 2, 0, 2, 4], // y=5: Akkor Kuantum Kalbi (c=0,1 beyaz akkor) + Geniş Hilal Bıçaklar (c=5,6)
+      [2, 3, 1, 0, 0, 1, 2], // y=6: Enerji kırılma koridoru (Merkez kristal ile kanat arası boşluk!)
+      [1, 2, 4, 1, 0, 2, 3], // y=7: Spektral hilal kıvrımı (Crescent Moon kavis)
+      [0, 1, 2, 4, 1, 2, 0], // y=8: İçe kıvrılan kuantum faz kıskacı
+      [0, 0, 1, 2, 4, 0, 0], // y=9: Alt spektral odaklama halkası
+      [0, 0, 2, 3, 2, 0, 0], // y=10: Arka faz nozül halkaları (c=2,3)
+      [0, 0, 6, 0, 6, 0, 0], // y=11: İkiz buz mavisi fısıltı kuantum iyon ışını
+      [0, 0, 0, 6, 0, 0, 0]  // y=12: Merkez kuantum akışı
     ]
   },
-  // 6. CHRONO APEX: Üç kademeli imparatorluk taç kanatlı, merkez zaman küreli ve üçlü altın bağımsız nozüllü efsanevi kruvazör
+  // 6. CHRONO APEX: Başının arkasında dönen kutsal Zaman Çarkı (Chrono Halo), üç katmanlı altın katedral kanatları ve güneş meşaleli devasa imparatorluk amiral titanı
   chrono: {
     p: 2.8,
     palette: {
-      1: '#1c1602',
-      2: '#ffd700',
-      3: '#ffffff',
-      4: '#f59e0b',
-      5: '#b45309',
-      6: '#fef08a'
+      1: '#1a1202', // Obsidyen Altını (Imperial Dark)
+      2: '#ffd700', // Saf Hükümdar Altını
+      3: '#ffffff', // İlahi Güneş Beyazı
+      4: '#ff9100', // Güneş Kehribarı
+      5: '#d97706', // Kraliyet Bronzu
+      6: '#fef08a'  // Göksel Parıltı
     },
     rows: [
-      [3, 0, 0, 0, 0, 0, 0], // y=0: Altın zaman mızrağı zirvesi
-      [2, 3, 0, 0, 0, 0, 0], // y=1: İmparatorluk pスター
-      [2, 1, 2, 0, 0, 0, 0], // y=2: İleri taç mahmuzu
-      [1, 4, 1, 2, 0, 0, 0], // y=3: Kronometre kadran yuvası
-      [3, 4, 5, 1, 2, 0, 0], // y=4: Merkez zaman taşı & kademeli taç
-      [2, 3, 4, 5, 1, 2, 2], // y=5: Masif üst taç kavis kanatları (c=6)
-      [1, 2, 1, 4, 5, 1, 4], // y=6: Altın dreadnought omurgası
-      [1, 5, 2, 1, 4, 5, 2], // y=7: İkinci kademe altın kalkan plakaları
-      [2, 1, 5, 2, 1, 4, 2], // y=8: Kademeli üçüncü kanat basamağı
-      [2, 4, 1, 5, 2, 1, 2], // y=9: Üçlü motor manifold koruyucusu
-      [1, 2, 6, 1, 6, 2, 0], // y=10: ÜÇLÜ İTİCİ NOZÜL SİSTEMİ (Merkez, İç ve Dış portlar)
-      [6, 0, 6, 6, 6, 0, 0], // y=11: Üçlü bağımsız altın temporal iticiler
-      [6, 0, 0, 6, 0, 0, 0]  // y=12: Üçlü altın ion alev akımları
+      [3, 0, 0, 0, 0, 0, 0], // y=0: Göksel Zaman Zirvesi (Divine Apex Spire)
+      [3, 2, 0, 0, 0, 2, 3], // y=1: ZAMAN ÇARKI HALO TAÇLARI (c=0 ve c=5,6 dış kavis taç boynuzları!)
+      [2, 3, 2, 0, 2, 3, 2], // y=2: İmparatorluk Güneş Tacı Kavisleri (Halo Ring Arch)
+      [1, 2, 3, 2, 4, 2, 1], // y=3: Altın Zırhlı Komuta Mabedi & Kronometre Çerçevesi
+      [3, 4, 1, 2, 5, 2, 4], // y=4: MERKEZ GÜNEŞ KRİSTALİ (c=0: Akkor beyaz/kehribar zaman taşı)
+      [2, 3, 4, 1, 2, 4, 2], // y=5: Kutsal Altın Kaburga Hatları (Sacred Ribs)
+      [1, 2, 3, 4, 1, 2, 3], // y=6: BİRİNCİ KADEME MASİF İMPARATORLUK KANATLARI (Geniş kavis, c=6)
+      [4, 1, 2, 3, 4, 1, 2], // y=7: İKİNCİ KADEME GÜNEŞ KALKANLARI
+      [2, 4, 1, 2, 3, 4, 1], // y=8: ÜÇÜNCÜ KADEME AĞIR DREADNOUGHT MAHMUZLARI
+      [1, 2, 4, 1, 2, 3, 2], // y=9: Çok Katmanlı Ağır Yan Top Bataryaları & Rezonatörler
+      [2, 1, 2, 6, 1, 2, 1], // y=10: Katedral Arka Manifold Koruma Izgarası
+      [3, 6, 2, 1, 6, 2, 0], // y=11: ÜÇLÜ MAJESTİK İTİCİ NOZÜL SİSTEMİ (c=0,1 ve c=4)
+      [6, 3, 0, 6, 4, 0, 0]  // y=12: Altın Güneş Plazması Egzoz Akımları
     ]
   }
 };
@@ -490,21 +490,25 @@ function getShipPixelSvg(skinId, size = 52) {
       <rect x="7.5" y="12" width="1" height="1.5" fill="#ffffff"/>
     `;
   } else if (skinId === 'phantom') {
-    // İç tünele gömülü fısıltı tipi stealth kuantum iyon huzmesi
+    // Kuantum Faz / Spektral Buzul Rezonansı: Havada asılı ikiz kristal plazma huzmeleri
     customFlames = `
-      <rect x="5" y="11" width="3" height="1.5" fill="#80deea" opacity="0.9"/>
-      <rect x="6" y="12" width="1" height="2" fill="#38bdf8"/>
-      <rect x="6" y="12.5" width="1" height="1" fill="#ffffff"/>
+      <rect x="4" y="11" width="1.5" height="2" fill="#a5f3fc" opacity="0.95"/>
+      <rect x="7.5" y="11" width="1.5" height="2" fill="#a5f3fc" opacity="0.95"/>
+      <rect x="4.25" y="12" width="1" height="2" fill="#38bdf8"/>
+      <rect x="7.75" y="12" width="1" height="2" fill="#38bdf8"/>
+      <rect x="4.5" y="12.5" width="0.5" height="1" fill="#ffffff"/>
+      <rect x="8" y="12.5" width="0.5" height="1" fill="#ffffff"/>
     `;
   } else if (skinId === 'chrono') {
-    // Üçlü altın imparatorluk bağımsız iticileri (Merkez + Sağ + Sol)
+    // Üçlü Altın İmparatorluk Güneş İticileri: Merkezde masif akkor plazma ve yanlarda güneş meşaleleri
     customFlames = `
-      <rect x="6" y="11" width="1" height="2" fill="#ffd700"/>
-      <rect x="6" y="12" width="1" height="1.5" fill="#ffffff"/>
-      <rect x="2" y="11" width="1" height="1.8" fill="#ffd700"/>
-      <rect x="2" y="12" width="1" height="1" fill="#ffffff"/>
-      <rect x="10" y="11" width="1" height="1.8" fill="#ffd700"/>
-      <rect x="10" y="12" width="1" height="1" fill="#ffffff"/>
+      <rect x="5" y="11" width="3" height="2.5" fill="#ffd700" opacity="0.95"/>
+      <rect x="5.5" y="12" width="2" height="2" fill="#fef08a"/>
+      <rect x="6" y="13" width="1" height="1.5" fill="#ffffff"/>
+      <rect x="1.5" y="11" width="1.5" height="2" fill="#ff9100"/>
+      <rect x="2" y="12" width="1" height="1.5" fill="#ffd700"/>
+      <rect x="10" y="11" width="1.5" height="2" fill="#ff9100"/>
+      <rect x="10" y="12" width="1" height="1.5" fill="#ffd700"/>
     `;
   } else {
     // Siberpunk: İkiz delta stabilizatör nozülleri
@@ -16386,21 +16390,81 @@ class Game {
       canardTipX = r * 0.82;
       canardTipY = -r * 0.75;
     } else if (sId === 'phantom') {
-      // Hayalet Plazma: Pürüzsüz stealth elmas ok ucu (faceted diamond)
-      wingTipX = r * 1.52;
-      wingTipY = r * 0.52;
-      wingBaseX = r * 0.95;
-      wingBaseY = r * 0.95;
-      canardTipX = r * 0.78;
-      canardTipY = -r * 0.12;
+      // Hayalet Plazma: İçe kıvrılan Spektral Hilal Kanatları & Kuantum Prizma
+      wingTipX = r * 1.65;
+      wingTipY = r * 0.35;
+      wingBaseX = r * 0.90;
+      wingBaseY = r * 0.90;
+      canardTipX = r * 0.55;
+      canardTipY = -r * 0.10;
     } else if (sId === 'chrono') {
-      // Chrono Apex: İmparatorluk taç kademeli kavisli kanatlar
-      wingTipX = r * 1.62;
-      wingTipY = r * 0.48;
-      wingBaseX = r * 1.42;
-      wingBaseY = r * 1.08;
-      canardTipX = r * 0.68;
-      canardTipY = -r * 0.60;
+      // Chrono Apex: Üç Kademeli Kutsal İmparatorluk Katedral Kanatları
+      wingTipX = r * 1.78;
+      wingTipY = r * 0.45;
+      wingBaseX = r * 1.55;
+      wingBaseY = r * 1.15;
+      canardTipX = r * 0.95;
+      canardTipY = -r * 0.65;
+    }
+
+    // Chrono Apex: Dönen Kutsal Zaman Çarkı (Chrono Halo & Radiating Sun Rays)
+    if (sId === 'chrono') {
+      ctx.save();
+      const haloRot = (this.frames || 0) * 0.015;
+      ctx.translate(0, -r * 0.15);
+      ctx.rotate(haloRot);
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.55)';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.45, 0, Math.PI * 2);
+      ctx.stroke();
+      // 8 Güneş Işını Dişlisi / Prizması
+      for (let i = 0; i < 8; i++) {
+        const ang = (i * Math.PI) / 4;
+        const x1 = Math.cos(ang) * (r * 1.35);
+        const y1 = Math.sin(ang) * (r * 1.35);
+        const x2 = Math.cos(ang) * (r * 1.68);
+        const y2 = Math.sin(ang) * (r * 1.68);
+        ctx.strokeStyle = i % 2 === 0 ? '#ffd700' : '#ff9100';
+        ctx.lineWidth = i % 2 === 0 ? 2.8 : 1.6;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Hayalet Plazma: Havada Asılı Kuantum Kristal Şarapnelleri & Kuantum Bozulma Halkası
+    if (sId === 'phantom') {
+      ctx.save();
+      const pShift = Math.sin((this.frames || 0) * 0.2) * 2.5;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 1.7 + pShift, r * 1.25, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      // Havada asılı ikiz kristal şarapneller (gövdeye dokunmadan süzülür)
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 1.4;
+      // Sol yüzen kristal
+      ctx.beginPath();
+      ctx.moveTo(-r * 1.75, -r * 0.35 + pShift);
+      ctx.lineTo(-r * 1.50, -r * 0.70 + pShift);
+      ctx.lineTo(-r * 1.35, -r * 0.15 + pShift);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Sağ yüzen kristal
+      ctx.beginPath();
+      ctx.moveTo(r * 1.75, -r * 0.35 + pShift);
+      ctx.lineTo(r * 1.50, -r * 0.70 + pShift);
+      ctx.lineTo(r * 1.35, -r * 0.15 + pShift);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     }
 
     // Transformers / Pokemon Evrim Geometrisi:
