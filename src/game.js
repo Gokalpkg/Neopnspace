@@ -93,7 +93,7 @@ const eventBanner = document.getElementById('event-banner');
 const eventBannerText = document.getElementById('event-banner-text');
 const eventBannerKicker = document.getElementById('event-banner-kicker');
 
-function flashEventBanner(message, tone = 'info') {
+function flashEventBanner(message, tone = 'info', duration = 3200) {
   if (!eventBanner || !eventBannerText) return;
   eventBanner.classList.remove('threat', 'info');
   void eventBanner.offsetWidth;
@@ -101,6 +101,14 @@ function flashEventBanner(message, tone = 'info') {
   if (eventBannerKicker) eventBannerKicker.textContent = tone === 'threat' ? t('banner_threat') : '';
   eventBannerText.textContent = message;
   eventBanner.classList.remove('hidden');
+  if (typeof window !== 'undefined') {
+    if (window._eventBannerTimeout) clearTimeout(window._eventBannerTimeout);
+    if (duration > 0) {
+      window._eventBannerTimeout = setTimeout(() => {
+        eventBanner.classList.add('hidden');
+      }, duration);
+    }
+  }
 }
 
 // Yeni Arayüz & Oyun İçi Özellik Elemanları
@@ -468,8 +476,8 @@ class Game {
     this.currentSectorId = 'void';
     this.warpTimer = 0;
     
-    // Çoklu Mod ve Skor Sistemi (Fırtına / Sonsuz Skor Modu Varsayılan)
-    this.currentMode = localStorage.getItem('neon_current_mode') || 'storm';
+    // Çoklu Mod ve Skor Sistemi (Klasik Sefer Modu Varsayılan)
+    this.currentMode = localStorage.getItem('neon_current_mode') || 'classic';
     this.highScores = {
       classic: parseInt(localStorage.getItem('neon_high_score_classic') || localStorage.getItem('neon_space_high_score') || '0', 10),
       storm: parseInt(localStorage.getItem('neon_high_score_storm') || '0', 10)
@@ -481,6 +489,8 @@ class Game {
 
     this.screenShake = 0;
     this.barrierFlash = 0;
+    this.grazePulse = 0;
+    this._lastGrazeCalloutTime = 0;
     this.gameTime = 0; // Saniye cinsinden
     this.frames = 0;
     this.touchOffsetY = -38;
@@ -507,7 +517,7 @@ class Game {
       speed: 12,
       level: 1,
       xp: 0,
-      nextXp: 25,
+      nextXp: 24,
       score: 0,
       magnetRange: 100,
       feverCharge: 0,
@@ -1725,9 +1735,9 @@ class Game {
       modeStorm.addEventListener('click', () => {
         sounds.init();
         sounds.playCardSelect();
-        const maxStage = (this.unlockedLevels && this.unlockedLevels.classic) || 1;
+        const maxStage = this.unlockedLevel || 1;
         const flights = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
-        if (maxStage < 2 && flights === 0) {
+        if (maxStage < 2 && flights < 1) {
           vibrate.light();
           this.showToast(t('toast_storm_locked'), '#ffbe0b');
           return;
@@ -1740,7 +1750,7 @@ class Game {
       modeMutator.addEventListener('click', () => {
         sounds.init();
         sounds.playCardSelect();
-        const maxStage = (this.unlockedLevels && this.unlockedLevels.classic) || 1;
+        const maxStage = this.unlockedLevel || 1;
         const flights = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
         if (maxStage < 3 && flights < 3) {
           vibrate.light();
@@ -3255,18 +3265,37 @@ class Game {
 
   getDiscoveredEvolutions() {
     try {
-      return JSON.parse(localStorage.getItem('neon_discovered_evolutions') || '[]');
+      const parsed = JSON.parse(localStorage.getItem('neon_discovered_evolutions') || '[]');
+      return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
       return [];
     }
   }
 
+  normalizeEvolutionKey(key) {
+    if (!key) return '';
+    let k = String(key).replace(/^evo_/, '');
+    if (k === 'nano_bastion') return 'bastion';
+    if (k === 'hyper_saber') return 'hyper_plasma';
+    return k;
+  }
+
+  isEvolutionDiscovered(id, discoveredList) {
+    const list = discoveredList || this.getDiscoveredEvolutions();
+    if (list.includes(id)) return true;
+    if (id === 'bastion' && list.includes('nano_bastion')) return true;
+    if (id === 'hyper_plasma' && list.includes('hyper_saber')) return true;
+    return false;
+  }
+
   recordDiscoveredEvolution(evoKey) {
+    const normKey = this.normalizeEvolutionKey(evoKey);
     const list = this.getDiscoveredEvolutions();
-    if (!list.includes(evoKey)) {
-      list.push(evoKey);
+    if (!list.includes(normKey)) {
+      list.push(normKey);
       localStorage.setItem('neon_discovered_evolutions', JSON.stringify(list));
-      this.showToast(t('toast_unlocked_celebration', { name: t('evo_' + evoKey + '_name') || evoKey }), '#ffd700');
+      const toastName = t('codex_title_' + normKey) || t('evo_' + normKey + '_name') || normKey;
+      this.showToast(t('toast_unlocked_celebration', { name: toastName }), '#ffd700');
     }
   }
 
@@ -3275,45 +3304,69 @@ class Game {
     const unlockedCountEl = document.getElementById('codex-unlocked-count');
     if (!codexGrid) return;
     codexGrid.innerHTML = '';
+    if (Array.isArray(codexGrid.children)) codexGrid.children.length = 0;
 
     const discoveredList = this.getDiscoveredEvolutions();
-    if (unlockedCountEl) {
-      unlockedCountEl.textContent = `${discoveredList.length} / 10 ${t('codex_discovered')}`;
-    }
 
     const RECIPES = [
-      { id: 'vortex', name: 'VORTEX KARADELİK LAZERİ', recipe: 'Lazer Lv.5 + Mıknatıs Lv.1', desc: 'Kara delik anomalileri açarak meteorları ve avcıları yutar.', color: '#d946ef' },
-      { id: 'cluster', name: 'NÜKLEER SÜRÜ FÜZESİ', recipe: 'Füze Lv.4 + EMP Lv.1', desc: 'Çoklu nükleer savaş başlıkları fırlatarak geniş alan tahribatı yapar.', color: '#ffbe0b' },
-      { id: 'ion_storm', name: 'TESLA İYON FIRTINASI', recipe: 'Tesla Lv.4 + Atış Hızı Lv.4', desc: 'Tüm ekranda zincirleme elektrik şimşekleri ve felç halkası oluşturur.', color: '#38bdf8' },
-      { id: 'bastion', name: 'ORBİTAL BASTİON HALKASI', recipe: 'Kalkan Lv.4 + Dron Lv.3', desc: 'Gemiyi çevreleyen reaktif nanoteknoloji kalkanı ve mermi siperi sağlar.', color: '#05ffa1' },
-      { id: 'cryo', name: 'MUTLAK SIFIR KRİYO-BLASTER', recipe: 'Lazer Lv.4 + Kalkan Lv.2', desc: 'Düşmanları mutlak sıfırda dondurarak tuzla buz eden kriyojenik ışın.', color: '#00f0ff' },
-      { id: 'saws', name: 'PLAZMA TESTERELERİ', recipe: 'Dron Lv.3 + Atış Hızı Lv.4', desc: 'Gemi etrafında dönen ölümcül yüksek hızlı plazma testereleri.', color: '#ff5500' },
-      { id: 'supernova', name: 'SÜPERNOVA ÇEKİRDEĞİ', recipe: 'Füze Lv.4 + Tesla Lv.3', desc: 'Mermiler çarpışmada nükleer mini süpernovalar tetikleyerek çevreyi eritir.', color: '#ff3d00' },
-      { id: 'matrix', name: 'KIYAMET TESLA MATRİSİ', recipe: 'Tesla Lv.4 + EMP Lv.3', desc: 'Tüm düşmanları birbirine bağlayan kıyamet ark ağı ve anlık felç.', color: '#bf5af2' },
-      { id: 'hyper_plasma', name: 'AŞIRI YÜKLEMELİ PLAZMA', recipe: 'Gövde Lv.3 + Atış Hızı Lv.4', desc: 'Aşırı kinetik enerjiyle düşmanların içinden geçen dev plazma dalgaları.', color: '#05ffa1' },
-      { id: 'void_drones', name: 'VAKUM AVCI DRONLARI', recipe: 'Dron Lv.3 + Mıknatıs Lv.3', desc: 'Otonom avcı dron filosu düşmanları avlarken kristalleri anında merkeze taşır.', color: '#ffd700' }
+      { id: 'vortex', item1: 'laser', item1Lvl: 5, item2: 'magnet', item2Lvl: 1, color: '#d946ef' },
+      { id: 'cluster', item1: 'missiles', item1Lvl: 4, item2: 'emp', item2Lvl: 1, color: '#ffbe0b' },
+      { id: 'ion_storm', item1: 'tesla', item1Lvl: 4, item2: 'fireRate', item2Lvl: 4, color: '#38bdf8' },
+      { id: 'bastion', item1: 'shield', item1Lvl: 4, item2: 'drones', item2Lvl: 3, color: '#05ffa1' },
+      { id: 'cryo', item1: 'laser', item1Lvl: 4, item2: 'shield', item2Lvl: 2, color: '#00f0ff' },
+      { id: 'saws', item1: 'drones', item1Lvl: 2, item2: 'fireRate', item2Lvl: 3, color: '#ff5500' },
+      { id: 'supernova', item1: 'missiles', item1Lvl: 4, item2: 'tesla', item2Lvl: 3, color: '#ff3d00' },
+      { id: 'matrix', item1: 'tesla', item1Lvl: 4, item2: 'emp', item2Lvl: 3, color: '#bf5af2' },
+      { id: 'hyper_plasma', item1: 'hull', item1Lvl: 3, item2: 'fireRate', item2Lvl: 4, color: '#05ffa1' },
+      { id: 'void_drones', item1: 'drones', item1Lvl: 3, item2: 'magnet', item2Lvl: 3, color: '#ffd700' }
     ];
 
-    RECIPES.forEach(r => {
-      const isDiscovered = discoveredList.includes(r.id);
-      const card = document.createElement('div');
-      card.className = `codex-entry-card ${isDiscovered ? 'discovered' : 'unknown'}`;
+    const discoveredCount = RECIPES.filter(r => this.isEvolutionDiscovered(r.id, discoveredList)).length;
+    if (unlockedCountEl) {
+      unlockedCountEl.textContent = `${discoveredCount} / 10 ${t('codex_discovered')}`;
+    }
 
-      const iconSvg = this.getUpgradeSvg('evo_' + r.id) || this.getUpgradeSvg(r.id) || getPixelIconSvg('energy', 'md');
+    RECIPES.forEach(r => {
+      const isDiscovered = this.isEvolutionDiscovered(r.id, discoveredList);
+      const card = document.createElement('div');
+      card.className = `codex-entry-card ${isDiscovered ? 'discovered' : 'unknown'}${r.id === 'supernova' && isDiscovered ? ' legendary' : ''}`;
+
+      const evoIconSvg = this.getUpgradeSvg('evo_' + r.id) || this.getUpgradeSvg(r.id) || getPixelIconSvg('energy', 'md');
+      const item1IconSvg = this.getUpgradeSvg(r.item1) || getPixelIconSvg('energy', 'sm');
+      const item2IconSvg = this.getUpgradeSvg(r.item2) || getPixelIconSvg('energy', 'sm');
+
       const statusClass = isDiscovered ? 'discovered' : 'unknown';
-      const statusText = isDiscovered ? t('codex_discovered') : t('codex_unknown');
+      const statusText = isDiscovered ? t('codex_discovered') : `<span class="codex-lock-icon">🔒</span> ${t('codex_undiscovered')}`;
+      const titleText = isDiscovered ? (t('codex_title_' + r.id) || r.id.toUpperCase()) : `??? ${t('codex_undiscovered')}`;
+      const item1Name = t('upg_' + r.item1 + '_name');
+      const item2Name = t('upg_' + r.item2 + '_name');
+      const recipeFormula = `${item1Name} Lv.${r.item1Lvl} + ${item2Name} Lv.${r.item2Lvl}`;
 
       card.innerHTML = `
         <div class="codex-icon-wrapper" style="border-color: ${isDiscovered ? r.color : 'rgba(255,255,255,0.2)'};">
-          ${iconSvg}
+          ${evoIconSvg}
         </div>
         <div class="codex-entry-info">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-            <span class="codex-entry-name" style="color: ${isDiscovered ? r.color : '#94a3b8'};">${isDiscovered ? r.name : '??? SİBER ANOMALİ'}</span>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+            <span class="codex-entry-name" style="color: ${isDiscovered ? r.color : '#94a3b8'};">${titleText}</span>
             <span class="codex-entry-status ${statusClass}">${statusText}</span>
           </div>
-          <span class="codex-entry-recipe" style="color: ${isDiscovered ? '#ffbe0b' : '#64748b'};">${t('codex_recipe')} ${r.recipe}</span>
-          <span class="codex-entry-desc">${isDiscovered ? r.desc : 'Bu silah evrimini savaş alanında ilk kez birleştirerek kodekse kaydedin.'}</span>
+          <div class="codex-recipe-row">
+            <div class="codex-mini-icon" title="${item1Name} Lv.${r.item1Lvl}">
+              ${item1IconSvg}
+            </div>
+            <span class="codex-recipe-plus">+</span>
+            <div class="codex-mini-icon" title="${item2Name} Lv.${r.item2Lvl}">
+              ${item2IconSvg}
+            </div>
+            <span class="codex-recipe-arrow">➜</span>
+            <div class="codex-mini-icon codex-mini-evo" style="border-color: ${isDiscovered ? r.color : 'rgba(255,255,255,0.2)'};" title="${isDiscovered ? titleText : '???'}">
+              ${evoIconSvg}
+            </div>
+          </div>
+          <span class="codex-entry-recipe" style="color: ${isDiscovered ? '#ffbe0b' : '#64748b'};">${t('codex_recipe')} ${recipeFormula}</span>
+          <span class="codex-entry-desc">${isDiscovered ? t('codex_desc_' + r.id) : t('codex_recipe_hint')}</span>
+          ${isDiscovered ? `<div class="codex-entry-lore">${t('codex_lore_' + r.id)}</div>` : ''}
         </div>
       `;
       codexGrid.appendChild(card);
@@ -3669,6 +3722,10 @@ class Game {
     }
   }
 
+  flashEventBanner(message, tone = 'info', duration = 3200) {
+    flashEventBanner(message, tone, duration);
+  }
+
   showToast(message, color = '#00f0ff') {
     const existing = document.getElementById('floating-game-toast');
     if (existing) existing.remove();
@@ -3873,10 +3930,18 @@ class Game {
     const showcase = document.createElement('div');
     showcase.className = 'hangar-showcase';
 
-    const dmgPct = Math.min(100, Math.round((inspected.stats.dmg / 150) * 100));
-    const shieldPct = Math.min(100, Math.round((inspected.stats.shield / 150) * 100));
-    const speedPct = Math.min(100, Math.round((inspected.stats.speed / 150) * 100));
-    const magnetPct = Math.min(100, Math.round((inspected.stats.magnet / 150) * 100));
+    const shipStars = this.getShipStars(inspected.id);
+    const starMult = 1 + (shipStars - 1) * 0.10;
+    const baseStats = inspected.stats || { dmg: 100, shield: 100, speed: 100, magnet: 100 };
+    const scaledDmg = Math.round(baseStats.dmg * starMult);
+    const scaledShield = Math.round(baseStats.shield * starMult);
+    const scaledSpeed = Math.round(baseStats.speed * starMult);
+    const scaledMagnet = baseStats.magnet;
+
+    const dmgPct = Math.min(100, Math.round((scaledDmg / 180) * 100));
+    const shieldPct = Math.min(100, Math.round((scaledShield / 180) * 100));
+    const speedPct = Math.min(100, Math.round((scaledSpeed / 180) * 100));
+    const magnetPct = Math.min(100, Math.round((scaledMagnet / 160) * 100));
 
     let actionBtnText = '';
     let actionBtnClass = '';
@@ -3915,6 +3980,17 @@ class Game {
           </span>
         </div>
 
+        ${isInspectedUnlocked ? `
+        <div class="hangar-ship-star-row menu-ship-star-row" style="margin: 6px 0 8px 0; padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,215,0,0.15); display: flex; align-items: center; justify-content: space-between;">
+          <div class="menu-ship-stars" title="${t('rank_rookie') || 'Gemi Rütbesi'}">
+            ${[1, 2, 3, 4, 5].map(s => `<span class="star-icon ${s <= shipStars ? 'active' : ''}">${s <= shipStars ? '★' : '☆'}</span>`).join('')}
+          </div>
+          <button class="btn-ship-starup btn-hangar-starup ${shipStars >= 5 ? 'maxed' : ''}" type="button" title="${t('starup_btn') || 'Yıldız Yükselt'}">
+            <span class="starup-icon">★+</span>
+            <span class="starup-cost">${shipStars >= 5 ? t('starup_max') : `${this.getStarUpCost(shipStars).toLocaleString()} 💎`}</span>
+          </button>
+        </div>` : ''}
+
         <div class="showcase-perk-box" style="border-left-color: ${inspected.primary};">
           <div class="showcase-perk-title" style="color: ${inspected.primary};">
             ${t('ship_' + inspected.id + '_perk_title')}
@@ -3924,19 +4000,19 @@ class Game {
 
         <div class="showcase-stats-grid">
           <div class="stat-bar-group">
-            <div class="stat-bar-label"><span>${t('stat_dmg')}</span><span class="stat-num">${inspected.stats.dmg}%</span></div>
+            <div class="stat-bar-label"><span>${t('stat_dmg')}</span><span class="stat-num">${scaledDmg}%</span></div>
             <div class="stat-bar-track"><div class="stat-bar-fill fill-dmg" style="width: ${dmgPct}%;"></div></div>
           </div>
           <div class="stat-bar-group">
-            <div class="stat-bar-label"><span>${t('stat_shield')}</span><span class="stat-num">${inspected.stats.shield}%</span></div>
+            <div class="stat-bar-label"><span>${t('stat_shield')}</span><span class="stat-num">${scaledShield}%</span></div>
             <div class="stat-bar-track"><div class="stat-bar-fill fill-shield" style="width: ${shieldPct}%;"></div></div>
           </div>
           <div class="stat-bar-group">
-            <div class="stat-bar-label"><span>${t('stat_speed')}</span><span class="stat-num">${inspected.stats.speed}%</span></div>
+            <div class="stat-bar-label"><span>${t('stat_speed')}</span><span class="stat-num">${scaledSpeed}%</span></div>
             <div class="stat-bar-track"><div class="stat-bar-fill fill-speed" style="width: ${speedPct}%;"></div></div>
           </div>
           <div class="stat-bar-group">
-            <div class="stat-bar-label"><span>${t('stat_magnet')}</span><span class="stat-num">${inspected.stats.magnet}%</span></div>
+            <div class="stat-bar-label"><span>${t('stat_magnet')}</span><span class="stat-num">${scaledMagnet}%</span></div>
             <div class="stat-bar-track"><div class="stat-bar-fill fill-magnet" style="width: ${magnetPct}%;"></div></div>
           </div>
         </div>
@@ -3951,6 +4027,38 @@ class Game {
         </div>
       </div>
     `;
+
+    const hangarStarBtn = showcase.querySelector('.btn-hangar-starup');
+    if (hangarStarBtn) {
+      hangarStarBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.init();
+        if (!isInspectedUnlocked) return;
+        const currentStars = this.getShipStars(inspected.id);
+        if (currentStars >= 5) {
+          this.showToast(t('starup_max'), '#ffd700');
+          return;
+        }
+        const cost = this.getStarUpCost(currentStars);
+        if (this.totalCrystals < cost) {
+          if (sounds.playError) sounds.playError();
+          vibrate.light();
+          this.showToast(t('starup_toast_insufficient'), '#ff0055');
+          return;
+        }
+        this.totalCrystals -= cost;
+        localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+        this.updateCrystalsDisplay();
+        this.setShipStars(inspected.id, currentStars + 1);
+        if (sounds.playUpgrade) sounds.playUpgrade();
+        else if (sounds.playLevelUp) sounds.playLevelUp();
+        vibrate.medium();
+        this.triggerSpendingEffect(hangarStarBtn, cost, 'KRİSTAL');
+        this.showToast(t('starup_toast_success', { n: currentStars + 1 }), '#ffd700');
+        this.renderHangarSkins();
+        this.updateMenuShipPreview();
+      });
+    }
 
     const showcaseTestBtn = showcase.querySelector('.showcase-test-btn');
     if (showcaseTestBtn) {
@@ -4028,7 +4136,7 @@ class Game {
           ${getShipPixelSvg(skin.id, 44)}
         </div>
         <div class="mini-card-info">
-          <span class="mini-card-title">${t('ship_' + skin.id + '_name')}</span>
+          <span class="mini-card-title">${t('ship_' + skin.id + '_name')}${isUnlocked ? ` <span style="color:#ffd700;font-size:11px;font-weight:700;">★${this.getShipStars(skin.id)}</span>` : ''}</span>
           <span class="mini-card-tag ${isEquipped ? 'tag-eq' : (isUnlocked ? 'tag-un' : 'tag-lock')}">
             ${isEquipped ? t('status_equipped') : (isUnlocked ? t('status_owned') : `${skin.cost} CR`)}
           </span>
@@ -5607,10 +5715,10 @@ class Game {
       hash |= 0;
     }
     const MUTATORS = [
-      { id: 'hyper_plasma', name: 'AŞIRI PLAZMA', desc: '+%50 Jet Hasarı • Düşmanlar +%30 Hızlı', playerDmg: 1.5, enemySpeed: 1.3, xpMult: 1.2 },
-      { id: 'glass_cannon', name: 'CAM SAVAŞÇI', desc: '1 HP ile Başla! • +%150 Plazma Hasarı', oneHp: true, playerDmg: 2.5, crystalMult: 2.0 },
-      { id: 'meteor_swarm', name: 'METEOR SAĞANAĞI', desc: '2x Meteor Yoğunluğu • 2x Kristal Verimi', meteorRate: 2.0, crystalMult: 2.0 },
-      { id: 'boss_rush', name: 'BOSS AV PROTOKOLÜ', desc: 'Her 25s Elit Filo • +%100 XP Çıktısı', bossFreq: 25, xpMult: 2.0 }
+      { id: 'hyper_plasma', name: t('mutator_hyper_plasma_name'), desc: t('mutator_hyper_plasma_desc'), playerDmg: 1.5, enemySpeed: 1.3, xpMult: 1.2 },
+      { id: 'glass_cannon', name: t('mutator_glass_cannon_name'), desc: t('mutator_glass_cannon_desc'), oneHp: true, playerDmg: 2.5, crystalMult: 2.0 },
+      { id: 'meteor_swarm', name: t('mutator_meteor_swarm_name'), desc: t('mutator_meteor_swarm_desc'), meteorRate: 2.0, crystalMult: 2.0 },
+      { id: 'boss_rush', name: t('mutator_boss_rush_name'), desc: t('mutator_boss_rush_desc'), bossFreq: 25, xpMult: 2.0 }
     ];
     const index = Math.abs(hash) % MUTATORS.length;
     const mut = MUTATORS[index];
@@ -6167,7 +6275,7 @@ class Game {
     const stats = {
       dmg: Math.round(baseStats.dmg * starMult),
       shield: Math.round(baseStats.shield * starMult),
-      speed: Math.round(baseStats.speed * (1 + (shipStars - 1) * 0.05)),
+      speed: Math.round(baseStats.speed * starMult),
       magnet: baseStats.magnet
     };
 
@@ -7478,7 +7586,7 @@ class Game {
     const careerView = document.getElementById('lb-career-view');
     if (!careerView) return;
     const stats = this.pilotStats || {};
-    const clearedLevel = Math.max(1, (this.unlockedLevels && this.unlockedLevels.classic) || 1);
+    const clearedLevel = Math.max(1, this.unlockedLevel || 1);
     const discoveredEvos = this.getDiscoveredEvolutions ? this.getDiscoveredEvolutions() : [];
     const currentSkinName = t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name');
 
@@ -7582,7 +7690,7 @@ class Game {
     const currentSkinName = t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name');
 
     const stormScore = this.highScores.storm || 0;
-    const clearedLevel = Math.max(1, (this.unlockedLevels && this.unlockedLevels.classic) || 1);
+    const clearedLevel = Math.max(1, this.unlockedLevel || 1);
     const totalStars = this.getTotalStars ? this.getTotalStars() : clearedLevel * 3;
 
     const playerRank = this.calculatePlayerRank(mode);
@@ -8286,18 +8394,24 @@ class Game {
     this.openingClusterTimer = 0;
     this.openingHookGap = 0;
 
-    const count = 8 + ((waveNum - 1) % 3);
+    const cx = this.width / 2;
+    const count = (this.openingHooksLeft === 2) ? 6 : (8 + ((waveNum - 1) % 3));
     for (let i = 0; i < count; i++) {
-      const x = 30 + Math.random() * Math.max(40, this.width - 60);
+      let x = 70 + Math.random() * Math.max(20, this.width - 140);
+      if (this.openingHooksLeft === 1 && Math.abs(x - cx) < 22) {
+        x += (x >= cx ? 24 : -24);
+      }
       const y = -18 - Math.random() * 150;
       const roll = Math.random();
       let type = 'asteroid_s';
       let hp = 1;
-      if (roll > 0.86) {
-        type = 'asteroid_m';
-        hp = 2;
-      } else if (roll > 0.72) {
-        type = 'asteroid_gold';
+      if (this.openingHooksLeft !== 2) {
+        if (roll > 0.86) {
+          type = 'asteroid_m';
+          hp = 2;
+        } else if (roll > 0.72) {
+          type = 'asteroid_gold';
+        }
       }
       const e = new Enemy(x, y, type, 1, 0.5);
       e.hp = hp;
@@ -8307,14 +8421,15 @@ class Game {
       e.speedY = 0.32 + Math.random() * 0.38;
       this.enemies.push(e);
     }
-    if (waveNum % 2 === 1) {
-      const bomb = new Enemy(40 + Math.random() * Math.max(20, this.width - 80), -50 - Math.random() * 160, 'asteroid_bomb', 1, 0.5);
+    const isCoreHook = (this.openingHooksLeft === 3 || this.openingHooksLeft === 1);
+    if (waveNum % 2 === 1 && isCoreHook) {
+      const bomb = new Enemy(cx, -25, 'asteroid_bomb', 1, 0.5);
       bomb.hp = 2;
       bomb.maxHp = 2;
       bomb.isOpeningCluster = true;
       bomb.isCoreBomb = true;
-      bomb.speedX = (Math.random() - 0.5) * 0.3;
-      bomb.speedY = 0.4;
+      bomb.speedX = 0;
+      bomb.speedY = 0.52;
       this.enemies.push(bomb);
     }
   }
@@ -8382,14 +8497,14 @@ class Game {
     this.player.skinCfg = skinCfg;
 
     // Başlangıç Statları (Kullanıcı İsteği: Başta güçsüzleşme ve kademeli güçlenme)
-    this.player.maxHp = Math.round(65 + (tech.hullMax || 0) * 10);
+    this.player.maxHp = Math.round(100 + (tech.hullMax || 0) * 10);
     this.player.hp = this.player.maxHp;
     this.player.critChance = 0.05 + (tech.critChance || 0) * 0.025;
     this.player.maxShield = Math.round((20 + (tech.shieldMax || 0) * 8) * (skinCfg.shieldMult || 1.0));
     this.player.shield = 0; // Kalkan ile başlama kapalı (kullanıcı talebi: 0 kalkanla başla)
     this.player.level = 1;
     this.player.xp = 0;
-    this.player.nextXp = this.getNextLevelXp(1); // 25 XP (İlk yükseltmeyi hak etmek için dengeli başlangıç)
+    this.player.nextXp = this.getNextLevelXp(1); // 24 XP (İlk yükseltmeyi hak etmek için dengeli başlangıç: ~25-30s)
     this.player.score = 0;
     this.player.magnetRange = Math.round((60 + (tech.magnet || 0) * 10) * (skinCfg.magnetMult || 1.0)); // Başlangıçta dar mıknatıs
     const masteryCrystalBonus = (this.masteryTree && this.masteryTree.crystalBonus) ? this.masteryTree.crystalBonus * 0.10 : 0;
@@ -8487,7 +8602,7 @@ class Game {
     this.player.maxShield = Math.round(this.player.maxShield * starBonus);
     this.player.maxHp = Math.round(this.player.maxHp * starBonus);
     this.player.hp = this.player.maxHp;
-    this.player.speedMultiplier = (this.player.speedMultiplier || 1.0) * (1 + (shipStars - 1) * 0.05);
+    this.player.speedMultiplier = (this.player.speedMultiplier || 1.0) * starBonus;
 
     // Kuantum Aşırı Yükleme Ustalığı (Tech Tree Infinite Overclock Lv.1-999)
     const ocDmg = (tech.overclock_damage || 0) * 0.03;
@@ -8505,7 +8620,9 @@ class Game {
     const flightCount = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
     if (flightCount === 0) {
       this.player.overchargeTimer = 720;
-      this.particles.spawnFloatingText(this.player.x, this.player.y - 45, '⚡ AŞIRI ŞARJ AKTİF (12s)!', '#00f0ff', 20);
+      sounds.playWarpDrive();
+      vibrate.heavy();
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 45, t('ftue_overdrive_active'), '#00f0ff', 20);
     }
 
     // Günün Mutasyonu Modu Kural Enjeksiyonu
@@ -8520,7 +8637,12 @@ class Game {
         this.player.shield = 0;
       }
       if (mut.crystalMult) this.player.crystalMultiplier *= mut.crystalMult;
-      this.particles.spawnFloatingText(this.player.x, this.player.y - 70, `MUTASYON: ${mut.name}!`, '#ff0055', 20);
+      if (mut.bossFreq) {
+        this.nextStormBossTime = mut.bossFreq;
+      }
+      this.flashEventBanner(`${mut.name}: ${mut.desc}`, 'threat', 3800);
+      sounds.playBossAlarm();
+      vibrate.heavy();
     } else {
       this.activeMutator = null;
     }
@@ -9365,9 +9487,9 @@ class Game {
   // - Seviye 4->5 (190 XP): Elit filoları yenerek hak edilir
   // - Seviye 5+: Sabit %36 bileşik artış formülü (sürekli kart popup yorgunluğunu önler)
   getNextLevelXp(level) {
-    if (level === 1) return 15;
-    if (level === 2) return 32;
-    if (level === 3) return 80;
+    if (level === 1) return 24;
+    if (level === 2) return 48;
+    if (level === 3) return 96;
     if (level === 4) return 160;
     return Math.round(160 * Math.pow(1.36, level - 4));
   }
@@ -9384,7 +9506,8 @@ class Game {
     if (this.currentMode === 'classic') {
       levelBonus = Math.max(0, (this.selectedLevel - 1) * 0.04);
     }
-    return 1 + waveBonus + timeBonus + sectorBonus + levelBonus;
+    const baseMult = 1 + waveBonus + timeBonus + sectorBonus + levelBonus;
+    return (this.activeMutator && this.activeMutator.xpMult) ? baseMult * this.activeMutator.xpMult : baseMult;
   }
 
   // Merkezi Seviye Atlama Kontrolü
@@ -9439,7 +9562,8 @@ class Game {
     // XP seviye atlamak için gem.value olarak aynen verilir, kalıcı kristal ise değerli ve dengeli kazanılır!
     const rawGain = gem.value >= 15 ? 5 : (gem.value >= 8 ? 3 : (gem.value >= 3 ? 2 : 1));
     const crystalGain = Math.max(1, Math.round(rawGain * (this.player.crystalMultiplier || 1)));
-    const xpMult = 1 + ((this.masteryTree && this.masteryTree.xpBonus) ? this.masteryTree.xpBonus * 0.08 : 0);
+    const baseTreeXp = 1 + ((this.masteryTree && this.masteryTree.xpBonus) ? this.masteryTree.xpBonus * 0.08 : 0);
+    const xpMult = baseTreeXp * ((this.activeMutator && this.activeMutator.xpMult) ? this.activeMutator.xpMult : 1.0);
 
     this.player.xp += gem.value * xpMult;
     this.player.score += gem.value * 10;
@@ -9843,12 +9967,12 @@ class Game {
     // Akıllı Sinerji Ağırlıklandırması: Oyuncunun elindeki silaha uygun sinerji kartlarının çıkma şansı +%60 artar
     const synergyWeights = {};
     const upg = this.player.upgrades;
-    if ((upg.laser || 0) >= 2) { synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; }
-    if ((upg.missiles || 0) >= 2) { synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.tesla = (synergyWeights.tesla || 1) + 0.6; }
-    if ((upg.tesla || 0) >= 2) { synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.missiles = (synergyWeights.missiles || 1) + 0.6; }
-    if ((upg.shield || 0) >= 2) { synergyWeights.drones = (synergyWeights.drones || 1) + 0.6; synergyWeights.laser = (synergyWeights.laser || 1) + 0.6; }
-    if ((upg.drones || 0) >= 2) { synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; }
-    if ((upg.hull || 0) >= 2) { synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; }
+    if ((upg.laser || 0) >= 1) { synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; }
+    if ((upg.missiles || 0) >= 1) { synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.tesla = (synergyWeights.tesla || 1) + 0.6; }
+    if ((upg.tesla || 0) >= 1) { synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.missiles = (synergyWeights.missiles || 1) + 0.6; }
+    if ((upg.shield || 0) >= 1) { synergyWeights.drones = (synergyWeights.drones || 1) + 0.6; synergyWeights.laser = (synergyWeights.laser || 1) + 0.6; }
+    if ((upg.drones || 0) >= 1) { synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; }
+    if ((upg.hull || 0) >= 1) { synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; }
 
     const shuffled = availableUpgrades.slice().sort((a, b) => {
       const weightA = (synergyWeights[a.id] || 1.0) * Math.random();
@@ -9856,7 +9980,7 @@ class Game {
       return weightB - weightA;
     });
     while (choices.length < 2 && shuffled.length > 0) {
-      choices.push(shuffled.pop());
+      choices.push(shuffled.shift());
     }
 
     // Tüm yükseltmeler maksimum seviyeye ulaştığında kilitlenmeyi önleyen Aşırı Yükleme Bonusları
@@ -10454,6 +10578,16 @@ class Game {
         desc: 'Kristalleri otomatik toplar ve seri plazma saçar!'
       });
     }
+    if (this.player.upgrades.missiles >= 4 && (this.player.upgrades.tesla || 0) >= 4 && !this.player.evolutions.supernova) {
+      evolutions.push({
+        id: 'evo_supernova',
+        isEvolution: true,
+        name: t('evo_supernova_name') || 'SÜPERNOVA ÇEKİRDEĞİ',
+        stat: t('evo_supernova_stat') || 'YIKIM DALGASI',
+        color: '#ff5500',
+        desc: t('evo_supernova_desc') || 'Kuantum plazma küresi fırlatır ve dev şok dalgasıyla mermileri eritir!'
+      });
+    }
 
     const availableUpgrades = [
       { id: 'laser', name: t('upg_laser_name'), stat: t('prev_dmg', { n: 25 }), color: '#00f0ff', level: this.player.upgrades.laser, maxLevel: 5, desc: t('upg_laser_desc') },
@@ -10617,6 +10751,7 @@ class Game {
       for (let item of rewardsToApply) {
         if (!item) continue;
         if (item.id.startsWith('evo_')) {
+          this.recordDiscoveredEvolution(item.id.replace(/^evo_/, ''));
           this.triggerEvolutionSurge(item.id, item.color || '#ffbe0b');
         }
 
@@ -10695,12 +10830,12 @@ class Game {
       if (el) el.style.display = '';
     });
 
-    const maxStage = (this.unlockedLevels && this.unlockedLevels.classic) || 1;
+    const maxStage = this.unlockedLevel || 1;
     const flights = (this.pilotStats && this.pilotStats.totalFlights) || parseInt(localStorage.getItem('neon_games_played') || '0', 10);
 
     const modeStormEl = document.getElementById('mode-storm');
     if (modeStormEl) {
-      if (maxStage < 2 && flights === 0) {
+      if (maxStage < 2 && flights < 1) {
         modeStormEl.classList.add('feature-locked');
       } else {
         modeStormEl.classList.remove('feature-locked');
@@ -10784,7 +10919,7 @@ class Game {
       const allUpgrades = this.getTechCatalog()
         .map(item => ({ item, lvl: this.techUpgrades[item.id] || 0 }))
         .filter(o => o.lvl < o.item.maxLevel)
-        .map(o => ({ ...o, cost: o.item.costs[o.lvl] }))
+        .map(o => ({ ...o, cost: o.item.costs ? o.item.costs[o.lvl] : Math.round(o.item.baseCost * Math.pow(o.item.costMult || 1.15, o.lvl)) }))
         .sort((a, b) => a.cost - b.cost);
 
       const titleEl = document.getElementById('go-revenge-title');
@@ -10948,7 +11083,7 @@ class Game {
     // İlk Uçuş Tamamlama Kutlaması (FTUE)
     if (gamesPlayed === 1) {
       setTimeout(() => {
-        this.showToast(t('toast_unlocked_celebration'), '#39ff14');
+        this.showToast(t('toast_unlocked_celebration', { name: t('mode_storm_title') }), '#39ff14');
       }, 1000);
     }
 
@@ -11130,7 +11265,11 @@ class Game {
         }
         if ((this.openingHooksLeft || 0) > 1) {
           this.openingHooksLeft -= 1;
-          this.openingHookGap = 48;
+          // Paced hook gap: Hook 2 arrives at ~10s, Hook 3 arrives at ~23.5s
+          const targetNextTime = this.openingHooksLeft === 2 ? 10 : 23.5;
+          const currentTime = (this.gameTime || 0) + (this.timeAccumulator || 0);
+          const remainingTime = Math.max(0.8, targetNextTime - currentTime);
+          this.openingHookGap = Math.round(remainingTime * 60);
           this.openingClusterTimer = 0;
         } else {
           const wasHook = (this.openingHooksLeft || 0) > 0;
@@ -11241,6 +11380,12 @@ class Game {
     if (this.damageFlash > 0) {
       this.damageFlash -= 0.04 * dt;
       if (this.damageFlash < 0) this.damageFlash = 0;
+    }
+
+    // Sıyırma (Graze) Siyan Flaş/Vinyet Sönümlemesi
+    if (this.grazePulse > 0) {
+      this.grazePulse -= 2.5 * dt;
+      if (this.grazePulse < 0) this.grazePulse = 0;
     }
 
     // Oyuncu Hareketi (Klavye desteği)
@@ -12201,7 +12346,8 @@ class Game {
             targetX: targetEnemy.x,
             targetY: targetEnemy.y,
             speed: 8.0,
-            life: 180
+            life: 180,
+            targetEnemy: targetEnemy
           });
           sounds.playBomb();
           vibrate.light();
@@ -12217,6 +12363,28 @@ class Game {
       const dy = orb.targetY - orb.y;
       const dist = Math.hypot(dx, dy);
       if (dist < 20 || orb.life <= 0) {
+        let targetEnemy = orb.targetEnemy;
+        if (!targetEnemy || targetEnemy.hp <= 0 || targetEnemy.toRemove) {
+          targetEnemy = this.enemies.find(e => Math.hypot(e.x - orb.x, e.y - orb.y) <= 95);
+        }
+        if (targetEnemy && targetEnemy.hp > 0 && !targetEnemy.toRemove) {
+          this.applyCappedEnemyDamage(targetEnemy, 65 * (this.player.damageMultiplier || 1.0));
+          if (targetEnemy.hp <= 0) {
+            this.handleEnemyDeath(targetEnemy);
+          }
+        }
+        for (let e of this.enemies) {
+          if (e === targetEnemy || e.hp <= 0 || e.toRemove) continue;
+          if (Math.hypot(e.x - orb.x, e.y - orb.y) <= 95) {
+            this.applyCappedEnemyDamage(e, 65 * (this.player.damageMultiplier || 1.0) * 0.75);
+            if (e.hp <= 0) {
+              this.handleEnemyDeath(e);
+            }
+          }
+        }
+        this.particles.spawnShockwave(orb.x, orb.y, '#ff3d00', 95);
+        this.screenShake = Math.max(this.screenShake || 0, 7.0);
+
         this.supernovaWells.push({
           x: orb.x,
           y: orb.y,
@@ -12224,7 +12392,6 @@ class Game {
           life: 210, // 3.5 sn kalır
           pulse: 0
         });
-        this.screenShake = 10;
         sounds.playBomb();
         vibrate.success();
         this.particles.spawnShockwave(orb.x, orb.y, '#ffd700', 170);
@@ -12760,8 +12927,8 @@ class Game {
       return;
     }
 
-    // === FIRTINA MODU: SAF ASTEROİD AKSİYONU VE REKOR AVI ===
-    if (this.currentMode === 'storm') {
+    // === FIRTINA MODU & GÜNLÜK MUTATÖR MODU: SAF ASTEROİD AKSİYONU VE REKOR AVI ===
+    if (this.currentMode === 'storm' || this.currentMode === 'mutator') {
       let interval = 46;
       let speedMult = 0.78;
 
@@ -12783,13 +12950,22 @@ class Game {
         speedMult = Math.min(1.55, 1.20 + (this.gameTime - 100) * 0.004);
       }
       speedMult *= (this.waveSpeedBonus || 1.0);
+      if (this.activeMutator && this.activeMutator.enemySpeed) {
+        speedMult *= this.activeMutator.enemySpeed;
+      }
+      if (this.activeMutator && this.activeMutator.meteorRate) {
+        interval = Math.max(12, Math.round(interval / this.activeMutator.meteorRate));
+      }
 
       const activeStormFleet = this.enemies.filter(e => e.isFleetMember && !e.toRemove && e.hp > 0).length;
       if (activeStormFleet >= 2) {
         interval = Math.max(interval, 68);
       }
 
-      const maxStormEnemies = this.gameTime < 15 ? 5 : (this.gameTime < 35 ? 7 : 11);
+      let maxStormEnemies = this.gameTime < 15 ? 5 : (this.gameTime < 35 ? 7 : 11);
+      if (this.activeMutator && this.activeMutator.meteorRate) {
+        maxStormEnemies = Math.round(maxStormEnemies * 1.5);
+      }
 
       // Fırtına modunda da Düşman Öncü Filosu baskını (Her 45 saniyede bir gerçek filo mücadelesi, boss uyarısına yakınken çıkmaz)
       if (!this.stormBossWarningTriggered && (this.nextStormBossTime - this.gameTime) > 10 && this.gameTime >= (this.nextStormFleetTime || 28)) {
@@ -12851,7 +13027,7 @@ class Game {
         sounds.playBossAlarm();
       }
 
-      // === FIRTINA MODU: KOZMİK UZAY BOSSLARI ===
+      // === FIRTINA MODU & GÜNLÜK MUTATÖR MODU: KOZMİK UZAY BOSSLARI ===
       const stormBossRoster = ['boss_vanguard', 'boss_dreadnought', 'boss_nebula', 'boss_titan', 'boss_apex'];
       if (!this.currentBoss && this.gameTime >= (this.nextStormBossTime - 3.5) && !this.stormBossWarningTriggered) {
         this.stormBossWarningTriggered = true;
@@ -12871,7 +13047,8 @@ class Game {
       if (!this.currentBoss && this.gameTime >= this.nextStormBossTime) {
         const bType = stormBossRoster[Math.min(this.stormBossIndex, stormBossRoster.length - 1)];
         this.stormBossIndex++;
-        this.nextStormBossTime = this.gameTime + 65; // Bir sonraki boss 65 saniye sonra
+        const nextDelay = (this.activeMutator && this.activeMutator.bossFreq) ? this.activeMutator.bossFreq : 65;
+        this.nextStormBossTime = this.gameTime + nextDelay; // Bir sonraki boss
         this.stormBossWarningTriggered = false;
 
         if (bossWarningOverlay) bossWarningOverlay.classList.add('hidden');
@@ -12884,7 +13061,8 @@ class Game {
         this.clearNonBossClutterForBossEntry();
 
         const bossScale = (1.0 + (this.stormBossIndex - 1) * 0.35) * bossPlayerPowerScale;
-        this.currentBoss = new Enemy(this.width / 2, -75, bType, bossScale, 1.0);
+        const bossSpeed = (this.activeMutator && this.activeMutator.enemySpeed ? this.activeMutator.enemySpeed : 1.0);
+        this.currentBoss = new Enemy(this.width / 2, -75, bType, bossScale, bossSpeed);
         this.currentBoss.isBoss = true;
         const bInfo = Enemy.getBossInfo(bType);
         this.particles.spawnShockwave(this.width / 2, 70, bInfo.color, 320);
@@ -12892,7 +13070,7 @@ class Game {
         this.updateHUD();
       }
 
-      return; // Fırtına modu
+      return; // Fırtına / Mutatör modu
     }
 
     // === KLASİK / SEFER (CAMPAIGN 1-38) MODU BOSS SPAWN SİSTEMİ ===
@@ -13021,6 +13199,12 @@ class Game {
       speedMult = Math.min(1.3, 0.98 + (this.gameTime - 85) * 0.004);
     }
     speedMult *= (this.waveSpeedBonus || 1.0);
+    if (this.activeMutator && this.activeMutator.enemySpeed) {
+      speedMult *= this.activeMutator.enemySpeed;
+    }
+    if (this.activeMutator && this.activeMutator.meteorRate) {
+      interval = Math.max(14, Math.round(interval / this.activeMutator.meteorRate));
+    }
 
     // Düşman Öncü Filosu sahnedeyken rastgele taş yoğunluğunu azalt ki filo savaşı net hissedilsin
     const activeFleetCount = this.enemies.filter(e => e.isFleetMember && !e.toRemove && e.hp > 0).length;
@@ -13709,11 +13893,13 @@ class Game {
     }
 
     // Düşman Mermilerini Sınırla ve Güncelle (Mermilerin hareket etmesi için p.update çağrılır!)
+    if (!this.enemyProjectiles) this.enemyProjectiles = [];
     if (this.enemyProjectiles.length > 65) {
       this.enemyProjectiles.splice(0, this.enemyProjectiles.length - 65);
     }
     for (let i = this.enemyProjectiles.length - 1; i >= 0; i--) {
       const p = this.enemyProjectiles[i];
+      if (!p) continue;
       p.update(this.width, this.height, dt);
       if (p.toRemove) {
         this.enemyProjectiles.splice(i, 1);
@@ -13776,6 +13962,9 @@ class Game {
     sounds.playGraze();
     vibrate.light();
 
+    this.screenShake = Math.max(this.screenShake || 0, 3.5);
+    this.grazePulse = 1.0;
+
     if (this.pilotStats) {
       this.pilotStats.totalGraze = (this.pilotStats.totalGraze || 0) + 1;
     }
@@ -13794,9 +13983,11 @@ class Game {
     if (this.particles && this.particles.spawnGrazeSparks) {
       this.particles.spawnGrazeSparks(sourceX || this.player.x, sourceY || this.player.y);
     }
-    if (localStorage.getItem('neon_graze_hint_seen') !== 'true') {
-      localStorage.setItem('neon_graze_hint_seen', 'true');
-      this.particles.spawnFloatingText(this.player.x, this.player.y - 45, 'SIYIRMA! +XP & +ATIŞ HIZI', '#00f0ff', 16);
+    // 0.8 saniyelik aralıkla sınırlandırılmış dinamik sıyırma bildirimi
+    const now = this.gameTime || 0;
+    if (now - (this._lastGrazeCalloutTime || 0) >= 0.8) {
+      this._lastGrazeCalloutTime = now;
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 45, t('graze_callout'), '#00f0ff', 16);
     }
     this.updateHUD();
   }
@@ -14268,7 +14459,10 @@ class Game {
       this.player.hp = Math.min(this.player.maxHp, this.player.hp + (isIntro ? 35 : 45));
       // Boss öldürme ödülü: +1 Ücretsiz Kart Yenileme (Reroll) hakkı!
       this.player.rerollCount = (this.player.rerollCount || 0) + 1;
-      this.particles.spawnFloatingText(this.player.x, this.player.y - 65, '+1 KART YENİLEME!', '#38bdf8', 18);
+      this.flashEventBanner(t('banner_boss_reroll'), 'info');
+      sounds.playPowerup();
+      vibrate.medium();
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 65, `+1 ${t('levelup_reroll') || 'REROLL'}`, '#38bdf8', 18);
       this.updateMissionProgress('defeat_boss', 1);
       if (this.pilotStats) {
         this.pilotStats.bossesDefeated = (this.pilotStats.bossesDefeated || 0) + 1;
@@ -15307,6 +15501,20 @@ class Game {
       ctx.restore();
     }
 
+    // Graze (Sıyırma) Siyan Periferik Flaş / Vinyet
+    if (this.grazePulse > 0) {
+      ctx.save();
+      const grad = ctx.createRadialGradient(
+        this.width / 2, this.height / 2, Math.min(this.width, this.height) * 0.35,
+        this.width / 2, this.height / 2, Math.max(this.width, this.height) * 0.65
+      );
+      grad.addColorStop(0, 'rgba(0, 240, 255, 0)');
+      grad.addColorStop(1, `rgba(0, 240, 255, ${this.grazePulse * 0.35})`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, this.width, this.height);
+      ctx.restore();
+    }
+
     ctx.restore();
   }
 
@@ -15675,21 +15883,47 @@ class Game {
     const secondaryColor = this.player.isFever ? '#ffffff' : skin.secondary;
     const cockpitColor = this.player.isFever ? '#ffffff' : skin.cockpit;
 
-    // Overcharge Mor Elektrik Aurası
+    // Overcharge / Hyper-Start Overdrive Aurası (Dual Cyan & Mor Gradyan ve Şok Halkaları)
     if (this.player.overchargeTimer > 0) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(191, 90, 242, 0.35)';
-      ctx.lineWidth = 5;
+      const pulse1 = Math.sin(this.gameTime * 15) * 3;
+      const pulse2 = Math.cos(this.gameTime * 18) * 3;
+
+      // Çift renkli radyal aura
+      const auraGrad = ctx.createRadialGradient(0, 0, r * 0.6, 0, 0, r + 16 + pulse1);
+      auraGrad.addColorStop(0, 'rgba(0, 240, 255, 0.15)');
+      auraGrad.addColorStop(0.6, 'rgba(191, 90, 242, 0.25)');
+      auraGrad.addColorStop(1, 'rgba(191, 90, 242, 0)');
+      ctx.fillStyle = auraGrad;
       ctx.beginPath();
-      ctx.arc(0, 0, r + 10 + Math.sin(this.gameTime * 15) * 3, 0, Math.PI * 2);
+      ctx.arc(0, 0, r + 18 + pulse1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dış siyan şok halkası
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.55)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, r + 12 + pulse1, 0, Math.PI * 2);
       ctx.stroke();
+
+      // İç mor plazma halkası
       ctx.strokeStyle = '#bf5af2';
       ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, r + 8 + pulse2, 0, Math.PI * 2);
       ctx.stroke();
+
+      // Dışa genişleyen dinamik şok halkası
+      const expandRadius = r + 10 + ((this.frames * 1.5) % 24);
+      const expandAlpha = Math.max(0, 1 - ((this.frames * 1.5) % 24) / 24) * 0.6;
+      ctx.strokeStyle = `rgba(0, 240, 255, ${expandAlpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, expandRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
       ctx.restore();
     }
-
-
 
     // 2. İkiz Motor Nozülleri (Twin Afterburner Thruster Pods)
     ctx.fillStyle = '#111827';
@@ -15718,28 +15952,94 @@ class Game {
     ctx.fillRect(-8, r * 0.8, 3, 3);
     ctx.fillRect(5, r * 0.8, 3, 3);
 
-    // Motor itki alevleri (Seri hatta daha uzun akkor plazma!)
+    // Motor itki alevleri (Seri hatta ve Overdrive'da daha uzun akkor plazma!)
+    const isOvercharge = (this.player.overchargeTimer || 0) > 0;
     const isRearZone = this.player.combatZone === 'rear';
     const flamePulse = 0.8 + Math.sin((this.frames || 0) * 0.35) * 0.3;
-    const baseFlameLen = isRearZone ? 16 : 9;
+    const baseFlameLen = isOvercharge ? 28 : (isRearZone ? 16 : 9);
     const flameLen = baseFlameLen * flamePulse;
     ctx.fillStyle = thrusterColor;
 
-    // Sol itki alevi
-    ctx.beginPath();
-    ctx.moveTo(-9, r * 0.85);
-    ctx.lineTo(-6.5, r * 0.85 + flameLen);
-    ctx.lineTo(-4, r * 0.85);
-    ctx.closePath();
-    ctx.fill();
+    if (isOvercharge) {
+      // Overdrive sırasında çok katmanlı siyan/mor gradyan alev geometrisi ve şok halkaları
+      const leftGrad = ctx.createLinearGradient(-6.5, r * 0.85, -6.5, r * 0.85 + flameLen);
+      leftGrad.addColorStop(0, '#00f0ff');
+      leftGrad.addColorStop(0.5, '#bf5af2');
+      leftGrad.addColorStop(1, 'rgba(191, 90, 242, 0)');
 
-    // Sağ itki alevi
-    ctx.beginPath();
-    ctx.moveTo(4, r * 0.85);
-    ctx.lineTo(6.5, r * 0.85 + flameLen);
-    ctx.lineTo(9, r * 0.85);
-    ctx.closePath();
-    ctx.fill();
+      const rightGrad = ctx.createLinearGradient(6.5, r * 0.85, 6.5, r * 0.85 + flameLen);
+      rightGrad.addColorStop(0, '#00f0ff');
+      rightGrad.addColorStop(0.5, '#bf5af2');
+      rightGrad.addColorStop(1, 'rgba(191, 90, 242, 0)');
+
+      // Sol itki alevi (Geniş plazma alevi)
+      ctx.fillStyle = leftGrad;
+      ctx.beginPath();
+      ctx.moveTo(-10.5, r * 0.85);
+      ctx.lineTo(-6.5, r * 0.85 + flameLen);
+      ctx.lineTo(-2.5, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sol iç akkor çekirdek (Beyaz/Siyan)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(-8.5, r * 0.85);
+      ctx.lineTo(-6.5, r * 0.85 + flameLen * 0.55);
+      ctx.lineTo(-4.5, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sağ itki alevi (Geniş plazma alevi)
+      ctx.fillStyle = rightGrad;
+      ctx.beginPath();
+      ctx.moveTo(2.5, r * 0.85);
+      ctx.lineTo(6.5, r * 0.85 + flameLen);
+      ctx.lineTo(10.5, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sağ iç akkor çekirdek (Beyaz/Siyan)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(4.5, r * 0.85);
+      ctx.lineTo(6.5, r * 0.85 + flameLen * 0.55);
+      ctx.lineTo(8.5, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+
+      // Nozül arkası plazma şok elips halkaları (Shock Diamonds / Rings)
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.7)';
+      ctx.lineWidth = 1.2;
+      const ringOffset1 = flameLen * 0.35;
+      const ringOffset2 = flameLen * 0.65;
+      ctx.beginPath();
+      ctx.ellipse(-6.5, r * 0.85 + ringOffset1, 3.5, 1.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(6.5, r * 0.85 + ringOffset1, 3.5, 1.5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(191, 90, 242, 0.5)';
+      ctx.beginPath();
+      ctx.ellipse(-6.5, r * 0.85 + ringOffset2, 2.5, 1.2, 0, 0, Math.PI * 2);
+      ctx.ellipse(6.5, r * 0.85 + ringOffset2, 2.5, 1.2, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      // Sol itki alevi
+      ctx.beginPath();
+      ctx.moveTo(-9, r * 0.85);
+      ctx.lineTo(-6.5, r * 0.85 + flameLen);
+      ctx.lineTo(-4, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sağ itki alevi
+      ctx.beginPath();
+      ctx.moveTo(4, r * 0.85);
+      ctx.lineTo(6.5, r * 0.85 + flameLen);
+      ctx.lineTo(9, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+    }
 
     // 3. Kanat Ucu Lazer Namlu Kovanları (Wingtip Blaster Pods)
     ctx.fillStyle = '#0f172a';

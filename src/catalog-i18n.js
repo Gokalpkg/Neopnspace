@@ -619,7 +619,28 @@ const RAW = {
   ftue_desc: row('Your strike fighter is fueled and combat systems are online in the Hangar. Take command and clear the sector!', 'İlk saldırı gemin hangarda hazırlandı ve savaş sistemleri aktif edildi. Komutayı al ve sektörü düşmandan temizle!', 'Votre chasseur d\'assaut est paré et les systèmes de combat sont en ligne au hangar. Prenez les commandes et nettoyez le secteur !', 'Dein Angriffsjäger ist betankt und die Kampfsysteme im Hangar sind online. Übernimm das Kommando und säubere den Sektor!', '你的突击战机已在机库备就，作战系统全部上线。接管指挥权，清空星区！', '你的突擊戰機已在機庫備就，作戰系統全部上線。接管指揮權，清空星區！', '最初の戦闘機が格納庫で待機完了、戦闘システム稼働中。指揮を執りセクターを制圧せよ！'),
   ftue_bonus_badge: row('+500 WELCOME CRYSTALS CLAIMED', '+500 HOŞ GELDİN KRİSTALİ HEDİYESİ', '+500 CRISTAUX DE BIENVENUE OBTENUS', '+500 WILLKOMMENS-KRISTALLE ERHALTEN', '已领取 +500 迎新水晶', '已領取 +500 迎新水晶', '+500 ウェルカムクリスタル獲得'),
   ftue_btn_start: row('DEPLOY TO BATTLE', 'SAVAŞA BAŞLA', 'DÉPLOYER AU COMBAT', 'IN DIE SCHLACHT ZIEHEN', '立即出击', '立即出擊', '戦場へ出撃'),
-  record_broken_banner: row('NEW RECORD!', 'YENİ REKOR!', 'NOUVEAU RECORD !', 'NEUER REKORD!', '刷新纪录！', '刷新紀錄！', '新記録達成！')
+  record_broken_banner: row('NEW RECORD!', 'YENİ REKOR!', 'NOUVEAU RECORD !', 'NEUER REKORD!', '刷新纪录！', '刷新紀錄！', '新記録達成！'),
+
+  tech_overclock_dmg_name: row('Overclock: Heavy Plasma', 'Aşırı Yükleme: Ağır Plazma', 'Surcadençage : Plasma lourd', 'Übertaktung: Schweres Plasma', '超频：重型等离子', '超頻：重型等離子', 'オーバークロック：ヘビープラズマ'),
+  tech_overclock_dmg_desc: row('Permanent +3% damage boost to all weapon systems.', 'Tüm silah sistemlerine kalıcı +%3 hasar artışı.', 'Bonus permanent de +3% de dégâts à tous les systèmes d\'armes.', 'Permanenter +3% Schadensbonus auf alle Waffensysteme.', '永久为所有武器系统提升 3% 伤害。', '永久為所有武器系統提升 3% 傷害。', '全兵装のダメージが恒久的に3%上昇。'),
+  tech_overclock_def_name: row('Overclock: Titanium Matrix', 'Aşırı Yükleme: Titanyum Matris', 'Surcadençage : Matrice de titane', 'Übertaktung: Titan-Matrix', '超频：钛金矩阵', '超頻：鈦金矩陣', 'オーバークロック：チタンマトリクス'),
+  tech_overclock_def_desc: row('Permanent +3% boost to maximum Shield & Hull capacity.', 'Maksimum Kalkan ve Gövde kapasitesine kalıcı +%3 artış.', 'Bonus permanent de +3% à la capacité maximale de bouclier et de coque.', 'Permanenter +3% Bonus auf maximale Schild- und Rumpfkapazität.', '永久为最大护盾与装甲上限提升 3%。', '永久為最大護盾與裝甲上限提升 3%。', 'シールドと船体装甲の最大値が恒久的に3%上昇。'),
+  tech_overclock_cry_name: row('Overclock: Crystal Harvester', 'Aşırı Yükleme: Kristal Hasatçı', 'Surcadençage : Récolteur de cristaux', 'Übertaktung: Kristall-Ernter', '超频：水晶收割器', '超頻：水晶收割器', 'オーバークロック：クリスタルハーベスター'),
+  tech_overclock_cry_desc: row('Permanent +5% bonus to all crystal drops.', 'Tüm kristal ganimetlerine kalıcı +%5 kazanç.', 'Bonus permanent de +5% sur tous les cristaux récupérés.', 'Permanenter +5% Bonus auf alle Kristallfunde.', '永久为所有掉落水晶提升 5% 收益。', '永久為所有掉落水晶提升 5% 收益。', '全クリスタルのドロップ獲得量が恒久的に5%上昇。'),
+
+  starup_btn: row('★ ASCEND', '★ YÜKSELT', '★ AMÉLIORER', '★ AUFWERTEN', '★ 升星', '★ 升星', '★ 昇格'),
+  starup_max: row('MAX STARS (★5)', 'MAKSİMUM (★5)', 'ÉTOILES MAX (★5)', 'MAX STERNE (★5)', '满星 (★5)', '滿星 (★5)', '最大星数 (★5)'),
+  starup_toast_success: row('★ Ship ascended to {n} Stars! +10% all base stats!', '★ Gemi {n} Yıldıza yükseltildi! Tüm temel özelliklere +%10!', '★ Vaisseau amélioré à {n} étoiles ! +10% à toutes les stats de base !', '★ Schiff auf {n} Sterne aufgewertet! +10% auf alle Basiswerte!', '★ 战机已升至 {n} 星！所有基础属性 +10%！', '★ 戰機已升至 {n} 星！所有基礎屬性 +10%！', '★ 艦が{n}星に昇格！全基本ステータス+10%！'),
+  starup_toast_insufficient: row('Not enough crystals to ascend ship!', 'Gemi yükseltmek için kristalin yetersiz!', 'Pas assez de cristaux pour améliorer le vaisseau !', 'Nicht genug Kristalle zum Aufwerten des Schiffs!', '水晶不足，无法升星战机！', '水晶不足，無法升星戰機！', '艦の昇格に必要なクリスタルが不足しています！'),
+
+  mutator_hyper_plasma_name: row('HYPER PLASMA', 'AŞIRI PLAZMA', 'HYPER-PLASMA', 'HYPERPLASMA', '超能等离子', '超能等離子', 'ハイパープラズマ'),
+  mutator_hyper_plasma_desc: row('+50% Ship DMG • Enemies +30% Speed', '+%50 Jet Hasarı • Düşmanlar +%30 Hızlı', '+50% dégâts du vaisseau • Ennemis +30% plus rapides', '+50% Schiffsschaden • Feinde +30% schneller', '战机伤害 +50% • 敌军速度 +30%', '戰機傷害 +50% • 敵軍速度 +30%', '自機ダメージ+50%・敵速度+30%'),
+  mutator_glass_cannon_name: row('GLASS CANNON', 'CAM SAVAŞÇI', 'CANON DE VERRE', 'GLASKANONE', '玻璃大炮', '玻璃大砲', 'ガラスの砲火'),
+  mutator_glass_cannon_desc: row('Start with 1 HP! • +150% Plasma DMG', '1 HP ile Başla! • +%150 Plazma Hasarı', 'Commencez avec 1 PV ! • +150% dégâts plasma', 'Starte mit 1 HP! • +150% Plasmaschaden', '以 1 点生命值开始！• 等离子伤害 +150%', '以 1 點生命值開始！• 等離子傷害 +150%', 'HP1で開始！・プラズマダメージ+150%'),
+  mutator_meteor_swarm_name: row('METEOR SWARM', 'METEOR SAĞANAĞI', 'ESSAIM DE MÉTÉORES', 'METEORSCHWARM', '流星风暴', '流星風暴', '流星の嵐'),
+  mutator_meteor_swarm_desc: row('2x Meteor Density • 2x Crystal Yield', '2x Meteor Yoğunluğu • 2x Kristal Verimi', '2x densité de météores • 2x rendement de cristaux', '2x Meteoritendichte • 2x Kristallausbeute', '2倍陨石密度 • 2倍水晶掉落', '2倍隕石密度 • 2倍水晶掉落', 'メテオ密度2倍・クリスタル収量2倍'),
+  mutator_boss_rush_name: row('BOSS RUSH PROTOCOL', 'BOSS AV PROTOKOLÜ', 'PROTOCOLE CHASSE AUX BOSS', 'BOSS-RUSH-PROTOKOLL', '首领突袭协议', '首領突襲協議', 'ボスラッシュプロトコル'),
+  mutator_boss_rush_desc: row('Elite Fleet every 25s • +100% XP Yield', 'Her 25s Elit Filo • +%100 XP Çıktısı', 'Flotte d\'élite toutes les 25s • +100% rendement XP', 'Eliteflotte alle 25 Sek. • +100% EP-Ausbeute', '每25秒一支精英舰队 • XP产出 +100%', '每25秒一支精英艦隊 • XP產出 +100%', '25秒毎に精鋭艦隊・経験値+100%')
 };
 
 export const CATALOG = {};
