@@ -5,6 +5,7 @@ import { ParticleSystem } from './particles.js';
 import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
 import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslationsToDOM } from './i18n.js';
 import { analytics } from './analytics.js';
+import { getShipSvg, getShipPixelSvg, drawShip, SHIP_VISUAL_CONFIGS } from './ships.js';
 
 function txt(key, fallback) {
   const v = t(key);
@@ -261,209 +262,8 @@ function pixelPips(filled, total) {
 }
 
 
-// === 8/16-BİT RETRO ARCADE OYUNCU GEMİ PİKSEL MOTORU ===
-const PIXEL_PLAYER_SKINS = {
-  cyberpunk: {
-    p: 2.8,
-    palette: {
-      1: '#070b19',
-      2: '#00f0ff',
-      3: '#ffffff',
-      4: '#ff0077',
-      5: '#0ea5e9',
-      6: '#00f0ff'
-    },
-    rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
-    ]
-  },
-  solar: {
-    p: 2.8,
-    palette: {
-      1: '#1a0b04',
-      2: '#ffbe0b',
-      3: '#ffffff',
-      4: '#ff3d00',
-      5: '#d97706',
-      6: '#ff9100'
-    },
-    rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
-    ]
-  },
-  toxic: {
-    p: 2.8,
-    palette: {
-      1: '#04140b',
-      2: '#05ffa1',
-      3: '#ffffff',
-      4: '#7209b7',
-      5: '#10b981',
-      6: '#05ffa1'
-    },
-    rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
-    ]
-  },
-  phantom: {
-    p: 2.8,
-    palette: {
-      1: '#020617',
-      2: '#38bdf8',
-      3: '#ffffff',
-      4: '#c084fc',
-      5: '#0284c7',
-      6: '#80deea'
-    },
-    rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
-    ]
-  },
-  vortex: {
-    p: 2.8,
-    palette: {
-      1: '#12041c',
-      2: '#bf5af2',
-      3: '#ffffff',
-      4: '#38bdf8',
-      5: '#7c3aed',
-      6: '#e879f9'
-    },
-    rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
-    ]
-  },
-  chrono: {
-    p: 2.8,
-    palette: {
-      1: '#1c1602',
-      2: '#ffd700',
-      3: '#ffffff',
-      4: '#f59e0b',
-      5: '#b45309',
-      6: '#fef08a'
-    },
-    rows: [
-      [2, 0, 0, 0, 0, 0, 0],
-      [2, 3, 0, 0, 0, 0, 0],
-      [1, 3, 2, 0, 0, 0, 0],
-      [1, 3, 4, 2, 0, 0, 0],
-      [1, 5, 4, 2, 0, 0, 0],
-      [1, 5, 1, 2, 2, 0, 0],
-      [1, 1, 5, 1, 2, 2, 4],
-      [2, 1, 1, 5, 1, 2, 4],
-      [2, 4, 1, 1, 5, 1, 2],
-      [1, 4, 2, 1, 1, 5, 2],
-      [0, 2, 1, 2, 0, 1, 2],
-      [0, 0, 2, 1, 6, 6, 0],
-      [0, 0, 0, 6, 6, 0, 0]
-    ]
-  }
-};
+// === OYUNCU GEMİLERİ VE VEKTÖR MOTORU ships.js İÇERİSİNDEN SAĞLANIR ===
 
-function getShipPixelSvg(skinId, size = 52) {
-  const pSkin = PIXEL_PLAYER_SKINS[skinId] || PIXEL_PLAYER_SKINS.cyberpunk;
-  const palette = pSkin.palette;
-  const flameColors = {
-    cyberpunk: '#00f0ff',
-    solar: '#ff3d00',
-    toxic: '#05ffa1',
-    phantom: '#00e5ff',
-    vortex: '#c084fc',
-    chrono: '#ffd700'
-  };
-  const primaryGlows = {
-    cyberpunk: '#00f0ff',
-    solar: '#ffbe0b',
-    toxic: '#05ffa1',
-    phantom: '#38bdf8',
-    vortex: '#bf5af2',
-    chrono: '#ffd700'
-  };
-  const flameCol = flameColors[skinId] || '#00f0ff';
-  const glowCol = primaryGlows[skinId] || '#00f0ff';
-
-  let rects = '';
-  pSkin.rows.forEach((row, y) => {
-    const c0 = row[0];
-    if (c0 && palette[c0]) {
-      rects += `<rect x="6" y="${y}" width="1" height="1" fill="${palette[c0]}"/>`;
-    }
-    for (let c = 1; c < row.length; c++) {
-      const val = row[c];
-      if (val && palette[val]) {
-        rects += `<rect x="${6 - c}" y="${y}" width="1" height="1" fill="${palette[val]}"/>`;
-        rects += `<rect x="${6 + c}" y="${y}" width="1" height="1" fill="${palette[val]}"/>`;
-      }
-    }
-  });
-
-  return `<svg viewBox="-1 -1 15 17" width="${size}" height="${size}" style="filter: drop-shadow(0 0 10px ${glowCol});">
-    ${rects}
-    <rect x="5.5" y="13" width="2" height="2" fill="${flameCol}" opacity="0.9"/>
-    <rect x="6" y="14" width="1" height="1.5" fill="#ffffff"/>
-  </svg>`;
-}
 
 class Game {
   constructor() {
@@ -6482,15 +6282,19 @@ class Game {
     const isUnlocked = this.unlockedSkins.includes(skin.id);
     const isEquipped = this.currentSkinId === skin.id;
 
-    const flameColor = skin.flame || skin.primary || '#00f0ff';
     const visualEl = document.getElementById('menu-ship-visual');
     if (visualEl) {
       visualEl.innerHTML = `
-        <div class="ship-pixel-wrapper">
-          ${getShipPixelSvg(skin.id, 64)}
-          <div class="pixel-thruster-flame" style="--flame-color: ${flameColor};"></div>
+        <div class="ship-vector-wrapper" style="filter: drop-shadow(0 0 14px ${skin.primary}88); transform: scale(1.1);">
+          ${getShipSvg(skin.id, 72)}
         </div>
       `;
+    }
+
+    const shipCardEl = document.getElementById('menu-ship-card');
+    if (shipCardEl) {
+      shipCardEl.style.borderColor = skin.primary;
+      shipCardEl.style.boxShadow = `0 0 0 1px #030816, 0 5px 0 ${skin.primary}44, inset 0 2px 0 rgba(255, 255, 255, 0.2), 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 22px ${skin.primary}33`;
     }
 
     if (menuShipName) menuShipName.textContent = t(`ship_${skin.id}_name`);
@@ -15305,124 +15109,14 @@ class Game {
     const bankRoll = Math.sin((this.frames || 0) * 0.025) * 0.06;
     ctx.rotate(bankRoll);
     ctx.scale(shipScale, shipScale);
-
-    // Motor alevi parçacıkları (Aşağı doğru salınan iyon alevi)
-    const flamePulse = 0.8 + Math.sin((this.frames || 0) * 0.3) * 0.35;
-    const r = this.player.radius || 18;
-
-    // Alev pırıltısı
-    ctx.fillStyle = this.launching ? '#00f0ff' : skin.flame;
-    const flameLen = (this.launching ? 24 : 10) * flamePulse;
-    ctx.beginPath();
-    ctx.moveTo(-9, r * 0.85);
-    ctx.lineTo(-6.5, r * 0.85 + flameLen);
-    ctx.lineTo(-4, r * 0.85);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(4, r * 0.85);
-    ctx.lineTo(6.5, r * 0.85 + flameLen);
-    ctx.lineTo(9, r * 0.85);
-    ctx.closePath();
-    ctx.fill();
-
-    // Geminin kendisi
-    const primaryColor = skin.primary;
-    const secondaryColor = skin.secondary;
-    const cockpitColor = skin.cockpit;
-
-    // Motor podları
-    ctx.fillStyle = '#111827';
-    ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 1.5;
-    ctx.fillRect(-9, r * 0.55, 5, 8);
-    ctx.strokeRect(-9, r * 0.55, 5, 8);
-    ctx.fillRect(4, r * 0.55, 5, 8);
-    ctx.strokeRect(4, r * 0.55, 5, 8);
-
-    // Kanat namluları
-    ctx.fillStyle = '#0f172a';
-    ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 1.4;
-    ctx.fillRect(-r * 1.35, -r * 0.25, 3.5, r * 0.95);
-    ctx.strokeRect(-r * 1.35, -r * 0.25, 3.5, r * 0.95);
-    ctx.fillRect(r * 1.35 - 3.5, -r * 0.25, 3.5, r * 0.95);
-    ctx.strokeRect(r * 1.35 - 3.5, -r * 0.25, 3.5, r * 0.95);
-
-    // Ana gövde
-    ctx.fillStyle = '#090d1a';
-    ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    ctx.moveTo(0, -r * 1.55);
-    ctx.lineTo(r * 0.26, -r * 0.9);
-    ctx.lineTo(r * 0.55, -r * 0.45);
-    ctx.lineTo(r * 0.32, -r * 0.25);
-    ctx.lineTo(r * 1.35, r * 0.65);
-    ctx.lineTo(r * 1.3, r * 1.05);
-    ctx.lineTo(r * 0.5, r * 0.65);
-    ctx.lineTo(r * 0.3, r * 0.85);
-    ctx.lineTo(0, r * 0.6);
-    ctx.lineTo(-r * 0.3, r * 0.85);
-    ctx.lineTo(-r * 0.5, r * 0.65);
-    ctx.lineTo(-r * 1.3, r * 1.05);
-    ctx.lineTo(-r * 1.35, r * 0.65);
-    ctx.lineTo(-r * 0.32, -r * 0.25);
-    ctx.lineTo(-r * 0.55, -r * 0.45);
-    ctx.lineTo(-r * 0.26, -r * 0.9);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // İç zırh plakası
-    ctx.fillStyle = '#141e33';
-    ctx.beginPath();
-    ctx.moveTo(0, -r * 1.15);
-    ctx.lineTo(r * 0.24, -r * 0.2);
-    ctx.lineTo(r * 0.85, r * 0.52);
-    ctx.lineTo(r * 0.4, r * 0.48);
-    ctx.lineTo(0, r * 0.4);
-    ctx.lineTo(-r * 0.4, r * 0.48);
-    ctx.lineTo(-r * 0.85, r * 0.52);
-    ctx.lineTo(-r * 0.24, -r * 0.2);
-    ctx.closePath();
-    ctx.fill();
-
-    // Neon enerji akış çizgileri
-    ctx.strokeStyle = secondaryColor;
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(-r * 0.22, -r * 0.1);
-    ctx.lineTo(-r * 0.78, r * 0.48);
-    ctx.moveTo(r * 0.22, -r * 0.1);
-    ctx.lineTo(r * 0.78, r * 0.48);
-    ctx.stroke();
-
-    // Kokpit
-    ctx.fillStyle = cockpitColor;
-    ctx.beginPath();
-    ctx.moveTo(0, -r * 0.85);
-    ctx.lineTo(r * 0.24, -r * 0.25);
-    ctx.lineTo(r * 0.2, r * 0.25);
-    ctx.lineTo(0, r * 0.38);
-    ctx.lineTo(-r * 0.2, r * 0.25);
-    ctx.lineTo(-r * 0.24, -r * 0.25);
-    ctx.closePath();
-    ctx.fill();
-
-    // Oyuncu Hasar Alma Efekti (Hit Flash & Zırh Titremesi): Hasar anında gemi beyaz/kırmızı parlar
+    const r = this.player.radius || 20;
+    drawShip(ctx, previewSkinId, r, {
+      frames: this.frames || 0,
+      flameScale: this.launching ? 2.4 : 1.0,
+      hitFlash: this.player.hitFlash > 0
+    });
     if (this.player.hitFlash > 0) {
       this.player.hitFlash -= 1;
-      ctx.save();
-      ctx.globalAlpha = 0.85;
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = 16;
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
     }
 
     ctx.restore();
@@ -16158,291 +15852,23 @@ class Game {
       ctx.restore();
     }
 
-    // 2. İkiz Motor Nozülleri (Twin Afterburner Thruster Pods)
-    ctx.fillStyle = '#111827';
-    ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 1.5;
-    // Sol motor podu
-    ctx.fillRect(-9, r * 0.55, 5, 8);
-    ctx.strokeRect(-9, r * 0.55, 5, 8);
-    // Sağ motor podu
-    ctx.fillRect(4, r * 0.55, 5, 8);
-    ctx.strokeRect(4, r * 0.55, 5, 8);
-
-    // Motor iç plazma alevi çekirdekleri (Hücum hattında alevler kızıla parlar!)
+    // 2. Özel Vektör Gemi Çizimi (6 Ayrı Gemi Mimarisi & Özel Geometri)
     const activeTrail = (this.trails && this.trails[this.equippedTrailId]) || null;
-    let baseFlame = (activeTrail && activeTrail.id !== 'default') ? activeTrail.color : skin.flame;
+    let baseFlame = (activeTrail && activeTrail.id !== 'default') ? activeTrail.color : null;
     if (activeTrail && activeTrail.id === 'rainbow') {
       baseFlame = `hsl(${((this.frames || 0) * 10) % 360}, 100%, 65%)`;
     }
-    let thrusterColor = baseFlame;
-    if (this.player.combatZone === 'front') {
-      thrusterColor = '#38bdf8';
-    } else if (this.player.combatZone === 'rear') {
-      thrusterColor = '#ff0055';
-    }
-    ctx.fillStyle = thrusterColor;
-    ctx.fillRect(-8, r * 0.8, 3, 3);
-    ctx.fillRect(5, r * 0.8, 3, 3);
 
-    // Motor itki alevleri (Seri hatta ve Overdrive'da daha uzun akkor plazma!)
-    const isOvercharge = (this.player.overchargeTimer || 0) > 0;
-    const isRearZone = this.player.combatZone === 'rear';
-    const flamePulse = 0.8 + Math.sin((this.frames || 0) * 0.35) * 0.3;
-    const baseFlameLen = isOvercharge ? 28 : (isRearZone ? 16 : 9);
-    const flameLen = baseFlameLen * flamePulse;
-    ctx.fillStyle = thrusterColor;
-
-    if (isOvercharge) {
-      // Overdrive sırasında çok katmanlı siyan/mor gradyan alev geometrisi ve şok halkaları
-      const leftGrad = ctx.createLinearGradient(-6.5, r * 0.85, -6.5, r * 0.85 + flameLen);
-      leftGrad.addColorStop(0, '#00f0ff');
-      leftGrad.addColorStop(0.5, '#bf5af2');
-      leftGrad.addColorStop(1, 'rgba(191, 90, 242, 0)');
-
-      const rightGrad = ctx.createLinearGradient(6.5, r * 0.85, 6.5, r * 0.85 + flameLen);
-      rightGrad.addColorStop(0, '#00f0ff');
-      rightGrad.addColorStop(0.5, '#bf5af2');
-      rightGrad.addColorStop(1, 'rgba(191, 90, 242, 0)');
-
-      // Sol itki alevi (Geniş plazma alevi)
-      ctx.fillStyle = leftGrad;
-      ctx.beginPath();
-      ctx.moveTo(-10.5, r * 0.85);
-      ctx.lineTo(-6.5, r * 0.85 + flameLen);
-      ctx.lineTo(-2.5, r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-
-      // Sol iç akkor çekirdek (Beyaz/Siyan)
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.moveTo(-8.5, r * 0.85);
-      ctx.lineTo(-6.5, r * 0.85 + flameLen * 0.55);
-      ctx.lineTo(-4.5, r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-
-      // Sağ itki alevi (Geniş plazma alevi)
-      ctx.fillStyle = rightGrad;
-      ctx.beginPath();
-      ctx.moveTo(2.5, r * 0.85);
-      ctx.lineTo(6.5, r * 0.85 + flameLen);
-      ctx.lineTo(10.5, r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-
-      // Sağ iç akkor çekirdek (Beyaz/Siyan)
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.moveTo(4.5, r * 0.85);
-      ctx.lineTo(6.5, r * 0.85 + flameLen * 0.55);
-      ctx.lineTo(8.5, r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-
-      // Nozül arkası plazma şok elips halkaları (Shock Diamonds / Rings)
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.7)';
-      ctx.lineWidth = 1.2;
-      const ringOffset1 = flameLen * 0.35;
-      const ringOffset2 = flameLen * 0.65;
-      ctx.beginPath();
-      ctx.ellipse(-6.5, r * 0.85 + ringOffset1, 3.5, 1.5, 0, 0, Math.PI * 2);
-      ctx.ellipse(6.5, r * 0.85 + ringOffset1, 3.5, 1.5, 0, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(191, 90, 242, 0.5)';
-      ctx.beginPath();
-      ctx.ellipse(-6.5, r * 0.85 + ringOffset2, 2.5, 1.2, 0, 0, Math.PI * 2);
-      ctx.ellipse(6.5, r * 0.85 + ringOffset2, 2.5, 1.2, 0, 0, Math.PI * 2);
-      ctx.stroke();
-    } else {
-      // Sol itki alevi
-      ctx.beginPath();
-      ctx.moveTo(-9, r * 0.85);
-      ctx.lineTo(-6.5, r * 0.85 + flameLen);
-      ctx.lineTo(-4, r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-
-      // Sağ itki alevi
-      ctx.beginPath();
-      ctx.moveTo(4, r * 0.85);
-      ctx.lineTo(6.5, r * 0.85 + flameLen);
-      ctx.lineTo(9, r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    // 3. Kanat Ucu Lazer Namlu Kovanları (Wingtip Blaster Pods)
-    ctx.fillStyle = '#0f172a';
-    ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 1.4;
-    // Sol kanat namlusu
-    ctx.fillRect(-r * 1.35, -r * 0.25, 3.5, r * 0.95);
-    ctx.strokeRect(-r * 1.35, -r * 0.25, 3.5, r * 0.95);
-    // Sağ kanat namlusu
-    ctx.fillRect(r * 1.35 - 3.5, -r * 0.25, 3.5, r * 0.95);
-    ctx.strokeRect(r * 1.35 - 3.5, -r * 0.25, 3.5, r * 0.95);
-    // Namlu ucu hazır enerji parıltısı (Hücum hattında akkor plazma)
-    let blasterGlow = this.player.isStationary ? '#00f0ff' : primaryColor;
-    if (this.player.combatZone === 'front') {
-      blasterGlow = '#38bdf8';
-    } else if (this.player.combatZone === 'rear') {
-      blasterGlow = '#ff0055';
-    }
-    ctx.fillStyle = this.player.overchargeTimer > 0 ? '#bf5af2' : (this.player.isFever ? '#ffbe0b' : blasterGlow);
-    ctx.fillRect(-r * 1.35, -r * 0.45, 3.5, this.player.isStationary ? 4.5 : 3);
-    ctx.fillRect(r * 1.35 - 3.5, -r * 0.45, 3.5, this.player.isStationary ? 4.5 : 3);
-
-    // Hareket etmediğinde namlu uçlarında odaklanma halkası
-    if (this.player.isStationary) {
-      ctx.save();
-      const pPulse = 0.5 + Math.sin((this.frames || 0) * 0.22) * 0.5;
-      ctx.strokeStyle = `rgba(0, 240, 255, ${0.4 + pPulse * 0.5})`;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.arc(-r * 1.35 + 1.75, -r * 0.45, 3.5 + pPulse * 1.5, 0, Math.PI * 2);
-      ctx.arc(r * 1.35 - 1.75, -r * 0.45, 3.5 + pPulse * 1.5, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // 4. Ana Gemi Gövdesi ve Kanat Yapısı (Yüksek Kontrastlı, Net ve Kusursuz Görsel)
-    ctx.save();
-    const bodyGrad = ctx.createLinearGradient(0, -r * 1.55, 0, r * 1.05);
-    bodyGrad.addColorStop(0, '#1e293b'); // Koyu titanyum gri
-    bodyGrad.addColorStop(0.5, '#0f172a'); // Derin metalik donanma mavisi
-    bodyGrad.addColorStop(1, '#1e293b');
-    ctx.fillStyle = bodyGrad;
-    ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 2.6;
-
-    // Transformers / Pokemon Evrim Geometrisi:
-    // Hücum (front) bölgesinde: İleri ok gibi açılmış hücum kanatları (Forward-swept assault wings)
-    // Sniper (rear) bölgesinde: Gövdeye yapışık, dar süpersonik iğne profili
-    // Orta (mid) bölgede: Klasik dengeli delta kanat
-    const zone = this.player.combatZone || 'mid';
-    let wingTipX = r * 1.35;
-    let wingTipY = r * 0.65;
-    let wingBaseX = r * 1.3;
-    let wingBaseY = r * 1.05;
-    let canardTipX = r * 0.58;
-    let canardTipY = -r * 0.45;
-
-    if (zone === 'front') {
-      // Hücum Hattı: Kanatlar agresif biçimde ileri doğru açılır ve silecek kılıcıyla kenetlenir
-      wingTipX = r * 1.48;
-      wingTipY = r * 0.18;
-      wingBaseX = r * 1.36;
-      wingBaseY = r * 0.72;
-      canardTipX = r * 0.72;
-      canardTipY = -r * 0.60;
-    } else if (zone === 'rear') {
-      // Sniper Hattı: Kanatlar daralır ve gövde boyunca iğne gibi geriye uzanır
-      wingTipX = r * 1.08;
-      wingTipY = r * 0.88;
-      wingBaseX = r * 1.02;
-      wingBaseY = r * 1.18;
-      canardTipX = r * 0.42;
-      canardTipY = -r * 0.32;
-    }
-
-    // Mekanik Dönüşüm Geçiş İnterpolasyonu (Transformers / Pokemon Evolution Morph Shift)
-    const morph = this.player.morphAnim || 0;
-    if (morph > 0) {
-      const morphShift = Math.sin(morph * Math.PI) * 5;
-      wingTipX += morphShift;
-      canardTipX += morphShift * 0.6;
-    }
-
-    // Tam kanat & gövde poligonu
-    ctx.beginPath();
-    ctx.moveTo(0, -r * 1.55);
-    ctx.lineTo(r * 0.28, -r * 0.9);
-    ctx.lineTo(canardTipX, canardTipY);
-    ctx.lineTo(r * 0.35, -r * 0.25);
-    ctx.lineTo(wingTipX, wingTipY);
-    ctx.lineTo(wingBaseX, wingBaseY);
-    ctx.lineTo(r * 0.5, r * 0.65);
-    ctx.lineTo(r * 0.3, r * 0.85);
-    ctx.lineTo(0, r * 0.6);
-    ctx.lineTo(-r * 0.3, r * 0.85);
-    ctx.lineTo(-r * 0.5, r * 0.65);
-    ctx.lineTo(-wingBaseX, wingBaseY);
-    ctx.lineTo(-wingTipX, wingTipY);
-    ctx.lineTo(-r * 0.35, -r * 0.25);
-    ctx.lineTo(-canardTipX, canardTipY);
-    ctx.lineTo(-r * 0.28, -r * 0.9);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // İç Titanyum Zırh Plakaları
-    ctx.fillStyle = '#334155';
-    ctx.strokeStyle = secondaryColor;
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(0, -r * 1.15);
-    ctx.lineTo(r * 0.24, -r * 0.2);
-    ctx.lineTo(r * 0.85, r * 0.52);
-    ctx.lineTo(r * 0.4, r * 0.48);
-    ctx.lineTo(0, r * 0.4);
-    ctx.lineTo(-r * 0.4, r * 0.48);
-    ctx.lineTo(-r * 0.85, r * 0.52);
-    ctx.lineTo(-r * 0.24, -r * 0.2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Merkez Füzyon Reaktörü Çekirdeği (Parlak Neon Nabız)
-    ctx.save();
-    ctx.fillStyle = primaryColor;
-    ctx.beginPath();
-    ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-
-
-    // Neon Enerji Dağıtım Hatları
-    ctx.strokeStyle = secondaryColor;
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.moveTo(-r * 0.22, -r * 0.1);
-    ctx.lineTo(-r * 0.78, r * 0.48);
-    ctx.moveTo(r * 0.22, -r * 0.1);
-    ctx.lineTo(r * 0.78, r * 0.48);
-    ctx.stroke();
-
-    // Kokpit Camı (Parlak Kristal Saydamlık)
-    ctx.fillStyle = cockpitColor;
-    ctx.beginPath();
-    ctx.moveTo(0, -r * 0.85);
-    ctx.lineTo(r * 0.22, -r * 0.25);
-    ctx.lineTo(r * 0.18, r * 0.22);
-    ctx.lineTo(0, r * 0.35);
-    ctx.lineTo(-r * 0.18, r * 0.22);
-    ctx.lineTo(-r * 0.22, -r * 0.25);
-    ctx.closePath();
-    ctx.fill();
-
-    // Kokpit İçi Specular Işık Yansıması
-    ctx.fillStyle = '#ffffff';
-    ctx.globalAlpha = 0.65;
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.moveTo(-r * 0.06, -r * 0.65);
-    ctx.lineTo(-r * 0.03, -r * 0.15);
-    ctx.lineTo(-r * 0.10, -r * 0.15);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1.0;
-    ctx.restore();
+    drawShip(ctx, this.currentSkinId, r, {
+      frames: this.frames || 0,
+      isFever: this.player.isFever,
+      overchargeTimer: this.player.overchargeTimer,
+      combatZone: this.player.combatZone,
+      morphAnim: this.player.morphAnim,
+      hitFlash: false,
+      isStationary: this.player.isStationary,
+      trailColor: baseFlame
+    });
 
     // === AĞIR BALYOZ (FRONT ZONE): ELEKTRO-RAY HYPER RAILGUN NAMLUSU ===
     if (this.player.combatZone === 'front') {
