@@ -171,6 +171,13 @@
     <div id="start-screen" class="main-menu-overlay">
       <!-- Üst Durum & Kaynak Çubuğu (Top Bar) -->
       <div class="menu-top-bar">
+        <div class="menu-top-left">
+          <button id="btn-menu-profile" class="pilot-profile-pill" title="Pilot Sıralaması & Profil" aria-label="Pilot Profili">
+            <span id="menu-player-flag" class="menu-player-flag"></span>
+            <span id="menu-player-rank" class="menu-player-rank">#...</span>
+            <span id="menu-player-name" class="menu-player-name">PILOT</span>
+          </button>
+        </div>
         <div class="menu-top-right">
           <button id="btn-lucky-wheel" class="sound-icon-btn menu-header-btn pulse relative-btn" title="Kozmik Şans Çarkı" aria-label="Şans Çarkı" style="position: relative; border-color: rgba(255, 215, 0, 0.45); background: rgba(255, 215, 0, 0.12);">
             <svg class="pixel-icon pixel-icon-md" viewBox="0 0 12 12"><path d="M5 0h2v2H5zM5 10h2v2H5zM0 5h2v2H0zM10 5h2v2h-2zM2 2h2v2H2zM8 2h2v2H8zM2 8h2v2H2zM8 8h2v2H8z" fill="#ffd700"/><rect x="5" y="5" width="2" height="2" fill="#fff"/></svg>
@@ -318,32 +325,32 @@
           <span class="launch-sheen"></span>
         </button>
       </div>
+    </div>
 
-      <!-- Alt Hızlı Erişim Çubuğu (5 Zengin Buton) -->
-      <div class="menu-bottom-dock">
-        <button id="btn-hangar" class="dock-btn">
-          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M8 1h3v3H8zM7 3h1v1H7zM6 4h1v1H6zM5 5h1v1H5zM4 6h1v1H4zM3 7h1v1H3zM2 8h1v1H2zM1 9h2v2H1z" fill="#00f0ff"/><rect x="9" y="2" width="1" height="1" fill="#030816"/></svg></span>
-          <span class="dock-label" data-i18n="dock_hangar">HANGAR</span>
-        </button>
-        <button id="btn-missions" class="dock-btn relative-btn">
-          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><rect x="5" y="0" width="2" height="3" fill="#ffbe0b"/><rect x="5" y="9" width="2" height="3" fill="#ffbe0b"/><rect x="0" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="9" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="4" y="4" width="4" height="4" fill="none" stroke="#ffbe0b" stroke-width="1"/></svg></span>
-          <span class="dock-label" data-i18n="dock_missions">GÖREVLER</span>
-          <span id="missions-badge-dot" class="badge-dot hidden"></span>
-        </button>
-        <button id="btn-menu" class="dock-btn relative-btn dock-tab-active">
-          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#05ffa1"/><rect x="5" y="7" width="2" height="4" fill="#030816"/></svg></span>
-          <span class="dock-label" data-i18n="dock_menu">MENÜ</span>
-        </button>
-        <button id="btn-daily-reward" class="dock-btn relative-btn">
-          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M1 2h10v8H1z" fill="#05ffa1"/><rect x="2" y="3" width="8" height="6" fill="#064e3b"/><line x1="6" y1="2" x2="6" y2="10" stroke="#05ffa1" stroke-width="1.5"/><line x1="1" y1="6" x2="11" y2="6" stroke="#05ffa1" stroke-width="1.5"/></svg></span>
-          <span class="dock-label" data-i18n="dock_supply">İKMAL</span>
-          <span id="daily-reward-dot" class="badge-dot hidden"></span>
-        </button>
-        <button id="btn-leaderboard" class="dock-btn">
-          <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><polygon points="6,1 8,5 11,5 8.5,8 9.5,11 6,9 2.5,11 3.5,8 1,5 4,5" fill="#ffd700"/></svg></span>
-          <span class="dock-label" data-i18n="dock_leaderboard">LİDERLER</span>
-        </button>
-      </div>
+    <!-- Alt Hızlı Erişim Çubuğu (5 Sekmeli Kalıcı Menü Dock'u) -->
+    <div id="menu-bottom-dock" class="menu-bottom-dock">
+      <button id="btn-hangar" class="dock-btn">
+        <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M8 1h3v3H8zM7 3h1v1H7zM6 4h1v1H6zM5 5h1v1H5zM4 6h1v1H4zM3 7h1v1H3zM2 8h1v1H2zM1 9h2v2H1z" fill="#00f0ff"/><rect x="9" y="2" width="1" height="1" fill="#030816"/></svg></span>
+        <span class="dock-label" data-i18n="dock_hangar">HANGAR</span>
+      </button>
+      <button id="btn-missions" class="dock-btn relative-btn">
+        <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><rect x="5" y="0" width="2" height="3" fill="#ffbe0b"/><rect x="5" y="9" width="2" height="3" fill="#ffbe0b"/><rect x="0" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="9" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="4" y="4" width="4" height="4" fill="none" stroke="#ffbe0b" stroke-width="1"/></svg></span>
+        <span class="dock-label" data-i18n="dock_missions">GÖREVLER</span>
+        <span id="missions-badge-dot" class="badge-dot hidden"></span>
+      </button>
+      <button id="btn-menu" class="dock-btn relative-btn dock-tab-active">
+        <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M6 1L1 6h2v5h6V6h2L6 1z" fill="#05ffa1"/><rect x="5" y="7" width="2" height="4" fill="#030816"/></svg></span>
+        <span class="dock-label" data-i18n="dock_menu">MENÜ</span>
+      </button>
+      <button id="btn-daily-reward" class="dock-btn relative-btn">
+        <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M1 2h10v8H1z" fill="#05ffa1"/><rect x="2" y="3" width="8" height="6" fill="#064e3b"/><line x1="6" y1="2" x2="6" y2="10" stroke="#05ffa1" stroke-width="1.5"/><line x1="1" y1="6" x2="11" y2="6" stroke="#05ffa1" stroke-width="1.5"/></svg></span>
+        <span class="dock-label" data-i18n="dock_supply">İKMAL</span>
+        <span id="daily-reward-dot" class="badge-dot hidden"></span>
+      </button>
+      <button id="btn-leaderboard" class="dock-btn">
+        <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><polygon points="6,1 8,5 11,5 8.5,8 9.5,11 6,9 2.5,11 3.5,8 1,5 4,5" fill="#ffd700"/></svg></span>
+        <span class="dock-label" data-i18n="dock_leaderboard">LİDERLER</span>
+      </button>
     </div>
 
     <div id="privacy-modal" class="modal-overlay hidden">
@@ -604,11 +611,11 @@
 
           <!-- Main Tabs: Kozmik Lig vs Kariyer Kayıtları -->
           <div class="lb-main-tabs">
-            <button id="lb-main-tab-league" class="lb-main-tab-btn active" data-i18n="lb_main_league">
-              🏆 KOZMİK LİG
+            <button id="lb-main-tab-league" class="lb-main-tab-btn active">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 1h8v2H2zM1 3h10v3H9v2H7v1h2v1H3v-1h2V9H3V6H1z" fill="#ffd700"/><rect x="4" y="3" width="4" height="3" fill="#ffe600"/><rect x="0" y="3" width="1" height="2" fill="#ffd700"/><rect x="11" y="3" width="1" height="2" fill="#ffd700"/></svg> <span data-i18n="lb_main_league">KOZMİK LİG</span>
             </button>
-            <button id="lb-main-tab-career" class="lb-main-tab-btn" data-i18n="lb_main_career">
-              📊 KARİYER KAYITLARI
+            <button id="lb-main-tab-career" class="lb-main-tab-btn">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><rect x="1" y="7" width="2" height="4" fill="#00f0ff"/><rect x="5" y="4" width="2" height="7" fill="#05ffa1"/><rect x="9" y="1" width="2" height="10" fill="#ffd700"/><line x1="0" y1="11" x2="12" y2="11" stroke="#64748b" stroke-width="1"/></svg> <span data-i18n="lb_main_career">KARİYER KAYITLARI</span>
             </button>
           </div>
 
@@ -625,11 +632,11 @@
 
             <!-- Sub View Switch (TOP 50 vs ETRAFIMDAKİLER) -->
             <div class="lb-sub-tabs">
-              <button id="lb-view-top50" class="lb-sub-tab-btn active" data-i18n="lb_view_top50" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 2h8v4H2zM4 6h4v2H4zM3 8h6v2H3z" fill="#ffd700"/></svg> TOP 50
+              <button id="lb-view-top50" class="lb-sub-tab-btn active" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M2 2h8v4H2zM4 6h4v2H4zM3 8h6v2H3z" fill="#ffd700"/></svg> <span data-i18n="lb_view_top50">TOP 50</span>
               </button>
-              <button id="lb-view-around" class="lb-sub-tab-btn" data-i18n="lb_view_around_me" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="#00f0ff" stroke-width="1.5"/><circle cx="6" cy="6" r="1.5" fill="#00f0ff"/></svg> ETRAFIMDAKİLER
+              <button id="lb-view-around" class="lb-sub-tab-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="#00f0ff" stroke-width="1.5"/><circle cx="6" cy="6" r="1.5" fill="#00f0ff"/></svg> <span data-i18n="lb_view_around_me">ETRAFIMDAKİLER</span>
               </button>
             </div>
           </div>
@@ -687,7 +694,10 @@
     <!-- Pilot Profil Düzenleme Modalı -->
     <div id="lb-profile-modal" class="modal-overlay hidden">
       <div class="modal-card lb-profile-card">
-        <h3 class="game-title" style="color: #00f0ff; font-size: 1.2rem; margin-bottom: 10px;" data-i18n="lb_profile_title">PİLOT PROFİLİ</h3>
+        <h3 class="game-title" style="color: #00f0ff; font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span data-i18n="lb_profile_title">PİLOT PROFİLİ</span>
+          <span id="lb-profile-rank-tag" class="lb-hud-rank-inline">#...</span>
+        </h3>
         
         <div style="text-align: left; margin-bottom: 10px;">
           <label style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;" data-i18n="lb_callsign_label">ÇAĞRI KODU (İSİM):</label>
@@ -755,8 +765,28 @@
     <div id="lucky-chest-modal" class="modal-overlay hidden">
       <div class="modal-card lucky-chest-card" style="position: relative; overflow: hidden;">
         <div class="chest-sunburst-backdrop"></div>
-        <div class="modal-icon chest-jackpot-icon" style="margin-bottom: 6px;">
-          <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M2 3h12v4H2z" fill="#ffbe0b"/><rect x="7" y="1" width="2" height="14" fill="#ff0055"/><path d="M3 7h10v8H3z" fill="#ff5500"/><rect x="1" y="7" width="14" height="1" fill="#ffe600"/></svg>
+        <div class="chest-stage-container">
+          <div id="chest-3d-box" class="chest-3d-box">
+            <div class="chest-lid-assembly">
+              <div class="chest-lid-top">
+                <div class="chest-lid-gold-crest"></div>
+                <div class="chest-lid-gem"></div>
+              </div>
+              <div class="chest-lid-rim"></div>
+            </div>
+            <div class="chest-body-assembly">
+              <div class="chest-body-front">
+                <div class="chest-lock-plate">
+                  <div class="chest-lock-gem"></div>
+                </div>
+                <div class="chest-corner-stud chest-stud-tl"></div>
+                <div class="chest-corner-stud chest-stud-tr"></div>
+                <div class="chest-corner-stud chest-stud-bl"></div>
+                <div class="chest-corner-stud chest-stud-br"></div>
+              </div>
+            </div>
+            <div class="chest-volumetric-burst"></div>
+          </div>
         </div>
         <div id="jackpot-badge" class="jackpot-tier-badge hidden">BÜYÜK İKRAMİYE!</div>
         <h2 id="lucky-chest-title" class="game-title" style="color: #ffbe0b; text-shadow: 0 0 16px rgba(255, 190, 11, 0.7); font-size: 1.4rem; margin-bottom: 2px;" data-i18n="chest_title">ŞANSLI UZAY SANDIĞI!</h2>

@@ -1,29 +1,221 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <defs>
-    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#141838"/>
-      <stop offset="100%" stop-color="#070714"/>
-    </radialGradient>
-    <linearGradient id="shipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00f0ff"/>
-      <stop offset="100%" stop-color="#0077ff"/>
-    </linearGradient>
-    <linearGradient id="cockpitGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ff0077"/>
-      <stop offset="100%" stop-color="#ffbe0b"/>
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
-  </defs>
-  <rect width="512" height="512" rx="110" fill="url(#bgGlow)" />
-  <circle cx="256" cy="256" r="170" fill="none" stroke="#00f0ff" stroke-width="3" opacity="0.3" stroke-dasharray="10 10"/>
-  <!-- Thruster flame -->
-  <polygon points="256,410 230,340 282,340" fill="#00f0ff" filter="url(#glow)"/>
-  <polygon points="256,385 240,340 272,340" fill="#ffbe0b"/>
-  <!-- Ship Body -->
-  <polygon points="256,105 385,345 295,310 256,335 217,310 127,345" fill="#0b1026" stroke="url(#shipGrad)" stroke-width="12" filter="url(#glow)"/>
-  <!-- Cockpit -->
-  <polygon points="256,170 290,270 256,290 222,270" fill="url(#cockpitGrad)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" shape-rendering="crispEdges">
+  <!-- RETRO-MODERN CRISP PIXEL ART ICON (Zero Blur / Zero Smooth Gradients) -->
+  <!-- 64x64 Grid Scaled to 512x512 (1 pixel = 8x8 units) -->
+
+  <!-- 1. Derin Uzay Zemin (Void Navy #070b19) -->
+  <rect width="512" height="512" fill="#070b19"/>
+
+  <!-- 2. Retro Arcade CRT İnce Piksel Izgara Çizgileri -->
+  <g fill="#0b132b" opacity="0.45">
+    <rect x="0" y="32" width="512" height="8"/>
+    <rect x="0" y="64" width="512" height="8"/>
+    <rect x="0" y="96" width="512" height="8"/>
+    <rect x="0" y="128" width="512" height="8"/>
+    <rect x="0" y="160" width="512" height="8"/>
+    <rect x="0" y="192" width="512" height="8"/>
+    <rect x="0" y="224" width="512" height="8"/>
+    <rect x="0" y="256" width="512" height="8"/>
+    <rect x="0" y="288" width="512" height="8"/>
+    <rect x="0" y="320" width="512" height="8"/>
+    <rect x="0" y="352" width="512" height="8"/>
+    <rect x="0" y="384" width="512" height="8"/>
+    <rect x="0" y="416" width="512" height="8"/>
+    <rect x="0" y="448" width="512" height="8"/>
+    <rect x="0" y="480" width="512" height="8"/>
+  </g>
+
+  <!-- 3. Arka Plan 8-Bit Yıldız Çaprazları (Arcade Starbursts) -->
+  <!-- Yıldız 1 (Sol Üst) -->
+  <rect x="72" y="80" width="8" height="24" fill="#ffd700"/>
+  <rect x="64" y="88" width="24" height="8" fill="#ffd700"/>
+  <rect x="72" y="88" width="8" height="8" fill="#ffffff"/>
+
+  <!-- Yıldız 2 (Sağ Üst) -->
+  <rect x="424" y="96" width="8" height="24" fill="#ffd700"/>
+  <rect x="416" y="104" width="24" height="8" fill="#ffd700"/>
+  <rect x="424" y="104" width="8" height="8" fill="#ffffff"/>
+
+  <!-- Yıldız 3 (Sol Alt) -->
+  <rect x="80" y="376" width="8" height="16" fill="#00f0ff"/>
+  <rect x="76" y="380" width="16" height="8" fill="#00f0ff"/>
+  <rect x="80" y="380" width="8" height="8" fill="#ffffff"/>
+
+  <!-- 4. Arka Plan Tehditkar Boss Dreadnought Silüeti (Crimson Optics) -->
+  <g opacity="0.85">
+    <!-- Boss Üst Zırh Çizgisi -->
+    <rect x="176" y="56" width="160" height="8" fill="#150510"/>
+    <rect x="192" y="64" width="128" height="8" fill="#1f0a18"/>
+    <!-- Boss Kırmızı Göz Sensörleri -->
+    <rect x="216" y="72" width="24" height="8" fill="#ff0055"/>
+    <rect x="224" y="72" width="8" height="8" fill="#ffffff"/>
+    <rect x="272" y="72" width="24" height="8" fill="#ff0055"/>
+    <rect x="280" y="72" width="8" height="8" fill="#ffffff"/>
+    <!-- Boss Kırmızı Lazer Odak Noktaları -->
+    <rect x="160" y="80" width="16" height="16" fill="#e11d48"/>
+    <rect x="336" y="80" width="16" height="16" fill="#e11d48"/>
+  </g>
+
+  <!-- 5. Çift Neon Piksel Lazer Ateşi (Laser Bolts) -->
+  <g>
+    <!-- Sol Lazer -->
+    <rect x="192" y="48" width="16" height="48" fill="#00f0ff"/>
+    <rect x="196" y="52" width="8" height="40" fill="#ffffff"/>
+    <rect x="192" y="104" width="16" height="24" fill="#0284c7"/>
+
+    <!-- Sağ Lazer -->
+    <rect x="304" y="48" width="16" height="48" fill="#00f0ff"/>
+    <rect x="308" y="52" width="8" height="40" fill="#ffffff"/>
+    <rect x="304" y="104" width="16" height="24" fill="#0284c7"/>
+  </g>
+
+  <!-- 6. İtki Plazma Alevleri (Stepped Pixel Thruster Flames) -->
+  <g>
+    <!-- Sol Motor İtkisi -->
+    <rect x="184" y="352" width="32" height="16" fill="#ffbe0b"/>
+    <rect x="192" y="368" width="16" height="24" fill="#ff3d00"/>
+    <rect x="196" y="392" width="8" height="16" fill="#00f0ff"/>
+    <rect x="196" y="360" width="8" height="16" fill="#ffffff"/>
+
+    <!-- Sağ Motor İtkisi -->
+    <rect x="296" y="352" width="32" height="16" fill="#ffbe0b"/>
+    <rect x="304" y="368" width="16" height="24" fill="#ff3d00"/>
+    <rect x="308" y="392" width="8" height="16" fill="#00f0ff"/>
+    <rect x="308" y="360" width="8" height="16" fill="#ffffff"/>
+
+    <!-- Merkez Boost İtkisi -->
+    <rect x="248" y="360" width="16" height="32" fill="#ffd700"/>
+    <rect x="252" y="392" width="8" height="24" fill="#ff0055"/>
+  </g>
+
+  <!-- 7. KAHRAMAN SAVAŞ GEMİSİ (16-Bit Crisp Pixel Art) -->
+  <!-- Sert Koyu Dış Kontur (2-Pixel Dark Outline #040714) -->
+  <g fill="#040714">
+    <!-- Burun Ucu -->
+    <rect x="248" y="128" width="16" height="16"/>
+    <rect x="240" y="144" width="32" height="16"/>
+    <rect x="232" y="160" width="48" height="16"/>
+    <!-- Orta Gövde & Kanat Başlangıcı -->
+    <rect x="224" y="176" width="64" height="16"/>
+    <rect x="216" y="192" width="80" height="16"/>
+    <rect x="208" y="208" width="96" height="16"/>
+    <rect x="192" y="224" width="128" height="16"/>
+    <!-- Geniş Kanatlar -->
+    <rect x="168" y="240" width="176" height="16"/>
+    <rect x="144" y="256" width="224" height="16"/>
+    <rect x="120" y="272" width="272" height="24"/>
+    <rect x="136" y="296" width="240" height="24"/>
+    <!-- Kanat Uçları ve Motor Yuvaları -->
+    <rect x="152" y="320" width="208" height="24"/>
+    <rect x="176" y="344" width="160" height="16"/>
+  </g>
+
+  <!-- Ana Gövde Zırhı (Siber Siyan Ramp: #024e75 -> #00f0ff -> #e0faff) -->
+  <g fill="#00f0ff">
+    <rect x="252" y="132" width="8" height="12"/>
+    <rect x="244" y="148" width="24" height="12"/>
+    <rect x="236" y="164" width="40" height="12"/>
+    <rect x="228" y="180" width="56" height="12"/>
+    <rect x="220" y="196" width="72" height="12"/>
+    <rect x="212" y="212" width="88" height="12"/>
+    <rect x="196" y="228" width="120" height="12"/>
+    <rect x="172" y="244" width="168" height="12"/>
+    <rect x="148" y="260" width="216" height="12"/>
+    <rect x="124" y="276" width="264" height="16"/>
+    <rect x="140" y="296" width="232" height="16"/>
+    <rect x="156" y="320" width="200" height="16"/>
+    <rect x="180" y="340" width="152" height="12"/>
+  </g>
+
+  <!-- Alt Gölge Tonlaması (Shadow Stepped Ramp #024e75) -->
+  <g fill="#024e75">
+    <rect x="124" y="284" width="264" height="8"/>
+    <rect x="140" y="304" width="232" height="8"/>
+    <rect x="156" y="328" width="200" height="8"/>
+    <rect x="180" y="344" width="152" height="8"/>
+  </g>
+
+  <!-- Üst Işık Pikselleri (Highlight Stepped Ramp #e0faff) -->
+  <g fill="#e0faff">
+    <rect x="252" y="132" width="8" height="4"/>
+    <rect x="244" y="148" width="12" height="4"/>
+    <rect x="236" y="164" width="16" height="4"/>
+    <rect x="228" y="180" width="20" height="4"/>
+    <rect x="220" y="196" width="24" height="4"/>
+    <rect x="172" y="244" width="32" height="4"/>
+    <rect x="148" y="260" width="40" height="4"/>
+    <rect x="124" y="276" width="48" height="4"/>
+  </g>
+
+  <!-- Kanat Altın Kenarlıkları (#ffbe0b & #fef08a) -->
+  <g fill="#ffbe0b">
+    <rect x="124" y="272" width="16" height="16"/>
+    <rect x="372" y="272" width="16" height="16"/>
+    <rect x="136" y="288" width="16" height="16"/>
+    <rect x="360" y="288" width="16" height="16"/>
+    <rect x="248" y="160" width="16" height="8"/>
+  </g>
+  <g fill="#fef08a">
+    <rect x="124" y="272" width="8" height="8"/>
+    <rect x="380" y="272" width="8" height="8"/>
+    <rect x="252" y="160" width="8" height="4"/>
+  </g>
+
+  <!-- 8-Bit Kokpit Visor (#ff0055, #ffbe0b, #ffffff) -->
+  <g>
+    <rect x="240" y="200" width="32" height="48" fill="#1a020d"/>
+    <rect x="244" y="204" width="24" height="40" fill="#ff0055"/>
+    <rect x="248" y="208" width="16" height="24" fill="#ffbe0b"/>
+    <!-- Kokpit Beyaz Piksel Işıma Noktası -->
+    <rect x="248" y="208" width="8" height="8" fill="#ffffff"/>
+  </g>
+
+  <!-- 8. SAĞ ALT KOZMİK ŞANSLI SANDIK & UÇUŞAN ELMAS KRİSTALLER -->
+  <!-- 8-Bit Sandık Gövdesi -->
+  <g>
+    <!-- Sandık Koyu Kontur -->
+    <rect x="384" y="384" width="96" height="80" fill="#040714"/>
+    <!-- Sandık Altın Gövdesi -->
+    <rect x="392" y="392" width="80" height="64" fill="#ffbe0b"/>
+    <!-- Sandık Kapağı & Alt Gölge -->
+    <rect x="392" y="392" width="80" height="16" fill="#fef08a"/>
+    <rect x="392" y="440" width="80" height="16" fill="#78350f"/>
+    <!-- Sandık Demir/Koyu Bantlar -->
+    <rect x="408" y="392" width="12" height="64" fill="#1e1b4b"/>
+    <rect x="444" y="392" width="12" height="64" fill="#1e1b4b"/>
+    <!-- Sandık Kilit Plakası & Kırmızı Mücevher -->
+    <rect x="424" y="408" width="16" height="20" fill="#ffd700"/>
+    <rect x="428" y="414" width="8" height="8" fill="#ff0055"/>
+    <rect x="430" y="416" width="4" height="4" fill="#ffffff"/>
+  </g>
+
+  <!-- Havaya Fırlayan Kare Zümrüt & Siyan XP Kristalleri -->
+  <g fill="#05ffa1">
+    <!-- Kristal 1 -->
+    <rect x="400" y="344" width="16" height="16"/>
+    <rect x="404" y="348" width="8" height="8" fill="#ffffff"/>
+
+    <!-- Kristal 2 -->
+    <rect x="448" y="328" width="20" height="20"/>
+    <rect x="452" y="332" width="12" height="12" fill="#d1fae5"/>
+    <rect x="456" y="336" width="4" height="4" fill="#ffffff"/>
+
+    <!-- Kristal 3 (Uzakta Uçuşan) -->
+    <rect x="432" y="296" width="12" height="12" fill="#00f0ff"/>
+    <rect x="436" y="300" width="4" height="4" fill="#ffffff"/>
+  </g>
+
+  <!-- 9. SOL ALTTA PATLAYAN 8-BIT ELEKTRİK KIVILCIMLARI (Pixel Debris) -->
+  <g fill="#ffd700">
+    <rect x="112" y="336" width="8" height="8"/>
+    <rect x="96" y="352" width="12" height="12"/>
+    <rect x="128" y="368" width="8" height="8"/>
+    <rect x="104" y="416" width="8" height="8" fill="#ffffff"/>
+    <rect x="120" y="432" width="12" height="12" fill="#ff0055"/>
+  </g>
+
+  <!-- 10. Çerçeve Kenarı Keskin 8-Bit Retro Kartuş Çerçevesi -->
+  <rect x="0" y="0" width="512" height="12" fill="#024e75" opacity="0.6"/>
+  <rect x="0" y="500" width="512" height="12" fill="#024e75" opacity="0.6"/>
+  <rect x="0" y="0" width="12" height="512" fill="#024e75" opacity="0.6"/>
+  <rect x="500" y="0" width="12" height="512" fill="#024e75" opacity="0.6"/>
 </svg>

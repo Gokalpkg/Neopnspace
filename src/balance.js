@@ -285,3 +285,31 @@ export const SPAWN_PACING = {
     };
   }
 };
+
+// === TEMEL OYUNCU ERGONOMİSİ VE STAT YAPILANDIRMASI ===
+export const PLAYER_BASE_CONFIG = {
+  baseHp: 100,
+  baseShield: 100,
+  baseSpeed: 4.2,
+  baseMagnet: 130,
+  touchYOffset: -46, // Parmağın gemiyi kapatmasını önleyen dikey ofset
+  grazeRadiusBonus: 18,
+  invulnerableTimeOnHit: 60 // 1 saniye
+};
+
+// === MERKEZİ DÜŞME ORANLARI VE ŞANS ÇARPANLARI ===
+export const DROP_RATES = {
+  crystalChanceSmallAsteroid: 0.35,
+  crystalChanceNormalEnemy: 0.75,
+  crystalChanceElite: 1.00,
+  crystalChanceBoss: 1.00,
+  chestDropRateOnWaveClear: 0.22
+};
+
+// === KIDEMLİ OYUNCU HİPER DALGA (HYPER MODE) PROTOKOLÜ ===
+export const HYPER_MODE_CONFIG = {
+  speedMult: 1.35,
+  spawnIntervalMult: 0.75,
+  crystalRewardMult: 1.40,
+  scoreMult: 1.50
+};

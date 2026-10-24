@@ -1676,16 +1676,17 @@ class SoundEngine {
   }
 
   // Keskin Nişancı Elektro-Ray (Railgun) Ağır Atış Sesi
-  playRailgun() {
+  playRailgun(pitchMult = 1.0) {
     if (this.isMuted || !this.ctx) return;
     try {
+      const p = Math.max(0.5, Math.min(2.5, pitchMult || 1.0));
       const now = this.ctx.currentTime;
       // 1. Derin Sub-Bass Patlaması
       const bass = this.ctx.createOscillator();
       const bGain = this.ctx.createGain();
       bass.type = 'sine';
-      bass.frequency.setValueAtTime(220, now);
-      bass.frequency.exponentialRampToValueAtTime(32, now + 0.35);
+      bass.frequency.setValueAtTime(220 * p, now);
+      bass.frequency.exponentialRampToValueAtTime(32 * p, now + 0.35);
 
       bGain.gain.setValueAtTime(0.45, now);
       bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
@@ -1700,8 +1701,8 @@ class SoundEngine {
       const ray = this.ctx.createOscillator();
       const rGain = this.ctx.createGain();
       ray.type = 'sawtooth';
-      ray.frequency.setValueAtTime(1450, now);
-      ray.frequency.exponentialRampToValueAtTime(180, now + 0.28);
+      ray.frequency.setValueAtTime(1450 * p, now);
+      ray.frequency.exponentialRampToValueAtTime(180 * p, now + 0.28);
 
       rGain.gain.setValueAtTime(0.25, now);
       rGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);

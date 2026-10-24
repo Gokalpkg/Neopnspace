@@ -5,8 +5,9 @@ import { ParticleSystem } from './particles.js';
 import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
 import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslationsToDOM } from './i18n.js';
 import { analytics } from './analytics.js';
-import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE } from './balance.js';
-import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, PGS_CONFIG, getPlayerUid } from './leaderboard.js';
+import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE, PLAYER_BASE_CONFIG, DROP_RATES, HYPER_MODE_CONFIG } from './balance.js';
+import { EventBus } from './events.js';
+import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, updatePlayerProfileInFirestore, PGS_CONFIG, getPlayerUid } from './leaderboard.js';
 
 if (typeof window !== 'undefined') {
   window.BalanceConfig = {
@@ -262,9 +263,37 @@ function getPixelIconSvg(name, size = 'sm') {
     freeze: '<svg class="' + sClass + '" viewBox="0 0 12 12"><path d="M5 0h2v12H5zM0 5h12v2H0zM2 2h2v2H2zM8 2h2v2H8zM2 8h2v2H2zM8 8h2v2H8z" fill="#00f0ff"/></svg>',
     lock: '<svg class="' + sClass + '" viewBox="0 0 12 12"><path d="M4 2h4v3H4z" fill="none" stroke="#ff4d4d" stroke-width="1.8"/><rect x="2" y="5" width="8" height="6" fill="#ff4d4d"/><rect x="5" y="7" width="2" height="2" fill="#030816"/></svg>',
     check: '<svg class="' + sClass + '" viewBox="0 0 12 12"><path d="M10 2L4 9 1 6l1.5-1.5L4 6l4.5-5.5z" fill="#05ffa1"/></svg>',
-    coin: '<svg class="' + sClass + '" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#ffbe0b"/><rect x="5" y="3" width="2" height="6" fill="#ff3d00"/><path d="M4 2h4v1H4zM4 9h4v1H4z" fill="#fff"/></svg>'
+    coin: '<svg class="' + sClass + '" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#ffbe0b"/><rect x="5" y="3" width="2" height="6" fill="#ff3d00"/><path d="M4 2h4v1H4zM4 9h4v1H4z" fill="#fff"/></svg>',
+    trophy: '<svg class="' + sClass + '" viewBox="0 0 12 12"><path d="M2 1h8v2H2zM1 3h10v3H9v2H7v1h2v1H3v-1h2V9H3V6H1z" fill="#ffd700"/><rect x="4" y="3" width="4" height="3" fill="#ffe600"/><rect x="0" y="3" width="1" height="2" fill="#ffd700"/><rect x="11" y="3" width="1" height="2" fill="#ffd700"/></svg>',
+    chart: '<svg class="' + sClass + '" viewBox="0 0 12 12"><rect x="1" y="7" width="2" height="4" fill="#00f0ff"/><rect x="5" y="4" width="2" height="7" fill="#05ffa1"/><rect x="9" y="1" width="2" height="10" fill="#ffd700"/><line x1="0" y1="11" x2="12" y2="11" stroke="#64748b" stroke-width="1"/></svg>',
+    medal_gold: '<svg class="' + sClass + '" viewBox="0 0 12 12"><path d="M4 0h4v3H4z" fill="#3b82f6"/><circle cx="6" cy="7" r="4.5" fill="#ffd700"/><circle cx="6" cy="7" r="3" fill="#f59e0b"/><rect x="5" y="5" width="2" height="4" fill="#ffffff"/></svg>',
+    medal_silver: '<svg class="' + sClass + '" viewBox="0 0 12 12"><path d="M4 0h4v3H4z" fill="#3b82f6"/><circle cx="6" cy="7" r="4.5" fill="#cbd5e1"/><circle cx="6" cy="7" r="3" fill="#94a3b8"/><rect x="5" y="5" width="2" height="4" fill="#ffffff"/></svg>',
+    medal_bronze: '<svg class="' + sClass + '" viewBox="0 0 12 12"><path d="M4 0h4v3H4z" fill="#3b82f6"/><circle cx="6" cy="7" r="4.5" fill="#cd7f32"/><circle cx="6" cy="7" r="3" fill="#b45309"/><rect x="5" y="5" width="2" height="4" fill="#ffffff"/></svg>'
   };
   return icons[name] || '';
+}
+
+export function getPixelFlagSvg(code = 'GLB') {
+  const c = String(code).toUpperCase();
+  const flags = {
+    TUR: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#e11d48"/><path d="M4.2 2a2.4 2.4 0 100 5 1.9 1.9 0 110-3.8 2 2 0 010-1.2z" fill="#ffffff"/><polygon points="7.2,3.8 7.7,4.3 7.4,5 6.7,4.8 6.7,4.1" fill="#ffffff"/></svg>',
+    USA: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#ffffff"/><rect y="0" width="12" height="1.8" fill="#e11d48"/><rect y="3.6" width="12" height="1.8" fill="#e11d48"/><rect y="7.2" width="12" height="1.8" fill="#e11d48"/><rect width="5" height="4.5" fill="#2563eb"/><rect x="1" y="1" width="1" height="1" fill="#fff"/><rect x="3" y="1" width="1" height="1" fill="#fff"/><rect x="2" y="2.5" width="1" height="1" fill="#fff"/></svg>',
+    GER: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect y="0" width="12" height="3" fill="#0f172a"/><rect y="3" width="12" height="3" fill="#e11d48"/><rect y="6" width="12" height="3" fill="#ffd700"/></svg>',
+    JPN: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#f8fafc"/><circle cx="6" cy="4.5" r="2.5" fill="#e11d48"/></svg>',
+    GBR: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#1e3a8a"/><path d="M0 0l12 9M12 0L0 9" stroke="#ffffff" stroke-width="1.8"/><path d="M0 0l12 9M12 0L0 9" stroke="#e11d48" stroke-width="0.8"/><rect x="4.5" y="0" width="3" height="9" fill="#ffffff"/><rect x="0" y="3" width="12" height="3" fill="#ffffff"/><rect x="5.2" y="0" width="1.6" height="9" fill="#e11d48"/><rect x="0" y="3.7" width="12" height="1.6" fill="#e11d48"/></svg>',
+    UK: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#1e3a8a"/><path d="M0 0l12 9M12 0L0 9" stroke="#ffffff" stroke-width="1.8"/><path d="M0 0l12 9M12 0L0 9" stroke="#e11d48" stroke-width="0.8"/><rect x="4.5" y="0" width="3" height="9" fill="#ffffff"/><rect x="0" y="3" width="12" height="3" fill="#ffffff"/><rect x="5.2" y="0" width="1.6" height="9" fill="#e11d48"/><rect x="0" y="3.7" width="12" height="1.6" fill="#e11d48"/></svg>',
+    FRA: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect x="0" width="4" height="9" fill="#2563eb"/><rect x="4" width="4" height="9" fill="#ffffff"/><rect x="8" width="4" height="9" fill="#e11d48"/></svg>',
+    AZE: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect y="0" width="12" height="3" fill="#0284c7"/><rect y="3" width="12" height="3" fill="#e11d48"/><rect y="6" width="12" height="3" fill="#16a34a"/><circle cx="6" cy="4.5" r="1.2" fill="#ffffff"/><circle cx="6.4" cy="4.5" r="0.9" fill="#e11d48"/></svg>',
+    KOR: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#f8fafc"/><path d="M6 2.5a2 2 0 010 4 1 1 0 010-2 1 1 0 000-2z" fill="#e11d48"/><path d="M6 6.5a2 2 0 010-4 1 1 0 010 2 1 1 0 000 2z" fill="#2563eb"/></svg>',
+    BRA: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#15803d"/><polygon points="6,1 11,4.5 6,8 1,4.5" fill="#facc15"/><circle cx="6" cy="4.5" r="1.8" fill="#1d4ed8"/></svg>',
+    CAN: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="3" height="9" fill="#e11d48"/><rect x="3" width="6" height="9" fill="#ffffff"/><rect x="9" width="3" height="9" fill="#e11d48"/><polygon points="6,2 7,4 6.5,4 7.5,6 6.2,5.5 6.2,7 5.8,7 5.8,5.5 4.5,6 5.5,4 5,4" fill="#e11d48"/></svg>',
+    ESP: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect y="0" width="12" height="2.2" fill="#e11d48"/><rect y="2.2" width="12" height="4.6" fill="#facc15"/><rect y="6.8" width="12" height="2.2" fill="#e11d48"/></svg>',
+    ITA: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect x="0" width="4" height="9" fill="#15803d"/><rect x="4" width="4" height="9" fill="#ffffff"/><rect x="8" width="4" height="9" fill="#e11d48"/></svg>',
+    NLD: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect y="0" width="12" height="3" fill="#e11d48"/><rect y="3" width="12" height="3" fill="#ffffff"/><rect y="6" width="12" height="3" fill="#1d4ed8"/></svg>',
+    SWE: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#0284c7"/><rect x="3.5" y="0" width="1.8" height="9" fill="#facc15"/><rect x="0" y="3.6" width="12" height="1.8" fill="#facc15"/></svg>',
+    AUS: '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#0f172a"/><rect width="5" height="4" fill="#1e3a8a"/><polygon points="2.5,0.5 3,3.5 1,1.5 4,1.5 2,3.5" fill="#fff"/><circle cx="9" cy="2" r="0.7" fill="#fff"/><circle cx="10" cy="4.5" r="0.7" fill="#fff"/><circle cx="8" cy="6" r="0.7" fill="#fff"/><circle cx="9.5" cy="7" r="0.7" fill="#fff"/></svg>'
+  };
+  return flags[c] || '<svg class="pixel-flag-svg" viewBox="0 0 12 9"><rect width="12" height="9" fill="#0f172a" stroke="#00f0ff" stroke-width="0.8"/><circle cx="6" cy="4.5" r="2.5" fill="none" stroke="#00f0ff" stroke-width="0.8"/><line x1="6" y1="2" x2="6" y2="7" stroke="#00f0ff" stroke-width="0.6"/><line x1="3.5" y1="4.5" x2="8.5" y2="4.5" stroke="#00f0ff" stroke-width="0.6"/></svg>';
 }
 
 function pixelPips(filled, total) {
@@ -1231,7 +1260,7 @@ class Game {
 
     // Mobil çoklu dokunuş (Multi-Touch) yönetimi: Sadece ilk hareket parmağını (activeTouchId) takip et
     canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
+      if (this.state === 'PLAYING' && e.cancelable) e.preventDefault();
       if (!e.changedTouches) return;
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
@@ -1244,7 +1273,7 @@ class Game {
     }, { passive: false });
 
     canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault();
+      if (this.state === 'PLAYING' && e.cancelable) e.preventDefault();
       if (!e.changedTouches) return;
       if (this.activeTouchId === null && this.state === 'PLAYING' && e.changedTouches.length > 0) {
         const firstTouch = e.changedTouches[0];
@@ -2411,6 +2440,7 @@ class Game {
     if (dailyRewardModal && !dailyRewardModal.classList.contains('hidden')) return 3;
     const lbModal = document.getElementById('leaderboard-modal');
     if (lbModal && !lbModal.classList.contains('hidden')) return 4;
+    if (statsModal && !statsModal.classList.contains('hidden')) return 4;
     return 2; // Ana Hub (MENÜ)
   }
 
@@ -2722,10 +2752,27 @@ class Game {
 
   refreshContinueButton() {
     if (!btnContinue) return;
-    let saved = false;
-    try { saved = !!localStorage.getItem('neon_suspended_run'); } catch (e) {}
-    const show = (this.runInMemory && this.player && this.player.hp > 0) || saved;
+    let snap = null;
+    try { snap = JSON.parse(localStorage.getItem('neon_suspended_run') || 'null'); } catch (e) {}
+    const show = (this.runInMemory && this.player && this.player.hp > 0) || (snap && snap.hp > 0);
     btnContinue.classList.toggle('hidden', !show);
+
+    const btnStartText = btnStart ? btnStart.querySelector('.launch-text') : null;
+    const btnContinueText = btnContinue.querySelector('.launch-text');
+
+    if (show) {
+      const lvl = (this.runInMemory && this.selectedLevel) ? this.selectedLevel : (snap ? (snap.selectedLevel || snap.level || 1) : 1);
+      if (btnContinueText) {
+        btnContinueText.textContent = `DEVAM ET (BÖLÜM ${lvl})`;
+      }
+      if (btnStartText) {
+        btnStartText.textContent = 'YENİ SEFERE BAŞLA';
+      }
+    } else {
+      if (btnStartText) {
+        btnStartText.textContent = t('btn_start') || 'GÖREVE BAŞLA';
+      }
+    }
   }
 
   continueSuspendedRun() {
@@ -3520,6 +3567,8 @@ class Game {
   openHangar(targetSkinId) {
     try { history.pushState({ modal: 'hangar' }, ''); } catch(e) {}
     this.state = 'MENU';
+    if (startScreen) startScreen.classList.remove('hidden', 'launching');
+    if (hud) hud.classList.add('hidden');
     if (targetSkinId && this.skins[targetSkinId]) {
       this.inspectedSkinId = targetSkinId;
     }
@@ -3543,7 +3592,12 @@ class Game {
   updateCrystalsDisplay() {
     if (this.devMode) this.totalCrystals = 999999999;
     const displayText = this.devMode ? '∞ SINIRSIZ' : this.totalCrystals.toLocaleString();
-    if (totalCrystalsDisplay) totalCrystalsDisplay.textContent = displayText;
+    if (totalCrystalsDisplay) {
+      totalCrystalsDisplay.textContent = displayText;
+      totalCrystalsDisplay.classList.remove('scale-punch');
+      void totalCrystalsDisplay.offsetWidth;
+      totalCrystalsDisplay.classList.add('scale-punch');
+    }
     if (hangarCrystalsVal) hangarCrystalsVal.textContent = displayText;
   }
 
@@ -4119,8 +4173,8 @@ class Game {
             <span class="showcase-title">${t('ship_' + inspected.id + '_name')}</span>
             <span class="showcase-subtitle">${t('ship_' + inspected.id + '_title')}</span>
           </div>
-          <span class="showcase-status-badge ${isInspectedEquipped ? 'badge-equipped' : (isInspectedUnlocked ? 'badge-owned' : 'badge-locked')}">
-            ${isInspectedEquipped ? t('status_equipped') : (isInspectedUnlocked ? t('status_hangar') : t('status_locked'))}
+          <span class="showcase-status-badge ${isInspectedEquipped ? 'badge-equipped' : (isInspectedUnlocked ? 'badge-owned' : 'badge-locked')}" style="${isInspectedUnlocked && !isInspectedEquipped ? 'cursor:pointer; padding: 4px 10px; font-weight:800; border: 1px solid rgba(0, 240, 255, 0.4);' : ''}">
+            ${isInspectedEquipped ? (t('status_equipped') || 'KUŞANILDI') : (isInspectedUnlocked ? `⚡ ${t('btn_equip') || 'KUŞAN'}` : (t('status_locked') || 'KİLİTLİ'))}
           </span>
         </div>
 
@@ -4209,6 +4263,22 @@ class Game {
       showcaseTestBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.startShipTestFlight(inspected.id);
+      });
+    }
+
+    const showcaseBadge = showcase.querySelector('.showcase-status-badge');
+    if (showcaseBadge && isInspectedUnlocked && !isInspectedEquipped) {
+      showcaseBadge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.init();
+        this.currentSkinId = inspected.id;
+        localStorage.setItem('neon_current_skin', inspected.id);
+        localStorage.setItem('neon_equipped_skin', inspected.id);
+        sounds.playCardSelect();
+        vibrate.light();
+        this.showToast(t('toast_ship_on', { name: t('ship_' + inspected.id + '_name') }), inspected.primary || '#00f0ff');
+        this.renderHangarSkins();
+        this.updateMenuShipPreview();
       });
     }
 
@@ -5664,7 +5734,6 @@ class Game {
         .skin-card,
         .btn-theme-preset,
         .lang-btn,
-        .upgrade-item-card,
         .hangar-tab-btn,
         .btn-ship-starup,
         .modal-close-btn
@@ -5992,6 +6061,8 @@ class Game {
 
   openMissions() {
     try { history.pushState({ modal: 'missions' }, ''); } catch(e) {}
+    this.state = 'MENU';
+    if (startScreen) startScreen.classList.remove('hidden', 'launching');
     this.renderMissions();
     if (missionsModal) missionsModal.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(1);
@@ -6116,6 +6187,8 @@ class Game {
 
   openStats() {
     try { history.pushState({ modal: 'stats' }, ''); } catch(e) {}
+    this.state = 'MENU';
+    if (startScreen) startScreen.classList.remove('hidden', 'launching');
     if (!this.pilotStats) this.pilotStats = this.loadPilotStats();
     if (statFlights) statFlights.textContent = this.pilotStats.totalFlights.toLocaleString();
     if (statAsteroids) statAsteroids.textContent = this.pilotStats.asteroidsDestroyed.toLocaleString();
@@ -6702,6 +6775,7 @@ class Game {
       const rIcon = rankBadge.querySelector('.rank-icon');
       if (rIcon) rIcon.innerHTML = getPixelIconSvg(icon, 'md');
     }
+    if (this.updateMainMenuProfileBar) this.updateMainMenuProfileBar();
   }
 
   getShipStars(skinId) {
@@ -7108,6 +7182,7 @@ class Game {
         btnClaimDaily.classList.remove('pulse');
       }
     }
+    if (startScreen) startScreen.classList.remove('hidden', 'launching');
     if (dailyRewardModal) dailyRewardModal.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(3);
   }
@@ -7333,7 +7408,7 @@ class Game {
     };
 
     canvas.addEventListener('touchstart', onStart, { passive: false });
-    window.addEventListener('touchmove', onMove, { passive: false });
+    canvas.addEventListener('touchmove', onMove, { passive: false });
     window.addEventListener('touchend', onEnd, { passive: true });
     window.addEventListener('touchcancel', onEnd, { passive: true });
 
@@ -7500,10 +7575,8 @@ class Game {
     wCtx.save();
     wCtx.beginPath();
     wCtx.arc(cx, cy, radius + 2, 0, Math.PI * 2);
-    wCtx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
+    wCtx.strokeStyle = 'rgba(0, 240, 255, 0.75)';
     wCtx.lineWidth = 3;
-    wCtx.shadowColor = '#00f0ff';
-    wCtx.shadowBlur = 10;
     wCtx.stroke();
     wCtx.restore();
 
@@ -7523,7 +7596,7 @@ class Game {
       wCtx.fill();
 
       // Enerji İletim Hatları (Ayrım Çizgisi)
-      wCtx.strokeStyle = 'rgba(0, 240, 255, 0.28)';
+      wCtx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
       wCtx.lineWidth = 1.5;
       wCtx.stroke();
       wCtx.restore();
@@ -7534,8 +7607,6 @@ class Game {
       wCtx.arc(cx, cy, radius - 4, startAngle + 0.04, endAngle - 0.04);
       wCtx.strokeStyle = s.glow || s.color;
       wCtx.lineWidth = 2.5;
-      wCtx.shadowColor = s.glow || s.color;
-      wCtx.shadowBlur = 6;
       wCtx.stroke();
       wCtx.restore();
 
@@ -7552,36 +7623,26 @@ class Game {
 
       if (isGold) {
         wCtx.fillStyle = '#ffd700';
-        wCtx.shadowColor = '#ffd700';
-        wCtx.shadowBlur = 8;
-        wCtx.font = '900 12px "Segoe UI", system-ui, sans-serif';
+        wCtx.font = '700 13px "Rajdhani", sans-serif';
       } else if (isRevive) {
         wCtx.fillStyle = '#ff0055';
-        wCtx.shadowColor = '#ff0055';
-        wCtx.shadowBlur = 7;
-        wCtx.font = '900 11px "Segoe UI", system-ui, sans-serif';
+        wCtx.font = '700 12px "Rajdhani", sans-serif';
       } else if (isOverdrive) {
         wCtx.fillStyle = '#c084fc';
-        wCtx.shadowColor = '#c084fc';
-        wCtx.shadowBlur = 7;
-        wCtx.font = '900 11px "Segoe UI", system-ui, sans-serif';
+        wCtx.font = '700 12px "Rajdhani", sans-serif';
       } else if (isShield) {
         wCtx.fillStyle = '#38bdf8';
-        wCtx.shadowColor = '#38bdf8';
-        wCtx.shadowBlur = 6;
-        wCtx.font = '900 11px "Segoe UI", system-ui, sans-serif';
+        wCtx.font = '700 12px "Rajdhani", sans-serif';
       } else {
         wCtx.fillStyle = '#ffffff';
-        wCtx.shadowColor = 'rgba(0, 240, 255, 0.4)';
-        wCtx.shadowBlur = 4;
-        wCtx.font = '800 11px "Segoe UI", system-ui, sans-serif';
+        wCtx.font = '600 12px "Rajdhani", sans-serif';
       }
 
       wCtx.fillText(s.label, radius - 14, 4);
 
       // Hazne Plazma Pipi
       wCtx.beginPath();
-      wCtx.arc(radius - 8, 0, 2, 0, Math.PI * 2);
+      wCtx.arc(radius - 8, 0, 2.5, 0, Math.PI * 2);
       wCtx.fillStyle = s.glow || s.color;
       wCtx.fill();
       wCtx.restore();
@@ -7598,7 +7659,7 @@ class Game {
       wCtx.beginPath();
       wCtx.moveTo(x1, y1);
       wCtx.lineTo(x2, y2);
-      wCtx.strokeStyle = (j % 3 === 0) ? '#00f0ff' : 'rgba(0, 240, 255, 0.35)';
+      wCtx.strokeStyle = (j % 3 === 0) ? '#00f0ff' : 'rgba(0, 240, 255, 0.45)';
       wCtx.lineWidth = (j % 3 === 0) ? 2 : 1;
       wCtx.stroke();
     }
@@ -7612,16 +7673,12 @@ class Game {
     wCtx.fill();
     wCtx.strokeStyle = '#00f0ff';
     wCtx.lineWidth = 2;
-    wCtx.shadowColor = '#00f0ff';
-    wCtx.shadowBlur = 8;
     wCtx.stroke();
 
     wCtx.beginPath();
     wCtx.arc(cx, cy, 17, 0, Math.PI * 2);
     wCtx.strokeStyle = '#c084fc';
     wCtx.lineWidth = 1.8;
-    wCtx.shadowColor = '#c084fc';
-    wCtx.shadowBlur = 6;
     wCtx.stroke();
 
     const coreGrad = wCtx.createRadialGradient(cx, cy, 0, cx, cy, 9);
@@ -7631,8 +7688,6 @@ class Game {
     wCtx.beginPath();
     wCtx.arc(cx, cy, 9, 0, Math.PI * 2);
     wCtx.fillStyle = coreGrad;
-    wCtx.shadowColor = '#00f0ff';
-    wCtx.shadowBlur = 12;
     wCtx.fill();
     wCtx.restore();
   }
@@ -7766,11 +7821,13 @@ class Game {
       this.showToast(t('toast_wheel_revive'), '#ff0055');
     } else if (prize.type === 'shield') {
       this.bonusShield = true;
+      localStorage.setItem('neon_bonus_shield', '1');
       sounds.playLevelUp();
       vibrate.success();
       this.showToast(t('toast_wheel_shield'), '#38bdf8');
     } else if (prize.type === 'overdrive') {
       this.bonusOverdrive = true;
+      localStorage.setItem('neon_bonus_overdrive', '1');
       sounds.playLevelUp();
       vibrate.success();
       this.showToast(t('toast_wheel_overdrive'), '#c084fc');
@@ -7802,6 +7859,7 @@ class Game {
     ];
 
     this.setupLeaderboardEvents();
+    this.updateMainMenuProfileBar();
   }
 
   setupLeaderboardEvents() {
@@ -7908,17 +7966,29 @@ class Game {
         this.savePilotProfile();
       });
     }
+
+    const btnMenuProfile = document.getElementById('btn-menu-profile');
+    if (btnMenuProfile) {
+      btnMenuProfile.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        this.openLeaderboard();
+      });
+    }
   }
 
   openProfileModal() {
     const modal = document.getElementById('lb-profile-modal');
     const input = document.getElementById('lb-input-callsign');
     const selector = document.getElementById('lb-flags-selector');
+    const rankTag = document.getElementById('lb-profile-rank-tag');
     if (!modal) return;
 
     const currentCallsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
     const currentCountry = localStorage.getItem('neon_player_country') || 'TUR';
+    const currentRank = this.calculatePlayerRank ? this.calculatePlayerRank(this.lbMode || 'storm') : 1;
 
+    if (rankTag) rankTag.textContent = `#${currentRank.toLocaleString()}`;
     if (input) input.value = currentCallsign;
 
     if (selector) {
@@ -7928,7 +7998,7 @@ class Game {
       this.lbCountries.forEach(c => {
         const opt = document.createElement('div');
         opt.className = `lb-flag-option ${c.code === currentCountry ? 'active' : ''}`;
-        opt.innerHTML = `<span>${c.flag}</span><span>${c.code}</span>`;
+        opt.innerHTML = `<span style="display:inline-flex; align-items:center; margin-right:4px;">${getPixelFlagSvg(c.code)}</span><span>${c.code}</span>`;
         opt.addEventListener('click', () => {
           sounds.init();
           sounds.playCardSelect();
@@ -7958,11 +8028,54 @@ class Game {
 
     localStorage.setItem('neon_player_callsign', callsign);
     localStorage.setItem('neon_player_country', countryCode);
+    this.playerCallsign = callsign;
+
+    const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: 'TUR', flag: 'TR' };
+    const myUid = getPlayerUid();
+
+    // Canlı Firestore listesi ve yerel önbellekler derhal oyuncunun yeni adıyla senkronlanır
+    if (this._liveLeaderboardData) {
+      ['storm', 'campaign'].forEach(m => {
+        const list = this._liveLeaderboardData[m];
+        if (Array.isArray(list)) {
+          list.forEach(item => {
+            if (item.isPlayer || item.uid === myUid) {
+              item.name = callsign;
+              item.country = pilotCountry;
+            }
+          });
+          try { localStorage.setItem(`neon_cached_lb_${m}`, JSON.stringify(list)); } catch(e) {}
+        }
+      });
+    }
+
+    try {
+      updatePlayerProfileInFirestore(callsign, pilotCountry, t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name'));
+    } catch (e) {
+      console.warn('[Leaderboard] updatePlayerProfileInFirestore err:', e);
+    }
     this.syncSubmitCurrentScores();
 
+    if (this.updateMainMenuProfileBar) this.updateMainMenuProfileBar();
     this.closeProfileModal();
     this.renderLeaderboard(this.lbMode || 'storm');
     this.showToast(t('float_profile'), '#00f0ff');
+  }
+
+  updateMainMenuProfileBar() {
+    const profileBtn = document.getElementById('btn-menu-profile');
+    if (!profileBtn) return;
+    const callsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
+    const countryCode = localStorage.getItem('neon_player_country') || 'TUR';
+    const currentRank = this.calculatePlayerRank ? this.calculatePlayerRank(this.lbMode || 'storm') : 1;
+
+    const flagEl = document.getElementById('menu-player-flag');
+    const rankEl = document.getElementById('menu-player-rank');
+    const nameEl = document.getElementById('menu-player-name');
+
+    if (flagEl) flagEl.innerHTML = getPixelFlagSvg(countryCode);
+    if (rankEl) rankEl.textContent = `#${currentRank.toLocaleString()}`;
+    if (nameEl) nameEl.textContent = callsign;
   }
 
   getPilotAtRank(rank, mode) {
@@ -7997,17 +8110,18 @@ class Game {
     const titles = ['ELITE', 'ACE', 'VETERAN', 'COMMANDER', 'WARRIOR', 'PILOT', 'CHAMPION'];
     const countries = this.lbCountries || [{ code: 'TUR', flag: 'TR' }];
 
-    const nameIdx = Math.floor(rand * pilotNames.length);
-    const countryIdx = Math.floor(((rand * 17) % 1) * countries.length);
-    const shipIdx = Math.floor(((rand * 31) % 1) * ships.length);
-    const titleIdx = Math.floor(((rand * 47) % 1) * titles.length);
+    // Stride bazlı deterministik indeksleme - ardışık sıralarda asla mükerrer isim çıkmaz
+    const nameIdx = (Math.abs(rank * 23) + Math.floor(rand * 7)) % pilotNames.length;
+    const countryIdx = (Math.abs(rank * 11) + Math.floor(((rand * 17) % 1) * 3)) % countries.length;
+    const shipIdx = (Math.abs(rank * 7) + Math.floor(((rand * 31) % 1) * 3)) % ships.length;
+    const titleIdx = (Math.abs(rank * 5) + Math.floor(((rand * 47) % 1) * 3)) % titles.length;
 
     const country = countries[countryIdx] || countries[0];
     const ship = ships[shipIdx] || 'CYBER';
     const title = titles[titleIdx] || 'PILOT';
     const baseName = pilotNames[nameIdx] || 'Pilot';
     let name = baseName;
-    if (rank > 65) {
+    if (rank > 40) {
       const v = (rand * 77) % 1;
       if (v < 0.40) {
         name = `${baseName}${rank % 99 + 1}`;
@@ -8072,6 +8186,8 @@ class Game {
 
   openLeaderboard() {
     try { history.pushState({ modal: 'leaderboard' }, ''); } catch(e) {}
+    this.state = 'MENU';
+    if (startScreen) startScreen.classList.remove('hidden', 'launching');
     const lbModal = document.getElementById('leaderboard-modal');
     if (lbModal) lbModal.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(4);
@@ -8146,7 +8262,8 @@ class Game {
 
   getCountryFlagBadge(c) {
     const code = (c && (c.code || c.flag)) || 'GLB';
-    return `<span class="lb-flag-badge"><span class="flag-code">${code}</span></span>`;
+    const flagSvg = getPixelFlagSvg(code);
+    return `<span class="lb-flag-badge" title="${code}">${flagSvg}<span class="flag-code">${code}</span></span>`;
   }
 
   getRankDeltaHtml(rank) {
@@ -8154,14 +8271,14 @@ class Game {
     const h = seed % 100;
     if (h < 38) {
       const up = 1 + (Math.floor(seed) % 5);
-      return `<span class="rank-delta up">▲ ${up}</span>`;
+      return `<span class="rank-delta up"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 8 8" style="vertical-align:middle; margin-right:1px;"><polygon points="4,1 7,6 1,6" fill="#05ffa1"/></svg>${up}</span>`;
     } else if (h < 72) {
       const down = 1 + (Math.floor(seed) % 3);
-      return `<span class="rank-delta down">▼ ${down}</span>`;
+      return `<span class="rank-delta down"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 8 8" style="vertical-align:middle; margin-right:1px;"><polygon points="4,7 1,2 7,2" fill="#ff0055"/></svg>${down}</span>`;
     } else if (h < 88) {
-      return `<span class="rank-delta same">•</span>`;
+      return `<span class="rank-delta same"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 8 8" style="vertical-align:middle;"><rect x="1" y="3" width="6" height="2" fill="#94a3b8"/></svg></span>`;
     } else {
-      return `<span class="rank-delta new">★ NEW</span>`;
+      return `<span class="rank-delta new">NEW</span>`;
     }
   }
 
@@ -8299,7 +8416,7 @@ class Game {
       percentileEl.style.color = tier.color;
     }
     if (nameEl) {
-      nameEl.innerHTML = `${this.getCountryFlagBadge(pilotCountry)} ${pilotCallsign} <span class="lb-you-badge">${t('lb_you_badge')}</span>`;
+      nameEl.innerHTML = `<span class="lb-hud-rank-inline">#${playerRank.toLocaleString()}</span> ${this.getCountryFlagBadge(pilotCountry)} <span class="lb-pilot-name-text">${pilotCallsign}</span> <span class="lb-you-badge">${t('lb_you_badge')}</span>`;
     }
 
     if (mode === 'storm') {
@@ -8331,19 +8448,34 @@ class Game {
 
     // Canlı Firestore listesi veya Prosedürel Pilotlar
     const liveList = (this._liveLeaderboardData && this._liveLeaderboardData[mode]) || null;
+    const myUid = getPlayerUid();
     const getPilotEntry = (rank) => {
-      if (liveList && liveList[rank - 1]) {
-        const item = liveList[rank - 1];
+      if (rank === playerRank) {
         return {
           rank,
-          name: item.name,
-          country: item.country,
-          ship: item.ship || currentSkinName,
+          name: pilotCallsign,
+          country: pilotCountry,
+          ship: currentSkinName,
+          title: tier.name,
+          score: stormScore,
+          level: clearedLevel,
+          stars: totalStars,
+          isPlayer: true
+        };
+      }
+      if (liveList && liveList[rank - 1]) {
+        const item = liveList[rank - 1];
+        const isMe = item.isPlayer || item.uid === myUid;
+        return {
+          rank,
+          name: isMe ? pilotCallsign : item.name,
+          country: isMe ? pilotCountry : item.country,
+          ship: isMe ? currentSkinName : (item.ship || currentSkinName),
           title: this.getTierInfo(rank).name,
-          score: item.score,
-          level: item.level || 1,
-          stars: item.stars || 0,
-          isPlayer: item.isPlayer
+          score: isMe ? (mode === 'storm' ? stormScore : item.score) : item.score,
+          level: isMe ? clearedLevel : (item.level || 1),
+          stars: isMe ? totalStars : (item.stars || 0),
+          isPlayer: isMe
         };
       }
       return this.getPilotAtRank(rank, mode);
@@ -8356,25 +8488,26 @@ class Game {
         const p1 = getPilotEntry(1);
         const p2 = getPilotEntry(2);
         const p3 = getPilotEntry(3);
+        const youTag = (p) => p.isPlayer ? `<span class="lb-you-badge" style="margin-left:2px; font-size:0.6rem;">${t('lb_you_badge')}</span>` : '';
         podium.innerHTML = `
-          <div class="podium-slot rank-2">
+          <div class="podium-slot rank-2 ${p2.isPlayer ? 'is-current-player' : ''}">
             <div class="podium-avatar">${this.getCountryFlagBadge(p2.country)}</div>
-            <div class="podium-name">${p2.name}</div>
+            <div class="podium-name">${p2.name} ${youTag(p2)}</div>
             <div class="podium-score">${mode === 'storm' ? p2.score.toLocaleString() : 'B.' + p2.level}</div>
-            <div class="podium-pedestal p2">2</div>
+            <div class="podium-pedestal p2"><span class="pedestal-medal">${getPixelIconSvg('medal_silver', 'sm')}</span> 2</div>
           </div>
-          <div class="podium-slot rank-1">
-            <div class="podium-crown">👑</div>
+          <div class="podium-slot rank-1 ${p1.isPlayer ? 'is-current-player' : ''}">
+            <div class="podium-crown">${getPixelIconSvg('crown', 'md')}</div>
             <div class="podium-avatar">${this.getCountryFlagBadge(p1.country)}</div>
-            <div class="podium-name">${p1.name}</div>
+            <div class="podium-name">${p1.name} ${youTag(p1)}</div>
             <div class="podium-score">${mode === 'storm' ? p1.score.toLocaleString() : 'B.' + p1.level}</div>
-            <div class="podium-pedestal p1">1</div>
+            <div class="podium-pedestal p1"><span class="pedestal-medal">${getPixelIconSvg('medal_gold', 'sm')}</span> 1</div>
           </div>
-          <div class="podium-slot rank-3">
+          <div class="podium-slot rank-3 ${p3.isPlayer ? 'is-current-player' : ''}">
             <div class="podium-avatar">${this.getCountryFlagBadge(p3.country)}</div>
-            <div class="podium-name">${p3.name}</div>
+            <div class="podium-name">${p3.name} ${youTag(p3)}</div>
             <div class="podium-score">${mode === 'storm' ? p3.score.toLocaleString() : 'B.' + p3.level}</div>
-            <div class="podium-pedestal p3">3</div>
+            <div class="podium-pedestal p3"><span class="pedestal-medal">${getPixelIconSvg('medal_bronze', 'sm')}</span> 3</div>
           </div>
         `;
       }
@@ -8396,6 +8529,24 @@ class Game {
           const p = getPilotEntry(r);
           list.appendChild(this.createLeaderboardRow(p, mode));
         }
+      }
+
+      if (playerRank > 50) {
+        const divider = document.createElement('div');
+        divider.className = 'leaderboard-divider';
+        divider.innerHTML = '<span style="color:#64748b; font-size:0.75rem; letter-spacing:3px; display:block; text-align:center; padding:6px 0; opacity:0.8;">• • •</span>';
+        list.appendChild(divider);
+        list.appendChild(this.createLeaderboardRow({
+          rank: playerRank,
+          name: pilotCallsign,
+          country: pilotCountry,
+          ship: currentSkinName,
+          title: tier.name,
+          score: stormScore,
+          level: clearedLevel,
+          stars: totalStars,
+          isPlayer: true
+        }, mode));
       }
     } else {
       // Around Me View
@@ -8443,15 +8594,21 @@ class Game {
       ? `${p.score.toLocaleString()} <span style="font-size: 0.65rem; color: #94a3b8;">${t('lb_pts')}</span>`
       : `${t('lb_stage')} ${p.level} <span style="font-size: 0.65rem; color: #ffbe0b;">${p.stars}★</span>`);
 
+    const medalIcon = p.rank === 1
+      ? getPixelIconSvg('medal_gold', 'xs')
+      : (p.rank === 2
+      ? getPixelIconSvg('medal_silver', 'xs')
+      : (p.rank === 3 ? getPixelIconSvg('medal_bronze', 'xs') : ''));
+
     row.innerHTML = `
       <div class="lb-left">
-        <span class="lb-rank-num">#${p.rank.toLocaleString()}</span>
+        <span class="lb-rank-num">${medalIcon} #${p.rank.toLocaleString()}</span>
         ${p.localRecord ? '' : this.getRankDeltaHtml(p.rank)}
         ${this.getCountryFlagBadge(p.country)}
         <div class="lb-pilot-info">
           <div class="lb-name-row">
             <span class="lb-pilot-name">${p.name}</span>
-            ${isPlayer ? `<span class="lb-you-badge">${t('lb_you_badge')}</span>` : ''}
+            ${isPlayer ? `<span class="lb-hud-rank-inline" style="font-size:0.72rem; margin-left:4px;">#${p.rank.toLocaleString()}</span><span class="lb-you-badge">${t('lb_you_badge')}</span>` : ''}
           </div>
           <div class="lb-pilot-sub">
             <span class="lb-ship-tag">${p.ship}</span>
@@ -8775,6 +8932,10 @@ class Game {
       const card = document.createElement('div');
       card.className = 'merchant-item-card';
       card.style.animation = `jackpotCardPop 0.42s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.08}s both`;
+      card.addEventListener('animationend', () => {
+        card.style.animation = 'none';
+        card.style.opacity = '1';
+      }, { once: true });
       const canAfford = this.totalCrystals >= item.price;
       const itemName = txt(`merch_${item.id}_name`, item.name);
       const itemDesc = txt(`merch_${item.id}_desc`, item.desc);
@@ -8877,26 +9038,31 @@ class Game {
     sounds.playUltimateCast();
     sounds.playNuke();
     vibrate.heavy();
-    this.screenShake = 10;
-    this.whiteFlash = 0.45;
+    this.hitStopTimer = Math.max(this.hitStopTimer || 0, 3);
+    this.screenShake = 12;
+    this.whiteFlash = 0.52;
 
-    // Taktiksel EMP Alanı (Hafifletilmiş tekil darbe dalgası)
-    this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 240);
+    // Taktiksel EMP Alanı (Çift kademeli keskin piksel darbe dalgası)
+    this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 260);
+    this.particles.spawnShockwave(this.player.x, this.player.y, '#ffbe0b', 165);
     this.particles.spawnFloatingText(this.player.x, this.player.y - 45, t('float_overdrive'), '#00f0ff', 18);
 
-    // Yakındaki mermileri nötralize et (Aşırı parçacık patlamasını engelle)
+    // Yakındaki mermileri nötralize et ve ilk 6 mermiyi kristale dönüştür (Kuantum Kristalizasyon)
     let clearedCount = 0;
     this.enemyProjectiles = this.enemyProjectiles.filter(ep => {
       const dx = ep.x - this.player.x;
       const dy = ep.y - this.player.y;
-      if (dx * dx + dy * dy < 220 * 220) {
+      if (dx * dx + dy * dy < 240 * 240) {
+        if (clearedCount < 6 && this.gems) {
+          this.gems.push(new Gem(ep.x, ep.y, 2));
+        }
         clearedCount++;
         return false;
       }
       return true;
     });
     if (clearedCount > 0) {
-      this.particles.spawnExplosion(this.player.x, this.player.y, '#00f0ff', 6, 2.5);
+      this.particles.spawnExplosion(this.player.x, this.player.y, '#00f0ff', 10, 3.0);
     }
 
     // Acil durum bariyer kalkanı (+20 geçici kalkan)
@@ -9424,13 +9590,28 @@ class Game {
     if (luckyChestModal) luckyChestModal.classList.add('hidden');
     this.telegraphs = [];
     this.activeBeams = [];
-    if (this.bonusShield) {
+    const hasBonusShield = this.bonusShield || localStorage.getItem('neon_bonus_shield') === '1';
+    if (hasBonusShield) {
       this.player.shield = this.player.maxShield;
       this.bonusShield = false;
+      localStorage.removeItem('neon_bonus_shield');
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#38bdf8', 160);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 35, 'KALKAN TAKVİYESİ AKTİF!', '#38bdf8', 16);
     }
-    if (this.bonusOverdrive) {
-      this.player.overchargeTimer = 220;
+    const hasBonusOverdrive = this.bonusOverdrive || localStorage.getItem('neon_bonus_overdrive') === '1';
+    if (hasBonusOverdrive) {
       this.bonusOverdrive = false;
+      localStorage.removeItem('neon_bonus_overdrive');
+      this.player.isFever = true;
+      this.player.feverTimer = 480; // 8 tam saniye gerçek Overdrive gücü
+      this.player.overchargeTimer = 480;
+      this.player.feverCharge = 100;
+      sounds.playWarpDrive();
+      sounds.playJackpot();
+      vibrate.heavy();
+      this.particles.triggerFlash('#c084fc', 0.6);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#c084fc', 280);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 48, 'ÇARKTAN SÜPER OVERDRIVE AKTİF!', '#c084fc', 20);
     }
     this.vortices = [];
     this.fireZones = [];
@@ -10212,6 +10393,10 @@ class Game {
     this.gemStreak = ((this.frames - (this.lastGemFrame || 0)) < 36) ? Math.min(16, (this.gemStreak || 0) + 1) : 0;
     this.lastGemFrame = this.frames;
     sounds.playCrystalPop(this.gemStreak);
+    if (this.gemStreak > 0 && this.gemStreak % 4 === 0) {
+      vibrate.light();
+    }
+    EventBus.emit('CRYSTAL_COLLECTED', { gem, streak: this.gemStreak });
 
     // Kalıcı Kristal Ekonomisi Dengesi (XP ile Kalıcı Para Birimi Ayrıldı):
     // XP seviye atlamak için gem.value olarak aynen verilir, kalıcı kristal ise değerli ve dengeli kazanılır!
@@ -10734,6 +10919,10 @@ class Game {
       card.style.setProperty('--card-color', upgrade.color || '#00f0ff');
       card.style.setProperty('--card-glow', `${upgrade.color || '#00f0ff'}55`);
       card.style.animation = `jackpotCardPop 0.42s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.08}s both`;
+      card.addEventListener('animationend', () => {
+        card.style.animation = 'none';
+        card.style.opacity = '1';
+      }, { once: true });
 
       let pipsHtml = '';
       if (!upgrade.isEvolution && !upgrade.isBonus && upgrade.maxLevel) {
@@ -10854,7 +11043,20 @@ class Game {
 
       card.addEventListener('click', () => {
         if (performance.now() < (this.modalInputLockUntil || 0)) return;
-        this.applyUpgrade(upgrade.id);
+        this.modalInputLockUntil = performance.now() + 500;
+        sounds.playCardSelect();
+        vibrate.medium();
+        // 5 Adımlı Koreografi 3: Diğer kartları söndür, seçileni vorteks gibi sıkıştır
+        const allCards = cardsContainer.querySelectorAll('.upgrade-card');
+        allCards.forEach(c => {
+          if (c !== card) c.style.opacity = '0.25';
+        });
+        card.style.transform = 'scale(0.92)';
+        card.style.borderColor = '#ffd700';
+        card.style.boxShadow = '0 0 25px rgba(255, 215, 0, 0.6)';
+        setTimeout(() => {
+          this.applyUpgrade(upgrade.id);
+        }, 110);
       });
 
       cardsContainer.appendChild(card);
@@ -11562,30 +11764,92 @@ class Game {
 
     this.selectedChestRewardIndex = 0;
 
-    if (luckyChestContainer) {
-      luckyChestContainer.innerHTML = '';
-      this.pendingChestRewards.forEach((item, idx) => {
-        const row = this.renderChestRewardCard(item, idx);
-        luckyChestContainer.appendChild(row);
-      });
-    }
-
+    const chestBox = document.getElementById('chest-3d-box');
     const btnClaimChest = document.getElementById('btn-claim-chest');
-    if (btnClaimChest) {
-      btnClaimChest.textContent = t('chest_claim_single');
-    }
-
     const btnAdChestAll = document.getElementById('btn-ad-chest-all');
     const btnAdChestAllText = document.getElementById('btn-ad-chest-all-text');
+
+    if (btnClaimChest) {
+      btnClaimChest.textContent = t('chest_claim_single');
+      btnClaimChest.style.pointerEvents = 'none';
+      btnClaimChest.style.opacity = '0.5';
+    }
     if (btnAdChestAll) {
-      btnAdChestAll.disabled = false;
+      btnAdChestAll.disabled = true;
+      btnAdChestAll.style.pointerEvents = 'none';
+      btnAdChestAll.style.opacity = '0.5';
     }
     if (btnAdChestAllText) {
       btnAdChestAllText.textContent = t('chest_claim_all_ad');
     }
 
+    // 14 Altın Koreografi - Koreografi 12: Dükkan / Sandık Açılımı (5 Adımlı Akış)
+    if (chestBox) {
+      chestBox.classList.remove('chest-open', 'chest-wobbling', 'chest-dropping');
+      void chestBox.offsetWidth; // Yeniden tetikleme reflow
+      chestBox.classList.add('chest-dropping');
+    }
+
+    if (luckyChestContainer) {
+      luckyChestContainer.innerHTML = '';
+      luckyChestContainer.style.opacity = '0';
+      luckyChestContainer.style.transform = 'translateY(16px)';
+      luckyChestContainer.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+    }
+
     try { history.pushState({ modal: 'lucky_chest' }, ''); } catch(e) {}
     if (luckyChestModal) luckyChestModal.classList.remove('hidden');
+
+    // 1. Adım (Hazırlık): Tok iniş sesi ve haptik
+    setTimeout(() => {
+      if (this.state !== 'LUCKY_CHEST') return;
+      sounds.playPowerup();
+      vibrate.light();
+    }, 180);
+
+    // 2. Adım (Gerilim): Wobble sallantısı ve kilit ışığı sızması
+    setTimeout(() => {
+      if (this.state !== 'LUCKY_CHEST' || !chestBox) return;
+      chestBox.classList.remove('chest-dropping');
+      chestBox.classList.add('chest-wobbling');
+      vibrate.medium();
+    }, 450);
+
+    // 3. Adım (Patlama): Kapak arkaya fırlar, ekran hit-stop, altın patlama
+    setTimeout(() => {
+      if (this.state !== 'LUCKY_CHEST' || !chestBox) return;
+      chestBox.classList.remove('chest-wobbling');
+      chestBox.classList.add('chest-open');
+      sounds.playJackpot();
+      vibrate.success();
+
+      // 4. Adım (Ödül Fırlaması): Kartlar sandıktan fırlayarak sırayla dizilir
+      setTimeout(() => {
+        if (this.state !== 'LUCKY_CHEST') return;
+        if (luckyChestContainer) {
+          luckyChestContainer.style.opacity = '1';
+          luckyChestContainer.style.transform = 'translateY(0)';
+          this.pendingChestRewards.forEach((item, idx) => {
+            const row = this.renderChestRewardCard(item, idx);
+            luckyChestContainer.appendChild(row);
+          });
+        }
+
+        // 5. Adım (Kutlama & Parlama): Butonlar aktifleşir ve dokunma açılır
+        setTimeout(() => {
+          if (this.state !== 'LUCKY_CHEST') return;
+          if (btnClaimChest) {
+            btnClaimChest.style.pointerEvents = 'auto';
+            btnClaimChest.style.opacity = '1';
+          }
+          if (btnAdChestAll) {
+            btnAdChestAll.disabled = false;
+            btnAdChestAll.style.pointerEvents = 'auto';
+            btnAdChestAll.style.opacity = '1';
+          }
+        }, 320);
+      }, 180);
+    }, 850);
   }
 
   renderChestRewardCard(item, idx) {
@@ -11594,13 +11858,21 @@ class Game {
     row.className = `upgrade-item-card ${item.isEvolution ? 'evolution-card' : ''} ${isSelected ? 'selected' : ''}`;
     row.style.setProperty('--card-color', item.color || '#ffbe0b');
     row.style.setProperty('--card-glow', `${item.color || '#ffbe0b'}55`);
-    row.style.animation = `jackpotCardPop 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${idx * 0.14}s backwards`;
+    row.style.animation = `jackpotCardPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${idx * 0.12}s backwards`;
+
+    // Animasyon tamamlandığında animasyon kuralını temizle ki tıklamada 'opacity: 0' asla yeniden tetiklenmesin!
+    row.addEventListener('animationend', () => {
+      row.style.animation = 'none';
+      row.style.opacity = '1';
+    }, { once: true });
 
     row.addEventListener('click', () => {
       this.selectedChestRewardIndex = idx;
       if (luckyChestContainer) {
         const cards = luckyChestContainer.querySelectorAll('.upgrade-item-card');
         cards.forEach((c, i) => {
+          c.style.animation = 'none';
+          c.style.opacity = '1';
           if (i === idx) c.classList.add('selected');
           else c.classList.remove('selected');
         });
@@ -12101,12 +12373,33 @@ class Game {
       this.player.hp = Math.round(this.player.maxHp * 0.6);
       this.player.shield = this.player.maxShield;
       this.player.invulnerableTimer = 180; // 3 saniye dokunulmazlık
-      this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 300);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 360);
       this.particles.spawnFloatingText(this.player.x, this.player.y - 40, t('float_revived'), '#ffd700', 18);
     }
+
+    // 5 Adımlı Koreografi 6: 360° EMP ile ekrandaki tüm düşman mermilerini süpür
+    if (this.enemyProjectiles) {
+      this.enemyProjectiles.length = 0;
+    }
+    if (this.enemies) {
+      for (const enemy of this.enemies) {
+        if (!enemy.isBoss && !enemy.isIndestructible) {
+          const dx = enemy.x - this.player.x;
+          const dy = enemy.y - this.player.y;
+          const d = Math.hypot(dx, dy) || 1;
+          if (d < 350) {
+            enemy.x += (dx / d) * 75;
+            enemy.y += (dy / d) * 75;
+            enemy.frozen = 60;
+          }
+        }
+      }
+    }
+
     sounds.playJackpot();
     sounds.startBGM();
     vibrate.success();
+    EventBus.emit('PLAYER_REVIVED', { revivesUsed: this.revivesUsed });
   }
 
   // === OYUN DÖNGÜSÜ GÜNCELLEME ===
@@ -13039,93 +13332,159 @@ class Game {
     // 1. Ana Silah Sistemi
     const zone = this.player.combatZone || 'rear';
     if (zone === 'front') {
-      // Ön hat tehlikeli. Karşılığı geminin kendi ağır silahı: aynı mavi ray değil.
-      const heavyInterval = Math.max(42, Math.round(fireInterval * 2.35));
-      this.player.shootCooldown += dt;
-      if (this.player.shootCooldown >= heavyInterval) {
-        this.player.shootCooldown = 0;
-        sounds.playRailgun();
-        vibrate.heavy();
-        this.screenShake = Math.max(this.screenShake, 4.5);
+      // Ön hat tehlikeli (Hücum Bölgesi). Karşılığı her gemiye özel karakteristik Ağır Balyoz kadansı ve ritmidir:
+      // Standart: ÇIV-ÇIV (çift askeri vuruş) -> 1.35s bekleme -> ÇIV-ÇIV
+      // Phantom: ÇIV-ÇIV-ÇIV (3'lü seri yaylım) -> 1.55s bekleme
+      // Solar: GÜÜÜÜM! (tek devasa nükleer balyoz) -> 1.75s bekleme
+      // Toxic: ÇOF-ÇOF (çift asit pompası) -> 1.30s bekleme
+      // Vortex: VUM-ÇAT! (yerçekimi ikiz darbe) -> 1.40s bekleme
+      // Chrono: ÇIV..ÇIV.ÇIV (ivmelenen zaman sekmesi) -> 1.45s bekleme
+      const HEAVY_CADENCE = {
+        cyberpunk: { burstCount: 2, burstSpacing: 8,  reloadFrames: 74, dmgScale: 0.62 },
+        phantom:   { burstCount: 3, burstSpacing: 6,  reloadFrames: 86, dmgScale: 0.42 },
+        solar:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 98, dmgScale: 1.15 },
+        toxic:     { burstCount: 2, burstSpacing: 10, reloadFrames: 76, dmgScale: 0.58 },
+        vortex:    { burstCount: 2, burstSpacing: 9,  reloadFrames: 78, dmgScale: 0.60 },
+        chrono:    { burstCount: 3, burstSpacing: 12, reloadFrames: 82, dmgScale: 0.45, isAccelerating: true }
+      };
 
-        const lvl = this.player.upgrades.laser;
-        const isCrit = Math.random() < ((this.player.critChance || 0.08) + 0.12);
-        const isOvercharge = this.player.overchargeTimer > 0;
-        const masteryCritBonus = (this.masteryTree && this.masteryTree.critDmg) ? this.masteryTree.critDmg * 0.15 : 0;
-        const critMult = isCrit ? (2.0 + masteryCritBonus) : 1.0;
-        const dmgBonus = (this.player.isFever ? 3.0 : 0) + (isOvercharge ? 2.5 : 0);
-        const mult = critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy);
-        const skinId = this.currentSkinId;
-        const muzzleY = this.player.y - 24;
+      if (typeof this.player.heavyBurstQueue !== 'number') {
+        this.player.heavyBurstQueue = 0;
+        this.player.heavyBurstInterval = 0;
+        this.player.heavyReloadTimer = 0;
+        this.player.heavyShotIndex = 0;
+      }
 
-        const pushHeavy = (bullet) => {
-          this.playerBullets.push({
-            isCrit,
-            maxRange: 980,
-            traveled: 0,
-            ...bullet
-          });
-        };
+      const skinId = this.currentSkinId;
+      const cadence = HEAVY_CADENCE[skinId] || HEAVY_CADENCE.cyberpunk;
 
-        if (skinId === 'solar') {
-          pushHeavy({
-            x: this.player.x, y: muzzleY, vx: 0, vy: -12,
-            damage: (16 + lvl * 3.4 + dmgBonus) * mult,
-            w: 16, h: 16, color: '#ff9100',
-            piercing: false, isSplash: true, isSolarFlare: true
-          });
-        } else if (skinId === 'toxic') {
-          pushHeavy({
-            x: this.player.x, y: muzzleY, vx: 0, vy: -22,
-            damage: (9 + lvl * 2.4 + dmgBonus) * mult,
-            w: 9, h: 42, color: '#05ffa1',
-            piercing: true, pierce: 7, isPoison: true, isHeavyBeam: true
-          });
-        } else if (skinId === 'vortex') {
-          pushHeavy({
-            x: this.player.x, y: muzzleY, vx: 0, vy: -18,
-            damage: (11 + lvl * 2.6 + dmgBonus) * mult,
-            w: 14, h: 22, color: '#d946ef',
-            piercing: true, pierce: 4, isGravitySlug: true
-          });
-        } else if (skinId === 'phantom') {
-          for (const ang of [-0.14, 0, 0.14]) {
+      if (this.player.heavyReloadTimer > 0) {
+        this.player.heavyReloadTimer -= dt;
+      }
+
+      // Şarj tamamlandıysa ve bekleyen atış yoksa yeni burst başlat
+      if (this.player.heavyReloadTimer <= 0 && this.player.heavyBurstQueue <= 0) {
+        this.player.heavyBurstQueue = cadence.burstCount;
+        this.player.heavyShotIndex = 0;
+        this.player.heavyBurstInterval = 0; // ilk atış gecikmesiz başlar
+      }
+
+      if (this.player.heavyBurstQueue > 0) {
+        this.player.heavyBurstInterval -= dt;
+        if (this.player.heavyBurstInterval <= 0) {
+          const shotIdx = this.player.heavyShotIndex;
+          this.player.heavyShotIndex++;
+          this.player.heavyBurstQueue--;
+
+          // Ses & Hissiyat: Çoklu atışta hafifçe yükselen perde (organik ritim)
+          const pitch = 1.0 + (shotIdx * 0.12);
+          if (typeof sounds.playRailgun === 'function') sounds.playRailgun(pitch);
+
+          if (cadence.burstCount === 1) {
+            this.screenShake = Math.max(this.screenShake, 5.5);
+            vibrate.heavy();
+          } else {
+            this.screenShake = Math.max(this.screenShake, 3.2);
+            vibrate.light();
+          }
+
+          // Çiftli ve üçlü atışlarda alternatif namlu ofseti (sağ/sol namlu hissi)
+          const muzzleY = this.player.y - 24;
+          const xOffset = cadence.burstCount === 2 
+            ? (shotIdx === 0 ? -5 : 5) 
+            : (cadence.burstCount === 3 ? (shotIdx === 0 ? -6 : (shotIdx === 1 ? 0 : 6)) : 0);
+
+          const lvl = this.player.upgrades.laser;
+          const isCrit = Math.random() < ((this.player.critChance || 0.08) + 0.12);
+          const isOvercharge = this.player.overchargeTimer > 0;
+          const masteryCritBonus = (this.masteryTree && this.masteryTree.critDmg) ? this.masteryTree.critDmg * 0.15 : 0;
+          const critMult = isCrit ? (2.0 + masteryCritBonus) : 1.0;
+          const dmgBonus = (this.player.isFever ? 3.0 : 0) + (isOvercharge ? 2.5 : 0);
+          const mult = critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy) * cadence.dmgScale;
+
+          const pushHeavy = (bullet) => {
+            this.playerBullets.push({
+              isCrit,
+              maxRange: 980,
+              traveled: 0,
+              ...bullet
+            });
+          };
+
+          if (skinId === 'solar') {
             pushHeavy({
-              x: this.player.x + Math.sin(ang) * 8,
-              y: muzzleY,
-              vx: Math.sin(ang) * 7,
-              vy: -Math.cos(ang) * 20,
-              damage: (7.5 + lvl * 1.7 + dmgBonus * 0.6) * mult,
-              w: 8, h: 18, color: '#00e5ff',
-              piercing: true, pierce: 3, isLaneClear: true
+              x: this.player.x, y: muzzleY, vx: 0, vy: -12,
+              damage: (16 + lvl * 3.4 + dmgBonus) * mult,
+              w: 18, h: 18, color: '#ff9100',
+              piercing: false, isSplash: true, isSolarFlare: true
+            });
+          } else if (skinId === 'toxic') {
+            pushHeavy({
+              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -22,
+              damage: (9 + lvl * 2.4 + dmgBonus) * mult,
+              w: 9, h: 42, color: '#05ffa1',
+              piercing: true, pierce: 7, isPoison: true, isHeavyBeam: true
+            });
+          } else if (skinId === 'vortex') {
+            pushHeavy({
+              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -18,
+              damage: (11 + lvl * 2.6 + dmgBonus) * mult,
+              w: 14, h: 22, color: '#d946ef',
+              piercing: true, pierce: 4, isGravitySlug: true
+            });
+          } else if (skinId === 'phantom') {
+            for (const ang of [-0.14, 0, 0.14]) {
+              pushHeavy({
+                x: this.player.x + Math.sin(ang) * 8 + xOffset,
+                y: muzzleY,
+                vx: Math.sin(ang) * 7,
+                vy: -Math.cos(ang) * 20,
+                damage: (7.5 + lvl * 1.7 + dmgBonus * 0.6) * mult,
+                w: 8, h: 18, color: '#00e5ff',
+                piercing: true, pierce: 3, isLaneClear: true
+              });
+            }
+          } else if (skinId === 'chrono') {
+            pushHeavy({
+              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -13,
+              damage: (13 + lvl * 3.1 + dmgBonus) * mult,
+              w: 18, h: 18, color: '#ffd700',
+              piercing: true, pierce: 2, isChronoSlug: true
+            });
+          } else {
+            pushHeavy({
+              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -30,
+              damage: (20 + lvl * 5.2 + dmgBonus) * mult,
+              w: 11, h: 52, color: isCrit ? '#ffbe0b' : '#7dd3fc',
+              piercing: true, pierce: 8, isHeavyBeam: true
             });
           }
-        } else if (skinId === 'chrono') {
-          pushHeavy({
-            x: this.player.x, y: muzzleY, vx: 0, vy: -13,
-            damage: (13 + lvl * 3.1 + dmgBonus) * mult,
-            w: 18, h: 18, color: '#ffd700',
-            piercing: true, pierce: 2, isChronoSlug: true
-          });
-        } else {
-          pushHeavy({
-            x: this.player.x, y: muzzleY, vx: 0, vy: -30,
-            damage: (20 + lvl * 5.2 + dmgBonus) * mult,
-            w: 11, h: 52, color: isCrit ? '#ffbe0b' : '#7dd3fc',
-            piercing: true, pierce: 8, isHeavyBeam: true
-          });
-        }
 
-        this.particles.spawnShockwave(this.player.x, muzzleY, '#ffffff', 36);
+          this.particles.spawnShockwave(this.player.x + xOffset, muzzleY, '#ffffff', 32);
+
+          // Bir sonraki atışın aralığını belirle
+          if (this.player.heavyBurstQueue > 0) {
+            let nextSpacing = cadence.burstSpacing;
+            if (cadence.isAccelerating) {
+              nextSpacing = Math.max(5, cadence.burstSpacing - (shotIdx * 4));
+            }
+            this.player.heavyBurstInterval = nextSpacing;
+          } else {
+            // Burst tamamlandı, ana reload süresini başlat (fireRate hızıyla ölçeklenir)
+            this.player.heavyReloadTimer = Math.max(28, Math.round(cadence.reloadFrames / speedMult));
+          }
+        }
       }
     } else {
+      // Alt bölgeye (Savunma) inildiğinde ağır burst durumunu sıfırla ki yukarı çıkınca hemen hazır olsun
+      this.player.heavyBurstQueue = 0;
+      this.player.heavyReloadTimer = 0;
       // 2. Kademe (ALT BÖLGE / SAVUNMA): SERİ ÇİFTLİ / ÇOKLU PLAZMA ("tık-tık tık-tık tık-tık")
       const effectiveInterval = fireInterval;
       this.player.shootCooldown += dt;
       if (this.player.shootCooldown >= effectiveInterval) {
         this.player.shootCooldown = 0;
         sounds.playLaser();
-        vibrate.light();
 
         const isOvercharge = this.player.overchargeTimer > 0;
         const isVortex = this.player.evolutions.vortexLaser;
@@ -14404,8 +14763,11 @@ class Game {
     dx /= len;
     dy /= len;
     const boss = !!(enemy.isBoss || (enemy.type && enemy.type.startsWith('boss')));
-    const mag = boss ? 0.4 : 1.15;
-    const cap = boss ? 0.55 : 1.35;
+    const isFleet = !!(enemy.isFleetMember || enemy.isFleetCommander || enemy.type === 'escort_fighter' || enemy.type === 'fighter' || enemy.type === 'scout' || enemy.type === 'cruiser' || enemy.type === 'shield_vanguard' || enemy.type === 'dive_bomber');
+    
+    // Düşman filo gemilerine vuruşta tatmin edici ve doğal mikro geri tepme (1-3px pushback)
+    const mag = boss ? 0.4 : (isFleet ? 2.6 : 1.4);
+    const cap = boss ? 0.6 : (isFleet ? 3.4 : 1.8);
     enemy.knockX = (enemy.knockX || 0) + dx * mag;
     enemy.knockY = (enemy.knockY || 0) + dy * mag;
     const klen = Math.hypot(enemy.knockX, enemy.knockY);
@@ -14413,13 +14775,18 @@ class Game {
       enemy.knockX = (enemy.knockX / klen) * cap;
       enemy.knockY = (enemy.knockY / klen) * cap;
     }
-    this.screenShake = Math.max(this.screenShake || 0, boss ? 2.1 : 1.6);
+
+    enemy.hitTremor = isFleet ? 2.8 : 1.5;
+    this.screenShake = Math.max(this.screenShake || 0, boss ? 2.1 : (isFleet ? 1.8 : 1.4));
     if ((this.frames || 0) >= (this._hitStopReady || 0)) {
-      this.hitStopTimer = Math.max(this.hitStopTimer || 0, 2);
-      this._hitStopReady = (this.frames || 0) + 8;
+      this.hitStopTimer = Math.max(this.hitStopTimer || 0, isFleet ? 1.5 : 1.0);
+      this._hitStopReady = (this.frames || 0) + 7;
     }
     if (this.particles) this.particles.spawnHitSparks(enemy.x, enemy.y, dx, dy, color || '#ffffff');
     sounds.playHitmarker();
+    if (typeof vibrate !== 'undefined' && vibrate.hit) {
+      vibrate.hit();
+    }
   }
 
   applyCappedEnemyDamage(enemy, rawDamage, from) {
@@ -14515,13 +14882,24 @@ class Game {
         sounds.playBossAlarm();
         sounds.setBossEnraged(true);
         vibrate.heavy();
+        this.hitStopTimer = Math.max(this.hitStopTimer || 0, 4);
         this.screenShake = 18;
-        this.whiteFlash = 0.45;
+        this.whiteFlash = 0.48;
         this.particles.spawnShockwave(enemy.x, enemy.y, '#ff1744', 340);
         this.particles.spawnShockwave(enemy.x, enemy.y, '#ffd700', 220);
         for (let a = 0; a < 14; a++) {
           const ang = (a * Math.PI / 7);
           this.particles.spawnExplosion(enemy.x + Math.cos(ang) * 22, enemy.y + Math.sin(ang) * 22, '#ff9100', 6, 3.2);
+        }
+        // Faz 2 Biyo-Manta Muhafız Sürüsü (Abyssal Escort Wing)
+        if (this.enemies.length < 28) {
+          for (const side of [-1, 1]) {
+            const ex = Math.max(28, Math.min(this.width - 28, enemy.x + side * 44));
+            const ey = Math.max(40, enemy.y + 14);
+            const escort = new Enemy(ex, ey, 'escort_fighter', 1.15, 1.0);
+            this.enemies.push(escort);
+            this.particles.spawnShockwave(ex, ey, '#00f0ff', 70);
+          }
         }
         this.particles.spawnFloatingText(this.width / 2, 200, txt('boss_armor_shed'), '#ff1744', 16);
       }
@@ -15264,7 +15642,6 @@ class Game {
       this.screenShake = 14;
       this.particles.spawnShockwave(enemy.x, enemy.y, '#c084fc', 180);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#e879f9', 36, 4.5);
-      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 22, true, 'purple');
 
       if (!enemy.isDominoChained) {
         this.triggerPurpleDominoCascade(enemy);
@@ -15278,7 +15655,6 @@ class Game {
       this.screenShake = 10;
       this.particles.spawnShockwave(enemy.x, enemy.y, '#c084fc', 150);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#c084fc', 28, 4);
-      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 24, true);
 
       // Yakındaki tüm düşmanlara 40 EMP hasarı!
       for (let other of this.enemies) {
@@ -15301,7 +15677,6 @@ class Game {
       this.screenShake = 11;
       this.particles.spawnShockwave(enemy.x, enemy.y, '#9333ea', 145);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#c084fc', 28, 4.2);
-      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 23, true);
 
       // Kuantum Girdap Çöküşü: Çevredeki düşmanları içine çekip 45 hasar verir
       for (let other of this.enemies) {
@@ -15325,7 +15700,6 @@ class Game {
       this.screenShake = 8;
       this.particles.spawnShockwave(enemy.x, enemy.y, '#38bdf8', 115);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#e0f2fe', 22, 3.2);
-      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 21, true);
 
       // Yakındaki oyuncuyu 1.2 sn dondurur ve yavaşlatır!
       if (Math.hypot(this.player.x - enemy.x, this.player.y - enemy.y) < 115) {
@@ -15348,7 +15722,6 @@ class Game {
       this.screenShake = 10;
       this.particles.spawnShockwave(enemy.x, enemy.y, '#05ffa1', 130);
       this.particles.spawnExplosion(enemy.x, enemy.y, '#05ffa1', 26, 3.8);
-      this.particles.spawnAsteroidBreakAnimation(enemy.x, enemy.y, enemy.radius || 19, true);
 
       // Zümrüt Geod Bonusu: 8 adet zengin XP kristali saçar!
       enemy._droppedHazardGem = true;
@@ -15371,11 +15744,12 @@ class Game {
     if (isAsteroid) {
       this.updateMissionProgress('kill_asteroids', 1);
       if (this.pilotStats) this.pilotStats.asteroidsDestroyed = (this.pilotStats.asteroidsDestroyed || 0) + 1;
+      const isBombType = enemy.type === 'asteroid_bomb' || enemy.type === 'asteroid_purple' || enemy.type === 'volatile_asteroid' || enemy.isVolatile || enemy.type === 'asteroid_vortex';
       this.particles.spawnAsteroidBreakAnimation(
         enemy.x,
         enemy.y,
         enemy.radius || 20,
-        enemy.type === 'asteroid_bomb' || enemy.type === 'asteroid_purple',
+        isBombType,
         enemy.type === 'asteroid_purple' ? 'purple' : null
       );
     }
@@ -16183,16 +16557,19 @@ class Game {
     ctx.closePath();
     ctx.fill();
 
-    // Oyuncu Hasar Alma Efekti (Hit Flash & Zırh Titremesi): Hasar anında gemi beyaz/kırmızı parlar
+    // Oyuncu Hasar Alma Efekti (Hit Flash & Zırh Titremesi): Hasar anında gemi beyaz/kırmızı parlar (Sıfır shadowBlur, 60fps)
     if (this.player.hitFlash > 0) {
       this.player.hitFlash -= 1;
       ctx.save();
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = '#ff0055';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.35, 0, Math.PI * 2);
+      ctx.fill();
       ctx.globalAlpha = 0.85;
       ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = 16;
       ctx.beginPath();
-      ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 1.15, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -16462,27 +16839,30 @@ class Game {
       ctx.restore();
     }
 
-    // === YÜKSEK KOMBO & FEVER EKRAN KENARI NEON AURA EFEKTİ (PART 3.2) ===
-    if (this.state === 'PLAYING' && (this.comboCount >= 15 || this.player.isFever)) {
-      ctx.save();
-      const pulse = 0.55 + Math.sin((this.frames || 0) * 0.18) * 0.45;
-      let edgeRGB = '0, 240, 255';
-      let baseAlpha = 0.14;
-      if (this.player.isFever || this.comboCount >= 50) {
-        edgeRGB = '255, 215, 0';
-        baseAlpha = 0.24;
-      } else if (this.comboCount >= 30) {
-        edgeRGB = '255, 0, 119';
-        baseAlpha = 0.19;
+    // === VİNYET / DOĞAL HASAR VE KRİTİK CAN KENAR EFEKTİ (SARI/KIRMIZI KÖŞE FLAŞLARI KALDIRILDI) ===
+    if (this.state === 'PLAYING') {
+      const isCriticalHp = this.player && (this.player.hp / Math.max(1, this.player.maxHp)) <= 0.20;
+      const isDamaged = (this.damageFlash || 0) > 0.04;
+
+      if (isCriticalHp || isDamaged) {
+        ctx.save();
+        const pulse = 0.5 + Math.sin((this.frames || 0) * 0.08) * 0.5;
+        const edgeColor = 'rgba(255, 0, 45, ';
+        const maxAlpha = isDamaged ? Math.min(0.32, (this.damageFlash || 0) * 0.45) : (0.12 + pulse * 0.06);
+
+        const radius = Math.max(this.width, this.height) * 0.72;
+        const grad = ctx.createRadialGradient(
+          this.width / 2, this.height / 2, Math.min(this.width, this.height) * 0.40,
+          this.width / 2, this.height / 2, radius
+        );
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        grad.addColorStop(0.72, 'rgba(0, 0, 0, 0)');
+        grad.addColorStop(1, `${edgeColor}${maxAlpha.toFixed(3)})`);
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, this.width, this.height);
+        ctx.restore();
       }
-      const alpha = (baseAlpha * (0.65 + pulse * 0.35)).toFixed(3);
-      const borderThickness = Math.round(10 + pulse * 8);
-      ctx.fillStyle = `rgba(${edgeRGB}, ${alpha})`;
-      ctx.fillRect(0, 0, this.width, borderThickness);
-      ctx.fillRect(0, this.height - borderThickness, this.width, borderThickness);
-      ctx.fillRect(0, borderThickness, borderThickness, this.height - borderThickness * 2);
-      ctx.fillRect(this.width - borderThickness, borderThickness, borderThickness, this.height - borderThickness * 2);
-      ctx.restore();
     }
 
     // === HANGAR 15 SANİYELİK GEMİ TEST UÇUŞU GERİ SAYIM BANNERI (PART 3.4) ===
@@ -16713,11 +17093,16 @@ class Game {
 
         ctx.save();
         const pulse = 0.65 + Math.sin(Date.now() * 0.02) * 0.35;
-        // Dış elektrik halesi
-        ctx.strokeStyle = `rgba(0, 240, 255, ${pulse * 0.65})`;
-        ctx.lineWidth = 5;
-        ctx.shadowColor = '#00f0ff';
-        ctx.shadowBlur = 10;
+        // Dış elektrik halesi (Sıfır shadowBlur, 60fps)
+        ctx.strokeStyle = `rgba(0, 240, 255, ${pulse * 0.45})`;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(enemy.x, enemy.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = `rgba(0, 240, 255, ${pulse * 0.85})`;
+        ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(enemy.x, enemy.y);
         ctx.lineTo(p.x, p.y);
@@ -16829,31 +17214,44 @@ class Game {
     sounds.playLaser();
 
     if (skinId === 'cyberpunk') {
-      // SİBERPUNK: Zaman Bükücü Dörtlü Hiper Işın (Quad Chrono Beams)
-      this.slowMoTimer = Math.max(this.slowMoTimer || 0, 4);
-      for (let angle of [-0.24, -0.08, 0.08, 0.24]) {
+      // SİBERPUNK: Zaman Bükücü 6'lı Hiper Plazma Mızrağı (Hexa Chrono Spears)
+      this.slowMoTimer = Math.max(this.slowMoTimer || 0, 6);
+      for (let angle of [-0.30, -0.18, -0.06, 0.06, 0.18, 0.30]) {
         this.playerBullets.push({
           x: this.player.x,
           y: this.player.y - 14,
-          vx: Math.sin(angle) * 16,
-          vy: -Math.cos(angle) * 16,
-          damage: 20,
-          radius: 5,
+          vx: Math.sin(angle) * 17,
+          vy: -Math.cos(angle) * 17,
+          damage: 22,
+          radius: 5.5,
           color: '#00f0ff',
           isPiercing: true
         });
       }
-      this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 60);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 95);
     } else if (skinId === 'solar') {
-      // GÜNEŞ FIRTINASI: Süpernova Güneş Halkası (Radial Solar Nova)
-      this.screenShake = 5;
-      this.particles.spawnShockwave(this.player.x, this.player.y, '#ffbe0b', 200);
-      this.particles.spawnShockwave(this.player.x, this.player.y, '#ff5500', 140);
+      // GÜNEŞ FIRTINASI: Süpernova Güneş Halkası & 8 Yöne Magma Küresi
+      this.screenShake = 6;
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#ffbe0b', 220);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#ff5500', 150);
+      for (let a = 0; a < 8; a++) {
+        const ang = (a * Math.PI / 4);
+        this.playerBullets.push({
+          x: this.player.x,
+          y: this.player.y,
+          vx: Math.cos(ang) * 11,
+          vy: Math.sin(ang) * 11,
+          damage: 20,
+          radius: 6,
+          color: '#ffbe0b',
+          isPiercing: true
+        });
+      }
       for (let enemy of this.enemies) {
         if (!enemy.toRemove && enemy.hp > 0) {
           const d = Math.hypot(enemy.x - this.player.x, enemy.y - this.player.y);
-          if (d < 200) {
-            this.applyCappedEnemyDamage(enemy, 24);
+          if (d < 210) {
+            this.applyCappedEnemyDamage(enemy, 26);
             this.particles.spawnExplosion(enemy.x, enemy.y, '#ff5500', 6, 2.5);
             if (enemy.hp <= 0) {
               this.handleEnemyDeath(enemy);
@@ -16862,32 +17260,32 @@ class Game {
         }
       }
     } else if (skinId === 'toxic') {
-      // ZEHİR NEON: Asit Plazma Fırtınası (Radial Piercing Spores)
-      for (let a = 0; a < 8; a++) {
-        const ang = (a * Math.PI / 4) + (Math.random() - 0.5) * 0.15;
+      // ZEHİR NEON: 10 Yöne Asit Plazma Fırtınası (Radial Piercing Bio-Spores)
+      for (let a = 0; a < 10; a++) {
+        const ang = (a * Math.PI * 2 / 10) + (Math.random() - 0.5) * 0.12;
         this.playerBullets.push({
           x: this.player.x,
           y: this.player.y,
-          vx: Math.cos(ang) * 9.5,
-          vy: Math.sin(ang) * 9.5,
-          damage: 16,
+          vx: Math.cos(ang) * 10.5,
+          vy: Math.sin(ang) * 10.5,
+          damage: 18,
           radius: 5.5,
           color: '#05ffa1',
           isPiercing: true
         });
       }
-      this.particles.spawnShockwave(this.player.x, this.player.y, '#05ffa1', 75);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#05ffa1', 105);
     } else if (skinId === 'phantom') {
-      // HAYALET PLAZMA: Boyutlar Arası Kuantum Füzeleri (Quantum Void Volley)
-      for (let m = 0; m < 3; m++) {
+      // HAYALET PLAZMA: 5'li Boyutlar Arası Kuantum Füzesi (Quantum Void Volley)
+      for (let m = -2; m <= 2; m++) {
         sounds.playMissile();
         this.homingMissiles.push({
-          x: this.player.x + (m - 1) * 16,
+          x: this.player.x + m * 14,
           y: this.player.y - 8,
-          vx: (m - 1) * 2.2,
-          vy: -6,
-          speed: 9.0,
-          damage: 18,
+          vx: m * 1.8,
+          vy: -6.5,
+          speed: 9.5,
+          damage: 20,
           isCluster: false,
           life: 180,
           state: 'active',
@@ -16896,35 +17294,37 @@ class Game {
           targetY: 0
         });
       }
-      this.particles.spawnShockwave(this.player.x, this.player.y, '#e0f7fa', 80);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#e0f7fa', 100);
     } else if (skinId === 'vortex') {
       // VORTEX NEBULA: Gravitasyonel Kozmik Çöküş & Karadelik Girdapları
-      for (let ox of [-38, 38]) {
+      for (let ox of [-42, 42]) {
         this.vortices.push({
           x: this.player.x + ox,
-          y: this.player.y - 75,
-          timer: 110,
-          radius: 55
+          y: this.player.y - 80,
+          timer: 135,
+          radius: 62
         });
       }
-      this.particles.spawnExplosion(this.player.x, this.player.y - 40, '#bf5af2', 12, 2.5);
+      this.particles.spawnShockwave(this.player.x, this.player.y - 40, '#bf5af2', 120);
+      this.particles.spawnExplosion(this.player.x, this.player.y - 40, '#bf5af2', 14, 2.8);
     } else if (skinId === 'chrono') {
-      // CHRONO APEX: Krono Zaman Durdurma & Beşli Delici İğne
-      this.slowMoTimer = Math.max(this.slowMoTimer || 0, 28);
+      // CHRONO APEX: Krono Zaman Durdurma & 7'li Delici İğne
+      this.slowMoTimer = Math.max(this.slowMoTimer || 0, 34);
       sounds.playLevelUp();
-      for (let angle of [-0.28, -0.14, 0, 0.14, 0.28]) {
+      for (let angle of [-0.36, -0.24, -0.12, 0, 0.12, 0.24, 0.36]) {
         this.playerBullets.push({
           x: this.player.x,
           y: this.player.y - 18,
-          vx: Math.sin(angle) * 19,
-          vy: -Math.cos(angle) * 19,
-          damage: 30,
+          vx: Math.sin(angle) * 20,
+          vy: -Math.cos(angle) * 20,
+          damage: 32,
           radius: 5.5,
           color: '#ffd700',
           isPiercing: true,
           isCrit: true
         });
       }
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 125);
       this.particles.spawnExplosion(this.player.x, this.player.y, '#ffd700', 14, 3);
     }
   }

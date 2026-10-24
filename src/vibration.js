@@ -20,6 +20,14 @@ function readVibrateLevel() {
 
 const startVibrateLevel = readVibrateLevel();
 
+function _getHaptics() {
+  if (Haptics) return Haptics;
+  if (typeof window !== 'undefined' && window.Capacitor?.Plugins?.Haptics) {
+    return window.Capacitor.Plugins.Haptics;
+  }
+  return null;
+}
+
 export const vibrate = {
   level: startVibrateLevel,
   enabled: startVibrateLevel > 0,
@@ -50,16 +58,34 @@ export const vibrate = {
 
   _lastLightTime: 0,
   _lastMediumTime: 0,
+  _lastHitTime: 0,
 
-  // Hafif dokunma / mermi atış titreşimi
+  // Mermi düşman/meteor vuruş onayı (Çok hafif, tatmin edici ve boğmayan mikro titreşim)
+  hit() {
+    if (!this.enabled || this.level <= 1) return;
+    const now = Date.now();
+    if (now - this._lastHitTime < 85) return;
+    this._lastHitTime = now;
+    try {
+      const h = _getHaptics();
+      if (h && h.impact) {
+        h.impact({ style: 'LIGHT' });
+      } else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(this._ms(8));
+      }
+    } catch (e) {}
+  },
+
+  // Hafif dokunma / buton / arayüz titreşimi
   light() {
     const now = Date.now();
     if (now - this._lastLightTime < 70) return;
     this._lastLightTime = now;
     try {
-      if (Haptics && Haptics.impact) {
-        Haptics.impact({ style: this.level <= 2 ? 'LIGHT' : this.level <= 5 ? 'MEDIUM' : 'HEAVY' });
-      } else if ('vibrate' in navigator) {
+      const h = _getHaptics();
+      if (h && h.impact) {
+        h.impact({ style: this.level <= 2 ? 'LIGHT' : this.level <= 5 ? 'MEDIUM' : 'HEAVY' });
+      } else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         navigator.vibrate(this._ms(14));
       }
     } catch (e) {}
@@ -71,9 +97,10 @@ export const vibrate = {
     if (now - this._lastMediumTime < 90) return;
     this._lastMediumTime = now;
     try {
-      if (Haptics && Haptics.impact) {
-        Haptics.impact({ style: this.level <= 3 ? 'LIGHT' : this.level <= 5 ? 'MEDIUM' : 'HEAVY' });
-      } else if ('vibrate' in navigator) {
+      const h = _getHaptics();
+      if (h && h.impact) {
+        h.impact({ style: this.level <= 3 ? 'LIGHT' : this.level <= 5 ? 'MEDIUM' : 'HEAVY' });
+      } else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         navigator.vibrate(this._ms(28));
       }
     } catch (e) {}
@@ -82,16 +109,25 @@ export const vibrate = {
   // Ağır darbe / oyuncu hasarı / boss ölümü
   heavy() {
     const hit = this._ms(40);
-    try { if (navigator.vibrate) navigator.vibrate([hit, 16, this._ms(55)]); } catch (e) {}
-    try { if (window.Capacitor?.Plugins?.Haptics) window.Capacitor.Plugins.Haptics.vibrate({ duration: this._ms(80) }); } catch (e) {}
+    try {
+      const h = _getHaptics();
+      if (h && h.vibrate) {
+        h.vibrate({ duration: this._ms(80) });
+      } else if (h && h.impact) {
+        h.impact({ style: 'HEAVY' });
+      } else if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([hit, 16, this._ms(55)]);
+      }
+    } catch (e) {}
   },
 
   // Seviye atlama kutlama titreşimi
   success() {
     try {
-      if (Haptics && Haptics.notification) {
-        Haptics.notification({ type: 'SUCCESS' });
-      } else if ('vibrate' in navigator) {
+      const h = _getHaptics();
+      if (h && h.notification) {
+        h.notification({ type: 'SUCCESS' });
+      } else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         navigator.vibrate([this._ms(18), 30, this._ms(18)]);
       }
     } catch (e) {}

@@ -6,16 +6,30 @@
 @import "@fontsource/rajdhani/600.css";
 @import "@fontsource/rajdhani/700.css";
 :root {
-  --primary-neon: #00f0ff;
+  /* === 5 ANAYASAL 60-30-10 KİLİTLİ RENK PALETİ === */
+  --bg-deep-space: #070b19;          /* %60 Derin Uzay Zemin (Asla saf #000000 değil) */
+  --card-surface: #0f172a;           /* %30 Kart & Panel Gövdesi */
+  --card-border: #1e293b;            /* Kart Dış Konturu */
+  --primary-cyan: #00f0ff;           /* %10 Birincil CTA Eylem Vurgusu */
+  --primary-cyan-lip: #0284c7;       /* 3D Buton Alt Dudağı (2 ton koyu) */
+  --reward-gold: #ffbe0b;            /* %10 Ödül / Altın / Kristal */
+  --reward-gold-lip: #d97706;        /* 3D Ödül Alt Dudağı */
+  --threat-crimson: #ff0055;         /* Tehlike / Can / Hasar */
+  --threat-crimson-lip: #be123c;     /* 3D Tehlike Alt Dudağı */
+  --text-cream: #f8fafc;             /* Sıcak Krem Metin (Asla çiğ #ffffff değil) */
+  --text-muted: #94a3b8;             /* Sakin İkincil Metin */
+
+  /* Geriye dönük uyumluluk takma adları */
+  --primary-neon: var(--primary-cyan);
   --secondary-neon: #ff0077;
-  --accent-gold: #ffbe0b;
+  --accent-gold: var(--reward-gold);
   --accent-green: #05ffa1;
   --accent-purple: #a855f7;
   --accent-orange: #ff7700;
-  --bg-dark: #060814;
-  --card-bg: rgba(11, 16, 32, 0.88);
-  --card-border: rgba(0, 240, 255, 0.22);
-  --text-light: #f8fafc;
+  --bg-dark: var(--bg-deep-space);
+  --card-bg: rgba(15, 23, 42, 0.94);
+  --card-border: rgba(0, 240, 255, 0.25);
+  --text-light: var(--text-cream);
   --font-display: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Meiryo', sans-serif;
   --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Meiryo', sans-serif;
   --safe-top: max(34px, env(safe-area-inset-top, 34px));
@@ -39,7 +53,7 @@ html, body {
   background-color: var(--bg-dark);
   font-family: var(--font-body);
   color: var(--text-light);
-  touch-action: none;
+  touch-action: manipulation;
   overscroll-behavior: none;
   -webkit-overscroll-behavior: none;
   letter-spacing: 0.2px;
@@ -114,6 +128,7 @@ html, body {
   height: 100%;
   display: block;
   z-index: 1;
+  touch-action: none;
 }
 
 /* === HUD ARAYÜZÜ (ULTRA-KOMPAKT ŞEFFAF SİBER ŞERİT - GÖRÜŞ ALANINI ASLA KISITLAMAZ) === */
@@ -535,6 +550,8 @@ html, body {
   padding: max(8px, var(--safe-top)) 12px max(12px, var(--safe-bottom)) 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
   pointer-events: auto;
   box-sizing: border-box;
 }
@@ -546,6 +563,8 @@ html, body {
   max-height: calc(100vh - 16px - var(--safe-top) - var(--safe-bottom));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
   background: var(--card-bg);
   border: 1.5px solid var(--card-border);
   border-radius: 20px;
@@ -559,6 +578,16 @@ html, body {
 @keyframes scaleIn {
   from { transform: scale(0.92); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scalePunch {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.24); color: var(--reward-gold); }
+  100% { transform: scale(1); }
+}
+
+.scale-punch {
+  animation: scalePunch 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes modalOverlaySmoothIn {
@@ -608,15 +637,17 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: max(8px, var(--safe-top)) 12px max(8px, var(--safe-bottom)) 12px;
+  padding: max(8px, var(--safe-top)) 12px calc(76px + var(--safe-bottom)) 12px;
   background: radial-gradient(circle at 50% 38%, rgba(0, 240, 255, 0.04) 0%, rgba(5, 7, 20, 0.65) 60%, rgba(3, 4, 12, 0.92) 100%);
   z-index: 50;
-  pointer-events: none;
+  pointer-events: auto;
   transition: opacity 0.4s ease, transform 0.4s ease;
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
 }
 
 .main-menu-overlay.launching {
@@ -1132,9 +1163,14 @@ html, body {
 }
 
 .mode-selector-cyber {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   width: 100%;
+}
+
+#mode-mutator {
+  grid-column: 1 / -1;
 }
 
 .cyber-mode-card {
@@ -1394,23 +1430,33 @@ html, body {
   35%, 100% { left: 160%; }
 }
 
-/* 5. Alt Hızlı Erişim Çubuğu (Bottom Dock - 5 Buton) */
+/* 5. Alt Hızlı Erişim Çubuğu (Bottom Dock - 5 Buton, Tüm Menü Sekmelerinde Kalıcı) */
 .menu-bottom-dock {
+  position: fixed;
+  bottom: max(6px, var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
-  width: 100%;
+  width: calc(100% - 24px);
   max-width: 440px;
-  margin: auto auto 0 auto;
+  margin: 0;
   flex-shrink: 0;
   pointer-events: auto;
-  background: rgba(8, 12, 26, 0.95);
-  border: 2px solid rgba(0, 240, 255, 0.3);
-  border-radius: 6px;
+  background: #070b19;
+  border: 2px solid #00f0ff;
+  border-radius: 4px;
   padding: 6px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 0 #03050c, 0 0 18px rgba(0, 240, 255, 0.25), inset 0 2px 0 rgba(255, 255, 255, 0.12);
+}
+
+#start-screen.hidden ~ .menu-bottom-dock,
+#start-screen.launching ~ .menu-bottom-dock,
+.menu-bottom-dock.hidden {
+  display: none !important;
+  pointer-events: none !important;
 }
 
 .dock-btn {
@@ -1884,24 +1930,25 @@ html, body {
 /* Neon Buton */
 .neon-btn {
   width: 100%;
-  background: linear-gradient(135deg, var(--primary-neon) 0%, #0077ff 100%);
+  background: linear-gradient(180deg, var(--primary-cyan) 0%, #0284c7 100%);
   color: #030816;
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 900;
   letter-spacing: 1.8px;
-  border: none;
-  border-radius: 16px;
-  padding: 15px;
+  border: 1px solid rgba(248, 250, 252, 0.4);
+  border-radius: 12px;
+  padding: 14px 16px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 4px 0 var(--primary-cyan-lip), 0 8px 20px rgba(0, 240, 255, 0.35), inset 0 1.5px 0 rgba(248, 250, 252, 0.6);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
   pointer-events: auto;
+  position: relative;
 }
 
 .neon-btn:active {
-  transform: scale(0.97);
-  box-shadow: 0 4px 14px rgba(0, 240, 255, 0.6);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--primary-cyan-lip), 0 4px 12px rgba(0, 240, 255, 0.5), inset 0 1px 0 rgba(248, 250, 252, 0.3);
 }
 
 .pulse {
@@ -1909,33 +1956,32 @@ html, body {
 }
 
 @keyframes buttonPulse {
-  0%, 100% { box-shadow: 0 8px 24px rgba(0, 240, 255, 0.35); }
-  50% { box-shadow: 0 8px 34px rgba(0, 240, 255, 0.7); }
+  0%, 100% { box-shadow: 0 4px 0 var(--primary-cyan-lip), 0 8px 24px rgba(0, 240, 255, 0.35); }
+  50% { box-shadow: 0 4px 0 var(--primary-cyan-lip), 0 8px 34px rgba(0, 240, 255, 0.75); }
 }
 
-/* İkincil Neon Buton */
+/* İkincil Neon Buton (Tactile 3D) */
 .neon-btn-secondary {
   width: 100%;
-  background: rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
   border: 1.5px solid rgba(0, 240, 255, 0.35);
-  color: #f1f5f9;
+  color: var(--text-cream);
   font-family: var(--font-display);
   font-size: 14.5px;
   font-weight: 800;
   letter-spacing: 1.2px;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 12px 14px;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 3px 0 #0f172a, inset 0 1px 0 rgba(248, 250, 252, 0.2);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
   pointer-events: auto;
   backdrop-filter: blur(8px);
 }
 
 .neon-btn-secondary:active {
-  background: rgba(0, 240, 255, 0.18);
-  border-color: var(--primary-neon);
-  transform: scale(0.97);
-  box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0f172a;
 }
 
 /* Kristal Kasası */
@@ -2180,7 +2226,8 @@ html, body {
 .hangar-drones-view.hidden,
 .hangar-trails-view.hidden,
 .tech-tab-view.hidden,
-.trophies-tab-view.hidden {
+.trophies-tab-view.hidden,
+.codex-tab-view.hidden {
   display: none !important;
 }
 
@@ -3128,9 +3175,6 @@ html, body {
   gap: 6px;
   width: 100%;
   flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
   background: rgba(4, 7, 18, 0.96);
   padding-top: 8px;
 }
@@ -3896,15 +3940,205 @@ html, body {
   100% { transform: translateX(-50%) rotate(360deg); }
 }
 
-.chest-jackpot-icon {
+.chest-stage-container {
   position: relative;
-  z-index: 1;
-  animation: chestBounce 1.2s ease-in-out infinite alternate;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 900px;
+  margin: 4px 0 10px 0;
+  z-index: 2;
 }
 
-@keyframes chestBounce {
-  0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 16px #ffbe0b); }
-  100% { transform: translateY(-6px) scale(1.1); filter: drop-shadow(0 0 28px #ffd700); }
+.chest-3d-box {
+  position: relative;
+  width: 108px;
+  height: 86px;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.65));
+}
+
+/* 1. Adım: Squash & Stretch Düşüş */
+.chest-3d-box.chest-dropping {
+  animation: chestSquashDrop 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes chestSquashDrop {
+  0% { transform: translateY(-70px) scale(0.7, 1.35); opacity: 0; }
+  60% { transform: translateY(0) scale(1.28, 0.72); opacity: 1; }
+  80% { transform: translateY(-12px) scale(0.92, 1.08); }
+  92% { transform: translateY(0) scale(1.06, 0.94); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+/* 2. Adım: Gerilim Sallantısı & Kilit Titremesi */
+.chest-3d-box.chest-wobbling {
+  animation: chestAnticipationWobble 0.5s ease-in-out infinite;
+}
+
+@keyframes chestAnticipationWobble {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(-5.5deg) scale(1.05, 0.95); }
+  40% { transform: rotate(5.5deg) scale(1.05, 0.95); }
+  60% { transform: rotate(-4deg) scale(1.08, 0.94); }
+  80% { transform: rotate(4deg) scale(1.08, 0.94); }
+}
+
+/* 3. Adım: Patlama ve Kapak Açılışı */
+.chest-3d-box.chest-open .chest-lid-assembly {
+  transform: rotateX(-115deg) translateY(-8px);
+  filter: drop-shadow(0 -10px 25px rgba(255, 190, 11, 0.85));
+}
+
+.chest-3d-box.chest-open .chest-volumetric-burst {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.4);
+}
+
+/* Sandık Kapağı */
+.chest-lid-assembly {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 108px;
+  height: 38px;
+  transform-origin: top center;
+  transition: transform 0.48s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 3;
+}
+
+.chest-lid-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: linear-gradient(180deg, #ffd700 0%, #ffbe0b 35%, #b45309 100%);
+  border-radius: 14px 14px 4px 4px;
+  border: 2px solid #fffbeb;
+  box-shadow: inset 0 3px 6px rgba(255, 255, 255, 0.7), 0 3px 0 #78350f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chest-lid-gold-crest {
+  position: absolute;
+  top: 4px;
+  width: 52px;
+  height: 8px;
+  background: linear-gradient(90deg, #78350f, #fef08a, #78350f);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.chest-lid-gem {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 35%, #ffffff, #00f0ff 60%, #0284c7 100%);
+  transform: rotate(45deg);
+  border-radius: 3px;
+  box-shadow: 0 0 12px #00f0ff, inset 0 0 4px #ffffff;
+  animation: chestGemGleam 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes chestGemGleam {
+  0% { filter: brightness(1) drop-shadow(0 0 4px #00f0ff); }
+  100% { filter: brightness(1.35) drop-shadow(0 0 14px #00f0ff); }
+}
+
+.chest-lid-rim {
+  position: absolute;
+  bottom: 0;
+  left: -2px;
+  width: 112px;
+  height: 8px;
+  background: linear-gradient(180deg, #ffe066, #d97706);
+  border-radius: 2px;
+  border: 1.5px solid #78350f;
+}
+
+/* Sandık Gövdesi */
+.chest-body-assembly {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 108px;
+  height: 52px;
+  z-index: 2;
+}
+
+.chest-body-front {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 60%, #070b19 100%);
+  border-radius: 4px 4px 12px 12px;
+  border: 3px solid #ffbe0b;
+  box-shadow: inset 0 0 14px rgba(255, 190, 11, 0.35), 0 5px 0 #78350f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chest-lock-plate {
+  position: absolute;
+  top: -6px;
+  width: 26px;
+  height: 28px;
+  background: linear-gradient(180deg, #ffd700, #b45309);
+  border-radius: 6px;
+  border: 2px solid #fffbeb;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6), inset 0 1px 2px #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 4;
+}
+
+.chest-lock-gem {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 35% 35%, #ffffff, #ff0055 70%);
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ff0055;
+}
+
+/* Köşe Perçinleri (Chunky Tactile Studs) */
+.chest-corner-stud {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: radial-gradient(circle at 35% 35%, #fffbeb, #d97706);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.chest-stud-tl { top: 5px; left: 5px; }
+.chest-stud-tr { top: 5px; right: 5px; }
+.chest-stud-bl { bottom: 5px; left: 5px; }
+.chest-stud-br { bottom: 5px; right: 5px; }
+
+/* Volumetrik Altın Enerji Patlaması (Step 3 & 4) */
+.chest-volumetric-burst {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.2);
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(255, 230, 0, 0.85) 0%, rgba(255, 190, 11, 0.45) 45%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  z-index: 1;
 }
 
 .jackpot-tier-badge {
@@ -3935,9 +4169,12 @@ html, body {
 .lucky-chest-items-grid .upgrade-item-card {
   cursor: pointer;
   pointer-events: auto !important;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease;
   border: 1.5px solid rgba(255, 190, 11, 0.35);
   position: relative;
+  opacity: 1 !important;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .lucky-chest-items-grid .upgrade-item-card:hover {
@@ -3945,11 +4182,17 @@ html, body {
   border-color: #ffbe0b;
 }
 
+.lucky-chest-items-grid .upgrade-item-card:active {
+  transform: scale(0.98) !important;
+  transition: transform 0.05s ease !important;
+}
+
 .lucky-chest-items-grid .upgrade-item-card.selected {
   border: 2px solid #00f0ff !important;
   box-shadow: 0 0 22px rgba(0, 240, 255, 0.75), inset 0 0 12px rgba(0, 240, 255, 0.18) !important;
-  transform: scale(1.02);
-  background: rgba(0, 240, 255, 0.09) !important;
+  transform: scale(1.02) !important;
+  background: rgba(0, 240, 255, 0.10) !important;
+  opacity: 1 !important;
 }
 
 .lucky-chest-items-grid .upgrade-item-card.selected::after {
@@ -6020,7 +6263,17 @@ html, body {
   box-shadow: 0 0 35px rgba(0, 240, 255, 0.25), inset 0 0 20px rgba(0, 240, 255, 0.05) !important;
   width: 95vw;
   max-width: 440px !important;
-  padding: 14px 16px !important;
+  padding: 10px 12px !important;
+}
+
+.leaderboard-header .modal-icon {
+  display: none !important;
+}
+
+.leaderboard-header .game-title {
+  margin-top: 0 !important;
+  margin-bottom: 3px !important;
+  font-size: 1.18rem !important;
 }
 
 .lb-meta-bar {
@@ -6028,9 +6281,9 @@ html, body {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 0.72rem;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 0.68rem;
   color: #94a3b8;
 }
 
@@ -6676,7 +6929,7 @@ html, body {
 /* === MOBİL VE DAR EKRANLAR İÇİN DİKEY OPTİMİZASYON (EKRAN TAŞMASINI ENGELLEYİCİ) === */
 @media (max-height: 720px) {
   .main-menu-overlay {
-    padding: max(6px, var(--safe-top)) 10px max(6px, var(--safe-bottom)) 10px;
+    padding: max(6px, var(--safe-top)) 10px calc(70px + var(--safe-bottom)) 10px;
   }
   .menu-ship-showcase {
     margin: 12px auto 16px auto;
@@ -7120,32 +7373,38 @@ html, body {
 }
 
 .hangar-tabs {
-  flex-wrap: wrap !important;
-  overflow: visible !important;
-  white-space: normal !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 .hangar-tab-btn {
-  flex: 1 1 calc(33.33% - 6px) !important;
-  font-size: 12px !important;
-  line-height: 1.2 !important;
-  white-space: normal !important;
-  text-align: center;
-  min-height: 36px;
-  padding: 8px 6px !important;
+  flex: 0 0 auto !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+  min-height: 32px;
+  padding: 6px 12px !important;
 }
 .hangar-card {
-  height: min(92vh, 860px) !important;
+  height: min(82vh, 780px) !important;
+  max-height: calc(100vh - 88px - var(--safe-top) - var(--safe-bottom)) !important;
 }
 .skins-view-container,
 .hangar-trails-view,
 .hangar-drones-view,
 .hangar-boosters-view,
 .tech-tab-view,
-.trophies-tab-view {
+.trophies-tab-view,
+.codex-tab-view {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   max-height: none !important;
   overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
 }
 .showcase-title,
 .booster-title,
@@ -8901,11 +9160,9 @@ html, body {
 /* 1. FTUE Progressive Disclosure on Start Screen (Flight 0) */
 #start-screen.ftue-first-flight #btn-ship-starup,
 #start-screen.ftue-first-flight #btn-lucky-wheel,
-#start-screen.ftue-first-flight #btn-daily-reward,
 #start-screen.ftue-first-flight #btn-endless,
 #start-screen.ftue-first-flight #btn-boss-rush,
-#start-screen.ftue-first-flight #mode-mutator,
-#start-screen.ftue-first-flight .start-bottom-dock .dock-tab-btn:not([data-dock="ships"]) {
+#start-screen.ftue-first-flight #mode-mutator {
   display: none !important;
 }
 
@@ -9117,9 +9374,392 @@ html, body {
   display: inline-block;
 }
 
+/* =========================================================
+   7. PERSISTENT BOTTOM DOCK & UNIVERSAL SCROLL ARMOR
+   ========================================================= */
 
+/* Keep the 5-tab bottom dock visible and unobstructed across all menu tab modals */
+#hangar-modal,
+#missions-modal,
+#daily-reward-modal,
+#leaderboard-modal,
+#stats-modal {
+  padding-bottom: calc(76px + var(--safe-bottom)) !important;
+}
 
+#hangar-modal .modal-card,
+#missions-modal .modal-card,
+#daily-reward-modal .modal-card,
+#leaderboard-modal .modal-card,
+#stats-modal .modal-card {
+  max-height: calc(100vh - 88px - var(--safe-top) - var(--safe-bottom)) !important;
+}
 
+/* Raise popup sub-modals above the persistent bottom dock */
+#lb-profile-modal,
+#level-select-modal,
+#lucky-wheel-modal,
+#privacy-modal,
+#save-code-modal {
+  z-index: 120 !important;
+}
+
+/* Prevent Flexbox from shrinking children inside scrollable vertical flex containers */
+.skins-view-container > *,
+.hangar-trails-view > *,
+.hangar-drones-view > *,
+.hangar-boosters-view > *,
+.tech-tab-view > *,
+.trophies-tab-view > *,
+.codex-tab-view > *,
+.missions-grid > *,
+.leaderboard-list-container > *,
+.pause-card > *,
+.codex-grid > *,
+.trophies-grid > *,
+.tech-grid > * {
+  flex-shrink: 0 !important;
+}
+
+/* Fix Leaderboard & Career Records scrolling */
+.leaderboard-card {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+
+#lb-league-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+#lb-league-view.hidden,
+#lb-career-view.hidden {
+  display: none !important;
+}
+
+.leaderboard-list-container {
+  flex: 1 1 auto !important;
+  min-height: 150px !important;
+  max-height: 38vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
+}
+
+.lb-career-view {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: 50vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Ensure all scrollable lists/modals allow smooth vertical touch panning on all child nodes */
+.main-menu-overlay,
+.modal-overlay,
+.modal-card,
+.missions-card,
+#missions-container,
+.stats-card,
+.daily-card,
+.level-grid-container,
+.pause-card,
+.pause-codex-grid,
+.settings-card,
+.privacy-body,
+.lb-flag-grid,
+.cards-container,
+.merchant-items-grid,
+.lucky-chest-items-grid {
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain;
+}
+
+/* =========================================================
+   8. 100% RETRO-MODERN CRISP PIXEL ART UI CONSTITUTION
+   (Zero Blurry Glass, Stepped Pixel Borders & Hard Shadows)
+   ========================================================= */
+
+/* Modal Backdrops: Crisp stepped scanline dark slate without blurry glass */
+.modal-overlay {
+  background:
+    repeating-linear-gradient(0deg, rgba(7, 11, 25, 0.92) 0px, rgba(7, 11, 25, 0.92) 2px, rgba(11, 17, 36, 0.94) 2px, rgba(11, 17, 36, 0.94) 4px) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Primary Modal Cards (Hangar, Görevler, İkmal, Liderler, Oyun Sonu, Zafer, Bölüm Seçimi, Seviye Atlama, Ayarlar) */
+.modal-card,
+.hangar-card,
+.missions-card,
+.daily-card,
+.leaderboard-card,
+.stats-card,
+.gameover-card,
+.victory-card,
+.level-select-card,
+.upgrade-card,
+.route-card,
+.lucky-chest-card,
+.merchant-card,
+.pause-card,
+.settings-card,
+.privacy-card,
+.lb-profile-card,
+.wheel-card {
+  background: #0b1124 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid #00f0ff !important;
+  border-radius: 3px !important;
+  box-shadow:
+    0 5px 0 #070b19,
+    0 0 0 2px #070b19,
+    inset 0 2px 0 rgba(248, 250, 252, 0.14),
+    inset 0 -2px 0 rgba(7, 11, 25, 0.85) !important;
+}
+
+/* Inner Pixel Cards & List Rows across all tabs */
+.ship-display-info,
+.cyber-mode-card,
+.hangar-showcase,
+.hangar-mini-card,
+.drone-bay-card,
+.trail-card,
+.booster-card,
+.tech-card,
+.trophy-card,
+.codex-entry-card,
+.mission-item,
+.streak-day-card,
+.lb-podium-container,
+.lb-podium-slot,
+.leaderboard-row,
+.player-rank-bar,
+.career-card,
+.stat-badge,
+.level-cell,
+.upgrade-item-card,
+.route-choice-card,
+.go-score-card,
+.go-telemetry-row,
+.go-vault-card,
+.go-mission-card,
+.go-revenge-card,
+.pause-mission-banner,
+.pause-quest-section,
+.codex-row {
+  background: #111827 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid #1e293b !important;
+  border-radius: 2px !important;
+  box-shadow:
+    0 3px 0 #070b19,
+    inset 0 1px 0 rgba(248, 250, 252, 0.1) !important;
+}
+
+/* Active / Highlighted Pixel Inner Cards */
+.cyber-mode-card.active,
+.hangar-mini-card.selected,
+.hangar-mini-card.equipped,
+.drone-bay-card.equipped,
+.trail-card.equipped,
+.leaderboard-row.is-current-player,
+.level-cell.current,
+.player-rank-bar {
+  background: #132238 !important;
+  border: 2px solid #00f0ff !important;
+  box-shadow:
+    0 3px 0 #0369a1,
+    inset 0 1px 0 rgba(248, 250, 252, 0.2) !important;
+}
+
+.mission-item.completed,
+.streak-day-card.active,
+.trophy-card.claimable {
+  background: #0d2824 !important;
+  border: 2px solid #05ffa1 !important;
+  box-shadow:
+    0 3px 0 #065f46,
+    inset 0 1px 0 rgba(248, 250, 252, 0.2) !important;
+}
+
+.lb-podium-slot.rank-1,
+.leaderboard-row.top-1,
+.streak-day-card.day-7 {
+  background: #231c0d !important;
+  border: 2px solid #ffbe0b !important;
+  box-shadow:
+    0 3px 0 #92400e,
+    inset 0 1px 0 rgba(248, 250, 252, 0.22) !important;
+}
+
+/* Tactile Crisp Pixel Buttons */
+.neon-btn,
+.neon-btn-primary,
+.neon-btn-secondary,
+.cyber-launch-btn,
+.hangar-confirm-btn,
+.hangar-tab-btn,
+.btn-mission-claim,
+.lb-main-tab-btn,
+.lb-mode-btn,
+.lb-sub-tab-btn,
+.dock-btn,
+.go-primary-restart-btn,
+.go-secondary-btn,
+.go-revive-btn,
+.vault-double-btn {
+  border-radius: 2px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.hangar-tabs,
+.lb-mode-tabs {
+  background: #070b19 !important;
+  border: 2px solid #1e293b !important;
+  border-radius: 2px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 3px 0 #070b19 !important;
+}
+
+/* Progress Bars: Crisp Stepped Pixel Tracks */
+.mission-progress-track,
+.trophy-progress-track,
+.jet-stat-track,
+.stat-bar-track,
+.lb-rival-track,
+.go-mission-track,
+.pause-quest-bar-track {
+  background: #070b19 !important;
+  border: 1.5px solid #1e293b !important;
+  border-radius: 1px !important;
+  box-shadow: inset 0 1px 0 #070b19 !important;
+}
+
+.mission-progress-fill,
+.trophy-progress-fill,
+.jet-stat-fill,
+.stat-bar-fill,
+.lb-rival-fill,
+.go-mission-fill,
+.pause-quest-bar-fill {
+  border-radius: 0 !important;
+}
+
+/* === PILOT PROFİL PİLL (ANA MENÜ ÜST BAR) === */
+.menu-top-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pilot-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #0d1726 !important;
+  border: 2px solid #00f0ff !important;
+  padding: 4px 10px;
+  border-radius: 2px !important;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 3px 0 #070b19, inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 10px rgba(0, 240, 255, 0.25) !important;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pilot-profile-pill:hover {
+  background: #132238 !important;
+  box-shadow: 0 3px 0 #070b19, 0 0 16px rgba(0, 240, 255, 0.5) !important;
+}
+
+.pilot-profile-pill:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #070b19, 0 0 6px rgba(0, 240, 255, 0.3) !important;
+}
+
+.menu-player-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.menu-player-rank {
+  font-family: var(--font-display, "Rajdhani", sans-serif);
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffbe0b;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px rgba(255, 190, 11, 0.6);
+  white-space: nowrap;
+}
+
+.menu-player-name {
+  font-family: var(--font-display, "Rajdhani", sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.6px;
+  max-width: 95px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* === LİDER TABLOSU SATIR İÇİ OYUNCU DERECESİ (INLINE RANK BADGE) === */
+.lb-hud-rank-inline {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  margin-left: 6px;
+  border-radius: 2px;
+  background: rgba(255, 190, 11, 0.18);
+  border: 1px solid rgba(255, 190, 11, 0.65);
+  color: #ffbe0b;
+  font-family: var(--font-display, "Rajdhani", sans-serif);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(255, 190, 11, 0.7);
+  vertical-align: middle;
+}
+
+/* === PİKSEL BAYRAKLAR & PİKSEL MADALYALAR === */
+.pixel-flag-svg {
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 1px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+.pedestal-medal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.flag-opt-pixel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 
 
 

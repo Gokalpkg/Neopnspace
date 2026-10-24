@@ -752,11 +752,14 @@ export class Enemy {
     if (this.hitFlash > 0) {
       this.hitFlash = Math.max(0, this.hitFlash - dt);
     }
+    if (this.hitTremor > 0) {
+      this.hitTremor = Math.max(0, this.hitTremor - 0.75 * dt);
+    }
     if (this.knockX || this.knockY) {
       this.x += (this.knockX || 0) * dt;
       this.y += (this.knockY || 0) * dt;
-      this.knockX *= 0.55;
-      this.knockY *= 0.55;
+      this.knockX *= 0.65;
+      this.knockY *= 0.65;
       if (Math.abs(this.knockX) < 0.04) this.knockX = 0;
       if (Math.abs(this.knockY) < 0.04) this.knockY = 0;
     }
@@ -1205,6 +1208,11 @@ export class Enemy {
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
+    if (this.hitTremor > 0) {
+      const sx = (Math.random() - 0.5) * this.hitTremor;
+      const sy = (Math.random() - 0.5) * this.hitTremor;
+      ctx.translate(sx, sy);
+    }
     if (this._ballooning) {
       const swell = 1 + Math.min(1, (this.balloonT || 0) / 5) * 0.55;
       ctx.scale(swell, swell);
@@ -1232,6 +1240,29 @@ export class Enemy {
       ctx.arc(0, 0, this.radius * 1.35, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
+    }
+
+    // === CANLILAR & BALIKLAR DİNAMİK ORGANİK HAREKET (BIO-SWIMMING & UNDULATION) ===
+    this.aliveTime = (this.aliveTime || 0) + 1;
+    if (!this.shape && this.type !== 'volatile_core') {
+      // 1. Organik Nefes Alma / Yüzme Sinüs Dalgası
+      const swimCycle = Math.sin(this.aliveTime * 0.08 + (this.x * 0.03));
+      const squashX = 1 + swimCycle * 0.045;
+      const squashY = 1 - swimCycle * 0.035;
+      ctx.scale(squashX, squashY);
+
+      // 2. Manevra Dönüş Eğimi (Banking Tilt)
+      const moveX = (this.vx || (this.speedX ? this.speedX * (this.dirX || 1) : 0) || 0);
+      const targetBank = Math.max(-0.24, Math.min(0.24, moveX * 0.08));
+      this.bankAngle = (this.bankAngle || 0) * 0.84 + targetBank * 0.16;
+      if (this.type !== 'kamikaze' && this.type !== 'dive_bomber' && this.type !== 'escort_fighter') {
+        ctx.rotate(this.bankAngle);
+      }
+
+      // 3. Vuruş Darbe Sıkışması (Hit Impact Squash - Juice 1. Adım)
+      if (this.hitFlash > 0) {
+        ctx.scale(1.12, 0.88);
+      }
     }
 
     if (this.type === 'volatile_core') {
@@ -1354,8 +1385,21 @@ export class Enemy {
       }
 
       ctx.strokeStyle = strokeColor;
-      ctx.fillStyle = fillColor;
       ctx.lineWidth = 2.4;
+
+      // 3D Hacimsel Küresel Işık Gradyanı (Rule 1 Stil DNA Sabiti: Sol-Üst Işık, Sağ-Alt Gölge)
+      if (!this.hitFlash && !this.isPrimedForDomino) {
+        const radGrad = ctx.createRadialGradient(
+          -this.radius * 0.35, -this.radius * 0.35, this.radius * 0.12,
+          0, 0, this.radius * 1.15
+        );
+        radGrad.addColorStop(0, strokeColor);
+        radGrad.addColorStop(0.38, fillColor);
+        radGrad.addColorStop(1, '#070b19');
+        ctx.fillStyle = radGrad;
+      } else {
+        ctx.fillStyle = fillColor;
+      }
 
       ctx.beginPath();
       ctx.moveTo(this.shape[0].x, this.shape[0].y);
@@ -1366,14 +1410,46 @@ export class Enemy {
       ctx.fill();
       ctx.stroke();
 
-      // İç Enerji / Lav / Asit / Kuantum Çatlağı
+      // 3D Dokunsal Kraterler (Tactile Craters)
+      if (this.radius >= 22 && !this.hitFlash) {
+        const c1X = this.radius * 0.25;
+        const c1Y = -this.radius * 0.2;
+        const c1R = this.radius * 0.22;
+        ctx.fillStyle = '#070b19';
+        ctx.beginPath();
+        ctx.arc(c1X, c1Y, c1R, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(c1X, c1Y, c1R, Math.PI * 0.75, Math.PI * 1.75);
+        ctx.stroke();
+      }
+
+      // Nefes Alan Dinamik İç Enerji / Lav / Asit / Kuantum Çatlağı
+      const veinPulse = 0.5 + Math.sin(Date.now() * 0.007 + (this.x * 0.02)) * 0.5;
       ctx.strokeStyle = crackColor;
-      ctx.lineWidth = 1.4;
+      ctx.lineWidth = 1.6 + veinPulse * 1.3;
       ctx.beginPath();
       ctx.moveTo(this.shape[0].x * 0.35, this.shape[0].y * 0.35);
       ctx.lineTo(this.shape[2].x * 0.25, this.shape[2].y * 0.25);
       ctx.lineTo(this.shape[4].x * 0.45, this.shape[4].y * 0.45);
       ctx.stroke();
+
+      // Yörüngede Dönen Mikro Kristaller / Çakıl Parçacıkları (Orbiting Debris)
+      if (this.type === 'asteroid_gold' || this.type === 'asteroid_geode' || this.type === 'asteroid_purple') {
+        const orbitAngle = (this.aliveTime || 0) * 0.055;
+        const orbR = this.radius * 1.35;
+        const sat1X = Math.cos(orbitAngle) * orbR;
+        const sat1Y = Math.sin(orbitAngle) * (orbR * 0.6);
+        ctx.fillStyle = crackColor;
+        ctx.fillRect(sat1X - 2, sat1Y - 2, 4, 4);
+
+        const sat2X = Math.cos(orbitAngle + Math.PI) * (orbR * 1.2);
+        const sat2Y = Math.sin(orbitAngle + Math.PI) * (orbR * 0.65);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(sat2X - 1.5, sat2Y - 1.5, 3, 3);
+      }
 
       // Bomba Asteroid Çekirdeği & Tehlike İşareti
       if (this.type === 'asteroid_bomb') {
@@ -1625,6 +1701,20 @@ export class Enemy {
         }
       }
     }
+
+    // Organik Biyo-Plazma Yüzgeç / Egzoz Dalgalanması (Bio-Fin Flutter - Canlı Hissi)
+    const finFlutter = Math.sin((this.aliveTime || 0) * 0.22) * 2.5;
+    const finLen = 8 + Math.sin((this.aliveTime || 0) * 0.15) * 3;
+    ctx.fillStyle = this.color || '#00f0ff';
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(-3, offsetY + h * p);
+    ctx.lineTo(finFlutter, offsetY + h * p + finLen);
+    ctx.lineTo(3, offsetY + h * p);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+
     ctx.restore();
   }
 
@@ -1691,6 +1781,26 @@ export class Enemy {
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(px, py);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Canlı Biyolüminesans Denizanası Dokunaçları (Bioluminescent Jellyfish Tentacles)
+      ctx.save();
+      const tentacleCount = 5;
+      const tentacleSpacing = (this.radius * 1.1) / (tentacleCount - 1);
+      const tTime = Date.now() * 0.005;
+      for (let tIdx = 0; tIdx < tentacleCount; tIdx++) {
+        const startX = -this.radius * 0.55 + tIdx * tentacleSpacing;
+        ctx.strokeStyle = tIdx % 2 === 0 ? curNeon : curCore;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(startX, this.radius * 0.45);
+        for (let seg = 1; seg <= 4; seg++) {
+          const segY = this.radius * 0.45 + seg * 12;
+          const segX = startX + Math.sin(tTime + seg * 0.65 + tIdx) * (5 + seg * 2.5);
+          ctx.lineTo(segX, segY);
+        }
         ctx.stroke();
       }
       ctx.restore();
@@ -2118,7 +2228,9 @@ export class LuckyChest {
 
   draw(ctx) {
     ctx.save();
-    ctx.translate(this.x, this.y);
+    // Yüzen sinüs dalgası salınımı (Floating bobbing)
+    const bobY = Math.sin(this.pulse * 2) * 4.5;
+    ctx.translate(this.x, this.y + bobY);
 
     // Kapsül yanıp sönme (ömrü azaldığında)
     if (this.life < 150 && Math.floor(this.life / 8) % 2 === 0) {
@@ -2128,6 +2240,30 @@ export class LuckyChest {
 
     const scale = 1 + Math.sin(this.pulse) * 0.08;
     ctx.scale(scale, scale);
+
+    // Dönen Altın Yörünge Enerji Halkası (Orbital Beacon Ring)
+    ctx.save();
+    const ringPulse = Math.sin(this.pulse * 1.5);
+    ctx.strokeStyle = 'rgba(255, 190, 11, 0.65)';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.ellipse(0, 4, 22 + ringPulse * 3, 8, this.pulse * 0.7, 0, Math.PI * 2);
+    ctx.stroke();
+    // Yörüngede dönen 2 mikro parıltı parçacığı
+    const sparkAngle = this.pulse * 2.2;
+    const spX = Math.cos(sparkAngle) * (22 + ringPulse * 3);
+    const spY = 4 + Math.sin(sparkAngle) * 8;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(spX - 1.5, spY - 1.5, 3, 3);
+    ctx.restore();
+
+    // Hacimsel Altın Radyal Hale
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 190, 11, 0.22)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 20 + Math.sin(this.pulse * 3) * 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 
     // 8-bit Retro Piksel Lucky Chest (Altın Kozmik Sandık)
     const p = 2.4;
@@ -2162,6 +2298,15 @@ export class LuckyChest {
         ctx.fillRect(x * p, py, p, p);
         if (x > 0) ctx.fillRect(-x * p, py, p, p);
       }
+    }
+    ctx.restore();
+
+    // Merkezdeki Mavi Kristal Parıldaması
+    ctx.save();
+    const gemPulse = Math.sin(this.pulse * 4);
+    if (gemPulse > 0.4) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-1.5, -2, 3, 3);
     }
     ctx.restore();
 

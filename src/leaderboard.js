@@ -67,18 +67,21 @@ export async function submitScoreToFirestore(mode, scoreData) {
   const playerRef = doc(firestore, collectionName, uid);
 
   try {
+    let bestScore = mode === 'storm' ? Math.max(0, Math.floor(scoreData.score || 0)) : undefined;
+    let bestLevel = mode !== 'storm' ? Math.max(1, Math.floor(scoreData.level || 1)) : undefined;
+    let bestStars = mode !== 'storm' ? Math.max(1, Math.floor(scoreData.stars || 1)) : undefined;
+
     const existingSnap = await getDoc(playerRef);
     if (existingSnap.exists()) {
       const current = existingSnap.data();
       if (mode === 'storm') {
-        if ((current.score || 0) >= (scoreData.score || 0)) {
-          return true; // Mevcut rekor zaten daha yüksek veya eşit
-        }
+        bestScore = Math.max(current.score || 0, scoreData.score || 0);
       } else {
         const curScoreVal = (current.level || 1) * 1000 + (current.stars || 0);
         const newScoreVal = (scoreData.level || 1) * 1000 + (scoreData.stars || 0);
-        if (curScoreVal >= newScoreVal) {
-          return true;
+        if (curScoreVal > newScoreVal) {
+          bestLevel = current.level || 1;
+          bestStars = current.stars || 0;
         }
       }
     }
@@ -92,10 +95,10 @@ export async function submitScoreToFirestore(mode, scoreData) {
     };
 
     if (mode === 'storm') {
-      payload.score = Math.max(0, Math.floor(scoreData.score || 0));
+      payload.score = Math.max(0, Math.floor(bestScore || 0));
     } else {
-      payload.level = Math.max(1, Math.floor(scoreData.level || 1));
-      payload.stars = Math.max(1, Math.floor(scoreData.stars || 1));
+      payload.level = Math.max(1, Math.floor(bestLevel || 1));
+      payload.stars = Math.max(0, Math.floor(bestStars || 0));
       payload.score = payload.level * 1000 + payload.stars;
     }
 
@@ -104,6 +107,34 @@ export async function submitScoreToFirestore(mode, scoreData) {
     return true;
   } catch (err) {
     console.warn(`[Leaderboard] Failed to submit score to ${collectionName}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Update pilot profile name & country across all leaderboard records immediately.
+ */
+export async function updatePlayerProfileInFirestore(callsign, country, ship) {
+  const firestore = initLeaderboard();
+  if (!firestore) return false;
+  const uid = getPlayerUid();
+  const updateData = {
+    uid,
+    name: callsign,
+    country: country || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' },
+    ship: ship || 'Siberpunk',
+    updatedAt: Date.now()
+  };
+  try {
+    const stormRef = doc(firestore, 'leaderboard_storm', uid);
+    const campaignRef = doc(firestore, 'leaderboard_campaign', uid);
+    await Promise.allSettled([
+      setDoc(stormRef, updateData, { merge: true }),
+      setDoc(campaignRef, updateData, { merge: true })
+    ]);
+    return true;
+  } catch (err) {
+    console.warn('[Leaderboard] updatePlayerProfileInFirestore error:', err);
     return false;
   }
 }
@@ -123,18 +154,22 @@ export async function fetchTopScoresFromFirestore(mode = 'storm', limitCount = 5
 
     const scores = [];
     const myUid = getPlayerUid();
+    const myCallsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
+    const myCountryCode = localStorage.getItem('neon_player_country') || 'TUR';
 
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
+      const docUid = data.uid || docSnap.id;
+      const isMe = docUid === myUid;
       scores.push({
-        uid: data.uid,
-        name: data.name,
-        country: data.country || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' },
+        uid: docUid,
+        name: isMe ? myCallsign : data.name,
+        country: isMe ? { code: myCountryCode, flag: myCountryCode } : (data.country || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' }),
         score: data.score || 0,
         level: data.level || 1,
         stars: data.stars || 0,
         ship: data.ship || 'Siberpunk',
-        isPlayer: data.uid === myUid,
+        isPlayer: isMe,
         updatedAt: data.updatedAt || Date.now()
       });
     });
@@ -148,7 +183,20 @@ export async function fetchTopScoresFromFirestore(mode = 'storm', limitCount = 5
     const cached = localStorage.getItem(`neon_cached_lb_${mode}`);
     if (cached) {
       try {
-        return JSON.parse(cached);
+        const myUid = getPlayerUid();
+        const myCallsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
+        const myCountryCode = localStorage.getItem('neon_player_country') || 'TUR';
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(item => {
+            if (item.isPlayer || item.uid === myUid) {
+              item.isPlayer = true;
+              item.name = myCallsign;
+              item.country = { code: myCountryCode, flag: myCountryCode };
+            }
+          });
+        }
+        return parsed;
       } catch (e) {
         return null;
       }

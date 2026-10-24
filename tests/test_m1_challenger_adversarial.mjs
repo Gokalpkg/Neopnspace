@@ -249,6 +249,7 @@ runTest('AuraLifecycle', '4.1: Elemental aura ticks down 480 frames to 0 and cla
   game.openingHookGap = 999999;
   game.openingSwarmPhase = 0;
   game.nextMeteorHookTime = 999999;
+  game.slowMoTimer = 0;
   game.player.elementalAuraTimer = 480;
 
   // Advance 60 frames at dt = 1.0
@@ -259,6 +260,8 @@ runTest('AuraLifecycle', '4.1: Elemental aura ticks down 480 frames to 0 and cla
 
   // Advance 420 frames to 0
   for (let f = 0; f < 420; f++) {
+    game.enemies = [];
+    game.projectiles = [];
     game.update(1.0);
   }
   assert.equal(game.player.elementalAuraTimer, 0, 'elementalAuraTimer should reach 0 after 480 frames');

@@ -2,7 +2,18 @@
 
 export class ParticleSystem {
   constructor() {
+    // Sabit Boyutlu Nesne Havuzu (Object Pooling - 0 Heap Allocation)
+    this.maxParticles = 120;
     this.particles = [];
+    for (let i = 0; i < this.maxParticles; i++) {
+      this.particles.push({
+        active: false,
+        x: 0, y: 0, vx: 0, vy: 0,
+        radius: 1, isPixel: false,
+        color: '#ffffff', alpha: 0, decay: 0.05
+      });
+    }
+
     this.floatingTexts = [];
     this.shockwaves = [];
     this.stars = [];
@@ -21,6 +32,44 @@ export class ParticleSystem {
     this.screenFlashAlpha = 0;
     this.screenFlashColor = '#ffffff';
     this.chromaticPulse = 0;
+  }
+
+  // Havuzdan Sıfır GC Tahsisatıyla Partikül Çekme
+  _allocParticle(cfg) {
+    let p = null;
+    for (let i = 0; i < this.particles.length; i++) {
+      if (!this.particles[i].active) {
+        p = this.particles[i];
+        break;
+      }
+    }
+    if (!p) {
+      if (this.particles.length < 160) {
+        p = { active: false };
+        this.particles.push(p);
+      } else {
+        p = this.particles[0]; // Havuz doluysa en eskisini ezerek geri dönüştür
+      }
+    }
+    p.active = true;
+    p.x = cfg.x;
+    p.y = cfg.y;
+    p.vx = cfg.vx;
+    p.vy = cfg.vy;
+    p.radius = cfg.radius;
+    p.isPixel = !!cfg.isPixel;
+    p.color = cfg.color;
+    p.alpha = cfg.alpha !== undefined ? cfg.alpha : 1.0;
+    p.decay = cfg.decay;
+    return p;
+  }
+
+  getActiveParticleCount() {
+    let count = 0;
+    for (let i = 0; i < this.particles.length; i++) {
+      if (this.particles[i].active) count++;
+    }
+    return count;
   }
 
   // 3 Katmanlı Dinamik Parallaks Yıldız Zemin & Kozmik Nebulalar
@@ -78,9 +127,9 @@ export class ParticleSystem {
     ];
   }
 
-  // Patlama Kıvılcımları (Mobil 60fps Optimize)
+  // Patlama Kıvılcımları (Mobil 60fps Optimize & Sıfır GC Havuzlama)
   spawnHitSparks(x, y, dx, dy, color = '#ffffff') {
-    const count = this.particles.length > 60 ? 3 : 5;
+    const count = this.getActiveParticleCount() > 60 ? 3 : 5;
     const len = Math.hypot(dx, dy) || 1;
     const ux = dx / len;
     const uy = dy / len;
@@ -89,7 +138,7 @@ export class ParticleSystem {
       const px = ux + (-uy * spread);
       const py = uy + (ux * spread);
       const speed = 1.15 + Math.random() * 1.5;
-      this.particles.push({
+      this._allocParticle({
         x,
         y,
         vx: px * speed,
@@ -104,7 +153,8 @@ export class ParticleSystem {
   }
 
   spawnExplosion(x, y, color = '#ff0077', count = 10, maxSpeed = 3.5) {
-    if (this.particles.length > 70) {
+    const active = this.getActiveParticleCount();
+    if (active > 70) {
       count = Math.min(count, 3);
     } else {
       count = Math.min(count, 8);
@@ -112,7 +162,7 @@ export class ParticleSystem {
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 0.5 + Math.random() * maxSpeed;
-      this.particles.push({
+      this._allocParticle({
         x,
         y,
         vx: Math.cos(angle) * speed,
@@ -147,47 +197,58 @@ export class ParticleSystem {
   }
 
   // Meteor / Taş Parçalanma Patlama Animasyonu (Birden yok olmayı önleyen organik parçalanma)
+  // Optimize Edilmiş Kaya Poligon Şablonları (Sıfır GC Tahsisi)
+  static _CHUNK_SHAPES = [
+    [{ x: 0.85, y: -0.5 }, { x: 0.95, y: 0.4 }, { x: 0.1, y: 0.9 }, { x: -0.85, y: 0.45 }, { x: -0.6, y: -0.7 }],
+    [{ x: 0.6, y: -0.8 }, { x: 0.9, y: 0.2 }, { x: 0.4, y: 0.85 }, { x: -0.7, y: 0.6 }, { x: -0.9, y: -0.3 }],
+    [{ x: 0.75, y: -0.6 }, { x: 0.85, y: 0.5 }, { x: -0.2, y: 0.95 }, { x: -0.9, y: 0.2 }, { x: -0.5, y: -0.8 }]
+  ];
+
   spawnAsteroidBreakAnimation(x, y, radius = 25, isBomb = false, theme = null) {
-    const r = Math.max(16, radius);
+    // 1. Ekran dışı patlama koruması (Ekranın dışındaki taşlar için ağır parçacık üretme)
+    const maxW = (this.width || (typeof window !== 'undefined' ? window.innerWidth : 600)) + 60;
+    const maxH = (this.height || (typeof window !== 'undefined' ? window.innerHeight : 1000)) + 60;
+    if (x < -60 || x > maxW || y < -60 || y > maxH) return;
+
+    const r = Math.max(14, radius);
     const isPurple = theme === 'purple';
+    const activeFireballs = this.blastFireballs ? this.blastFireballs.length : 0;
+    const activeDebris = this.rockDebris ? this.rockDebris.length : 0;
 
-    // 1. Çok Katmanlı Genişleyen Patlama Ateş Topu (Blooming Fireball Blast)
-    // Bu ateş topu, tam taşın yok olduğu karede ortaya çıkıp hacmini doldurur ve organik olarak genişleyip dağılır.
-    const baseCore = '#ffffff';
-    let baseMid = isBomb ? '#ffbe0b' : '#38bdf8';
-    let baseOuter = isBomb ? '#ff3d00' : '#475569';
-    if (isPurple) {
-      baseMid = '#e879f9';
-      baseOuter = '#a855f7';
-    }
+    // 1. Ateş Topu Patlaması (Havuz doluluğuna göre bütçelenir)
+    if (activeFireballs < 12) {
+      const baseCore = '#ffffff';
+      let baseMid = isBomb ? '#ffbe0b' : '#38bdf8';
+      let baseOuter = isBomb ? '#ff3d00' : '#475569';
+      if (isPurple) {
+        baseMid = '#e879f9';
+        baseOuter = '#a855f7';
+      }
 
-    this.blastFireballs.push({
-      x,
-      y,
-      radius: r * 0.45,
-      maxRadius: r * (isBomb || isPurple ? 2.6 : 1.8),
-      growSpeed: isBomb || isPurple ? 4.6 : 3.0,
-      alpha: 1.0,
-      decay: isBomb || isPurple ? 0.032 : 0.046,
-      isBomb: isBomb || isPurple,
-      colorCore: baseCore,
-      colorMid: baseMid,
-      colorOuter: baseOuter
-    });
+      this.blastFireballs.push({
+        x,
+        y,
+        radius: r * 0.4,
+        maxRadius: r * (isBomb || isPurple ? 2.2 : 1.6),
+        growSpeed: isBomb || isPurple ? 4.2 : 2.8,
+        alpha: 1.0,
+        decay: isBomb || isPurple ? 0.038 : 0.052,
+        isBomb: isBomb || isPurple,
+        colorCore: baseCore,
+        colorMid: baseMid,
+        colorOuter: baseOuter
+      });
 
-    // Bomba ise çevresinde ikincil patlama halkaları ve köz saçılması
-    if (isBomb) {
-      for (let b = 0; b < 3; b++) {
-        const offAng = (b * (Math.PI * 2 / 3)) + (Math.random() - 0.5) * 0.4;
-        const offDist = r * (0.3 + Math.random() * 0.35);
+      // Bomba ise tek bir hafif ikincil halka (Performansı boğmamak için 3 yerine 1 adet)
+      if (isBomb && activeFireballs < 8) {
         this.blastFireballs.push({
-          x: x + Math.cos(offAng) * offDist,
-          y: y + Math.sin(offAng) * offDist,
-          radius: r * 0.3,
-          maxRadius: r * (1.6 + Math.random() * 0.8),
-          growSpeed: 3.2 + Math.random() * 2.2,
-          alpha: 0.9,
-          decay: 0.036,
+          x: x + (Math.random() - 0.5) * r * 0.4,
+          y: y + (Math.random() - 0.5) * r * 0.4,
+          radius: r * 0.25,
+          maxRadius: r * 1.5,
+          growSpeed: 3.0,
+          alpha: 0.85,
+          decay: 0.045,
           isBomb: true,
           colorCore: '#ffe600',
           colorMid: '#ff3d00',
@@ -196,8 +257,12 @@ export class ParticleSystem {
       }
     }
 
-    // 2. Büyük Poligonal Parçalanan Kaya Blokları (Gerçek Taş Çatlaması - Asla birden yok olmaz!)
-    const chunkCount = Math.max(6, Math.min(9, Math.round(r * 0.36)));
+    // 2. Parçalanan Kaya Blokları (Zincirleme patlamalarda kasmayı önleyen dinamik bütçe)
+    if (activeDebris >= 24) return; // Zaten yeterince enkaz havada uçuşuyor
+
+    let chunkCount = Math.max(3, Math.min(6, Math.round(r * 0.22)));
+    if (activeDebris > 14) chunkCount = Math.min(chunkCount, 2);
+
     let fillCol = isBomb ? '#5c122a' : '#334155';
     let strokeCol = isBomb ? '#ff0055' : '#94a3b8';
     let crackCol = isBomb ? '#ffe600' : '#38bdf8';
@@ -207,30 +272,25 @@ export class ParticleSystem {
       crackCol = '#f0abfc';
     }
 
+    const shapes = ParticleSystem._CHUNK_SHAPES;
     for (let i = 0; i < chunkCount; i++) {
-      const angle = (i * (Math.PI * 2 / chunkCount)) + (Math.random() - 0.5) * 0.55;
-      const speed = 2.0 + Math.random() * 3.4;
-      const rotSpeed = (Math.random() - 0.5) * 0.28;
-      const chunkR = Math.max(7, Math.min(18, (r * 0.42) + Math.random() * 3.5));
+      const angle = (i * (Math.PI * 2 / chunkCount)) + (Math.random() - 0.5) * 0.4;
+      const speed = 1.8 + Math.random() * 2.8;
+      const rotSpeed = (Math.random() - 0.5) * 0.22;
+      const chunkR = Math.max(6, Math.min(14, (r * 0.35) + Math.random() * 2.5));
 
-      // 4-6 köşeli düzensiz kaya poligonu
-      const polyPoints = [];
-      const numPts = 5;
-      for (let p = 0; p < numPts; p++) {
-        const pAng = (p / numPts) * Math.PI * 2;
-        const dist = chunkR * (0.65 + Math.random() * 0.6);
-        polyPoints.push({ x: Math.cos(pAng) * dist, y: Math.sin(pAng) * dist });
-      }
+      const template = shapes[i % shapes.length];
+      const polyPoints = template.map(pt => ({ x: pt.x * chunkR, y: pt.y * chunkR }));
 
       this.rockDebris.push({
-        x: x + Math.cos(angle) * (r * 0.35),
-        y: y + Math.sin(angle) * (r * 0.35),
+        x: x + Math.cos(angle) * (r * 0.3),
+        y: y + Math.sin(angle) * (r * 0.3),
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         rot: Math.random() * Math.PI * 2,
         rotSpeed: rotSpeed,
         alpha: 1.0,
-        decay: 0.024 + Math.random() * 0.012, // ~35 - 45 frame boyunca ekranda takla atarak uçar!
+        decay: 0.032 + Math.random() * 0.015,
         polygon: polyPoints,
         fillColor: fillCol,
         strokeColor: strokeCol,
@@ -238,12 +298,13 @@ export class ParticleSystem {
       });
     }
 
-    // 3. Genişleyen Duman Püskürmeleri ve Kızgın Közler
-    const dustCount = Math.min(16, Math.round(r * 0.5));
+    // 3. Genişleyen Duman Püskürmeleri ve Kızgın Közler (Dinamik Yük Dengeleme)
+    const activeDust = this.getActiveParticleCount();
+    const dustCount = activeDust > 90 ? Math.min(3, Math.round(r * 0.12)) : (activeDust > 50 ? Math.min(6, Math.round(r * 0.22)) : Math.min(14, Math.round(r * 0.45)));
     for (let i = 0; i < dustCount; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 0.8 + Math.random() * 2.8;
-      this.particles.push({
+      this._allocParticle({
         x: x + Math.cos(angle) * (r * 0.3),
         y: y + Math.sin(angle) * (r * 0.3),
         vx: Math.cos(angle) * speed,
@@ -262,7 +323,7 @@ export class ParticleSystem {
     for (let i = 0; i < 4; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1.2 + Math.random() * 2.2;
-      this.particles.push({
+      this._allocParticle({
         x,
         y,
         vx: Math.cos(angle) * speed,
@@ -283,8 +344,8 @@ export class ParticleSystem {
 
   // Motor İtiş Alevi (Kuantize Retro-Pixel İtki Közleri)
   spawnThruster(x, y, color = '#00f0ff') {
-    if (this.particles.length > 75) return;
-    this.particles.push({
+    if (this.getActiveParticleCount() > 75) return;
+    this._allocParticle({
       x: Math.round(x + (Math.random() * 6 - 3)),
       y: Math.round(y),
       vx: (Math.random() - 0.5) * 1.2,
@@ -500,12 +561,10 @@ export class ParticleSystem {
       }
     }
 
-    // Parçacıklar (Mobil 60fps akıcılık için optimize edilmiş 90 tavanı)
-    if (this.particles.length > 90) {
-      this.particles.splice(0, this.particles.length - 90);
-    }
-    for (let i = this.particles.length - 1; i >= 0; i--) {
+    // Parçacıklar (Sıfır GC Havuz Güncellemesi - Splice Yok)
+    for (let i = 0; i < this.particles.length; i++) {
       const p = this.particles[i];
+      if (!p.active) continue;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.vx *= Math.pow(0.96, dt);
@@ -513,7 +572,7 @@ export class ParticleSystem {
       p.alpha -= p.decay * dt;
       p.radius *= Math.pow(0.97, dt);
       if (p.alpha <= 0 || p.radius <= 0.2) {
-        this.particles.splice(i, 1);
+        p.active = false;
       }
     }
 
@@ -555,26 +614,30 @@ export class ParticleSystem {
       }
     }
 
-    // Patlama Ateş Topları (Blast Fireballs)
+    // Patlama Ateş Topları (Blast Fireballs - Performans için sıkı havuz sınırı)
+    const maxW = (this.width || (typeof window !== 'undefined' ? window.innerWidth : 600)) + 60;
+    const maxH = (this.height || (typeof window !== 'undefined' ? window.innerHeight : 1000)) + 60;
+
+    // Patlama Alev Küreleri (Ekran Dışı ve Sönme Temizliği)
     if (this.blastFireballs && this.blastFireballs.length > 0) {
-      if (this.blastFireballs.length > 25) {
-        this.blastFireballs.splice(0, this.blastFireballs.length - 25);
+      if (this.blastFireballs.length > 14) {
+        this.blastFireballs.splice(0, this.blastFireballs.length - 14);
       }
       for (let i = this.blastFireballs.length - 1; i >= 0; i--) {
         const b = this.blastFireballs[i];
         b.radius += b.growSpeed * dt;
         b.alpha -= b.decay * dt;
         b.rot = (b.rot || 0) + 0.04 * dt;
-        if (b.alpha <= 0 || b.radius >= b.maxRadius * 1.5) {
+        if (b.alpha <= 0 || b.radius >= b.maxRadius * 1.5 || b.x < -60 || b.x > maxW || b.y < -60 || b.y > maxH) {
           this.blastFireballs.splice(i, 1);
         }
       }
     }
 
-    // Parçalanan Kaya Blokları (Chunky Polygonal Rock Debris)
+    // Parçalanan Kaya Blokları (Chunky Polygonal Rock Debris - 24 Limit & Ekran Dışı Temizliği)
     if (this.rockDebris && this.rockDebris.length > 0) {
-      if (this.rockDebris.length > 40) {
-        this.rockDebris.splice(0, this.rockDebris.length - 40);
+      if (this.rockDebris.length > 24) {
+        this.rockDebris.splice(0, this.rockDebris.length - 24);
       }
       for (let i = this.rockDebris.length - 1; i >= 0; i--) {
         const rk = this.rockDebris[i];
@@ -585,22 +648,22 @@ export class ParticleSystem {
         rk.vy *= Math.pow(0.96, dt);
         rk.alpha -= rk.decay * dt;
 
-        // Uçarken arkasında hafif kızgın kıvılcım veya köz bırakır
-        if (rk.alpha > 0.45 && Math.random() < 0.22 * dt && this.particles.length < 80) {
-          this.particles.push({
+        // Uçarken arkasında hafif kızgın kıvılcım veya köz bırakır (Düşük oran ile havuzu korur)
+        if (rk.alpha > 0.5 && Math.random() < 0.08 * dt && this.getActiveParticleCount() < 50) {
+          this._allocParticle({
             x: rk.x,
             y: rk.y,
-            vx: (Math.random() - 0.5) * 1.2,
-            vy: (Math.random() - 0.5) * 1.2,
-            radius: 1.6,
+            vx: (Math.random() - 0.5) * 1.0,
+            vy: (Math.random() - 0.5) * 1.0,
+            radius: 1.4,
             isPixel: true,
             color: rk.crackColor || '#ff9100',
-            alpha: rk.alpha * 0.8,
-            decay: 0.06
+            alpha: rk.alpha * 0.7,
+            decay: 0.07
           });
         }
 
-        if (rk.alpha <= 0) {
+        if (rk.alpha <= 0 || rk.x < -60 || rk.x > maxW || rk.y < -60 || rk.y > maxH) {
           this.rockDebris.splice(i, 1);
         }
       }
@@ -631,20 +694,29 @@ export class ParticleSystem {
       ctx.fillStyle = this.bgBase;
       ctx.fillRect(-60, -60, ctx.canvas.width + 120, ctx.canvas.height + 120);
     }
-    // 1. Kozmik Parallax Nebulalar (Derinlikli Uzay)
+    // 1. Kozmik Parallax Nebulalar (Önbellekli Hızlı Çizim)
     if (this.nebulae && this.nebulae.length > 0) {
       for (let neb of this.nebulae) {
-        ctx.save();
-        const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.radius);
-        grad.addColorStop(0, neb.color);
-        grad.addColorStop(1, 'transparent');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(neb.x, neb.y, neb.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        if (!neb._cachedCanvas || neb._cachedR !== neb.radius) {
+          const off = document.createElement('canvas');
+          const d = Math.ceil(neb.radius * 2);
+          off.width = d;
+          off.height = d;
+          const octx = off.getContext('2d');
+          const g = octx.createRadialGradient(neb.radius, neb.radius, 0, neb.radius, neb.radius, neb.radius);
+          g.addColorStop(0, neb.color);
+          g.addColorStop(1, 'transparent');
+          octx.fillStyle = g;
+          octx.fillRect(0, 0, d, d);
+          neb._cachedCanvas = off;
+          neb._cachedR = neb.radius;
+        }
+        ctx.drawImage(neb._cachedCanvas, neb.x - neb.radius, neb.y - neb.radius);
       }
     }
+
+    // 1.5. Kuantum Kutup Işıkları (Aurora Ribbons - Derin Uzay Parıltısı)
+    this.renderAuroras(ctx);
 
     // 2. Retro-Pixel Yıldızlar (3 Katmanlı 8-Bit Parallaks & Çapraz Yıldız Parıltıları)
     const isWarp = this.warpTimer > 0;
@@ -708,30 +780,24 @@ export class ParticleSystem {
         ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha));
 
         const r = Math.max(1, b.radius);
-        // Volumetrik Yumuşak Alev Gradyanı (Bulutsu / Kor Alev Topu)
-        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        grad.addColorStop(0, '#ffffff'); // Akkor beyaz merkez
-        grad.addColorStop(0.25, b.colorCore || '#ffe600');
-        grad.addColorStop(0.55, b.colorMid || '#ff5500');
-        grad.addColorStop(0.82, b.colorOuter || '#ff0055');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Kenarlarda yumuşak tütsülü geçiş
-
-        ctx.fillStyle = grad;
-
-        // Ana alev küresi
+        // Hızlı 3 katmanlı akkor alev küresi (Sıfır per-frame gradyan maliyeti, 60fps)
+        ctx.fillStyle = b.colorOuter || '#ff0055';
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha * 0.45));
         ctx.beginPath();
-        ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+        ctx.arc(b.x, b.y, r * 1.15, 0, Math.PI * 2);
         ctx.fill();
 
-        // Organik dalgalanan 4 alev yumrusu (Mushroom / Billowing Cloud Lobes)
-        const lobeDist = r * 0.45;
-        const lobeR = r * 0.58;
-        for (let k = 0; k < 4; k++) {
-          const ang = (b.rot || 0) + k * (Math.PI / 2);
-          ctx.beginPath();
-          ctx.arc(b.x + Math.cos(ang) * lobeDist, b.y + Math.sin(ang) * lobeDist, lobeR, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.fillStyle = b.colorMid || '#ff5500';
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha * 0.8));
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, r * 0.75, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha));
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, r * 0.38, 0, Math.PI * 2);
+        ctx.fill();
 
         // Bomba ise parlayan genişleyen dış enerji çemberi
         if (b.isBomb && b.alpha > 0.15) {
@@ -746,8 +812,9 @@ export class ParticleSystem {
       }
     }
 
-    // 4. Parçacıklar (Kuantize Retro-Pixel ve Normal Kıvılcımlar)
+    // 4. Parçacıklar (Sıfır GC Havuz Çizimi)
     for (let p of this.particles) {
+      if (!p.active || p.alpha <= 0) continue;
       ctx.fillStyle = p.color;
       ctx.globalAlpha = Math.max(0, p.alpha);
       if (p.isPixel) {
