@@ -68,7 +68,11 @@ function createMockElement(id = 'mock-elem', tagName = 'div') {
   const elem = {
     id,
     tagName: tagName.toUpperCase(),
-    style: {},
+    style: {
+      setProperty(k, v) { this[k] = String(v); },
+      getPropertyValue(k) { return this[k] || ''; },
+      removeProperty(k) { delete this[k]; }
+    },
     className: '',
     children: [],
     parentNode: null,
@@ -90,7 +94,14 @@ function createMockElement(id = 'mock-elem', tagName = 'div') {
     addEventListener: () => {},
     removeEventListener: () => {},
     dispatchEvent: () => true,
-    appendChild(child) { elem.children.push(child); if (child) child.parentNode = elem; return child; },
+    appendChild(child) {
+      elem.children.push(child);
+      if (child) {
+        child.parentNode = elem;
+        elem.innerHTML += `<${(child.tagName || 'div').toLowerCase()} class="${child.className || ''}" title="${child.title || ''}">${child.innerHTML || ''}</${(child.tagName || 'div').toLowerCase()}>`;
+      }
+      return child;
+    },
     removeChild(child) { elem.children = elem.children.filter(c => c !== child); return child; },
     remove() { if (elem.parentNode) elem.parentNode.removeChild(elem); },
     querySelector: () => null,
@@ -108,7 +119,11 @@ const elementsById = new Map();
 
 function getOrCreateElement(id) {
   if (!elementsById.has(id)) {
-    elementsById.set(id, createMockElement(id));
+    const elem = createMockElement(id);
+    if (id.endsWith('-modal') || id.endsWith('-overlay') || id === 'evolution-banner' || id === 'boss-warning-overlay') {
+      elem.classList.add('hidden');
+    }
+    elementsById.set(id, elem);
   }
   return elementsById.get(id);
 }

@@ -1740,6 +1740,79 @@ class SoundEngine {
       osc.stop(now + 0.18);
     } catch (e) {}
   }
+
+  // 9. Mitik Evrim Kartı Açılışı (Rising Arcane Charge -> Thunderous Bass Drop -> Celestial Choir Chime)
+  playMythicEvolutionReveal() {
+    this.lastPlayedSound = 'mythic_evolution_reveal';
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+
+      // Faz 1 (0 - 340ms): Yükselen Arcane Şarj (Enerji Küreleri İçe Çekilirken)
+      const chargeOsc = this.ctx.createOscillator();
+      const chargeFilter = this.ctx.createBiquadFilter();
+      const chargeGain = this.ctx.createGain();
+      chargeOsc.type = 'sawtooth';
+      chargeOsc.frequency.setValueAtTime(160, now);
+      chargeOsc.frequency.exponentialRampToValueAtTime(920, now + 0.34);
+      chargeFilter.type = 'bandpass';
+      chargeFilter.frequency.setValueAtTime(400, now);
+      chargeFilter.frequency.exponentialRampToValueAtTime(2400, now + 0.34);
+      chargeFilter.Q.setValueAtTime(4.0, now);
+      chargeGain.gain.setValueAtTime(0.02, now);
+      chargeGain.gain.linearRampToValueAtTime(0.28, now + 0.32);
+      chargeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+      chargeOsc.connect(chargeFilter);
+      chargeFilter.connect(chargeGain);
+      chargeGain.connect(this.sfxGain);
+      this._autoDisconnect(chargeOsc, chargeFilter, chargeGain);
+      chargeOsc.start(now);
+      chargeOsc.stop(now + 0.36);
+
+      // Faz 2 (340ms): Thunderous Bass Drop (3D Perspektif Snap & Altın Yıldırım Anı)
+      const dropTime = now + 0.34;
+      const bassOsc = this.ctx.createOscillator();
+      const bassGain = this.ctx.createGain();
+      bassOsc.type = 'sine';
+      bassOsc.frequency.setValueAtTime(135, dropTime);
+      bassOsc.frequency.exponentialRampToValueAtTime(28, dropTime + 0.48);
+      bassGain.gain.setValueAtTime(0.55, dropTime);
+      bassGain.gain.exponentialRampToValueAtTime(0.001, dropTime + 0.50);
+      bassOsc.connect(bassGain);
+      bassGain.connect(this.sfxGain);
+      this._autoDisconnect(bassOsc, bassGain);
+      bassOsc.start(dropTime);
+      bassOsc.stop(dropTime + 0.50);
+
+      // Faz 3 (360ms - 1.35s): Celestial Choir Chime (Göksel Koro Akoru + Mitik Yıldız Parıltısı)
+      const chordNotes = [523.25, 659.25, 783.99, 987.77, 1174.66, 1567.98]; // C5 Maj9
+      chordNotes.forEach((freq, idx) => {
+        const noteStart = dropTime + 0.02 + idx * 0.035;
+        const choirOsc = this.ctx.createOscillator();
+        const shimmerOsc = this.ctx.createOscillator();
+        const noteGain = this.ctx.createGain();
+
+        choirOsc.type = 'triangle';
+        shimmerOsc.type = 'sine';
+        choirOsc.frequency.setValueAtTime(freq, noteStart);
+        shimmerOsc.frequency.setValueAtTime(freq * 1.003, noteStart); // hafif detune koro genişliği
+
+        noteGain.gain.setValueAtTime(0.001, noteStart);
+        noteGain.gain.linearRampToValueAtTime(0.14 / Math.sqrt(idx + 1), noteStart + 0.06);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.92);
+
+        choirOsc.connect(noteGain);
+        shimmerOsc.connect(noteGain);
+        noteGain.connect(this.sfxGain);
+        this._autoDisconnect(choirOsc, noteGain);
+        this._autoDisconnect(shimmerOsc, noteGain);
+        choirOsc.start(noteStart);
+        shimmerOsc.start(noteStart);
+        choirOsc.stop(noteStart + 0.95);
+        shimmerOsc.stop(noteStart + 0.95);
+      });
+    } catch (e) {}
+  }
 }
 
 export const sounds = new SoundEngine();

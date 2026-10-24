@@ -102,6 +102,18 @@
         </div>
       </div>
 
+      <!-- Aktif Silah ve Evrim Rozetleri Şeridi -->
+      <div id="hud-weapons-strip" class="hud-weapons-strip"></div>
+
+      <!-- İsteğe Bağlı Uzay Kaçakçısı Çağrı Sinyali (Savaşı Zorla Durdurmayan HUD Rozeti) -->
+      <button id="merchant-signal-btn" class="merchant-signal-btn hidden" type="button" aria-label="Uzay Kaçakçısı Sinyali">
+        <span class="merchant-signal-icon">
+          <svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="7" ry="3" fill="#38bdf8"/><circle cx="8" cy="6" r="3" fill="#00f0ff"/><circle cx="8" cy="6" r="1.5" fill="#ffffff"/></svg>
+        </span>
+        <span class="merchant-signal-text">KAÇAKÇI İSTASYONU • DOKUN &amp; GİR</span>
+        <span id="merchant-signal-timer" class="merchant-signal-timer">9s</span>
+      </button>
+
       <!-- Boss Sağlık Barı -->
       <div id="boss-bar-container" class="boss-bar-container hidden">
         <div class="boss-title" data-i18n="boss_warning_title">CAPITAL SHIP</div>
@@ -210,7 +222,7 @@
                 </div>
                 <button id="btn-ship-starup" class="btn-ship-starup" type="button" title="Yıldız Yükselt">
                   <span class="starup-icon">★+</span>
-                  <span id="ship-starup-cost" class="starup-cost">500 💎</span>
+                  <span id="ship-starup-cost" class="starup-cost">500 <svg class="pixel-icon pixel-icon-xs inline-crystal-svg" viewBox="0 0 10 10"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff"/></svg></span>
                 </button>
               </div>
             </div>
@@ -290,7 +302,7 @@
             </div>
             <span class="mode-card-desc" id="mode-mutator-desc">Özel Kural & +400 Kristal</span>
             <div class="mode-card-score">
-              <span data-i18n="mode_mutator_badge">ÖDÜL:</span> <strong id="score-val-mutator" style="color:#ff0055;">+400 💎</strong>
+              <span data-i18n="mode_mutator_badge">ÖDÜL:</span> <strong id="score-val-mutator" style="color:#ff0055;">+400 <svg class="pixel-icon pixel-icon-xs inline-crystal-svg" viewBox="0 0 10 10"><polygon points="5,1 9,4 5,9 1,4" fill="#00f0ff"/></svg></strong>
             </div>
           </button>
         </div>
@@ -559,6 +571,13 @@
           <canvas id="lucky-wheel-canvas" width="260" height="260" style="border-radius: 50%; box-shadow: 0 0 30px rgba(0, 240, 255, 0.45), inset 0 0 20px rgba(0, 240, 255, 0.25); border: 2.5px solid #00f0ff; touch-action: none; cursor: grab; user-select: none;"></canvas>
         </div>
 
+        <div style="display:flex; justify-content:center; margin-bottom:8px;">
+          <button id="wheel-fast-toggle" type="button" class="wheel-fast-toggle-btn" title="4.3s animasyonu 0.38s hızlı moda geçirir">
+            <svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="margin-right:4px;"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#ffbe0b"/></svg>
+            <span id="wheel-fast-toggle-text">HIZLI ÇEVİR: KAPALI</span>
+          </button>
+        </div>
+
         <button id="btn-spin-wheel" class="neon-btn pulse quantum-charge-btn" style="width: 100%; font-size: 1.05rem; padding: 12px; margin-bottom: 8px;">
           <span class="btn-shimmer-badge"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 12 12" style="margin-right:4px;"><polygon points="6,1 11,11 1,11" fill="#00f0ff"/></svg><span data-i18n="quantum_spin_btn">REAKTÖRÜ YÜKLE</span></span>
           <span id="btn-spin-wheel-text">ÜCRETSİZ YÜKLEME (1/1)</span>
@@ -705,9 +724,13 @@
           <!-- Dinamik Kartlar JS ile doldurulacak -->
         </div>
 
-        <div class="upgrade-footer-actions" style="margin-top: 10px; display: flex; justify-content: center;">
+        <div class="upgrade-footer-actions" style="margin-top: 10px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
           <button id="btn-reroll-cards" class="neon-btn-secondary" style="font-size: 0.82rem; padding: 6px 14px;">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:4px"><path d="M1 4h2V2h6v2h2v6H9v2H3v-2H1V4z" fill="#1e293b" stroke="#00f0ff" stroke-width="1"/><circle cx="4" cy="5" r="1" fill="#fff"/><circle cx="8" cy="5" r="1" fill="#fff"/><circle cx="6" cy="7" r="1" fill="#fff"/><circle cx="4" cy="9" r="1" fill="#fff"/><circle cx="8" cy="9" r="1" fill="#fff"/></svg> <span data-i18n="levelup_reroll">KARTLARI YENİLE</span> (<span id="reroll-count-val">0</span>)
+          </button>
+          <button id="btn-auto-synergy-toggle" type="button" class="neon-btn-secondary auto-synergy-btn" style="font-size: 0.78rem; padding: 6px 12px;">
+            <svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="margin-right:4px"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#05ffa1"/></svg>
+            <span id="auto-synergy-text">OTO-SİNERJİ: KAPALI</span>
           </button>
         </div>
       </div>
@@ -720,7 +743,8 @@
           <svg class="pixel-icon pixel-icon-xxl" viewBox="0 0 16 16"><path d="M8 1L2 7h4v7h4V7h4L8 1z" fill="#00f0ff"/><polygon points="2,14 14,14 8,11" fill="#ffbe0b"/></svg>
         </div>
         <h2 class="game-title" style="color: #00f0ff; font-size: 1.3rem; margin-bottom: 2px;" data-i18n="route_title">ROTA SEÇİMİ</h2>
-        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 14px;" data-i18n="route_sub">Sonraki sektörün tehlike ve ödül profilini belirle</div>
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;" data-i18n="route_sub">Sonraki sektörün tehlike ve ödül profilini belirle</div>
+        <div id="route-debrief-summary" class="victory-debrief-summary"></div>
         <div id="route-choices-container" style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
           <!-- Dinamik Rota Seçenek Kartları -->
         </div>
@@ -984,9 +1008,20 @@
               <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:5px;"><path d="M6 1a5 5 0 1 0 4.5 2.8L9.2 4.5A3.5 3.5 0 1 1 6 2.5V4l3-2.5L6 0v1z" fill="#ffbe0b"/></svg>
               <span data-i18n="ui_reset_workshop">ATÖLYEYİ SIFIRLA (İADE AL)</span>
             </button>
+            <button id="btn-open-codex-from-tech" class="tech-reset-btn" style="border-color: #00f0ff; color: #00f0ff;" title="10 Silah Evrim Tarifini ve Sinerji Rehberini Görüntüle">
+              <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:5px;"><path d="M2 1h8v10H2z" fill="none" stroke="#00f0ff" stroke-width="1.4"/><path d="M4 4h4M4 6h4M4 8h3" stroke="#ffbe0b" stroke-width="1.2"/></svg>
+              <span data-i18n="tab_codex">EVRİM KODEKSİ</span>
+            </button>
           </div>
 
-          <p class="role-hint" data-i18n="workshop_role">Permanent. Stays on every flight.</p>
+          <div class="tech-workshop-toolbar">
+            <p class="role-hint" style="margin:0;" data-i18n="workshop_role">Permanent. Stays on every flight.</p>
+            <div id="tech-buy-mult-bar" class="tech-buy-mult-bar" role="group" aria-label="Toplu Yükseltme Çarpanı">
+              <button type="button" class="tech-mult-btn active" data-mult="1">1x</button>
+              <button type="button" class="tech-mult-btn" data-mult="5">5x</button>
+              <button type="button" class="tech-mult-btn" data-mult="max">MAX</button>
+            </div>
+          </div>
           <div id="tech-container" class="tech-grid">
             <!-- Dinamik Kalıcı Teknoloji Kartları -->
           </div>
@@ -1125,6 +1160,75 @@
         <p id="evo-banner-desc" class="evo-banner-desc">Düşman hatlarını parçalayan yerçekimsel tekillik çekirdeği</p>
         <div class="evo-banner-tag">
           <span id="evo-barrier-tag" data-i18n="evo_barrier_tag">GEÇİCİ DOKUNULMAZLIK VE AŞIRI GÜÇ</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Işıltılı Holografik Silah Evrim Sahnesi (Radiant Holographic Evolution Showcase Modal) -->
+    <div id="evolution-showcase-modal" class="evolution-showcase-modal hidden">
+      <div class="evo-showcase-backdrop"></div>
+      <div class="evo-volumetric-rays" aria-hidden="true"></div>
+      <div class="evo-floor-runes" aria-hidden="true"></div>
+      <div class="evo-orbs-container" id="evo-orbs-container" aria-hidden="true"></div>
+      <div class="evo-showcase-card">
+        <div class="evo-prismatic-sheen" aria-hidden="true"></div>
+        <svg class="evo-golden-lightning" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+          <polyline points="18,12 58,64 42,78 96,140" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="182,18 138,68 156,82 104,146" stroke="#00f0ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="100,4 92,48 110,56 98,105" stroke="#ffbe0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="evo-showcase-particles" id="evo-showcase-particles">
+          <div class="evo-ring-outer"></div>
+          <div class="evo-ring-inner"></div>
+        </div>
+
+        <div class="evo-showcase-header">
+          <div class="evo-mythic-stars" id="evo-mythic-stars" aria-hidden="true">
+            <span class="evo-mythic-star" style="--star-idx:0">★</span>
+            <span class="evo-mythic-star" style="--star-idx:1">★</span>
+            <span class="evo-mythic-star" style="--star-idx:2">★</span>
+            <span class="evo-mythic-star" style="--star-idx:3">★</span>
+            <span class="evo-mythic-star" style="--star-idx:4">★</span>
+          </div>
+          <span class="evo-kicker" data-i18n="evo_showcase_kicker">WEAPON EVOLUTION COMPLETED</span>
+          <h2 class="evo-showcase-title evo-rgb-split" id="evo-showcase-title">VORTEX BLACK-HOLE LASER</h2>
+          <div class="evo-showcase-stat-pill" id="evo-showcase-stat">PIERCING VORTEX</div>
+        </div>
+
+        <!-- 3 Adımlı Füzyon Animasyon Alanı: [Weapon A] + [Nexus +] + [Passive B] ➔ [Evolved Weapon] -->
+        <div class="evo-fusion-stage">
+          <div class="evo-node evo-node-item1">
+            <div class="evo-node-icon" id="evo-node-item1-icon"></div>
+            <span class="evo-node-label" id="evo-node-item1-name">LASER LV.5</span>
+          </div>
+
+          <div class="evo-node-nexus">
+            <span class="nexus-symbol">+</span>
+            <div class="nexus-glow-pulse"></div>
+          </div>
+
+          <div class="evo-node evo-node-item2">
+            <div class="evo-node-icon" id="evo-node-item2-icon"></div>
+            <span class="evo-node-label" id="evo-node-item2-name">MAGNET LV.1</span>
+          </div>
+
+          <div class="evo-node-arrow">
+            <span class="arrow-symbol">➔</span>
+          </div>
+
+          <div class="evo-node evo-node-result">
+            <div class="evo-node-icon evo-result-icon" id="evo-node-result-icon"></div>
+            <span class="evo-node-label evo-result-label" id="evo-node-result-name">VORTEX LASER</span>
+          </div>
+        </div>
+
+        <div class="evo-showcase-body">
+          <p class="evo-showcase-desc" id="evo-showcase-desc">Shots pierce targets and open a gravity well that pulls crystals.</p>
+          <div class="evo-showcase-emp-callout" data-i18n="evo_emp_callout">360° COSMIC EMP CLEARS SCREEN • 8S ELEMENTAL AURA</div>
+        </div>
+
+        <div class="evo-showcase-actions">
+          <button id="btn-evo-dismiss" class="btn-evo-dismiss" data-i18n="evo_showcase_dismiss">DISMISS & DETONATE EMP</button>
         </div>
       </div>
     </div>
@@ -1301,6 +1405,8 @@
           <span style="font-size: 0.85rem; color: #cbd5e1; font-weight: 700;">İLK GEÇİŞ GANİMETİ</span>
           <strong id="victory-reward-crystals" style="color: #05ffa1; font-size: 1.15rem; text-shadow: 0 0 12px #05ffa1;">+350 <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10" style="margin-left:2px"><polygon points="5,1 9,4 5,9 1,4" fill="#05ffa1" stroke="#ffffff" stroke-width="0.8"/></svg></strong>
         </div>
+
+        <div id="victory-debrief-summary" class="victory-debrief-summary"></div>
 
         <button id="btn-victory-double" class="neon-btn pulse gold-shimmer-btn" style="width: 100%; font-size: 0.96rem; padding: 11px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <span class="btn-shimmer-badge"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="margin-right:2px"><polygon points="2,1 8,1 8,5 5,8 2,5" fill="#ffd700"/></svg> 2X ZAFER</span>

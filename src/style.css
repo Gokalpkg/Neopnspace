@@ -8161,6 +8161,964 @@ html, body {
   animation: kineticScreenShake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
 }
 
+/* ==========================================================================
+   AKTİF SİLAH VE EVRİM ROZETLERİ ŞERİDİ (HUD WEAPONS STRIP)
+   ========================================================================== */
+.hud-weapons-strip {
+  position: absolute;
+  top: 48px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 100;
+  pointer-events: none;
+  max-width: 85%;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.hud-weapon-badge {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  background: rgba(10, 16, 32, 0.82);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.hud-weapon-badge .hud-badge-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-weapon-badge .hud-badge-lvl {
+  position: absolute;
+  bottom: -4px;
+  right: -3px;
+  font-family: var(--font-display, monospace);
+  font-size: 8px;
+  font-weight: 900;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.92);
+  padding: 0 2px;
+  border-radius: 2px;
+  line-height: 1;
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.hud-weapon-badge.hud-evo-badge {
+  border-width: 1.5px;
+  animation: evoBadgePulse 2s infinite ease-in-out;
+}
+
+.hud-weapon-badge .hud-badge-star {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  font-size: 8px;
+  color: #000000;
+  border-radius: 50%;
+  width: 11px;
+  height: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.hud-weapon-badge.badge-pulse-burst {
+  animation: evoPulseBurst 0.75s ease-out;
+}
+
+@keyframes evoBadgePulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+}
+
+@keyframes evoPulseBurst {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.4); filter: brightness(1.8); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   IŞILTILI HOLOGRAFİK SİLAH EVRİM SAHNESİ (EVOLUTION SHOWCASE MODAL)
+   ========================================================================== */
+.evolution-showcase-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.evolution-showcase-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.94);
+}
+
+.evo-showcase-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(10, 16, 38, 0.88) 0%, rgba(3, 7, 18, 0.96) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.evo-showcase-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(165deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 12, 28, 0.98) 100%);
+  border: 2px solid var(--evo-color, #ffd700);
+  border-radius: 18px;
+  box-shadow: 0 0 35px var(--evo-color, rgba(255, 215, 0, 0.4)), inset 0 0 20px var(--evo-color, rgba(255, 215, 0, 0.15));
+  padding: 22px 18px 18px;
+  text-align: center;
+  overflow: hidden;
+  animation: evoCardUnfold 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes evoCardUnfold {
+  0% { transform: scale(0.7) rotate(-3deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.evo-showcase-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.evo-ring-outer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px dashed var(--evo-color, #00f0ff);
+  opacity: 0.35;
+  animation: evoRingSpin 16s linear infinite;
+}
+
+.evo-ring-inner {
+  position: absolute;
+  inset: 30px;
+  border-radius: 50%;
+  border: 1.5px dotted var(--evo-color, #d946ef);
+  opacity: 0.45;
+  animation: evoRingSpinRev 10s linear infinite;
+}
+
+@keyframes evoRingSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes evoRingSpinRev {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.evo-showcase-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 14px;
+}
+
+.evo-kicker {
+  display: inline-block;
+  font-family: var(--font-display, monospace);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: var(--evo-color, #ffd700);
+  text-transform: uppercase;
+  text-shadow: 0 0 8px var(--evo-color, rgba(255, 215, 0, 0.6));
+  margin-bottom: 4px;
+}
+
+.evo-showcase-title {
+  font-family: var(--font-display, monospace);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  margin: 2px 0 6px;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px var(--evo-color, #ffd700);
+  line-height: 1.2;
+}
+
+.evo-showcase-stat-pill {
+  display: inline-block;
+  font-family: var(--font-display, monospace);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #030816;
+  background: var(--evo-color, #ffd700);
+  padding: 3px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px var(--evo-color, rgba(255, 215, 0, 0.5));
+}
+
+/* 3-Step Fusion Stage */
+.evo-fusion-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px 6px;
+  background: rgba(10, 16, 32, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+}
+
+.evo-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.evo-node-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.3s ease;
+}
+
+.evo-node-label {
+  font-family: var(--font-display, monospace);
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 68px;
+}
+
+.evo-node-nexus, .evo-node-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.nexus-symbol {
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 0 0 8px #ffd700;
+  animation: nexusPulse 1s infinite alternate;
+}
+
+.arrow-symbol {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--evo-color, #00f0ff);
+  text-shadow: 0 0 8px var(--evo-color, #00f0ff);
+}
+
+@keyframes nexusPulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.3); filter: brightness(1.6); }
+}
+
+.evo-node-result .evo-node-icon.evo-result-icon {
+  width: 52px;
+  height: 52px;
+  border-color: var(--evo-color, #ffd700);
+  border-width: 2px;
+  box-shadow: 0 0 16px var(--evo-color, rgba(255, 215, 0, 0.6)), inset 0 0 10px var(--evo-color, rgba(255, 215, 0, 0.3));
+  animation: resultGlowPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes resultGlowPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 14px var(--evo-color, rgba(255, 215, 0, 0.6)); }
+  50% { transform: scale(1.08); box-shadow: 0 0 24px var(--evo-color, rgba(255, 215, 0, 0.9)); }
+}
+
+.evo-node-result .evo-result-label {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.evo-showcase-body {
+  position: relative;
+  z-index: 1;
+  margin: 10px 0 16px;
+}
+
+.evo-showcase-desc {
+  font-family: var(--font-body, sans-serif);
+  font-size: 12px;
+  line-height: 1.45;
+  color: #cbd5e1;
+  margin: 0 0 8px;
+}
+
+.evo-showcase-emp-callout {
+  display: inline-block;
+  font-family: var(--font-display, monospace);
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px dashed rgba(0, 240, 255, 0.45);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.evo-showcase-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-evo-dismiss {
+  width: 100%;
+  padding: 12px 16px;
+  font-family: var(--font-display, monospace);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #070b19;
+  background: linear-gradient(135deg, var(--evo-color, #ffbe0b) 0%, #f8fafc 100%);
+  border: 2px solid #070b19;
+  border-bottom: 5px solid rgba(7, 11, 25, 0.85);
+  border-radius: 12px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.55), 0 0 20px var(--evo-color, rgba(255, 190, 11, 0.65)), inset 0 2px 0 rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.btn-evo-dismiss:active {
+  transform: translateY(3px) scale(0.98);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.55), 0 0 12px var(--evo-color, rgba(255, 190, 11, 0.5));
+  filter: brightness(0.95);
+}
+
+.pause-inv-card-evolved {
+  position: relative;
+  border-width: 1.5px !important;
+}
+
+/* ==========================================================================
+   GACHA 5-ADIMLI SİLAH EVRİM KARTI KOREOGRAFİSİ (~1.05s AKICI DOPAMİN ŞÖLENİ)
+   1. Float up + violent vibration + inward energy orbs
+   2. 3D perspective snap + brief freeze-frame + bouncy overshoot
+   3. Expanding golden floor runes + crackling golden lightning on impact
+   4. Prismatic rainbow sheen sweep + volumetric rays fountain
+   5. RGB channel split on impact + popping mythic rarity stars
+   ========================================================================== */
+.evolution-showcase-modal.gacha-reveal-active .evo-showcase-card {
+  transform-style: preserve-3d;
+  animation: evoGachaChargeSnap 0.92s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes evoGachaChargeSnap {
+  0% {
+    transform: perspective(900px) translateY(48px) scale(0.68) rotateY(-165deg) rotateZ(-4deg);
+    opacity: 0;
+    filter: brightness(1.8);
+  }
+  12% {
+    transform: perspective(900px) translateY(-10px) translateX(-5px) scale(0.86) rotateY(-110deg);
+    opacity: 1;
+  }
+  20% {
+    transform: perspective(900px) translateY(-14px) translateX(6px) scale(0.90) rotateY(-65deg);
+  }
+  28% {
+    transform: perspective(900px) translateY(-12px) translateX(-6px) scale(0.94) rotateY(-25deg);
+  }
+  /* 3D Perspective Snap + Brief Freeze-Frame Impact (34% - 42%) */
+  35% {
+    transform: perspective(900px) translateY(0px) scale(1.10) rotateY(0deg);
+    filter: brightness(2.1) contrast(1.25);
+  }
+  42% {
+    transform: perspective(900px) translateY(0px) scale(1.10) rotateY(0deg);
+    filter: brightness(1.65);
+  }
+  /* Elastic Bouncy Settle */
+  62% {
+    transform: perspective(900px) translateY(3px) scale(0.96) rotateY(0deg);
+    filter: brightness(1.1);
+  }
+  80% {
+    transform: perspective(900px) translateY(-2px) scale(1.02) rotateY(0deg);
+    filter: brightness(1);
+  }
+  100% {
+    transform: perspective(900px) translateY(0px) scale(1) rotateY(0deg);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+/* Step 1: Glowing Energy Orbs Sucked Inward */
+.evo-orbs-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.evo-suck-orb {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f8fafc 0%, var(--evo-color, #ffbe0b) 60%, transparent 100%);
+  box-shadow: 0 0 14px var(--evo-color, #ffbe0b), 0 0 24px #00f0ff;
+  opacity: 0;
+}
+
+.evolution-showcase-modal.gacha-reveal-active .evo-suck-orb {
+  animation: evoOrbSuckIn 0.36s cubic-bezier(0.55, 0.055, 0.675, 0.19) var(--orb-delay, 0s) forwards;
+}
+
+@keyframes evoOrbSuckIn {
+  0% {
+    transform: translate(var(--orb-x, 120px), var(--orb-y, -120px)) scale(0.4);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+    transform: translate(calc(var(--orb-x, 120px) * 0.75), calc(var(--orb-y, -120px) * 0.75)) scale(1.35);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(0.1);
+    opacity: 0;
+  }
+}
+
+/* Step 3: Expanding Floor Runes & Crackling Golden Lightning on Impact */
+.evo-floor-runes {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 340px;
+  height: 340px;
+  margin-left: -170px;
+  margin-top: -170px;
+  border-radius: 50%;
+  border: 3px dashed #ffbe0b;
+  box-shadow: 0 0 28px rgba(255, 190, 11, 0.65), inset 0 0 24px rgba(0, 240, 255, 0.45);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+}
+
+.evolution-showcase-modal.gacha-reveal-active .evo-floor-runes {
+  animation: evoRuneBlast 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.30s forwards;
+}
+
+@keyframes evoRuneBlast {
+  0% {
+    transform: scale(0.25) rotate(0deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1.45) rotate(90deg);
+    opacity: 0;
+  }
+}
+
+.evo-golden-lightning {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px #ffd700);
+}
+
+.evolution-showcase-modal.gacha-reveal-active .evo-golden-lightning {
+  animation: evoLightningFlash 0.52s steps(2, end) 0.31s forwards;
+}
+
+@keyframes evoLightningFlash {
+  0% { opacity: 0; transform: scale(0.92); }
+  20% { opacity: 1; transform: scale(1.04); }
+  45% { opacity: 0.25; }
+  70% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; }
+}
+
+/* Step 4: Prismatic Rainbow Sheen Sweep & Volumetric Rays Fountain */
+.evo-volumetric-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 440px;
+  height: 440px;
+  margin-left: -220px;
+  margin-top: -220px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 18deg,
+    rgba(255, 190, 11, 0.22) 18deg 32deg,
+    transparent 32deg 60deg,
+    rgba(0, 240, 255, 0.20) 60deg 76deg,
+    transparent 76deg 110deg,
+    rgba(255, 190, 11, 0.24) 110deg 128deg,
+    transparent 128deg 165deg,
+    rgba(255, 0, 85, 0.18) 165deg 182deg,
+    transparent 182deg 220deg,
+    rgba(0, 240, 255, 0.22) 220deg 238deg,
+    transparent 238deg 280deg,
+    rgba(255, 190, 11, 0.24) 280deg 300deg,
+    transparent 300deg 360deg
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+}
+
+.evolution-showcase-modal.gacha-reveal-active .evo-volumetric-rays {
+  animation: evoVolumetricSpin 6s linear 0.32s infinite, evoVolumetricFadeIn 0.45s ease-out 0.32s forwards;
+}
+
+@keyframes evoVolumetricSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.06); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes evoVolumetricFadeIn {
+  from { opacity: 0; }
+  to { opacity: 0.85; }
+}
+
+.evo-prismatic-sheen {
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 90%;
+  height: 100%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 0, 85, 0.22) 25%,
+    rgba(255, 190, 11, 0.38) 45%,
+    rgba(248, 250, 252, 0.65) 50%,
+    rgba(0, 240, 255, 0.38) 55%,
+    rgba(191, 90, 242, 0.22) 75%,
+    transparent 100%
+  );
+  transform: skewX(-22deg);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.evolution-showcase-modal.gacha-reveal-active .evo-prismatic-sheen {
+  animation: evoPrismaticSweep 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.36s forwards;
+}
+
+@keyframes evoPrismaticSweep {
+  0% { left: -130%; }
+  100% { left: 160%; }
+}
+
+/* Step 5: RGB Channel Split on Impact & Mythic Rarity Stars Pop */
+.evolution-showcase-modal.gacha-reveal-active .evo-rgb-split {
+  animation: evoRgbImpact 0.48s ease-out 0.32s forwards;
+}
+
+@keyframes evoRgbImpact {
+  0% {
+    text-shadow: -5px 0 #ff0055, 5px 0 #00f0ff, 0 0 18px var(--evo-color, #ffbe0b);
+    transform: scale(1.14);
+  }
+  45% {
+    text-shadow: 4px -1px #ff0055, -4px 1px #00f0ff, 0 0 22px #ffd700;
+  }
+  100% {
+    text-shadow: 0 0 14px var(--evo-color, #ffd700), 0 2px 0 #070b19;
+    transform: scale(1);
+  }
+}
+
+.evo-mythic-stars {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.evo-mythic-star {
+  display: inline-block;
+  font-size: 15px;
+  color: #ffd700;
+  text-shadow: 0 0 10px #ffbe0b, 0 2px 0 #070b19;
+  opacity: 0;
+  transform: scale(0);
+}
+
+.evolution-showcase-modal.gacha-reveal-active .evo-mythic-star {
+  animation: evoMythicStarPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc(0.35s + var(--star-idx, 0) * 0.055s) forwards;
+}
+
+@keyframes evoMythicStarPop {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.2) rotate(-35deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.35) rotate(8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+/* ==========================================================================
+   TEK EKRANLI ZAFER ÖZETİ (SINGLE-SCREEN VICTORY DEBRIEF)
+   ========================================================================== */
+.victory-debrief-summary {
+  width: 100%;
+  margin: 8px 0 12px;
+}
+
+.debrief-unified-pill {
+  background: rgba(17, 24, 39, 0.92);
+  border: 1.5px solid #1e293b;
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.08), 0 4px 12px rgba(7, 11, 25, 0.6);
+  text-align: left;
+}
+
+.debrief-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  margin-bottom: 3px;
+}
+
+.debrief-tag {
+  font-weight: 700;
+  color: #f8fafc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 76%;
+}
+
+.debrief-val-gold {
+  color: #ffbe0b;
+  font-weight: 900;
+  font-size: 0.85rem;
+  text-shadow: 0 0 8px rgba(255, 190, 11, 0.45);
+}
+
+.debrief-mini-pct {
+  font-weight: 800;
+  color: #00f0ff;
+  font-size: 0.72rem;
+}
+
+.debrief-bar-track {
+  width: 100%;
+  height: 5px;
+  background: #070b19;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.debrief-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.35s ease;
+}
+
+/* =========================================================
+   v1.7.0 STUDIO AUDIT BOARD: FTUE, QOL & ART POLISH
+   ========================================================= */
+
+/* 1. FTUE Progressive Disclosure on Start Screen (Flight 0) */
+#start-screen.ftue-first-flight #btn-ship-starup,
+#start-screen.ftue-first-flight #btn-lucky-wheel,
+#start-screen.ftue-first-flight #btn-daily-reward,
+#start-screen.ftue-first-flight #btn-endless,
+#start-screen.ftue-first-flight #btn-boss-rush,
+#start-screen.ftue-first-flight #mode-mutator,
+#start-screen.ftue-first-flight .start-bottom-dock .dock-tab-btn:not([data-dock="ships"]) {
+  display: none !important;
+}
+
+/* 2. Optional HUD Merchant Signal Pill (No forced combat pause) */
+.merchant-signal-btn {
+  position: absolute;
+  top: 98px;
+  right: 12px;
+  z-index: 65;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.96) 0%, rgba(17, 24, 39, 0.98) 100%);
+  border: 2px solid #ffbe0b;
+  border-bottom: 4px solid #b45309;
+  border-radius: 12px;
+  color: #f8fafc;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 6px 18px rgba(7, 11, 25, 0.75), 0 0 14px rgba(255, 190, 11, 0.35), inset 0 1px 0 rgba(248, 250, 252, 0.22);
+  animation: merchantSignalPulse 1.1s ease-in-out infinite alternate;
+  transition: transform 0.1s ease, filter 0.12s ease;
+}
+
+.merchant-signal-btn.hidden {
+  display: none !important;
+}
+
+.merchant-signal-btn:active {
+  transform: translateY(3px) scale(0.97);
+  border-bottom-width: 1px;
+}
+
+.merchant-signal-timer {
+  background: rgba(255, 190, 11, 0.2);
+  color: #ffbe0b;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+@keyframes merchantSignalPulse {
+  0% {
+    box-shadow: 0 6px 18px rgba(7, 11, 25, 0.75), 0 0 10px rgba(255, 190, 11, 0.25);
+    transform: translateY(0);
+  }
+  100% {
+    box-shadow: 0 8px 22px rgba(7, 11, 25, 0.85), 0 0 20px rgba(0, 240, 255, 0.45);
+    transform: translateY(-2px);
+  }
+}
+
+/* 3. Workshop Bulk Buy Toolbar (1x | 5x | MAX) */
+.tech-workshop-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  background: rgba(17, 24, 39, 0.9);
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  border-radius: 10px;
+}
+
+.tech-mult-label {
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.8px;
+}
+
+.tech-buy-mult-bar {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.tech-mult-btn {
+  padding: 4px 11px;
+  background: #1e293b;
+  border: 1.5px solid rgba(148, 163, 184, 0.35);
+  border-bottom: 3px solid #0f172a;
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.tech-mult-btn.active {
+  background: linear-gradient(180deg, #00f0ff 0%, #0284c7 100%);
+  border-color: #7dd3fc;
+  border-bottom-color: #0369a1;
+  color: #070b19;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.tech-mult-btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+/* 4. Lucky Wheel Fast Toggle & Auto-Synergy Toggle Buttons */
+.wheel-fast-toggle-row {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 8px;
+}
+
+.wheel-fast-toggle-btn,
+.auto-synergy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: linear-gradient(180deg, #1e293b 0%, #111827 100%);
+  border: 1.5px solid rgba(148, 163, 184, 0.4);
+  border-bottom: 3px solid #070b19;
+  border-radius: 9px;
+  color: #94a3b8;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.08s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.wheel-fast-toggle-btn.active,
+.auto-synergy-btn.active {
+  background: linear-gradient(180deg, rgba(255, 190, 11, 0.24) 0%, rgba(17, 24, 39, 0.95) 100%);
+  border-color: #ffbe0b;
+  border-bottom-color: #b45309;
+  color: #ffbe0b;
+  box-shadow: 0 0 12px rgba(255, 190, 11, 0.3);
+}
+
+.wheel-fast-toggle-btn:active,
+.auto-synergy-btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+.level-modal-top-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+/* 5. Tactile 3D Route Selection Cards */
+.route-choice-card {
+  position: relative;
+  flex: 1 1 140px;
+  max-width: 210px;
+  background: linear-gradient(180deg, #1E293B 0%, #111827 100%);
+  border: 2px solid var(--route-color, #00F0FF);
+  border-bottom: 5px solid var(--route-color, #00F0FF);
+  border-radius: 14px;
+  padding: 14px 12px;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(7, 11, 25, 0.75), inset 0 1px 0 rgba(248, 250, 252, 0.18);
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+}
+
+.route-choice-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(7, 11, 25, 0.85), 0 0 16px var(--route-color, #00F0FF);
+}
+
+.route-choice-card:active {
+  transform: translateY(3px) scale(0.97);
+  border-bottom-width: 2px;
+}
+
+/* 6. Corrupted (Risk/Reward) Level-Up Cards */
+.upgrade-item-card.corrupted-card {
+  background: linear-gradient(180deg, rgba(88, 28, 135, 0.42) 0%, rgba(17, 24, 39, 0.96) 100%) !important;
+  border: 2px solid #ff0055 !important;
+  border-bottom: 4px solid #9f1239 !important;
+  box-shadow: 0 6px 18px rgba(255, 0, 85, 0.28), inset 0 1px 0 rgba(248, 250, 252, 0.18) !important;
+}
+
+.corrupted-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  margin-left: 5px;
+  background: rgba(255, 0, 85, 0.22);
+  border: 1px solid #ff0055;
+  border-radius: 5px;
+  color: #ff0055;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  vertical-align: middle;
+}
+
+.inline-crystal-svg {
+  vertical-align: middle;
+  margin-left: 2px;
+  display: inline-block;
+}
+
+
+
 
 
 

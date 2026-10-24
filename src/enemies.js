@@ -532,6 +532,10 @@ export class Enemy {
         this.shieldPlateAngle = 0;
         this.spiralAngle = 0;
         this.bossAttackTick = 0;
+        this.laserCooldown = 190; // İlk ağır lazer saldırısına kalan kare
+        this.laserChargeTimer = 0; // 72 kare = 1.2s kırmızı telegraf uyarı süresi
+        this.laserActiveTimer = 0; // 45 kare = 0.75s aktif ölüm ışını süresi
+        this.laserTargetX = x;
         this.leftPodHp = Math.round(this.hp * 0.28);
         this.rightPodHp = Math.round(this.hp * 0.28);
         this.leftPodDestroyed = false;
@@ -745,6 +749,9 @@ export class Enemy {
   }
 
   update(playerX, playerY, enemyProjectiles, screenWidth, screenHeight, dt = 1.0) {
+    if (this.hitFlash > 0) {
+      this.hitFlash = Math.max(0, this.hitFlash - dt);
+    }
     if (this.knockX || this.knockY) {
       this.x += (this.knockX || 0) * dt;
       this.y += (this.knockY || 0) * dt;
@@ -872,25 +879,54 @@ export class Enemy {
         this.shieldPlateAngle += 0.04 * dt;
       }
 
-      // Boss Özel Ateş Mekanikleri
+      // === BOSS 1.2 SN LAZER TELEGRAFI & AKTİF ÖLÜM IŞINI DÖNGÜSÜ ===
+      if (this.laserActiveTimer > 0) {
+        this.laserActiveTimer = Math.max(0, this.laserActiveTimer - dt);
+        this.laserTargetX = this.x; // Lazer boss ile birlikte hafif kayar
+      } else if (this.laserChargeTimer > 0) {
+        this.laserChargeTimer = Math.max(0, this.laserChargeTimer - dt);
+        // İlk 0.7 saniye oyuncuyu yavaşça takip eder, son 0.5 saniye kilitlenir (adil kaçış penceresi)
+        if (this.laserChargeTimer > 30 && playerX !== undefined) {
+          this.laserTargetX += (playerX - this.laserTargetX) * 0.12 * dt;
+        }
+        if (this.laserChargeTimer <= 0) {
+          this.laserActiveTimer = 45; // 0.75s aktif lazer ateşlemesi
+          this.justFiredBossLaser = true;
+        }
+      } else {
+        this.laserCooldown = (this.laserCooldown === undefined ? 180 : this.laserCooldown) - dt;
+        if (this.laserCooldown <= 0 && this.y >= targetHoverY - 15) {
+          this.laserChargeTimer = 72; // Tam 1.2 saniye (72 kare @ 60fps) kırmızı telegraf uyarısı!
+          this.laserMaxCharge = 72;
+          this.laserTargetX = playerX !== undefined ? playerX : this.x;
+          this.laserCooldown = this.phase === 2 ? 185 : 240;
+          this.justStartedLaserCharge = true;
+        }
+      }
+
+      // Boss Özel Ateş Mekanikleri (Spiral Mermi Cehennemi + Radyal Yaylım)
       this.shootTimer -= dt;
       if (this.shootTimer <= 0) {
         const baseAngle = Math.atan2(playerY - this.y, playerX - this.x);
+        this.spiralAngle = (this.spiralAngle || 0) + (this.phase === 2 ? 0.36 : 0.24);
 
         if (this.type === 'boss_vanguard') {
           if (this.phase === 2) {
-            this.shootTimer = 56;
-            this.spiralAngle += 0.35;
-            for (let offset of [-0.32, -0.16, 0, 0.16, 0.32]) {
+            this.shootTimer = 54;
+            for (let s = 0; s < 4; s++) {
+              const sAng = this.spiralAngle + (s * Math.PI / 2);
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 18, sAng, 3.2));
+            }
+            for (let offset of [-0.28, 0, 0.28]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 30, this.y + 18, baseAngle + offset, 3.4));
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 28, this.y + 18, baseAngle + offset, 3.4));
             }
           } else {
-            this.shootTimer = 68;
-            enemyProjectiles.push(new EnemyProjectile(this.x - 14, this.y + 16, baseAngle - 0.14, 3.1));
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle, 3.3));
-            enemyProjectiles.push(new EnemyProjectile(this.x + 14, this.y + 16, baseAngle + 0.14, 3.1));
+            this.shootTimer = 66;
+            for (let offset of [-0.22, 0, 0.22]) {
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, baseAngle + offset + Math.sin(this.spiralAngle) * 0.08, 3.2));
+            }
           }
         } else if (this.type === 'boss_dreadnought' || this.type === 'boss') {
           if (this.phase === 2) {
@@ -1172,10 +1208,6 @@ export class Enemy {
     if (this._ballooning) {
       const swell = 1 + Math.min(1, (this.balloonT || 0) / 5) * 0.55;
       ctx.scale(swell, swell);
-    }
-    if (this.hitFlash > 0) {
-      ctx.filter = 'brightness(8) saturate(0)';
-      this.hitFlash -= 1;
     }
 
     // Kriyojenik Donma Aurası
@@ -1577,8 +1609,12 @@ export class Enemy {
         const val = row[x];
         if (val === 0) continue;
         let col = sprite.palette[val];
-        if (val === 2) col = this.color || col;
-        if (val === 6 && Math.random() < 0.3) col = '#ffffff';
+        if (this.hitFlash > 0) {
+          col = '#ffffff';
+        } else {
+          if (val === 2) col = this.color || col;
+          if (val === 6 && Math.random() < 0.3) col = '#ffffff';
+        }
 
         ctx.fillStyle = col;
         // Sağ yarı
@@ -1729,23 +1765,68 @@ export class Enemy {
       ctx.fill();
     }
 
-    // 5. Boss Saldırı Nişanlama Telegrafı (Attack Telegraphing Warning)
-    if (this.shootTimer <= 10 && this.shootTimer > 0) {
-      const alpha = (1 - this.shootTimer / 10) * 0.75;
+    // 5. Boss Saldırı Nişanlama Telegrafı (1.2s Kırmızı Lazer Telegraf Hattı & Aktif Ölüm Işını)
+    if (this.laserChargeTimer > 0) {
+      const maxC = this.laserMaxCharge || 72;
+      const prog = 1 - (this.laserChargeTimer / maxC); // 0 -> 1
+      const pulse = 0.55 + Math.sin(Date.now() * 0.035) * 0.45;
+      const coneHalfWidth = Math.max(4, (1 - prog) * 38);
+      ctx.save();
+      // Daralan kırmızı tehdit konisi
+      ctx.fillStyle = `rgba(255, 0, 85, ${0.08 + prog * 0.18})`;
+      ctx.beginPath();
+      ctx.moveTo(0, this.radius * 0.65);
+      ctx.lineTo(-coneHalfWidth, 820);
+      ctx.lineTo(coneHalfWidth, 820);
+      ctx.closePath();
+      ctx.fill();
+
+      // Kesikli parlak kırmızı/altın kilitlenme kılavuz çizgisi
+      ctx.strokeStyle = prog > 0.72 ? '#ffbe0b' : `rgba(255, 0, 85, ${0.5 + pulse * 0.5})`;
+      ctx.lineWidth = 1.8 + prog * 2.2;
+      if (ctx.setLineDash) ctx.setLineDash([10, 6]);
+      ctx.beginPath();
+      ctx.moveTo(0, this.radius * 0.65);
+      ctx.lineTo(0, 820);
+      ctx.stroke();
+      if (ctx.setLineDash) ctx.setLineDash([]);
+
+      // Namlu ucunda büyüyen enerji çekirdeği
+      ctx.fillStyle = '#ff0055';
+      ctx.beginPath();
+      ctx.arc(0, this.radius * 0.65, 5 + prog * 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(0, this.radius * 0.65, 2.5 + prog * 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (this.laserActiveTimer > 0) {
+      // Aktif Boss Ölüm Lazeri (0.75s Boyunca Ekranı Boydan Boya Kesen Kızıl/Beyaz Sütun)
+      const beamW = 28 + Math.sin(Date.now() * 0.06) * 5;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 0, 85, 0.38)';
+      ctx.fillRect(-beamW, this.radius * 0.6, beamW * 2, 840);
+      ctx.fillStyle = '#ff0055';
+      ctx.fillRect(-beamW * 0.55, this.radius * 0.6, beamW * 1.1, 840);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-beamW * 0.25, this.radius * 0.6, beamW * 0.5, 840);
+      ctx.restore();
+    } else if (this.shootTimer <= 12 && this.shootTimer > 0) {
+      const alpha = (1 - this.shootTimer / 12) * 0.75;
       ctx.save();
       ctx.strokeStyle = isEnraged ? `rgba(255, 23, 68, ${alpha})` : `rgba(255, 190, 11, ${alpha})`;
-      ctx.setLineDash([4, 4]);
+      if (ctx.setLineDash) ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.moveTo(0, this.radius * 0.7);
       ctx.lineTo(0, this.radius * 3.8);
       ctx.stroke();
-      ctx.setLineDash([]);
-      
-      // Namlu ağzı yoğunlaşan enerji parlaması
+      if (ctx.setLineDash) ctx.setLineDash([]);
+
       ctx.fillStyle = isEnraged ? '#ff1744' : '#ffbe0b';
       ctx.beginPath();
-      ctx.arc(0, this.radius * 0.7, 3 + (1 - this.shootTimer / 10) * 4.5, 0, Math.PI * 2);
+      ctx.arc(0, this.radius * 0.7, 3 + (1 - this.shootTimer / 12) * 4.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }

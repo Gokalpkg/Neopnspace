@@ -248,6 +248,9 @@ const RAW = {
   evo_matrix_name: row('DOOMSDAY TESLA MATRIX', 'KIYAMET TESLA MATRİSİ', 'MATRICE TESLA APOCALYPTIQUE', 'WELTENDE-TESLA-MATRIX', '末日特斯拉矩阵', '末日特斯拉矩陣', 'ドゥームデイ・テスラ'),
   evo_matrix_stat: row('OVERVOLTAGE', 'AŞIRI VOLTAJ', 'SURTENSION', 'ÜBERSPANNUNG', '过载电压', '過載電壓', '過電圧'),
   evo_matrix_desc: row('A lightning web links the ship, drones, and enemies, then dumps an EMP.', 'Gemi, dron ve düşmanlar arasında yıldırım ağı kurulur, sonra EMP patlar.', 'Un réseau de foudre relie vaisseau, drones et ennemis, puis lâche un EMP.', 'Ein Blitznetz verbindet Schiff, Drohnen und Gegner, dann folgt ein EMP.', '闪电网连接战机、无人机和敌人，然后释放电磁脉冲。', '閃電網連接戰機、無人機和敵人，然後釋放電磁脈衝。', '艦・ドローン・敵を雷網で結び、EMPを放つ。'),
+  evo_supernova_name: row('SUPERNOVA CORE', 'SÜPERNOVA ÇEKİRDEĞİ', 'CŒUR DE SUPERNOVA', 'SUPERNOVA-KERN', '超新星核心', '超新星核心', '超新星コア'),
+  evo_supernova_stat: row('THERMONUCLEAR BURST', 'TERMONÜKLEER PATLAMA', 'ÉRUPTION THERMONUCLÉAIRE', 'THERMONUKLEARE ERUPTION', '热核爆发', '熱核爆發', '熱核バースト'),
+  evo_supernova_desc: row('Quantum plasma sphere launches and unleashes a massive thermonuclear shockwave.', 'Kuantum plazma küresi fırlatır ve dev termonükleer şok dalgasıyla mermileri eritir.', 'Lance une sphère de plasma quantique déclenchant une onde thermonucléaire massive.', 'Startet Quantenplasmasphäre und entfesselt massive thermonukleare Schockwelle.', '发射量子等离子球并释放毁灭性热核冲击波。', '發射量子等離子球並釋放毀滅性熱核衝擊波。', '量子プラズマ球を射出し、巨大な熱核衝撃波を放つ。'),
   evo_hyper_plasma_name: row('OVERCHARGED PLASMA', 'AŞIRI YÜKLEMELİ PLAZMA', 'PLASMA SURCHARGÉ', 'ÜBERLADENES PLASMA', '过载等离子', '過載等離子', '過充電プラズマ'),
   evo_hyper_plasma_stat: row('PIERCING PLASMA', 'DELİCİ PLAZMA', 'PLASMA PERÇANT', 'DURCHSCHLAGENDES PLASMA', '穿透等离子', '穿透等離子', '貫通プラズマ'),
   evo_hyper_plasma_desc: row('Plasma shots pierce and burst with an electric shock.', 'Plazma mermileri deler ve elektrik şoku patlatır.', 'Les tirs plasma transpercent et explosent en choc électrique.', 'Plasmaschüsse durchschlagen und explodieren elektrisch.', '等离子弹穿透并爆出电击。', '等離子彈穿透並爆出電擊。', 'プラズマ弾が貫通し、電撃で爆発する。'),
@@ -640,7 +643,19 @@ const RAW = {
   mutator_meteor_swarm_name: row('METEOR SWARM', 'METEOR SAĞANAĞI', 'ESSAIM DE MÉTÉORES', 'METEORSCHWARM', '流星风暴', '流星風暴', '流星の嵐'),
   mutator_meteor_swarm_desc: row('2x Meteor Density • 2x Crystal Yield', '2x Meteor Yoğunluğu • 2x Kristal Verimi', '2x densité de météores • 2x rendement de cristaux', '2x Meteoritendichte • 2x Kristallausbeute', '2倍陨石密度 • 2倍水晶掉落', '2倍隕石密度 • 2倍水晶掉落', 'メテオ密度2倍・クリスタル収量2倍'),
   mutator_boss_rush_name: row('BOSS RUSH PROTOCOL', 'BOSS AV PROTOKOLÜ', 'PROTOCOLE CHASSE AUX BOSS', 'BOSS-RUSH-PROTOKOLL', '首领突袭协议', '首領突襲協議', 'ボスラッシュプロトコル'),
-  mutator_boss_rush_desc: row('Elite Fleet every 25s • +100% XP Yield', 'Her 25s Elit Filo • +%100 XP Çıktısı', 'Flotte d\'élite toutes les 25s • +100% rendement XP', 'Eliteflotte alle 25 Sek. • +100% EP-Ausbeute', '每25秒一支精英舰队 • XP产出 +100%', '每25秒一支精英艦隊 • XP產出 +100%', '25秒毎に精鋭艦隊・経験値+100%')
+  mutator_boss_rush_desc: row('Elite Fleet every 25s • +100% XP Yield', 'Her 25s Elit Filo • +%100 XP Çıktısı', 'Flotte d\'élite toutes les 25s • +100% rendement XP', 'Eliteflotte alle 25 Sek. • +100% EP-Ausbeute', '每25秒一支精英舰队 • XP产出 +100%', '每25秒一支精英艦隊 • XP產出 +100%', '25秒毎に精鋭艦隊・経験値+100%'),
+
+  badge_evolved: row('EVOLVED', 'EVRİMLEŞTİ', 'ÉVOLUÉ', 'EVOLVIERT', '已进化', '已進化', '進化済み'),
+  pause_no_weapons: row('No active weapons equipped yet.', 'Henüz aktif bir silah seçilmedi.', 'Aucune arme active équipée pour l\'instant.', 'Noch keine aktiven Waffen ausgerüstet.', '尚未装备可用武器。', '尚未裝備可用武器。', '有効な兵装はまだありません。'),
+
+  evo_showcase_kicker: row('WEAPON EVOLUTION COMPLETED', 'SİLAH EVRİMİ TAMAMLANDI', 'ÉVOLUTION D\'ARME TERMINÉE', 'WAFFEN-EVOLUTION ABGESCHLOSSEN', '武器进化完成', '武器進化完成', '兵装進化完了'),
+  evo_showcase_dismiss: row('DISMISS & DETONATE EMP', 'DEVAM ET & EMP PATLAT', 'CONTINUER ET DÉTONER L\'EMP', 'WEITER & EMP ZÜNDEN', '继续并引爆电磁脉冲', '繼續並引爆電磁脈衝', '続行＆EMP起爆'),
+  evo_emp_callout: row('360° COSMIC EMP CLEARS SCREEN • 8S ELEMENTAL AURA', '360° KOZMİK EMP EKRANI TEMİZLER • 8 SN ELEMENTAL AURA', 'EMP COSMIQUE 360° NETTOIE L\'ÉCRAN • AURA ÉLÉMENTAIRE 8S', '360° KOSMISCHER EMP REINIGT DEN BILDSCHIRM • 8S ELEMENTAR-AURA', '360° 宇宙电磁脉冲清屏 • 获得 8 秒元素光环', '360° 宇宙電磁脈衝清屏 • 獲得 8 秒元素光環', '360° 宇宙EMPが全弾消滅 • 8秒エレメンタルオーラ'),
+  evo_emp_detonated: row('COSMIC EMP DETONATED!', 'KOZMİK EMP PATLATILDI!', 'EMP COSMIQUE DÉTONÉ !', 'KOSMISCHER EMP GEZÜNDET!', '宇宙电磁脉冲已引爆！', '宇宙電磁脈衝已引爆！', '宇宙EMP起爆！'),
+
+  codex_active: row('ACTIVE', 'AKTİF', 'ACTIF', 'AKTIV', '激活', '啟動', '稼働中'),
+  codex_ready: row('READY (CHEST / LEVEL UP)', 'HAZIR (SANDIK / SEVİYE)', 'PRÊT (COFFRE / NIVEAU)', 'BEREIT (TRUHE / STUFE)', '就绪（宝箱 / 升级）', '就緒（寶箱 / 升級）', '準備完了（宝箱 / レベルアップ）'),
+  codex_locked: row('LOCKED', 'KİLİTLİ', 'VERROUILLÉ', 'GESPERRT', '已锁定', '已鎖定', 'ロック中')
 };
 
 export const CATALOG = {};

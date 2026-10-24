@@ -13,7 +13,7 @@ export class ParticleSystem {
     this.rockDebris = [];
     this.glitchTimer = 0;
     this.currentSector = 'void';
-    this.bgBase = '#02040a';
+    this.bgBase = '#070B19';
     this.sectorEmbers = [];
     this.auroraTime = 0;
     this.warpTimer = 0;
@@ -380,8 +380,8 @@ export class ParticleSystem {
         star.color = colors[Math.floor(Math.random() * colors.length)];
       }
     } else {
-      // Varsayılan: 'void' (Siber Neon Boşluğu)
-      this.bgBase = '#060814';
+      // Varsayılan: 'void' (Siber Neon Boşluğu - THEME_PALETTE.bgDeepSpace)
+      this.bgBase = '#070B19';
       const colors = ['#00f0ff', '#ff0077', '#ffbe0b', '#ffffff'];
       for (let star of this.stars) {
         star.color = colors[Math.floor(Math.random() * colors.length)];

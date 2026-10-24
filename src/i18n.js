@@ -4245,6 +4245,13 @@ export const TRANSLATIONS = {
   }
 };
 
+// CATALOG sözlüğündeki teknoloji kataloğu ve silah evrimi anahtarlarını TRANSLATIONS ile harmanla
+for (const [lang, catDict] of Object.entries(CATALOG)) {
+  if (TRANSLATIONS[lang]) {
+    Object.assign(TRANSLATIONS[lang], catDict);
+  }
+}
+
 // Cihaz Dilini Akıllıca Otomatik Algılama (Localization Auto-Detect)
 export function detectDeviceLanguage() {
   try {
