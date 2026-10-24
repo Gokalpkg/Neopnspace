@@ -6,6 +6,7 @@ import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
 import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslationsToDOM } from './i18n.js';
 import { analytics } from './analytics.js';
 import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE } from './balance.js';
+import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, PGS_CONFIG, getPlayerUid } from './leaderboard.js';
 
 if (typeof window !== 'undefined') {
   window.BalanceConfig = {
@@ -6428,6 +6429,7 @@ class Game {
       this.unlockedLevel = Math.min(38, completedLevel + 1);
       localStorage.setItem('neon_unlocked_level', this.unlockedLevel.toString());
     }
+    this.syncSubmitCurrentScores();
 
     // Tek Ekranlı Zafer Özeti (Kristaller + Günlük Görev İlerlemesi + Kupa İlerlemesi + Lig Rakibi)
     this.renderVictoryDebriefSummary(completedLevel, rewardCrystals);
@@ -7956,6 +7958,7 @@ class Game {
 
     localStorage.setItem('neon_player_callsign', callsign);
     localStorage.setItem('neon_player_country', countryCode);
+    this.syncSubmitCurrentScores();
 
     this.closeProfileModal();
     this.renderLeaderboard(this.lbMode || 'storm');
@@ -8073,6 +8076,72 @@ class Game {
     if (lbModal) lbModal.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(4);
     this.renderLeaderboard(this.lbMode || 'storm');
+    this.syncLiveLeaderboard(this.lbMode || 'storm');
+  }
+
+  async syncLiveLeaderboard(mode = 'storm') {
+    this.syncSubmitCurrentScores();
+    try {
+      const realScores = await fetchTopScoresFromFirestore(mode, 50);
+      if (Array.isArray(realScores) && realScores.length > 0) {
+        this._liveLeaderboardData = this._liveLeaderboardData || {};
+        this._liveLeaderboardData[mode] = realScores;
+        const lbModal = document.getElementById('leaderboard-modal');
+        if (lbModal && !lbModal.classList.contains('hidden') && this.lbMode === mode && this.lbMainTab !== 'career') {
+          this.renderLeaderboard(mode, false);
+        }
+        const activeCountEl = document.getElementById('lb-active-count');
+        if (activeCountEl) {
+          activeCountEl.innerHTML = `<span style="color:#05ffa1; font-weight:700;">● CANLI BULUT LİGİ (${realScores.length} ÇEVRİMİÇİ)</span>`;
+        }
+      }
+    } catch (err) {
+      console.warn('[Leaderboard] syncLiveLeaderboard error:', err);
+    }
+  }
+
+  syncSubmitCurrentScores() {
+    try {
+      const callsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
+      const countryCode = localStorage.getItem('neon_player_country') || 'TUR';
+      const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' };
+      const currentSkinName = t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name');
+
+      const stormScore = this.highScores.storm || 0;
+      if (stormScore > 0) {
+        submitScoreToFirestore('storm', {
+          name: callsign,
+          country: pilotCountry,
+          score: stormScore,
+          ship: currentSkinName
+        });
+        this.submitToPlayGames('storm', stormScore);
+      }
+
+      const clearedLevel = Math.max(1, this.unlockedLevel || 1);
+      const totalStars = this.getTotalStars ? this.getTotalStars() : (clearedLevel * 3);
+      submitScoreToFirestore('campaign', {
+        name: callsign,
+        country: pilotCountry,
+        level: clearedLevel,
+        stars: totalStars,
+        ship: currentSkinName
+      });
+      this.submitToPlayGames('campaign', clearedLevel * 1000 + totalStars);
+    } catch (e) {
+      console.warn('[Leaderboard] syncSubmitCurrentScores error:', e);
+    }
+  }
+
+  submitToPlayGames(mode, score) {
+    const lbId = mode === 'storm' ? PGS_CONFIG.leaderboards.storm : PGS_CONFIG.leaderboards.campaign;
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.PlayGames) {
+      try {
+        window.PlayGames.submitScore({ leaderboardId: lbId, score: Math.round(score) });
+      } catch (e) {
+        console.log('[PGS] Score submit:', e);
+      }
+    }
   }
 
   getCountryFlagBadge(c) {
@@ -8148,11 +8217,15 @@ class Game {
     `;
   }
 
-  renderLeaderboard(mode = 'storm') {
+  renderLeaderboard(mode = 'storm', shouldSync = true) {
     this.lbMode = mode;
     if (this.lbMainTab === 'career') {
       this.renderCareerRecords();
       return;
+    }
+
+    if (shouldSync) {
+      this.syncLiveLeaderboard(mode);
     }
 
     const view = this.lbView || 'top50';
@@ -8170,7 +8243,7 @@ class Game {
     const activeCountEl = document.getElementById('lb-active-count');
     if (!list) return;
 
-    if (activeCountEl) {
+    if (activeCountEl && (!this._liveLeaderboardData || !this._liveLeaderboardData[mode])) {
       activeCountEl.textContent = `${(this.totalPilots || 18492).toLocaleString()} PİLOT AKTİF`;
     }
 
@@ -8256,13 +8329,33 @@ class Game {
 
     list.innerHTML = '';
 
+    // Canlı Firestore listesi veya Prosedürel Pilotlar
+    const liveList = (this._liveLeaderboardData && this._liveLeaderboardData[mode]) || null;
+    const getPilotEntry = (rank) => {
+      if (liveList && liveList[rank - 1]) {
+        const item = liveList[rank - 1];
+        return {
+          rank,
+          name: item.name,
+          country: item.country,
+          ship: item.ship || currentSkinName,
+          title: this.getTierInfo(rank).name,
+          score: item.score,
+          level: item.level || 1,
+          stars: item.stars || 0,
+          isPlayer: item.isPlayer
+        };
+      }
+      return this.getPilotAtRank(rank, mode);
+    };
+
     // TOP 50 View
     if (view === 'top50') {
       if (podium) {
         podium.style.display = 'flex';
-        const p1 = this.getPilotAtRank(1, mode);
-        const p2 = this.getPilotAtRank(2, mode);
-        const p3 = this.getPilotAtRank(3, mode);
+        const p1 = getPilotEntry(1);
+        const p2 = getPilotEntry(2);
+        const p3 = getPilotEntry(3);
         podium.innerHTML = `
           <div class="podium-slot rank-2">
             <div class="podium-avatar">${this.getCountryFlagBadge(p2.country)}</div>
@@ -8300,7 +8393,7 @@ class Game {
             isPlayer: true
           }, mode));
         } else {
-          const p = this.getPilotAtRank(r, mode);
+          const p = getPilotEntry(r);
           list.appendChild(this.createLeaderboardRow(p, mode));
         }
       }
@@ -8327,7 +8420,7 @@ class Game {
             isPlayer: true
           }, mode));
         } else {
-          const p = this.getPilotAtRank(r, mode);
+          const p = getPilotEntry(r);
           list.appendChild(this.createLeaderboardRow(p, mode));
         }
       }
@@ -11884,6 +11977,7 @@ class Game {
       localStorage.setItem(`neon_high_score_${this.currentMode}`, this.highScores[this.currentMode].toString());
       localStorage.setItem('neon_space_high_score', this.highScores['classic'].toString());
     }
+    this.syncSubmitCurrentScores();
     const gamesPlayed = parseInt(localStorage.getItem('neon_games_played') || '0', 10) + 1;
     localStorage.setItem('neon_games_played', gamesPlayed.toString());
     this.noteQuietRunForAdGap();
