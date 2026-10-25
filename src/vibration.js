@@ -76,47 +76,49 @@ export const vibrate = {
     } catch (e) {}
   },
 
-  // Hafif dokunma / buton / arayüz titreşimi
+  // Hafif dokunma / buton / arayüz titreşimi (Rafine, asla aşırı sarsmayan dokunuş)
   light() {
+    if (!this.enabled || this.level <= 1) return;
     const now = Date.now();
     if (now - this._lastLightTime < 70) return;
     this._lastLightTime = now;
     try {
       const h = _getHaptics();
       if (h && h.impact) {
-        h.impact({ style: this.level <= 2 ? 'LIGHT' : this.level <= 5 ? 'MEDIUM' : 'HEAVY' });
+        h.impact({ style: this.level <= 4 ? 'LIGHT' : 'MEDIUM' });
       } else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(this._ms(14));
+        navigator.vibrate(this._ms(8));
       }
     } catch (e) {}
   },
 
   // Düşman vurulma / orta patlama titreşimi
   medium() {
+    if (!this.enabled || this.level <= 1) return;
     const now = Date.now();
     if (now - this._lastMediumTime < 90) return;
     this._lastMediumTime = now;
     try {
       const h = _getHaptics();
       if (h && h.impact) {
-        h.impact({ style: this.level <= 3 ? 'LIGHT' : this.level <= 5 ? 'MEDIUM' : 'HEAVY' });
+        h.impact({ style: this.level <= 3 ? 'LIGHT' : (this.level <= 6 ? 'MEDIUM' : 'HEAVY') });
       } else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(this._ms(28));
+        navigator.vibrate(this._ms(22));
       }
     } catch (e) {}
   },
 
-  // Ağır darbe / oyuncu hasarı / boss ölümü
+  // Ağır darbe / oyuncu hasarı / boss ölümü (Keskin tok haptik, kaba motor vızıltısı yok)
   heavy() {
-    const hit = this._ms(40);
+    if (!this.enabled || this.level <= 1) return;
     try {
       const h = _getHaptics();
-      if (h && h.vibrate) {
-        h.vibrate({ duration: this._ms(80) });
-      } else if (h && h.impact) {
+      if (h && h.impact) {
         h.impact({ style: 'HEAVY' });
+      } else if (h && h.vibrate) {
+        h.vibrate({ duration: this._ms(35) });
       } else if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([hit, 16, this._ms(55)]);
+        navigator.vibrate([this._ms(25), 14, this._ms(28)]);
       }
     } catch (e) {}
   },

@@ -889,8 +889,8 @@ class Game {
         shieldMult: SHIP_BALANCE.toxic.shieldMult,
         speedMult: SHIP_BALANCE.toxic.speedMult,
         magnetMult: SHIP_BALANCE.toxic.magnetMult,
-        perkTitle: 'ZÜMRÜT SÜZÜLME',
-        perk: '+%65 kristal çekim menzili ve arkasında yakıcı biyo-asit izi bırakır.'
+        perkTitle: 'KOROZİF BİYO-KONİ',
+        perk: '+%65 kristal çekim menzili ve önünde düşmanları eriten korozif biyo-asit konisi saçar.'
       },
       phantom: {
         id: 'phantom',
@@ -1144,10 +1144,18 @@ class Game {
   }
 
   resize() {
+    const dpr = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) || 1, 2.5);
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    canvas.width = this.width;
-    canvas.height = this.height;
+    canvas.width = Math.round(this.width * dpr);
+    canvas.height = Math.round(this.height * dpr);
+    canvas.style.width = this.width + 'px';
+    canvas.style.height = this.height + 'px';
+    if (ctx) {
+      if (ctx.resetTransform) ctx.resetTransform();
+      else ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    }
     this.particles.initStars(this.width, this.height);
     this.particles.setSector(this.currentSectorId || 'void', this.width, this.height);
   }
@@ -1193,16 +1201,10 @@ class Game {
       lastX = clientX;
       lastY = clientY;
 
-      // Parmak görüş açısı: Dokunma anında gemiyi parmağın 42px yukarısında konumlandırarak parmağın gemiyi ve mermileri kapatmasını önle
+      // Kesinlikle ani yer atlama yok — Tamamen göreceli delta (smooth relative movement)
       if (this.player) {
-        const scaleX = this.width / (window.innerWidth || this.width);
-        const scaleY = this.height / (window.innerHeight || this.height);
-        const touchCanvasX = clientX * scaleX;
-        const touchCanvasY = clientY * scaleY;
-        const distToShip = Math.hypot(touchCanvasX - this.player.x, touchCanvasY - this.player.y);
-        if (distToShip < 75) {
-          this.player.targetY = Math.max(50, Math.min(this.height - 72, touchCanvasY - 42));
-        }
+        this.player.targetX = this.player.x;
+        this.player.targetY = this.player.y;
       }
     };
 
@@ -1210,8 +1212,9 @@ class Game {
       if (!isDragging || this.state !== 'PLAYING') return;
       if (activePointerId !== null && pointerId !== activePointerId) return;
 
-      const scaleX = this.width / (window.innerWidth || this.width);
-      const scaleY = this.height / (window.innerHeight || this.height);
+      const rect = (canvas && canvas.getBoundingClientRect) ? canvas.getBoundingClientRect() : { width: this.width, height: this.height };
+      const scaleX = rect.width ? (this.width / rect.width) : 1;
+      const scaleY = rect.height ? (this.height / rect.height) : 1;
       const slowRatio = (this.player.cryoSlowTimer > 0) ? 0.65 : 1.0;
       const deltaX = (clientX - lastX) * scaleX * slowRatio;
       const deltaY = (clientY - lastY) * scaleY * slowRatio;
@@ -8845,7 +8848,7 @@ class Game {
     }
     sounds.playPowerup();
     if (this.player && this.particles) {
-      this.particles.spawnFloatingText(this.player.x, this.player.y - 36, 'KAÇAKÇI SİNYALİ [DOKUN]', '#ffbe0b', 14);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 36, txt('smuggler_signal_tap', 'KAÇAKÇI SİNYALİ [DOKUN]'), '#ffbe0b', 14);
     }
   }
 
@@ -10361,7 +10364,7 @@ class Game {
       sounds.playLevelUp();
       vibrate.success();
       this.updateHUD();
-      this.startModalTransition('LEVEL_UP', 28);
+      this.startModalTransition('LEVEL_UP', 9);
     }
   }
 
@@ -10384,7 +10387,7 @@ class Game {
       this.updateHUD();
       return;
     }
-    this.startSmoothResume(34);
+    this.startSmoothResume(6);
     this.updateHUD();
   }
 
@@ -10555,11 +10558,11 @@ class Game {
   triggerLevelUp(immediate = false) {
     if (this._pendingVictory) return;
     if (!immediate && this.state === 'PLAYING') {
-      this.startModalTransition('LEVEL_UP', 28);
+      this.startModalTransition('LEVEL_UP', 9);
       return;
     }
     this.state = 'LEVEL_UP';
-    this.modalInputLockUntil = performance.now() + 260;
+    this.modalInputLockUntil = performance.now() + 60;
     if (this.cancelDrag) this.cancelDrag();
     if (this.player) {
       this.player.targetX = this.player.x;
@@ -10588,12 +10591,9 @@ class Game {
       }
     }
 
-    // FTUE İlk Uçuş Evrim Kancası: İlk 2 uçuşta silah Lv.3+ olduğunda ilk evrimi erkenden tattır!
-    const isEarlyFTUE = ((this.pilotStats && this.pilotStats.totalFlights) || 0) <= 2;
-
     // Evrim seçeneklerini kontrol et
     const evolutions = [];
-    if ((this.player.upgrades.laser >= 5 || (isEarlyFTUE && this.player.upgrades.laser >= 3)) && this.player.upgrades.magnet >= 1 && !this.player.evolutions.vortexLaser) {
+    if (this.player.upgrades.laser >= 5 && this.player.upgrades.magnet >= 1 && !this.player.evolutions.vortexLaser) {
       evolutions.push({
         id: 'evo_vortex',
         isEvolution: true,
@@ -11043,7 +11043,7 @@ class Game {
 
       card.addEventListener('click', () => {
         if (performance.now() < (this.modalInputLockUntil || 0)) return;
-        this.modalInputLockUntil = performance.now() + 500;
+        this.modalInputLockUntil = performance.now() + 100;
         sounds.playCardSelect();
         vibrate.medium();
         // 5 Adımlı Koreografi 3: Diğer kartları söndür, seçileni vorteks gibi sıkıştır
@@ -11054,9 +11054,7 @@ class Game {
         card.style.transform = 'scale(0.92)';
         card.style.borderColor = '#ffd700';
         card.style.boxShadow = '0 0 25px rgba(255, 215, 0, 0.6)';
-        setTimeout(() => {
-          this.applyUpgrade(upgrade.id);
-        }, 110);
+        this.applyUpgrade(upgrade.id);
       });
 
       cardsContainer.appendChild(card);
@@ -11750,11 +11748,11 @@ class Game {
 
     if (jackpotBadge) {
       jackpotBadge.classList.remove('hidden');
-      jackpotBadge.textContent = this.pendingChestIsJackpot ? '[BÜYÜK İKRAMİYE: 3X]' : '[ŞANSLI SANDIK]';
+      jackpotBadge.textContent = this.pendingChestIsJackpot ? txt('chest_jackpot_badge', '[BÜYÜK İKRAMİYE: 3X]') : txt('chest_lucky_badge', '[ŞANSLI SANDIK]');
     }
 
     if (luckyChestTitle) {
-      luckyChestTitle.textContent = this.pendingChestIsJackpot ? '[BÜYÜK İKRAMİYE SANDIĞI]' : t('chest_title');
+      luckyChestTitle.textContent = this.pendingChestIsJackpot ? txt('chest_jackpot_title', '[BÜYÜK İKRAMİYE SANDIĞI]') : t('chest_title');
       luckyChestTitle.style.color = '#ffbe0b';
     }
 
@@ -12325,7 +12323,7 @@ class Game {
       } else {
         btnAdRevive.style.display = 'flex';
         if (isNoAds && !this.vipReviveUsedThisRun) {
-          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">VIP ÜCRETSİZ</span>`;
+          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_vip_free') || 'VIP FREE'}</span>`;
         } else if (freeRevives > 0) {
           btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_revive_free', { n: freeRevives })}</span>`;
         } else {
@@ -12472,6 +12470,7 @@ class Game {
       if (this.screenShake > 0) {
         this.screenShake = Math.max(0, this.screenShake - dt * 0.85);
       }
+      this.particles.update(this.width, this.height, dt * 0.3);
       return;
     }
 
@@ -12645,11 +12644,12 @@ class Game {
     if (this.keys['ArrowUp'] || this.keys['KeyW']) this.player.targetY -= moveSpeed;
     if (this.keys['ArrowDown'] || this.keys['KeyS']) this.player.targetY += moveSpeed;
 
-    // Yumuşak İnterpolasyon (Smooth Follow - Dengeli ve oturaklı başlangıç kontrolü)
+    // Akıcı ve Çevik Takip (Snappy Exponential Follow ~0.70 - Gecikmesiz, anlık ve pürüzsüz tepki)
     const dx = this.player.targetX - this.player.x;
     const dy = this.player.targetY - this.player.y;
     const moveDist = Math.hypot(dx, dy);
-    const follow = Math.min(1, 0.24 * dt * (this.player.speedMultiplier || 1) * ((this.currentSkinId === 'cyberpunk' && this.player.adrenalineTimer > 0) ? 1.25 : 1));
+    const speedMult = (this.player.speedMultiplier || 1) * ((this.currentSkinId === 'cyberpunk' && this.player.adrenalineTimer > 0) ? 1.25 : 1);
+    const follow = Math.min(1, Math.max(0.70 * dt, 1 - Math.exp(-28 * (dt / 60) * 2.65)) * speedMult);
     this.player.x += dx * follow;
     this.player.y += dy * follow;
     if (this.player.knockX || this.player.knockY) {
@@ -12681,11 +12681,11 @@ class Game {
       }
     }
 
-    // Asit İzi & Zehir Emisyonu (Toxic Jet Özel Yeteneği)
+    // Asit İzi & Zehir Emisyonu (Toxic Jet Özel Yeteneği: İleri Yönlü Biyolojik Korozyon Konisi)
     if (this.currentSkinId === 'toxic' && (this.frames % 12 === 0)) {
-      this.particles.spawnExplosion(this.player.x + (Math.random() * 12 - 6), this.player.y + 16, '#05ffa1', 2, 1.2);
+      this.particles.spawnExplosion(this.player.x + (Math.random() * 24 - 12), this.player.y - 30, '#05ffa1', 3, 1.6);
       for (let enemy of this.enemies) {
-        if (enemy.hp > 0 && !enemy.toRemove && Math.abs(enemy.x - this.player.x) < 36 && enemy.y > this.player.y && enemy.y < this.player.y + 70) {
+        if (enemy.hp > 0 && !enemy.toRemove && Math.abs(enemy.x - this.player.x) < 48 && enemy.y < this.player.y && enemy.y > this.player.y - 120) {
           const applied = this.applyCappedEnemyDamage(enemy, 2.2 * dt, false);
           this.recordWeaponDamage('special', applied);
           if (enemy.hp <= 0) {
@@ -12752,8 +12752,13 @@ class Game {
     }
 
     // === 2 DİNAMİK TAKTİKSEL MOD: ÜSTTE AĞIR BALYOZ (TUK-TUK) // ALTTA SERİ SALDIRI ===
-    const zoneThreshold = this.height * 0.70;
-    const currentZone = (this.player.y < zoneThreshold) ? 'front' : 'rear';
+    // Histerezis ölü bölgesi (0.67 giriş, 0.73 çıkış) ile titreşim ve ses spam'ini önle
+    let currentZone = this.player.combatZone || 'rear';
+    if (currentZone === 'rear') {
+      if (this.player.y < this.height * 0.67) currentZone = 'front';
+    } else {
+      if (this.player.y > this.height * 0.73) currentZone = 'rear';
+    }
 
     if (this.player.combatZone !== currentZone) {
       const prevZone = this.player.combatZone;
@@ -13393,6 +13398,9 @@ class Game {
           }
 
           const muzzleY = this.player.y - 24;
+          // Fiziksel silah geri tepmesi (Recoil Kick) ve görsel namlu alevi (Muzzle Punch)
+          this.player.knockY = 3.5;
+          this.particles.spawnHitSparks(this.player.x, muzzleY, 0, -1, '#ffffff');
           const lvl = this.player.upgrades.laser;
           const isCrit = Math.random() < ((this.player.critChance || 0.08) + 0.12);
           const isOvercharge = this.player.overchargeTimer > 0;
@@ -16357,16 +16365,19 @@ class Game {
     vibrate.light();
     this.particles.spawnShockwave(enemy.x, this.height - 8, '#ff0055', 70);
 
-    // Savunma Hattı Baskısı (Hareketsiz bekleyip düşmanları serbestçe geçirmeyi engeller)
-    const breachDmg = enemy.isBoss ? 20 : (enemy.shape ? 4 : 8);
-    if (this.player.shield > 0) {
-      this.player.shield = Math.max(0, this.player.shield - breachDmg);
-      this.particles.spawnFloatingText(enemy.x, this.height - 25, `BARİYER BASKISI -${breachDmg}`, '#ff0055', 12);
-    } else {
-      this.player.hp = Math.max(1, this.player.hp - Math.round(breachDmg * 0.5));
-      this.particles.spawnFloatingText(enemy.x, this.height - 25, `GÖVDE UYARISI -${Math.round(breachDmg * 0.5)}`, '#ff3b30', 12);
+    // Savunma Hattı Baskısı: Taşlar/meteorlar geçtiğinde oyuncuya can hasarı verilmez, sadece kombo sıfırlanır
+    const isRock = enemy.shape || enemy.isAsteroid || (enemy.type && enemy.type.includes('asteroid'));
+    if (!isRock) {
+      const breachDmg = enemy.isBoss ? 20 : 8;
+      if (this.player.shield > 0) {
+        this.player.shield = Math.max(0, this.player.shield - breachDmg);
+        this.particles.spawnFloatingText(enemy.x, this.height - 25, t('breach_barrier_pressure', { n: breachDmg }), '#ff0055', 12);
+      } else {
+        this.player.hp = Math.max(1, this.player.hp - Math.round(breachDmg * 0.5));
+        this.particles.spawnFloatingText(enemy.x, this.height - 25, t('breach_hull_warning', { n: Math.round(breachDmg * 0.5) }), '#ff3b30', 12);
+      }
+      this.player.shieldRegenTimer = 0; // Kalkan bekleme süresini sıfırla
     }
-    this.player.shieldRegenTimer = 0; // Kalkan bekleme süresini sıfırla
 
     this.updateHUD();
   }
@@ -16374,9 +16385,22 @@ class Game {
   updateGems(dt = 1.0) {
     const magnetDistance = (this.player.isFever || this.player.vacuumTimer > 0) ? 9999 : this.player.magnetRange;
 
-    // Kristal Havuzunu Sınırla (Maksimum 60 kristal - Performans Koruması)
+    // Kristal Havuzunu Sınırla (Maksimum 60 kristal - Fazlalıkları Hyper-Gem olarak birleştir, XP kaybını %100 engelle)
     if (this.gems.length > 60) {
-      this.gems.splice(0, this.gems.length - 60);
+      const excess = this.gems.splice(0, this.gems.length - 60);
+      let totalMergedVal = 0;
+      let avgX = 0;
+      let avgY = 0;
+      for (const g of excess) {
+        totalMergedVal += (g.value || 1);
+        avgX += g.x;
+        avgY += g.y;
+      }
+      if (excess.length > 0 && totalMergedVal > 0) {
+        avgX /= excess.length;
+        avgY /= excess.length;
+        this.gems.push(new Gem(avgX, avgY, totalMergedVal));
+      }
     }
 
     for (let i = this.gems.length - 1; i >= 0; i--) {
@@ -16659,12 +16683,17 @@ class Game {
     ctx.font = '800 10px "Rajdhani", sans-serif';
     ctx.fillStyle = color;
     ctx.textAlign = 'right';
-    ctx.fillText(isFront ? '▲ AĞIR BALYOZ HATTI (1.25x)' : '▼ SERİ MANEVRA HATTI', this.width - 12, y - 6);
+    ctx.fillText(isFront ? txt('tactical_front_zone', '▲ AĞIR BALYOZ HATTI (1.25x)') : txt('tactical_rear_zone', '▼ SERİ MANEVRA HATTI'), this.width - 12, y - 6);
     ctx.restore();
   }
 
   // === ÇİZİM MOTORU (RENDER) ===
   draw() {
+    const dpr = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) || 1, 2.5);
+    if (ctx.resetTransform) ctx.resetTransform();
+    else ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
     // 1. Ekranı tamamen temizle ve zemin rengiyle doldur (kenar bozulmalarını ve iz kalmasını önler)
     ctx.clearRect(0, 0, this.width, this.height);
     ctx.fillStyle = this.particles.bgBase || '#070B19';
@@ -16755,7 +16784,7 @@ class Game {
         ctx.font = '900 11px "Rajdhani", "Segoe UI", sans-serif';
         ctx.textAlign = 'center';
         ctx.fillStyle = `rgba(0, 240, 255, ${alpha})`;
-        ctx.fillText('[UYARI] LAZER HATTI!', tel.x, 38);
+        ctx.fillText(txt('warning_laser_line', '[UYARI] LAZER HATTI!'), tel.x, 38);
       } else {
         // === 2. GÜDÜMLÜ FÜZE UYARISI: HEDEF KİLİDİ & İKAZ NİŞANGAHI ===
         // Kesikli kırmızı tehlike hattı
@@ -16797,7 +16826,7 @@ class Game {
         // Füze İkaz Başlığı
         ctx.font = '900 11px "Rajdhani", "Segoe UI", sans-serif';
         ctx.fillStyle = `rgba(255, 60, 0, ${alpha})`;
-        ctx.fillText('[ALARM] GÜDÜMLÜ FÜZE!', tel.x, 38);
+        ctx.fillText(txt('alarm_guided_missile', '[ALARM] GÜDÜMLÜ FÜZE!'), tel.x, 38);
       }
 
       ctx.restore();
@@ -16945,7 +16974,7 @@ class Game {
       ctx.font = '900 12px "Rajdhani", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`DENEME UÇUŞU  ${remSec}sn`, this.width / 2, by + bh / 2);
+      ctx.fillText(t('banner_test_flight', { s: remSec }), this.width / 2, by + bh / 2);
       ctx.restore();
     }
 

@@ -3,7 +3,7 @@
 export class ParticleSystem {
   constructor() {
     // Sabit Boyutlu Nesne Havuzu (Object Pooling - 0 Heap Allocation)
-    this.maxParticles = 120;
+    this.maxParticles = 420;
     this.particles = [];
     for (let i = 0; i < this.maxParticles; i++) {
       this.particles.push({
@@ -44,7 +44,7 @@ export class ParticleSystem {
       }
     }
     if (!p) {
-      if (this.particles.length < 160) {
+      if (this.particles.length < 460) {
         p = { active: false };
         this.particles.push(p);
       } else {
@@ -508,7 +508,7 @@ export class ParticleSystem {
   update(width, height, dt = 1.0) {
     if (this.hitstopTimer > 0) {
       this.hitstopTimer -= dt;
-      return; // Hitstop sırasında dünya 2-3 frame donar, vuruş hissi katlanır
+      dt *= 0.3; // Hitstop sırasında parçacıklar ve kozmik efektler donmaz, sinematik akış korunur
     }
 
     if (this.warpTimer > 0) {

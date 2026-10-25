@@ -75,7 +75,8 @@ test('S1.4: In-flight initialization applies starBonus (+10% per star) to HP, DM
 
   const starBonus = 1 + (4 - 1) * 0.10; // 1.30
   assert.equal(starBonus, 1.30);
-  assert.ok(game.player.damageMultiplier >= 1.30, `Damage multiplier must include 1.30x star bonus (got ${game.player.damageMultiplier})`);
+  const expectedDmgMult = (game.skins.cyberpunk?.dmgMult || 1.0) * starBonus;
+  assert.ok(game.player.damageMultiplier >= expectedDmgMult - 0.001, `Damage multiplier must include 1.30x star bonus (got ${game.player.damageMultiplier})`);
   assert.ok(game.player.speedMultiplier >= 1.30, `Speed multiplier must include 1.30x star bonus (got ${game.player.speedMultiplier})`);
   assert.ok(game.player.maxHp >= 130, `Max HP must scale with 1.30x star bonus (got ${game.player.maxHp})`);
 });
@@ -178,7 +179,8 @@ test('S2.4: Runtime flight initialization applies overclock bonuses (+3% DMG, +3
   };
   game.startNewGame();
 
-  assert.ok(game.player.damageMultiplier >= 1.30, `Damage multiplier must include +30% overclock (got ${game.player.damageMultiplier})`);
+  const expectedOcDmgMult = (game.skins.cyberpunk?.dmgMult || 1.0) * 1.30;
+  assert.ok(game.player.damageMultiplier >= expectedOcDmgMult - 0.001, `Damage multiplier must include +30% overclock (got ${game.player.damageMultiplier})`);
   assert.ok(game.player.maxHp >= 130, `Max HP must include +30% overclock defense (got ${game.player.maxHp})`);
   assert.ok(game.player.crystalMultiplier >= 1.50, `Crystal multiplier must include +50% overclock crystals (got ${game.player.crystalMultiplier})`);
 });

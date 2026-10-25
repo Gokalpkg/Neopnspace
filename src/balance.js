@@ -100,9 +100,9 @@ export const SHIP_BALANCE = {
     shieldMult: 0.95,
     speedMult: 1.25,
     magnetMult: 1.60,
-    acidTrailDps: 2.6,
-    perkTitle: 'ZÜMRÜT SÜZÜLME',
-    perk: '+%60 Kristal Çekim Alanı, +%25 Hız ve arkasında düşmanları eriten biyo-asit izi bırakır.'
+    acidConeDps: 2.6,
+    perkTitle: 'KOROZİF BİYO-KONİ',
+    perk: '+%60 Kristal Çekim Alanı, +%25 Hız ve önünde düşmanları eriten korozif biyo-asit konisi saçar.'
   },
   vortex: {
     id: 'vortex',

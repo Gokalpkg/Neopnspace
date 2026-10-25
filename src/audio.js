@@ -548,7 +548,7 @@ class SoundEngine {
       subOsc.connect(subGain);
       subGain.connect(this.sfxGain);
 
-      this._autoDisconnect(osc, gain);
+      this._autoDisconnect(osc, gain, filter);
       this._autoDisconnect(subOsc, subGain);
 
       osc.start(now);
@@ -669,11 +669,17 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // Kristal / XP Toplama Çınlaması (Çift Harmonikli Kristal Çan Tınısı - Pentatonik Arpej)
+  // Kristal / XP Toplama Çınlaması (Çift Harmonikli Kristal Çan Tınısı - 45ms Korumalı & 2600Hz Filtreli)
   playGemPickup() {
     if (this.isMuted || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
+      // 45ms tetikleme sınırlayıcı (Yığın toplamalarda ses patlamasını engeller)
+      if (this.lastGemPlayTime && now - this.lastGemPlayTime < 0.045) {
+        return;
+      }
+      this.lastGemPlayTime = now;
+
       if (this.lastGemTime && now - this.lastGemTime < 0.75) {
         this.gemPitchStep = Math.min(7, (this.gemPitchStep || 0) + 1);
       } else {
@@ -684,39 +690,49 @@ class SoundEngine {
       // Pentatonik Nota Basamakları (Oktav tırmanışı: do-re-mi-sol-la-do2-re2-mi2)
       const pitchScale = [1.0, 1.122, 1.26, 1.498, 1.682, 2.0, 2.245, 2.52];
       const mult = pitchScale[this.gemPitchStep];
-      const dur = 0.16;
+      const dur = 0.15;
 
-      // 1. Temel Berrak Kristal Çan Tonu (Fundamental Bell)
+      // 1. Temel Berrak Kristal Çan Tonu (Fundamental Bell) - Max 1800 Hz
       const osc1 = this.ctx.createOscillator();
       const gain1 = this.ctx.createGain();
-      osc1.type = 'sine';
-      const baseFreq = 1250 * mult;
-      osc1.frequency.setValueAtTime(baseFreq, now);
-      osc1.frequency.exponentialRampToValueAtTime(baseFreq * 1.12, now + dur);
+      const filter1 = this.ctx.createBiquadFilter();
+      filter1.type = 'lowpass';
+      filter1.frequency.setValueAtTime(2600, now);
 
-      gain1.gain.setValueAtTime(0.22, now);
+      osc1.type = 'sine';
+      const baseFreq = Math.min(1800, 950 * mult);
+      osc1.frequency.setValueAtTime(baseFreq, now);
+      osc1.frequency.exponentialRampToValueAtTime(baseFreq * 1.08, now + dur);
+
+      gain1.gain.setValueAtTime(0.18, now);
       gain1.gain.exponentialRampToValueAtTime(0.001, now + dur);
 
-      osc1.connect(gain1);
+      osc1.connect(filter1);
+      filter1.connect(gain1);
       gain1.connect(this.sfxGain);
-      this._autoDisconnect(osc1, gain1);
+      this._autoDisconnect(osc1, gain1, filter1);
       osc1.start(now);
       osc1.stop(now + dur);
 
-      // 2. Işıltılı Yüksek Harmonik Pırıltı (Shimmering Overtone 2.4x)
+      // 2. Işıltılı Yüksek Harmonik Pırıltı - 2600 Hz ile sınırlandırılmış ve analog lowpass süzmeli
       const osc2 = this.ctx.createOscillator();
       const gain2 = this.ctx.createGain();
-      osc2.type = 'triangle';
-      const harmFreq = baseFreq * 2.4;
-      osc2.frequency.setValueAtTime(harmFreq, now);
-      osc2.frequency.exponentialRampToValueAtTime(harmFreq * 1.05, now + dur * 0.6);
+      const filter2 = this.ctx.createBiquadFilter();
+      filter2.type = 'lowpass';
+      filter2.frequency.setValueAtTime(2600, now);
 
-      gain2.gain.setValueAtTime(0.12, now);
+      osc2.type = 'triangle';
+      const harmFreq = Math.min(2600, baseFreq * 1.6);
+      osc2.frequency.setValueAtTime(harmFreq, now);
+      osc2.frequency.exponentialRampToValueAtTime(Math.min(2600, harmFreq * 1.05), now + dur * 0.6);
+
+      gain2.gain.setValueAtTime(0.09, now);
       gain2.gain.exponentialRampToValueAtTime(0.001, now + dur * 0.6);
 
-      osc2.connect(gain2);
+      osc2.connect(filter2);
+      filter2.connect(gain2);
       gain2.connect(this.sfxGain);
-      this._autoDisconnect(osc2, gain2);
+      this._autoDisconnect(osc2, gain2, filter2);
       osc2.start(now);
       osc2.stop(now + dur * 0.6);
     } catch (e) {}
@@ -1011,7 +1027,7 @@ class SoundEngine {
       filter.connect(gain);
       gain.connect(this.sfxGain);
 
-      this._autoDisconnect(osc, gain);
+      this._autoDisconnect(osc, gain, filter);
       osc.start(now);
       osc.stop(now + 0.028);
     } catch (e) {}
@@ -1137,7 +1153,7 @@ class SoundEngine {
         filter.connect(gain);
         gain.connect(this.sfxGain);
 
-        this._autoDisconnect(osc, gain);
+        this._autoDisconnect(osc, gain, filter);
         osc.start(now + idx * 0.055);
         osc.stop(now + idx * 0.055 + 0.35);
       });

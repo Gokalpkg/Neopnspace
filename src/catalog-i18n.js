@@ -655,7 +655,20 @@ const RAW = {
 
   codex_active: row('ACTIVE', 'AKTİF', 'ACTIF', 'AKTIV', '激活', '啟動', '稼働中'),
   codex_ready: row('READY (CHEST / LEVEL UP)', 'HAZIR (SANDIK / SEVİYE)', 'PRÊT (COFFRE / NIVEAU)', 'BEREIT (TRUHE / STUFE)', '就绪（宝箱 / 升级）', '就緒（寶箱 / 升級）', '準備完了（宝箱 / レベルアップ）'),
-  codex_locked: row('LOCKED', 'KİLİTLİ', 'VERROUILLÉ', 'GESPERRT', '已锁定', '已鎖定', 'ロック中')
+  codex_locked: row('LOCKED', 'KİLİTLİ', 'VERROUILLÉ', 'GESPERRT', '已锁定', '已鎖定', 'ロック中'),
+
+  warning_laser_line: row('[WARNING] LASER LINE!', '[UYARI] LAZER HATTI!', '[ATTENTION] LIGNE LASER !', '[WARNUNG] LASER-LINIE!', '[警告] 激光束路径！', '[警告] 激光束路徑！', '[警告] レーザーライン！'),
+  alarm_guided_missile: row('[ALARM] GUIDED MISSILE!', '[ALARM] GÜDÜMLÜ FÜZE!', '[ALARME] MISSILE GUIDÉ !', '[ALARM] LENKRAKETE!', '[警报] 制导导弹！', '[警報] 導引導彈！', '[警報] 誘導ミサイル！'),
+  btn_vip_free: row('VIP FREE', 'VIP ÜCRETSİZ', 'VIP GRATUIT', 'VIP KOSTENLOS', 'VIP 免费', 'VIP 免費', 'VIP 無料'),
+  chest_jackpot_badge: row('[JACKPOT: 3X]', '[BÜYÜK İKRAMİYE: 3X]', '[GROS LOT : 3X]', '[JACKPOT: 3X]', '[头奖：3X]', '[頭獎：3X]', '[ジャックポット: 3X]'),
+  chest_jackpot_title: row('[JACKPOT CHEST]', '[BÜYÜK İKRAMİYE SANDIĞI]', '[COFFRE DU GROS LOT]', '[JACKPOT-TRUHE]', '[头奖宝箱]', '[頭獎寶箱]', '[ジャックポットチェスト]'),
+  chest_lucky_badge: row('[LUCKY CHEST]', '[ŞANSLI SANDIK]', '[COFFRE CHANCEUX]', '[GLÜCKSTRUHE]', '[幸运宝箱]', '[幸運寶箱]', '[ラッキーチェスト]'),
+  tactical_front_zone: row('▲ HEAVY STRIKE ZONE (1.25x)', '▲ AĞIR BALYOZ HATTI (1.25x)', '▲ ZONE DE FRAPPE LOURDE (1.25x)', '▲ SCHWERE SCHLAGZONE (1.25x)', '▲ 重击阵线 (1.25x)', '▲ 重擊陣線 (1.25x)', '▲ 重撃ライン (1.25x)'),
+  tactical_rear_zone: row('▼ RAPID MANEUVER ZONE', '▼ SERİ MANEVRA HATTI', '▼ ZONE DE MANŒUVRE RAPIDE', '▼ SCHNELLE MANÖVERZONE', '▼ 快速机动阵线', '▼ 快速機動陣線', '▼ 高速機動ライン'),
+  smuggler_signal_tap: row('SMUGGLER SIGNAL [TAP]', 'KAÇAKÇI SİNYALİ [DOKUN]', 'SIGNAL DU CONTREBANDIER [TOUCHER]', 'SCHMUGGLER-SIGNAL [ANTIPPEN]', '走私者信号 [点击]', '走私者信號 [點擊]', '密輸業者のシグナル [タップ]'),
+  breach_barrier_pressure: row('BARRIER PRESSURE -{n}', 'BARİYER BASKISI -{n}', 'PRESSION DU BOUCLIER -{n}', 'SCHILDDRUCK -{n}', '护盾受压 -{n}', '護盾受壓 -{n}', 'バリア圧力 -{n}'),
+  breach_hull_warning: row('HULL WARNING -{n}', 'GÖVDE UYARISI -{n}', 'ALERTE DE COQUE -{n}', 'HUELLENWARNUNG -{n}', '机体警报 -{n}', '機體警報 -{n}', '船体警告 -{n}'),
+  banner_test_flight: row('TEST FLIGHT {s}s', 'DENEME UÇUŞU {s}sn', 'VOL D\'ESSAI {s}s', 'TESTFLUG {s}s', '试飞 {s}秒', '試飛 {s}秒', 'テスト飛行 {s}秒')
 };
 
 export const CATALOG = {};

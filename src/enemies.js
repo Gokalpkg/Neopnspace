@@ -1991,15 +1991,12 @@ export class EnemyProjectile {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
 
-    // Yüksek Performanslı Neon Plazma Mermisi
+    // Yüksek Görünürlüklü Neon Magenta Mermisi (14x7 px, sarı XP kristallerinden net ayrışır)
     ctx.fillStyle = '#ff0055';
-    ctx.fillRect(-5, -2.5, 10, 5);
-
-    ctx.fillStyle = '#ffbe0b';
-    ctx.fillRect(-2, -1.5, 6, 3);
+    ctx.fillRect(-7, -3.5, 14, 7);
 
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(1, -1, 3, 2);
+    ctx.fillRect(-4, -1.5, 8, 3);
 
     ctx.restore();
   }
