@@ -66,16 +66,16 @@ test('V16.1: Art Bible 60-30-10 HEX Palette avoids pure #000000 and #FFFFFF', ()
 });
 
 // 2. Ship Power Rebalancing & Economy Math Verification
-test('V16.2: Ship Balance enforces clear tactical trade-offs and nerfs overpowered Chrono', () => {
-  assert.equal(game.skins.chrono.dmgMult, 1.22, 'Chrono damage multiplier rebalanced from 1.45x to 1.22x');
-  assert.equal(game.skins.chrono.shieldMult, 1.12, 'Chrono shield multiplier rebalanced from 1.40x to 1.12x');
-  assert.equal(SHIP_BALANCE.chrono.chronoNovaIntervalFrames, 660, 'Chrono freeze interval set to 660 frames (11s)');
-  assert.equal(SHIP_BALANCE.chrono.chronoFreezeDurationFrames, 66, 'Chrono freeze duration set to 66 frames (1.1s)');
+test('V16.2: Ship Balance enforces clear tactical trade-offs and crowns Chrono Apex as tier pinnacle', () => {
+  assert.equal(game.skins.chrono.dmgMult, 1.55, 'Chrono damage multiplier set to true Apex tier (1.55x)');
+  assert.equal(game.skins.chrono.shieldMult, 1.25, 'Chrono shield multiplier set to 1.25x');
+  assert.equal(SHIP_BALANCE.chrono.chronoNovaIntervalFrames, 480, 'Chrono freeze interval set to 480 frames (8s)');
+  assert.equal(SHIP_BALANCE.chrono.chronoFreezeDurationFrames, 78, 'Chrono freeze duration set to 78 frames (1.3s)');
 
-  assert.equal(game.skins.solar.dmgMult, 1.38, 'Solar is the true Glass Cannon (1.38x damage)');
-  assert.equal(game.skins.solar.shieldMult, 0.78, 'Solar has lower shield trade-off (0.78x)');
-  assert.equal(game.skins.toxic.magnetMult, 1.65, 'Toxic has highest harvester magnet (1.65x)');
-  assert.equal(game.skins.phantom.shieldMult, 1.48, 'Phantom is the premier shield tank (1.48x)');
+  assert.equal(game.skins.solar.dmgMult, 1.12, 'Solar rebalanced to 1.12x');
+  assert.equal(game.skins.solar.shieldMult, 0.85, 'Solar has lower shield trade-off (0.85x)');
+  assert.equal(game.skins.toxic.magnetMult, 1.60, 'Toxic has highest harvester magnet (1.60x)');
+  assert.equal(game.skins.phantom.shieldMult, 1.45, 'Phantom is the premier shield tank (1.45x)');
 });
 
 // 3. Tech Workshop Linear Power & Exponential Costs
@@ -101,7 +101,7 @@ test('V16.3: Tech Workshop applies perceptible linear stat jumps (+12% dmg, +15 
 
   assert.equal(game.player.maxHp, 140, 'Base 100 + 2 * 20 hullMax = 140 HP');
   assert.equal(game.player.maxShield, 50, 'Base 20 + 2 * 15 shieldMax = 50 Shield');
-  assert.ok(Math.abs(game.player.damageMultiplier - 1.24) < 1e-6, 'Base 1.0 + 2 * 0.12 = 1.24x damage');
+  assert.ok(Math.abs(game.player.damageMultiplier - (1.24 * 0.95)) < 1e-6, 'Base (1.0 + 2 * 0.12) * 0.95x skin mult = 1.178x damage');
   assert.ok(Math.abs(game.player.critChance - 0.13) < 1e-6, 'Base 0.05 + 2 * 0.04 = 0.13 crit chance');
 });
 

@@ -54,7 +54,7 @@ export const ECONOMY_FORMULAS = {
   }
 };
 
-// 6 Geminin Rol, Al-Ver (Trade-Off) ve Özel Yetenek Dengesi
+// 6 Geminin Rol, Fiyat Kademesi ve Güç Dengesi (Chrono Apex Zirvede 9.5/10)
 export const SHIP_BALANCE = {
   cyberpunk: {
     id: 'cyberpunk',
@@ -62,8 +62,8 @@ export const SHIP_BALANCE = {
     title: 'Dengeli Çevik Avcı',
     primary: '#00f0ff', secondary: '#ff0077', cockpit: '#ff007f', flame: '#00f0ff',
     cost: 0,
-    stats: { dmg: 100, shield: 100, speed: 105, magnet: 100 },
-    dmgMult: 1.00,
+    stats: { dmg: 95, shield: 100, speed: 105, magnet: 100 },
+    dmgMult: 0.95,
     shieldMult: 1.00,
     speedMult: 1.05,
     magnetMult: 1.00,
@@ -78,16 +78,16 @@ export const SHIP_BALANCE = {
     title: 'Ağır Topçu Kruvazörü',
     primary: '#ffbe0b', secondary: '#ff5722', cockpit: '#ff9100', flame: '#ff3d00',
     cost: 1800,
-    stats: { dmg: 138, shield: 78, speed: 86, magnet: 85 },
-    dmgMult: 1.38,
-    shieldMult: 0.78,
-    speedMult: 0.86,
+    stats: { dmg: 112, shield: 85, speed: 88, magnet: 85 },
+    dmgMult: 1.12,
+    shieldMult: 0.85,
+    speedMult: 0.88,
     magnetMult: 0.85,
-    solarFlareEveryNShots: 8, // Her 8. atışta alan hasarlı güneş küresi
-    solarFlareDmgMult: 1.80,
-    solarFlareBaseDmg: 6.5,
+    solarFlareEveryNShots: 8,
+    solarFlareDmgMult: 1.60,
+    solarFlareBaseDmg: 5.5,
     perkTitle: 'GÜNEŞ PATLAMASI',
-    perk: '+%38 Ağır Hasar! Her 8. atışta alanı yakan dev güneş plazması fırlatır (Kalkan/Hız -%15).'
+    perk: '+%12 Ağır Hasar! Her 8. atışta alanı yakan dev güneş plazması fırlatır (Kalkan/Hız -%15).'
   },
   toxic: {
     id: 'toxic',
@@ -95,14 +95,14 @@ export const SHIP_BALANCE = {
     title: 'Hızlı Hasatçı & Biyo-Avcı',
     primary: '#05ffa1', secondary: '#7209b7', cockpit: '#b5179e', flame: '#05ffa1',
     cost: 3400,
-    stats: { dmg: 96, shield: 92, speed: 128, magnet: 165 },
-    dmgMult: 0.96,
-    shieldMult: 0.92,
-    speedMult: 1.28,
-    magnetMult: 1.65,
+    stats: { dmg: 104, shield: 95, speed: 125, magnet: 160 },
+    dmgMult: 1.04,
+    shieldMult: 0.95,
+    speedMult: 1.25,
+    magnetMult: 1.60,
     acidTrailDps: 2.6,
     perkTitle: 'ZÜMRÜT SÜZÜLME',
-    perk: '+%65 Kristal Çekim Alanı, +%28 Hız ve arkasında düşmanları eriten biyo-asit izi bırakır.'
+    perk: '+%60 Kristal Çekim Alanı, +%25 Hız ve arkasında düşmanları eriten biyo-asit izi bırakır.'
   },
   vortex: {
     id: 'vortex',
@@ -110,8 +110,8 @@ export const SHIP_BALANCE = {
     title: 'Alan Kontrol & Tekillik Avcısı',
     primary: '#bf5af2', secondary: '#38bdf8', cockpit: '#f0abfc', flame: '#c084fc',
     cost: 5200,
-    stats: { dmg: 115, shield: 105, speed: 108, magnet: 130 },
-    dmgMult: 1.15,
+    stats: { dmg: 118, shield: 105, speed: 108, magnet: 130 },
+    dmgMult: 1.18,
     shieldMult: 1.05,
     speedMult: 1.08,
     magnetMult: 1.30,
@@ -127,33 +127,33 @@ export const SHIP_BALANCE = {
     title: 'Kuantum Kalkan Siperi',
     primary: '#e0f7fa', secondary: '#00e5ff', cockpit: '#80deea', flame: '#00e5ff',
     cost: 7200,
-    stats: { dmg: 106, shield: 148, speed: 108, magnet: 100 },
-    dmgMult: 1.06,
-    shieldMult: 1.48,
+    stats: { dmg: 126, shield: 145, speed: 108, magnet: 105 },
+    dmgMult: 1.26,
+    shieldMult: 1.45,
     speedMult: 1.08,
-    magnetMult: 1.00,
+    magnetMult: 1.05,
     phaseDurationFrames: 65, // ~1.08 sn dokunulmaz faz
     phaseInvulnFrames: 65,
     phaseCooldownFrames: 720, // 12 sn bekleme süresi
     perkTitle: 'FAZ KALKANI',
-    perk: '+%48 Kalkan Kapasitesi! Darbe aldığında 1.1 sn kuantum fazına geçerek hasarsızlık kazanır.'
+    perk: '+%45 Kalkan Kapasitesi! Darbe aldığında 1.1 sn kuantum fazına geçerek hasarsızlık kazanır.'
   },
   chrono: {
     id: 'chrono',
     name: 'CHRONO APEX',
-    title: 'Altın Zaman Taktisyeni',
+    title: 'Altın Zaman Taktisyeni (Zirve Kruvazör)',
     primary: '#ffd700', secondary: '#ffffff', cockpit: '#fef08a', flame: '#ffbe0b',
     cost: 9600,
-    stats: { dmg: 122, shield: 112, speed: 110, magnet: 115 },
-    dmgMult: 1.22,
-    shieldMult: 1.12,
-    speedMult: 1.10,
-    magnetMult: 1.15,
-    chronoNovaIntervalFrames: 660, // 11 saniyede bir 1.1 sn zaman dondurma (Eski: 8 sn'de bir 1.5 sn OP idi)
-    chronoFreezeFrames: 66,
-    chronoFreezeDurationFrames: 66,
-    perkTitle: 'KRONO SÜPERNOVA',
-    perk: 'Sekmeli altın diskler ateşler ve her 11 sn düşmanları 1.1 sn donduran zaman dalgası yayar.'
+    stats: { dmg: 155, shield: 125, speed: 115, magnet: 135 },
+    dmgMult: 1.55,
+    shieldMult: 1.25,
+    speedMult: 1.15,
+    magnetMult: 1.35,
+    chronoNovaIntervalFrames: 480, // 8 saniyede bir 1.3 sn zaman dondurma dalgası!
+    chronoFreezeFrames: 78,
+    chronoFreezeDurationFrames: 78,
+    perkTitle: 'KRONO SÜPERNOVA (APEX)',
+    perk: '+%55 Üstün Hasar! Sekmeli 3 altın testere çakramı atar ve her 8 sn tüm sahayı 1.3 sn dondurur.'
   }
 };
 

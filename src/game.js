@@ -13332,20 +13332,15 @@ class Game {
     // 1. Ana Silah Sistemi
     const zone = this.player.combatZone || 'rear';
     if (zone === 'front') {
-      // Ön hat tehlikeli (Hücum Bölgesi). Karşılığı her gemiye özel karakteristik Ağır Balyoz kadansı ve ritmidir:
-      // Standart: ÇIV-ÇIV (çift askeri vuruş) -> 1.35s bekleme -> ÇIV-ÇIV
-      // Phantom: ÇIV-ÇIV-ÇIV (3'lü seri yaylım) -> 1.55s bekleme
-      // Solar: GÜÜÜÜM! (tek devasa nükleer balyoz) -> 1.75s bekleme
-      // Toxic: ÇOF-ÇOF (çift asit pompası) -> 1.30s bekleme
-      // Vortex: VUM-ÇAT! (yerçekimi ikiz darbe) -> 1.40s bekleme
-      // Chrono: ÇIV..ÇIV.ÇIV (ivmelenen zaman sekmesi) -> 1.45s bekleme
+      // === ÖN HAT (AĞIR BALYOZ): 6 GEMİNİN GÜÇ SIRALAMASI & KADANSI ===
+      // Cyberpunk (6.5/10) -> Solar (7.5/10) -> Toxic (7.8/10) -> Vortex (8.3/10) -> Phantom (8.8/10) -> CHRONO APEX (9.5/10)
       const HEAVY_CADENCE = {
-        cyberpunk: { burstCount: 2, burstSpacing: 8,  reloadFrames: 74, dmgScale: 0.62 },
-        phantom:   { burstCount: 3, burstSpacing: 6,  reloadFrames: 86, dmgScale: 0.42 },
-        solar:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 98, dmgScale: 1.15 },
-        toxic:     { burstCount: 2, burstSpacing: 10, reloadFrames: 76, dmgScale: 0.58 },
-        vortex:    { burstCount: 2, burstSpacing: 9,  reloadFrames: 78, dmgScale: 0.60 },
-        chrono:    { burstCount: 3, burstSpacing: 12, reloadFrames: 82, dmgScale: 0.45, isAccelerating: true }
+        cyberpunk: { burstCount: 2, burstSpacing: 7,  reloadFrames: 74, dmgScale: 0.52 },
+        solar:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 108, dmgScale: 1.15 },
+        toxic:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 82, dmgScale: 1.05 },
+        phantom:   { burstCount: 4, burstSpacing: 5,  reloadFrames: 86, dmgScale: 0.28 },
+        vortex:    { burstCount: 1, burstSpacing: 0,  reloadFrames: 90, dmgScale: 1.10 },
+        chrono:    { burstCount: 4, burstSpacing: 15, reloadFrames: 76, dmgScale: 0.55, isAccelerating: true }
       };
 
       if (typeof this.player.heavyBurstQueue !== 'number') {
@@ -13366,7 +13361,7 @@ class Game {
       if (this.player.heavyReloadTimer <= 0 && this.player.heavyBurstQueue <= 0) {
         this.player.heavyBurstQueue = cadence.burstCount;
         this.player.heavyShotIndex = 0;
-        this.player.heavyBurstInterval = 0; // ilk atış gecikmesiz başlar
+        this.player.heavyBurstInterval = 0; // ilk atış anında tetiklenir
       }
 
       if (this.player.heavyBurstQueue > 0) {
@@ -13376,24 +13371,28 @@ class Game {
           this.player.heavyShotIndex++;
           this.player.heavyBurstQueue--;
 
-          // Ses & Hissiyat: Çoklu atışta hafifçe yükselen perde (organik ritim)
-          const pitch = 1.0 + (shotIdx * 0.12);
-          if (typeof sounds.playRailgun === 'function') sounds.playRailgun(pitch);
-
-          if (cadence.burstCount === 1) {
-            this.screenShake = Math.max(this.screenShake, 5.5);
+          // Ses & Hissiyat: Gemiye ve atış indeksine özel ses profili
+          const pitch = 0.95 + (shotIdx * 0.12);
+          if (skinId === 'solar') {
+            sounds.playNuke();
+            this.screenShake = Math.max(this.screenShake, 6.5);
             vibrate.heavy();
+          } else if (skinId === 'vortex') {
+            sounds.playWarp();
+            this.screenShake = Math.max(this.screenShake, 4.8);
+            vibrate.medium();
           } else {
-            this.screenShake = Math.max(this.screenShake, 3.2);
-            vibrate.light();
+            if (typeof sounds.playRailgun === 'function') sounds.playRailgun(pitch);
+            if (cadence.burstCount === 1) {
+              this.screenShake = Math.max(this.screenShake, 5.0);
+              vibrate.heavy();
+            } else {
+              this.screenShake = Math.max(this.screenShake, 2.8);
+              vibrate.light();
+            }
           }
 
-          // Çiftli ve üçlü atışlarda alternatif namlu ofseti (sağ/sol namlu hissi)
           const muzzleY = this.player.y - 24;
-          const xOffset = cadence.burstCount === 2 
-            ? (shotIdx === 0 ? -5 : 5) 
-            : (cadence.burstCount === 3 ? (shotIdx === 0 ? -6 : (shotIdx === 1 ? 0 : 6)) : 0);
-
           const lvl = this.player.upgrades.laser;
           const isCrit = Math.random() < ((this.player.critChance || 0.08) + 0.12);
           const isOvercharge = this.player.overchargeTimer > 0;
@@ -13412,74 +13411,86 @@ class Game {
           };
 
           if (skinId === 'solar') {
+            // GÜNEŞ: Tek Devasa 24px Nükleer Güneş Topu (Geniş Alan Alev Patlaması)
             pushHeavy({
-              x: this.player.x, y: muzzleY, vx: 0, vy: -12,
-              damage: (16 + lvl * 3.4 + dmgBonus) * mult,
-              w: 18, h: 18, color: '#ff9100',
-              piercing: false, isSplash: true, isSolarFlare: true
+              x: this.player.x, y: muzzleY, vx: 0, vy: -11,
+              damage: (24 + lvl * 5.5 + dmgBonus) * mult,
+              w: 24, h: 24, color: '#ffbe0b',
+              piercing: false, isSplash: true, isSolarFlare: true, splashRadius: 110
             });
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#ff3d00', 44);
           } else if (skinId === 'toxic') {
+            // ZEHİR: Tek Kalın Delip Geçen Asit Sondası (Tüm hattı deler geçer)
             pushHeavy({
-              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -22,
-              damage: (9 + lvl * 2.4 + dmgBonus) * mult,
-              w: 9, h: 42, color: '#05ffa1',
-              piercing: true, pierce: 7, isPoison: true, isHeavyBeam: true
+              x: this.player.x, y: muzzleY, vx: 0, vy: -26,
+              damage: (18 + lvl * 4.2 + dmgBonus) * mult,
+              w: 16, h: 72, color: '#05ffa1',
+              piercing: true, pierce: 99, isPoison: true, isAcidDrill: true, isHeavyBeam: true
             });
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#05ffa1', 36);
           } else if (skinId === 'vortex') {
+            // VORTEX: Singularity Girdap Küresi (Uçarken düşman ve meteorları vakumlar)
             pushHeavy({
-              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -18,
-              damage: (11 + lvl * 2.6 + dmgBonus) * mult,
-              w: 14, h: 22, color: '#d946ef',
-              piercing: true, pierce: 4, isGravitySlug: true
+              x: this.player.x, y: muzzleY, vx: 0, vy: -9.5,
+              damage: (20 + lvl * 4.6 + dmgBonus) * mult,
+              w: 22, h: 22, color: '#bf5af2',
+              piercing: true, pierce: 6, isVortexOrb: true, isGravitySlug: true
             });
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#bf5af2', 40);
           } else if (skinId === 'phantom') {
-            for (const ang of [-0.14, 0, 0.14]) {
-              pushHeavy({
-                x: this.player.x + Math.sin(ang) * 8 + xOffset,
-                y: muzzleY,
-                vx: Math.sin(ang) * 7,
-                vy: -Math.cos(ang) * 20,
-                damage: (7.5 + lvl * 1.7 + dmgBonus * 0.6) * mult,
-                w: 8, h: 18, color: '#00e5ff',
-                piercing: true, pierce: 3, isLaneClear: true
-              });
-            }
+            // HAYALET: 4'lü Suikastçi Seri Yaylımı (ÇIK-ÇIK-ÇIK-ÇIK) -> 8.8 / 10
+            const ang = (shotIdx - 1.5) * 0.05;
+            pushHeavy({
+              x: this.player.x + (shotIdx - 1.5) * 4,
+              y: muzzleY,
+              vx: Math.sin(ang) * 6,
+              vy: -Math.cos(ang) * 23,
+              damage: (9.5 + lvl * 2.4 + dmgBonus * 0.7) * mult,
+              w: 7, h: 22, color: '#00e5ff',
+              piercing: true, pierce: 3, isLaneClear: true
+            });
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#00e5ff', 24);
           } else if (skinId === 'chrono') {
+            // CHRONO APEX: İvmelenen Zaman Kaskadı (15->8->4 frame) -> 9.5 / 10 ZİRVE
+            const xOff = (shotIdx % 2 === 0 ? -7 : 7);
             pushHeavy({
-              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -13,
-              damage: (13 + lvl * 3.1 + dmgBonus) * mult,
-              w: 18, h: 18, color: '#ffd700',
-              piercing: true, pierce: 2, isChronoSlug: true
+              x: this.player.x + xOff, y: muzzleY, vx: 0, vy: -18 - shotIdx * 3.0,
+              damage: (16 + lvl * 4.2 + dmgBonus * 1.2) * mult,
+              w: 16, h: 32, color: '#ffd700',
+              piercing: true, pierce: 5, isChronoSlug: true, isCrit: true
             });
+            this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#ffd700', 32);
           } else {
+            // CYBERPUNK: Çift Askeri Ray Tüfeği (Sol / Sağ alternatif namlu - ÇIV-ÇIV) -> 6.5 / 10
+            const xOff = shotIdx === 0 ? -6 : 6;
             pushHeavy({
-              x: this.player.x + xOffset, y: muzzleY, vx: 0, vy: -30,
-              damage: (20 + lvl * 5.2 + dmgBonus) * mult,
-              w: 11, h: 52, color: isCrit ? '#ffbe0b' : '#7dd3fc',
-              piercing: true, pierce: 8, isHeavyBeam: true
+              x: this.player.x + xOff, y: muzzleY, vx: 0, vy: -32,
+              damage: (15 + lvl * 3.8 + dmgBonus) * mult,
+              w: 11, h: 52, color: isCrit ? '#ffbe0b' : '#00f0ff',
+              piercing: true, pierce: 6, isHeavyBeam: true
             });
+            this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#00f0ff', 30);
           }
-
-          this.particles.spawnShockwave(this.player.x + xOffset, muzzleY, '#ffffff', 32);
 
           // Bir sonraki atışın aralığını belirle
           if (this.player.heavyBurstQueue > 0) {
             let nextSpacing = cadence.burstSpacing;
             if (cadence.isAccelerating) {
-              nextSpacing = Math.max(5, cadence.burstSpacing - (shotIdx * 4));
+              // Chrono için: 16 -> 8 -> 4 frame (ivmelenen vuruş temposu)
+              nextSpacing = Math.max(4, Math.round(cadence.burstSpacing / Math.pow(1.9, shotIdx)));
             }
             this.player.heavyBurstInterval = nextSpacing;
           } else {
-            // Burst tamamlandı, ana reload süresini başlat (fireRate hızıyla ölçeklenir)
-            this.player.heavyReloadTimer = Math.max(28, Math.round(cadence.reloadFrames / speedMult));
+            // Burst bitti, ana reload süresini başlat (fireRate hızıyla ölçeklenir)
+            this.player.heavyReloadTimer = Math.max(26, Math.round(cadence.reloadFrames / speedMult));
           }
         }
       }
     } else {
-      // Alt bölgeye (Savunma) inildiğinde ağır burst durumunu sıfırla ki yukarı çıkınca hemen hazır olsun
+      // Alt bölgeye (Savunma) inildiğinde ağır burst durumunu sıfırla
       this.player.heavyBurstQueue = 0;
       this.player.heavyReloadTimer = 0;
-      // 2. Kademe (ALT BÖLGE / SAVUNMA): SERİ ÇİFTLİ / ÇOKLU PLAZMA ("tık-tık tık-tık tık-tık")
+      // === 2. KADEME (ALT BÖLGE / SAVUNMA): 6 GEMİYE 6 TAMAMEN FARKLI MERMİ ARKETİPİ ===
       const effectiveInterval = fireInterval;
       this.player.shootCooldown += dt;
       if (this.player.shootCooldown >= effectiveInterval) {
@@ -13503,7 +13514,6 @@ class Game {
 
         const calcDmg = (base) => (base + dmgBonus) * critMult * vortexMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy);
 
-        // Her geminin normal atışı ayrı. Tek hedef hasarı birbirine yakın; fark desende.
         const step = (lvl - 1) * 0.28;
         const skinId = this.currentSkinId;
         const fire = (bullet) => {
@@ -13519,67 +13529,94 @@ class Game {
         };
 
         if (skinId === 'phantom') {
-          const pellet = 1.42 + step * 0.65;
-          for (const ang of [-0.07, 0, 0.07]) {
+          // 1. PHANTOM: 5'li Geniş Kuantum Shotgun Yayılımı (Geniş açı tarama)
+          const pellet = 1.35 + step * 0.55;
+          for (const ang of [-0.18, -0.09, 0, 0.09, 0.18]) {
             fire({
-              x: this.player.x + Math.sin(ang) * 6,
+              x: this.player.x + Math.sin(ang) * 8,
               y: this.player.y - 16,
-              vx: Math.sin(ang) * 5.2,
+              vx: Math.sin(ang) * 7.5,
               vy: -Math.cos(ang) * 16.5,
               damage: calcDmg(pellet),
-              w: 4.5, h: 10, color: '#00e5ff', maxRange: 640
+              w: 4.5, h: 8, color: '#00e5ff', isShotgunPellet: true, maxRange: 580
             });
           }
         } else if (skinId === 'toxic') {
-          const needle = 2.35 + step;
-          for (const ox of [-7, 7]) {
+          // 2. TOXIC: V Şeklinde 4'lü Biyo-Asit İğne Yelpazesi (Geniş korozif yayılım)
+          const needle = 1.85 + step * 0.75;
+          for (const [ox, vx] of [[-10, -1.8], [-4, -0.5], [4, 0.5], [10, 1.8]]) {
             fire({
               x: this.player.x + ox, y: this.player.y - 16,
-              vx: ox * 0.04, vy: -17.5,
+              vx: vx, vy: -17.5,
               damage: calcDmg(needle),
-              w: 3.5, h: 14, color: '#05ffa1',
-              piercing: true, pierce: 1, isPoison: true, poisonMul: 0.18, poisonTime: 55
+              w: 3.5, h: 16, color: '#05ffa1',
+              piercing: true, pierce: 2, isPoison: true, poisonMul: 0.22, poisonTime: 60
             });
           }
+        } else if (skinId === 'vortex') {
+          // 3. VORTEX: Dönen Sarmal (Sine-Wave DNA Helix) İkiz Plazma Dalgası
+          const bolt = 2.45 + step;
+          this.player.vortexSineToggle = !this.player.vortexSineToggle;
+          fire({
+            x: this.player.x - 8, y: this.player.y - 16,
+            vx: 0, vy: -16.5,
+            damage: calcDmg(bolt),
+            w: 8, h: 8, color: '#c084fc',
+            isSineWave: true, sinePhase: 0, sineAmp: 16, baseX: this.player.x - 8
+          });
+          fire({
+            x: this.player.x + 8, y: this.player.y - 16,
+            vx: 0, vy: -16.5,
+            damage: calcDmg(bolt),
+            w: 8, h: 8, color: '#c084fc',
+            isSineWave: true, sinePhase: Math.PI, sineAmp: 16, baseX: this.player.x + 8
+          });
         } else if (skinId === 'chrono') {
-          const disc = 1.85 + step;
-          for (const ox of [-8, 8]) {
+          // 4. CHRONO APEX: Dönen 3 Altın Testere Çakramı (3'lü Seken & Delen Altın Testereler) -> 9.5 / 10
+          const disc = 3.2 + step * 1.5;
+          for (const [ox, dir] of [[-12, -1.2], [0, 0], [12, 1.2]]) {
             fire({
-              x: this.player.x + ox, y: this.player.y - 16,
-              vx: (ox > 0 ? 0.35 : -0.35), vy: -16.2,
+              x: this.player.x + ox, y: this.player.y - 18,
+              vx: dir * 0.9, vy: -17.0,
               damage: calcDmg(disc),
-              w: 7, h: 7, color: '#ffd700',
-              piercing: false, isRicochet: true, bouncesLeft: 1, maxRange: 720
+              w: 11, h: 11, color: '#ffd700',
+              piercing: true, pierce: 2, isChakram: true, isRicochet: true, bouncesLeft: 3, maxRange: 880
             });
           }
         } else if (skinId === 'solar') {
+          // 5. SOLAR: 3'lü Lav Bombardıman Şarapneli (Merkez ağır ateş topu + 2 kanat lavı)
           fire({
             x: this.player.x, y: this.player.y - 18,
-            vx: 0, vy: -15,
-            damage: calcDmg(3.7 + step * 2),
-            w: 8, h: 8, color: '#ffbe0b',
-            piercing: false, isSplash: true, splashMul: 0.32
+            vx: 0, vy: -15.5,
+            damage: calcDmg(3.8 + step * 1.8),
+            w: 10, h: 10, color: '#ffbe0b',
+            piercing: false, isSplash: true, splashMul: 0.35, isSolarFlare: true
           });
-        } else if (skinId === 'vortex') {
-          const bolt = 2.05 + step;
-          for (const ox of [-8, 8]) {
+          for (const [ox, vx] of [[-10, -1.5], [10, 1.5]]) {
             fire({
               x: this.player.x + ox, y: this.player.y - 16,
-              vx: ox > 0 ? -0.55 : 0.55, vy: -16.8,
-              damage: calcDmg(bolt),
-              w: 4.2, h: 13, color: '#c084fc',
-              piercing: true, pierce: 1
+              vx: vx, vy: -14.5,
+              damage: calcDmg(2.1 + step),
+              w: 6, h: 6, color: '#ff5500',
+              piercing: false, isSplash: true, splashMul: 0.2
             });
           }
         } else {
+          // 6. CYBERPUNK: Kesintisiz Askeri Vulcan Gatling Akışı (Yüksek kadans, sıkı çift hat)
           const bolt = 2.55 + step;
+          this.player.gatlingToggle = !this.player.gatlingToggle;
+          const gx = this.player.gatlingToggle ? -5 : 5;
           fire({
-            x: this.player.x - 6, y: this.player.y - 16, vx: 0, vy: -17,
-            damage: calcDmg(bolt), w: 4, h: 12, color: bColor
+            x: this.player.x + gx, y: this.player.y - 18,
+            vx: 0, vy: -19,
+            damage: calcDmg(bolt * 1.05),
+            w: 4, h: 14, color: '#00f0ff', isGatling: true
           });
           fire({
-            x: this.player.x + 6, y: this.player.y - 16, vx: 0, vy: -17,
-            damage: calcDmg(bolt), w: 4, h: 12, color: bColor
+            x: this.player.x - gx * 0.5, y: this.player.y - 15,
+            vx: 0, vy: -18.5,
+            damage: calcDmg(bolt * 0.95),
+            w: 3.5, h: 12, color: '#ffffff', isGatling: true
           });
         }
 
@@ -14016,13 +14053,36 @@ class Game {
       }
     }
 
-    // Mermileri Güncelle (Menzil Aşımı Kontrolü)
+    // Mermileri Güncelle (Menzil Aşımı Kontrolü & Eşsiz Fizik Sistemleri)
     for (let i = this.playerBullets.length - 1; i >= 0; i--) {
       const b = this.playerBullets[i];
       const step = Math.hypot(b.vx * dt, b.vy * dt);
-      b.x += b.vx * dt;
+
+      // VORTEX SARMAL SİNÜS DALGASI FİZİĞİ (DNA Helix Trajectory)
+      if (b.isSineWave) {
+        b.baseX = (b.baseX !== undefined ? b.baseX : b.x) + b.vx * dt;
+        b.x = b.baseX + Math.sin((b.traveled || 0) * 0.055 + (b.sinePhase || 0)) * (b.sineAmp || 16);
+      } else {
+        b.x += b.vx * dt;
+      }
+
       b.y += b.vy * dt;
       b.traveled = (b.traveled || 0) + step;
+
+      // VORTEX TEKİLLİK KÜRESİ VAKUM FİZİĞİ (Singularity Suction)
+      if (b.isVortexOrb && this.enemies) {
+        for (let enemy of this.enemies) {
+          if (enemy.hp > 0 && !enemy.isBoss) {
+            const edx = b.x - enemy.x;
+            const edy = b.y - enemy.y;
+            const edist = Math.hypot(edx, edy);
+            if (edist < 100 && edist > 8) {
+              enemy.x += (edx / edist) * 2.2 * dt;
+              enemy.y += (edy / edist) * 2.2 * dt;
+            }
+          }
+        }
+      }
 
       // Kullanıcı İsteği: Hücum hattında yarım boy (~42px), orta hatta 2 kat boy (~115px) menzil sınırı!
       if (b.maxRange && b.traveled >= b.maxRange) {
@@ -17137,7 +17197,91 @@ class Game {
       const w = b.w || 4;
       const h = b.h || 12;
 
-      if (b.isHeavyBeam || b.isRailgun) {
+      if (b.isVortexOrb) {
+        // 1. VORTEX TEKİLLİK KÜRESİ: Dönen kara delik & mor/mavi olay ufku
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        const spin = (b.traveled || 0) * 0.15;
+        ctx.rotate(spin);
+        // Dış girdap aurası
+        ctx.fillStyle = 'rgba(191, 90, 242, 0.4)';
+        ctx.beginPath();
+        ctx.arc(0, 0, w * 0.95, 0, Math.PI * 2);
+        ctx.fill();
+        // Dönen turkuaz girdap kolları
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, w * 0.75, 0, Math.PI * 1.4);
+        ctx.stroke();
+        // Kara delik çekirdeği
+        ctx.fillStyle = '#070b19';
+        ctx.beginPath();
+        ctx.arc(0, 0, w * 0.42, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else if (b.isChakram) {
+        // 2. CHRONO ALTIN TESTERE ÇAKRAMI: Dönen 4 bıçaklı altın disk
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate((b.traveled || 0) * 0.18);
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2.2;
+        ctx.strokeRect(-w * 0.5, -h * 0.5, w, h);
+        ctx.fillStyle = '#ffbe0b';
+        ctx.fillRect(-w * 0.3, -h * 0.3, w * 0.6, h * 0.6);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-1.5, -1.5, 3, 3);
+        ctx.restore();
+      } else if (b.isAcidDrill) {
+        // 3. TOXIC DELİP GEÇEN ASİT SONDASI: Kalın zümrüt biyo-matkap ışını
+        ctx.fillStyle = 'rgba(5, 255, 161, 0.35)';
+        ctx.fillRect(b.x - w * 0.8, b.y - h * 0.5, w * 1.6, h);
+        ctx.fillStyle = '#05ffa1';
+        ctx.fillRect(b.x - w * 0.4, b.y - h * 0.48, w * 0.8, h * 0.96);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(b.x - w * 0.15, b.y - h * 0.44, w * 0.3, h * 0.9);
+      } else if (b.isSolarFlare && (b.w >= 18 || b.isSplash)) {
+        // 4. SOLAR SÜPERNOVA BALYOZU: Parlayan devasa 24px güneş küresi
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.fillStyle = 'rgba(255, 61, 0, 0.45)';
+        ctx.beginPath();
+        ctx.arc(0, 0, w * 0.85, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffbe0b';
+        ctx.beginPath();
+        ctx.arc(0, 0, w * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, w * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else if (b.isSineWave) {
+        // 5. VORTEX SARMAL PLAZMA DAMLASI: Parıldayan mor plazma küresi
+        ctx.fillStyle = '#c084fc';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, w * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, w * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (b.isShotgunPellet) {
+        // 6. PHANTOM KUANTUM SAÇMASI: Elmas şeklinde turkuaz mermi
+        ctx.fillStyle = '#00e5ff';
+        ctx.beginPath();
+        ctx.moveTo(b.x, b.y - h * 0.5);
+        ctx.lineTo(b.x + w * 0.6, b.y);
+        ctx.lineTo(b.x, b.y + h * 0.5);
+        ctx.lineTo(b.x - w * 0.6, b.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(b.x - 1, b.y - 2, 2, 4);
+      } else if (b.isHeavyBeam || b.isRailgun) {
+        // CYBERPUNK ASKERİ RAY TÜFEĞİ IŞINI
         ctx.fillStyle = col;
         ctx.globalAlpha = 0.35;
         ctx.fillRect(b.x - w * 0.7, b.y - h * 0.5, w * 1.4, h * 1.1);
