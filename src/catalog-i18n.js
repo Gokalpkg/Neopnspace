@@ -25,6 +25,8 @@ const RAW = {
   trophy_cat_flight: row('Campaign Flights', 'Sefer Uçuşları', 'Vols de campagne', 'Kampagnenflüge', '战役出击', '戰役出擊', 'キャンペーン出撃'),
   trophy_cat_chest: row('Cosmic Chest', 'Kozmik Sandık', 'Coffre cosmique', 'Kosmos-Truhe', '宇宙宝箱', '宇宙寶箱', '宇宙チェスト'),
   trophy_cat_bomb: row('Explosives Expert', 'Patlayıcı Uzmanı', 'Expert en explosifs', 'Sprengstoffexperte', '爆破专家', '爆破專家', '爆破の専門家'),
+  card_tag_evo: row('LEGENDARY EVOLUTION', 'EFSANEVİ EVRİM', 'ÉVOLUTION LÉGENDAIRE', 'LEGENDÄRE EVOLUTION', '传奇进化', '傳奇進化', '伝説の進化'),
+  card_tag_free: row('FREE UPGRADE', 'ÜCRETSİZ GELİŞTİRME', 'AMÉLIORATION GRATUITE', 'KOSTENLOSES UPGRADE', '免费升级', '免費升級', '無料アップグレード'),
 
   trophy_kill_1_name: row('First Hunt', 'İlk Av', 'Première chasse', 'Erste Jagd', '初次狩猎', '初次狩獵', '最初の獲物'),
   trophy_kill_1_desc: row('Destroy 15 enemies', 'Toplam 15 düşman yok et', 'Détruisez 15 ennemis', 'Vernichte 15 Gegner', '消灭 15 个敌人', '消滅 15 個敵人', '敵を15体倒す'),

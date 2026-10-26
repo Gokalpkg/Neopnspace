@@ -730,6 +730,15 @@
           <p class="role-hint" data-i18n="card_role">This flight only.</p>
         </div>
 
+        <div class="modal-live-vitals" style="display: flex; justify-content: center; gap: 14px; margin: 6px 0 12px 0;">
+          <div class="vital-pill hp-pill" style="display: flex; align-items: center; gap: 6px; background: rgba(255, 0, 85, 0.15); border: 1px solid #ff0055; padding: 4px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: bold; color: #ff5577;">
+            <span>❤️</span> <span id="modal-hp-text">100 / 100</span>
+          </div>
+          <div class="vital-pill shield-pill" style="display: flex; align-items: center; gap: 6px; background: rgba(0, 240, 255, 0.15); border: 1px solid #00f0ff; padding: 4px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: bold; color: #00f0ff;">
+            <span>🛡️</span> <span id="modal-shield-text">30 / 30</span>
+          </div>
+        </div>
+
         <div id="cards-container" class="cards-container">
           <!-- Dinamik Kartlar JS ile doldurulacak -->
         </div>
@@ -791,6 +800,14 @@
         <div id="jackpot-badge" class="jackpot-tier-badge hidden">BÜYÜK İKRAMİYE!</div>
         <h2 id="lucky-chest-title" class="game-title" style="color: #ffbe0b; text-shadow: 0 0 16px rgba(255, 190, 11, 0.7); font-size: 1.4rem; margin-bottom: 2px;" data-i18n="chest_title">ŞANSLI UZAY SANDIĞI!</h2>
         <div id="lucky-chest-subtitle" class="missions-reset-hint" style="color: #00f0ff; margin-bottom: 12px; font-weight: 700;" data-i18n="chest_select_hint">1 ödül seç veya hepsini almak için reklam izle</div>
+        <div class="modal-live-vitals" style="display: flex; justify-content: center; gap: 14px; margin: 6px 0 12px 0;">
+          <div class="vital-pill hp-pill" style="display: flex; align-items: center; gap: 6px; background: rgba(255, 0, 85, 0.15); border: 1px solid #ff0055; padding: 4px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: bold; color: #ff5577;">
+            <span>❤️</span> <span id="chest-modal-hp-text">100 / 100</span>
+          </div>
+          <div class="vital-pill shield-pill" style="display: flex; align-items: center; gap: 6px; background: rgba(0, 240, 255, 0.15); border: 1px solid #00f0ff; padding: 4px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: bold; color: #00f0ff;">
+            <span>🛡️</span> <span id="chest-modal-shield-text">30 / 30</span>
+          </div>
+        </div>
         <div id="lucky-chest-container" class="lucky-chest-items-grid">
           <!-- Dinamik Sandık Ödülleri -->
         </div>

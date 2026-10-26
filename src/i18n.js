@@ -17,6 +17,8 @@ export const TRANSLATIONS = {
   'en-GB': {
     tap_to_skip: "Tap anywhere to skip",
     btn_equip: "EQUIP",
+    card_tag_evo: "LEGENDARY EVOLUTION",
+    card_tag_free: "FREE UPGRADE",
     btn_buy_ship: "BUY FOR {c} CR",
     daily_streak: "LOGIN STREAK",
     settings_privacy: "Privacy Policy",
@@ -516,6 +518,8 @@ export const TRANSLATIONS = {
   'tr-TR': {
     tap_to_skip: "Geçmek için dokunun",
     btn_equip: "KUŞAN",
+    card_tag_evo: "EFSANEVİ EVRİM",
+    card_tag_free: "ÜCRETSİZ GELİŞTİRME",
     btn_buy_ship: "{c} CR SATIN AL",
     daily_streak: "GİRİŞ SERİSİ",
     settings_privacy: "Gizlilik Politikası",
@@ -1001,6 +1005,8 @@ export const TRANSLATIONS = {
   'fr-FR': {
     tap_to_skip: "Touchez pour passer",
     btn_equip: "ÉQUIPER",
+    card_tag_evo: "ÉVOLUTION LÉGENDAIRE",
+    card_tag_free: "AMÉLIORATION GRATUITE",
     btn_buy_ship: "ACHETER ({c} CR)",
     daily_streak: "SÉRIE DE CONNEXION",
     settings_privacy: "Politique de confidentialité",
@@ -1450,6 +1456,8 @@ export const TRANSLATIONS = {
   'fr-CA': {
     tap_to_skip: "Touchez pour passer",
     btn_equip: "ÉQUIPER",
+    card_tag_evo: "ÉVOLUTION LÉGENDAIRE",
+    card_tag_free: "AMÉLIORATION GRATUITE",
     btn_buy_ship: "ACHETER ({c} CR)",
     daily_streak: "SÉRIE DE CONNEXION",
     settings_privacy: "Politique de confidentialité",
@@ -1903,6 +1911,8 @@ export const TRANSLATIONS = {
   'de-DE': {
     tap_to_skip: "Tippen zum Überspringen",
     btn_equip: "AUSRÜSTEN",
+    card_tag_evo: "LEGENDÄRE EVOLUTION",
+    card_tag_free: "KOSTENLOSES UPGRADE",
     btn_buy_ship: "KAUFEN ({c} CR)",
     daily_streak: "LOGIN-SERIE",
     settings_privacy: "Datenschutzrichtlinie",
@@ -2371,6 +2381,8 @@ export const TRANSLATIONS = {
   'zh-HK': {
     tap_to_skip: "點擊任意處跳過",
     btn_equip: "裝備",
+    card_tag_evo: "傳奇進化",
+    card_tag_free: "免費升級",
     btn_buy_ship: "購買 ({c} CR)",
     daily_streak: "連續登入",
     settings_privacy: "隱私政策",
@@ -2843,6 +2855,8 @@ export const TRANSLATIONS = {
   'zh-CN': {
     tap_to_skip: "点击任意处跳过",
     btn_equip: "装备",
+    card_tag_evo: "传奇进化",
+    card_tag_free: "免费升级",
     btn_buy_ship: "购买 ({c} CR)",
     daily_streak: "连续登录",
     settings_privacy: "隐私政策",
@@ -3311,6 +3325,8 @@ export const TRANSLATIONS = {
   'zh-TW': {
     tap_to_skip: "點擊任意處跳過",
     btn_equip: "裝備",
+    card_tag_evo: "傳奇進化",
+    card_tag_free: "免費升級",
     btn_buy_ship: "購買 ({c} CR)",
     daily_streak: "連續登入",
     settings_privacy: "隱私權政策",
@@ -3779,6 +3795,8 @@ export const TRANSLATIONS = {
   'ja-JP': {
     tap_to_skip: "タップしてスキップ",
     btn_equip: "装備",
+    card_tag_evo: "伝説の進化",
+    card_tag_free: "無料アップグレード",
     btn_buy_ship: "購入 ({c} CR)",
     daily_streak: "ログインボーナス",
     settings_privacy: "プライバシーポリシー",

@@ -1221,9 +1221,9 @@ class Game {
       lastX = clientX;
       lastY = clientY;
 
-      // Parmak görüşünü kapatmama koruması: gemi alt sınıra 72px kala durur, başparmak gemiyi kapatmaz
-      this.player.targetX = Math.max(24, Math.min(this.width - 24, this.player.targetX + deltaX));
-      this.player.targetY = Math.max(50, Math.min(this.height - 72, this.player.targetY + deltaY));
+      // Genişletilmiş hareket alanı: jet tüm ekranda serbest ve çevik manevra yapar
+      this.player.targetX = Math.max(16, Math.min(this.width - 16, this.player.targetX + deltaX));
+      this.player.targetY = Math.max(36, Math.min(this.height - 36, this.player.targetY + deltaY));
       if (this.dismissTutorial) this.dismissTutorial();
     };
 
@@ -9840,6 +9840,7 @@ class Game {
     }
 
     this.updateHudWeaponsStrip();
+    this.updateModalVitals();
   }
 
   getUpgradeSvg(id) {
@@ -11060,6 +11061,7 @@ class Game {
       cardsContainer.appendChild(card);
     });
 
+    this.updateModalVitals();
     levelModal.classList.remove('hidden');
 
     if (this.autoSynergyEnabled && choices.length > 0) {
@@ -11070,6 +11072,20 @@ class Game {
           if (pick) this.applyUpgrade(pick.id);
         }
       }, 420);
+    }
+  }
+
+  updateModalVitals() {
+    if (!this.player) return;
+    const hpStr = `${Math.ceil(this.player.hp)} / ${this.player.maxHp}`;
+    const shieldStr = `${Math.ceil(this.player.shield)} / ${this.player.maxShield}`;
+    for (const id of ['modal-hp-text', 'chest-modal-hp-text']) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = hpStr;
+    }
+    for (const id of ['modal-shield-text', 'chest-modal-shield-text']) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = shieldStr;
     }
   }
 
@@ -11796,6 +11812,7 @@ class Game {
     }
 
     try { history.pushState({ modal: 'lucky_chest' }, ''); } catch(e) {}
+    this.updateModalVitals();
     if (luckyChestModal) luckyChestModal.classList.remove('hidden');
 
     // 1. Adım (Hazırlık): Tok iniş sesi ve haptik
@@ -11848,6 +11865,10 @@ class Game {
         }, 320);
       }, 180);
     }, 850);
+  }
+
+  createChestRewardCard(item, idx) {
+    return this.renderChestRewardCard(item, idx);
   }
 
   renderChestRewardCard(item, idx) {
@@ -12660,8 +12681,8 @@ class Game {
       if (Math.abs(this.player.knockX) < 0.04) this.player.knockX = 0;
       if (Math.abs(this.player.knockY) < 0.04) this.player.knockY = 0;
     }
-    this.player.x = Math.max(24, Math.min(this.width - 24, this.player.x));
-    this.player.y = Math.max(48, Math.min(this.height - 36, this.player.y));
+    this.player.x = Math.max(16, Math.min(this.width - 16, this.player.x));
+    this.player.y = Math.max(36, Math.min(this.height - 36, this.player.y));
     // Kuantum Faz Sayacı (Phantom Jet Özel Koruması) & Diriliş Dokunulmazlığı
     if (this.player.phaseTimer > 0) this.player.phaseTimer -= dt;
     if (this.player.phaseCooldown > 0) this.player.phaseCooldown -= dt;
@@ -12809,9 +12830,11 @@ class Game {
       this.player.isStationary = false;
     }
 
-    // İpeksi Yumuşak Aerodinamik Yatma (Smooth Banking Lerp with Damping)
-    const targetTilt = Math.max(-0.25, Math.min(0.25, dx * 0.012));
-    this.player.tilt = (this.player.tilt || 0) + (targetTilt - (this.player.tilt || 0)) * Math.min(1, 0.12 * dt);
+    // İpeksi Yumuşak Aerodinamik Yatma (Aerodynamic spring-damper response, max 0.55 rad)
+    const targetTilt = Math.max(-0.55, Math.min(0.55, dx * 0.024));
+    const tiltDiff = targetTilt - (this.player.tilt || 0);
+    this.player.tiltVel = ((this.player.tiltVel || 0) + tiltDiff * 0.20 * dt) * Math.pow(0.74, dt);
+    this.player.tilt = Math.max(-0.55, Math.min(0.55, (this.player.tilt || 0) + this.player.tiltVel * dt));
 
     // Evrim / Dönüşüm Animasyonu & Zone Banner Sönümlemesi
     if (this.player.morphAnim > 0) {
@@ -12908,7 +12931,9 @@ class Game {
     }
 
     // İkiz Motor Egzoz Alevleri & Kostüme Özel Kuyruk İzi (Skin Tail & Engine Trails)
-    if (Math.random() < 0.70 * dt) {
+    const isManeuvering = (moveDist > 2.0 || Math.abs(dx) > 1.6 || dy < -1.0);
+    const thrusterRate = isManeuvering ? 1.0 : (0.70 * dt);
+    if (Math.random() < thrusterRate) {
       const cosT = Math.cos(this.player.tilt);
       const sinT = Math.sin(this.player.tilt);
       const skinId = this.currentSkinId || 'cyberpunk';
@@ -12927,8 +12952,21 @@ class Game {
       const leftY = this.player.y + (-7 * sinT + 18 * cosT);
       const rightX = this.player.x + (7 * cosT - 18 * sinT);
       const rightY = this.player.y + (7 * sinT + 18 * cosT);
-      this.particles.spawnThruster(leftX, leftY, flameColor);
-      this.particles.spawnThruster(rightX, rightY, flameColor);
+
+      if (isManeuvering) {
+        // Hızlı manevra ve ileri atılma: Çift art yakıcı (Afterburner) plazma alevi (Mavi/Beyaz parlak plazma)
+        const afterburnerColor = Math.random() < 0.4 ? '#ffffff' : '#38bdf8';
+        if (typeof this.particles.spawnAfterburner === 'function') {
+          this.particles.spawnAfterburner(leftX, leftY, afterburnerColor);
+          this.particles.spawnAfterburner(rightX, rightY, afterburnerColor);
+        } else {
+          this.particles.spawnThruster(leftX, leftY, afterburnerColor);
+          this.particles.spawnThruster(rightX, rightY, afterburnerColor);
+        }
+      } else {
+        this.particles.spawnThruster(leftX, leftY, flameColor);
+        this.particles.spawnThruster(rightX, rightY, flameColor);
+      }
 
       // Özel Motor İzi & Kostüm Parçacıkları
       if (!isFever && !isOvercharge && Math.random() < 0.45 * dt) {
@@ -13340,12 +13378,12 @@ class Game {
       // === ÖN HAT (AĞIR BALYOZ): 6 GEMİNİN GÜÇ SIRALAMASI & KADANSI ===
       // Cyberpunk (6.5/10) -> Solar (7.5/10) -> Toxic (7.8/10) -> Vortex (8.3/10) -> Phantom (8.8/10) -> CHRONO APEX (9.5/10)
       const HEAVY_CADENCE = {
-        cyberpunk: { burstCount: 2, burstSpacing: 7,  reloadFrames: 74, dmgScale: 0.52 },
-        solar:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 108, dmgScale: 1.15 },
-        toxic:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 82, dmgScale: 1.05 },
-        phantom:   { burstCount: 4, burstSpacing: 5,  reloadFrames: 86, dmgScale: 0.28 },
-        vortex:    { burstCount: 1, burstSpacing: 0,  reloadFrames: 90, dmgScale: 1.10 },
-        chrono:    { burstCount: 4, burstSpacing: 15, reloadFrames: 76, dmgScale: 0.55, isAccelerating: true }
+        cyberpunk: { burstCount: 2, burstSpacing: 5,  reloadFrames: 28, dmgScale: 0.65 },
+        solar:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 38, dmgScale: 1.25 },
+        toxic:     { burstCount: 1, burstSpacing: 0,  reloadFrames: 30, dmgScale: 1.15 },
+        phantom:   { burstCount: 4, burstSpacing: 4,  reloadFrames: 30, dmgScale: 0.38 },
+        vortex:    { burstCount: 1, burstSpacing: 0,  reloadFrames: 34, dmgScale: 1.20 },
+        chrono:    { burstCount: 4, burstSpacing: 7,  reloadFrames: 28, dmgScale: 0.68, isAccelerating: true }
       };
 
       if (typeof this.player.heavyBurstQueue !== 'number') {
@@ -13419,78 +13457,78 @@ class Game {
           };
 
           if (skinId === 'solar') {
-            // GÜNEŞ: Tek Devasa 24px Nükleer Güneş Topu (Geniş Alan Alev Patlaması)
+            // GÜNEŞ: Tek Devasa 26px Nükleer Güneş Topu (180px Geniş Alan Alev Patlaması)
             pushHeavy({
-              x: this.player.x, y: muzzleY, vx: 0, vy: -11,
-              damage: (24 + lvl * 5.5 + dmgBonus) * mult,
-              w: 24, h: 24, color: '#ffbe0b',
-              piercing: false, isSplash: true, isSolarFlare: true, splashRadius: 110
+              x: this.player.x, y: muzzleY, vx: 0, vy: -12,
+              damage: (28 + lvl * 6.5 + dmgBonus) * mult,
+              w: 26, h: 26, color: '#ffbe0b',
+              piercing: false, isSplash: true, isSolarFlare: true, splashRadius: 180, splashMul: 0.85
             });
-            this.particles.spawnShockwave(this.player.x, muzzleY, '#ff3d00', 44);
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#ff3d00', 52);
           } else if (skinId === 'toxic') {
-            // ZEHİR: Tek Kalın Delip Geçen Asit Sondası (Tüm hattı deler geçer)
+            // ZEHİR: Tek Kalın Delip Geçen Asit Sondası (Tüm hattı kesintisiz deler geçer)
             pushHeavy({
-              x: this.player.x, y: muzzleY, vx: 0, vy: -26,
-              damage: (18 + lvl * 4.2 + dmgBonus) * mult,
-              w: 16, h: 72, color: '#05ffa1',
+              x: this.player.x, y: muzzleY, vx: 0, vy: -28,
+              damage: (22 + lvl * 5.0 + dmgBonus) * mult,
+              w: 20, h: 84, color: '#05ffa1',
               piercing: true, pierce: 99, isPoison: true, isAcidDrill: true, isHeavyBeam: true
             });
-            this.particles.spawnShockwave(this.player.x, muzzleY, '#05ffa1', 36);
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#05ffa1', 40);
           } else if (skinId === 'vortex') {
-            // VORTEX: Singularity Girdap Küresi (Uçarken düşman ve meteorları vakumlar)
+            // VORTEX: 24px Singularity Girdap Küresi (Uçarken düşman ve meteorları vakumlar)
             pushHeavy({
-              x: this.player.x, y: muzzleY, vx: 0, vy: -9.5,
-              damage: (20 + lvl * 4.6 + dmgBonus) * mult,
-              w: 22, h: 22, color: '#bf5af2',
-              piercing: true, pierce: 6, isVortexOrb: true, isGravitySlug: true
+              x: this.player.x, y: muzzleY, vx: 0, vy: -10,
+              damage: (24 + lvl * 5.2 + dmgBonus) * mult,
+              w: 24, h: 24, color: '#bf5af2',
+              piercing: true, pierce: 12, isVortexOrb: true, isGravitySlug: true
             });
-            this.particles.spawnShockwave(this.player.x, muzzleY, '#bf5af2', 40);
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#bf5af2', 44);
           } else if (skinId === 'phantom') {
-            // HAYALET: 4'lü Suikastçi Seri Yaylımı (ÇIK-ÇIK-ÇIK-ÇIK) -> 8.8 / 10
+            // HAYALET: 4'lü Suikastçi Seri Yaylımı (ÇIK-ÇIK-ÇIK-ÇIK)
             const ang = (shotIdx - 1.5) * 0.05;
             pushHeavy({
-              x: this.player.x + (shotIdx - 1.5) * 4,
+              x: this.player.x + (shotIdx - 1.5) * 5,
               y: muzzleY,
               vx: Math.sin(ang) * 6,
-              vy: -Math.cos(ang) * 23,
-              damage: (9.5 + lvl * 2.4 + dmgBonus * 0.7) * mult,
-              w: 7, h: 22, color: '#00e5ff',
-              piercing: true, pierce: 3, isLaneClear: true
+              vy: -Math.cos(ang) * 24,
+              damage: (12 + lvl * 3.0 + dmgBonus * 0.8) * mult,
+              w: 9, h: 28, color: '#00e5ff',
+              piercing: true, pierce: 6, isLaneClear: true
             });
-            this.particles.spawnShockwave(this.player.x, muzzleY, '#00e5ff', 24);
+            this.particles.spawnShockwave(this.player.x, muzzleY, '#00e5ff', 26);
           } else if (skinId === 'chrono') {
-            // CHRONO APEX: İvmelenen Zaman Kaskadı (15->8->4 frame) -> 9.5 / 10 ZİRVE
-            const xOff = (shotIdx % 2 === 0 ? -7 : 7);
+            // CHRONO APEX: 4 İvmelenen Altın Zaman Mızrağı (pierce 99 + Kolon Dondurma)
+            const xOff = (shotIdx % 2 === 0 ? -8 : 8);
             pushHeavy({
-              x: this.player.x + xOff, y: muzzleY, vx: 0, vy: -18 - shotIdx * 3.0,
-              damage: (16 + lvl * 4.2 + dmgBonus * 1.2) * mult,
-              w: 16, h: 32, color: '#ffd700',
-              piercing: true, pierce: 5, isChronoSlug: true, isCrit: true
+              x: this.player.x + xOff, y: muzzleY, vx: 0, vy: -20 - shotIdx * 3.5,
+              damage: (20 + lvl * 4.8 + dmgBonus * 1.3) * mult,
+              w: 18, h: 44, color: '#ffd700',
+              piercing: true, pierce: 99, isChronoSlug: true, isCrit: true
             });
-            this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#ffd700', 32);
+            this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#ffd700', 36);
           } else {
-            // CYBERPUNK: Çift Askeri Ray Tüfeği (Sol / Sağ alternatif namlu - ÇIV-ÇIV) -> 6.5 / 10
-            const xOff = shotIdx === 0 ? -6 : 6;
+            // CYBERPUNK: Çift Askeri Ray Tüfeği (Sol / Sağ alternatif namlu - ÇIV-ÇIV)
+            const xOff = shotIdx === 0 ? -7 : 7;
             pushHeavy({
-              x: this.player.x + xOff, y: muzzleY, vx: 0, vy: -32,
-              damage: (15 + lvl * 3.8 + dmgBonus) * mult,
-              w: 11, h: 52, color: isCrit ? '#ffbe0b' : '#00f0ff',
-              piercing: true, pierce: 6, isHeavyBeam: true
+              x: this.player.x + xOff, y: muzzleY, vx: 0, vy: -34,
+              damage: (18 + lvl * 4.2 + dmgBonus) * mult,
+              w: 13, h: 64, color: isCrit ? '#ffbe0b' : '#00f0ff',
+              piercing: true, pierce: 10, isHeavyBeam: true
             });
-            this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#00f0ff', 30);
+            this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#00f0ff', 32);
           }
 
           // Bir sonraki atışın aralığını belirle
           if (this.player.heavyBurstQueue > 0) {
             let nextSpacing = cadence.burstSpacing;
             if (cadence.isAccelerating) {
-              // Chrono için: 16 -> 8 -> 4 frame (ivmelenen vuruş temposu)
-              nextSpacing = Math.max(4, Math.round(cadence.burstSpacing / Math.pow(1.9, shotIdx)));
+              // Chrono için: ivmelenen vuruş temposu
+              nextSpacing = Math.max(3, Math.round(cadence.burstSpacing / Math.pow(1.5, shotIdx)));
             }
             this.player.heavyBurstInterval = nextSpacing;
           } else {
             // Burst bitti, ana reload süresini başlat (fireRate hızıyla ölçeklenir)
-            this.player.heavyReloadTimer = Math.max(26, Math.round(cadence.reloadFrames / speedMult));
+            this.player.heavyReloadTimer = Math.max(12, Math.round(cadence.reloadFrames / speedMult));
           }
         }
       }
@@ -15128,12 +15166,13 @@ class Game {
 
           if (bullet.isSplash) {
             sounds.playExplosion(true);
-            this.particles.spawnShockwave(bullet.x, bullet.y, '#ff3d00', 44);
-            this.particles.spawnExplosion(bullet.x, bullet.y, '#ff9100', 14, 2.8);
+            const splashRad = bullet.splashRadius || 52;
+            this.particles.spawnShockwave(bullet.x, bullet.y, '#ff3d00', splashRad > 80 ? 95 : 44);
+            this.particles.spawnExplosion(bullet.x, bullet.y, '#ff9100', splashRad > 80 ? 22 : 14, splashRad > 80 ? 4.2 : 2.8);
             const splashMul = bullet.splashMul || 0.45;
             for (let other of this.enemies) {
               if (other !== enemy && !other.toRemove && other.hp > 0) {
-                if (Math.hypot(other.x - bullet.x, other.y - bullet.y) < 52) {
+                if (Math.hypot(other.x - bullet.x, other.y - bullet.y) < splashRad) {
                   const splashApplied = this.applyCappedEnemyDamage(other, bullet.damage * splashMul);
                   this.recordWeaponDamage('laser', splashApplied);
                   other.hitFlash = 3;
@@ -15148,8 +15187,17 @@ class Game {
 
           if (bullet.isChronoSlug) {
             const boss = enemy.isBoss || (enemy.type && enemy.type.startsWith('boss'));
-            if (boss) enemy.slowTimer = Math.max(enemy.slowTimer || 0, 50);
-            else enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 36);
+            if (boss) enemy.slowTimer = Math.max(enemy.slowTimer || 0, 60);
+            else enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 50);
+            this.particles.spawnShockwave(bullet.x, bullet.y, '#ffd700', 70);
+            for (let other of this.enemies) {
+              if (other !== enemy && !other.toRemove && other.hp > 0 && Math.abs(other.x - bullet.x) < 38) {
+                if (!other.isBoss && !(other.type && other.type.startsWith('boss'))) {
+                  other.freezeTimer = Math.max(other.freezeTimer || 0, 45);
+                  other.hitFlash = 2;
+                }
+              }
+            }
           }
           if (bullet.isGravitySlug && !bullet._wellSpawned && this.vortices.length < 2 && this.armPerk('gravityWell', 28 * 60)) {
             bullet._wellSpawned = true;

@@ -358,6 +358,22 @@ export class ParticleSystem {
     });
   }
 
+  // İkiz Art Yakıcı Alevi (Afterburner - Yüksek hızlı manevra ve hücum itişi)
+  spawnAfterburner(x, y, color = '#38bdf8') {
+    if (this.getActiveParticleCount() > 120) return;
+    this._allocParticle({
+      x: Math.round(x + (Math.random() * 4 - 2)),
+      y: Math.round(y),
+      vx: (Math.random() - 0.5) * 1.8,
+      vy: 6.5 + Math.random() * 5.0,
+      radius: 4.2,
+      isPixel: true,
+      color: Math.random() < 0.45 ? '#ffffff' : color,
+      alpha: 1.0,
+      decay: 0.09
+    });
+  }
+
   // Şok Dalgası (Sadece büyük patlamalar, EMP, Boss ve Evrim anları için zarif neon halka: maxRadius >= 90)
   spawnShockwave(x, y, color = '#00f0ff', maxRadius = 110) {
     if (maxRadius < 90) return;
