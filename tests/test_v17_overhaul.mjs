@@ -40,11 +40,11 @@ const game = getGame();
 // 1. Version Bump Verification
 test('V17.1: Version bumped to 1.7.0+ (versionCode 47+) in package.json & build.gradle', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
-  assert.ok(['1.7.0', '1.7.1'].includes(pkg.version), 'package.json version must be 1.7.0 or 1.7.1');
+  assert.ok(['1.7.0', '1.7.1', '1.7.2'].includes(pkg.version), 'package.json version must be 1.7.0+');
 
   const gradle = fs.readFileSync(path.join(rootDir, 'android/app/build.gradle'), 'utf8');
-  assert.ok(gradle.includes('versionCode 47') || gradle.includes('versionCode 48'), 'build.gradle must have versionCode 47 or 48');
-  assert.ok(gradle.includes('versionName "1.7.0"') || gradle.includes('versionName "1.7.1"'), 'build.gradle must have versionName 1.7.0 or 1.7.1');
+  assert.ok(gradle.includes('versionCode 47') || gradle.includes('versionCode 48') || gradle.includes('versionCode 49'), 'build.gradle must have versionCode 47+');
+  assert.ok(gradle.includes('versionName "1.7.0"') || gradle.includes('versionName "1.7.1"') || gradle.includes('versionName "1.7.2"'), 'build.gradle must have versionName 1.7.0+');
 });
 
 // 2. Controls & Movement Snappiness

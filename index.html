@@ -1326,9 +1326,6 @@
           </div>
         </div>
 
-        <!-- SİLAH HASAR ANALİZİ (DPS METRE) -->
-        <div id="go-damage-breakdown" class="go-damage-breakdown" style="display: none;"></div>
-
         <!-- GANİMET KASASI & 2X KATLAMA (KOMPAKT & ŞIK) -->
         <div class="go-vault-card">
           <div class="vault-info">
@@ -1336,12 +1333,34 @@
             <div class="vault-values">
               <span id="final-crystals-boosted" class="vault-multiplier-preview">+0 CR</span>
             </div>
-            <span class="vault-hint" data-i18n="gameover_double_hint">Reklam izlersen bu uçuşun kristali ikiye katlanır.</span>
           </div>
           <button id="btn-double-crystals" class="vault-double-btn" type="button">
             <span id="btn-double-crystals-text" data-i18n="go_double_crystals_btn">REKLAM İZLE, KRİSTALİ 2 KAT YAP</span>
           </button>
         </div>
+
+        <!-- REVIVE / CANLANMA SEÇENEĞİ (Canlanma hakkı varsa belirir) -->
+        <button id="btn-ad-revive" class="go-revive-btn">
+          <svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span class="btn-main-text" id="go-revive-main-text" data-i18n="btn_revive_action">CANLAN</span>
+          <span class="btn-pill-tag" id="go-revive-pill-tag" data-i18n="btn_revive_ad">REKLAM</span>
+        </button>
+
+        <!-- BİRİNCİL AKSİYON: YENİDEN OYNA (SADE & NET) -->
+        <button id="btn-restart" class="go-primary-restart-btn" data-i18n="btn_retry">
+          <svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M4 2v4H0M12 14v-4h4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M13.5 6A6 6 0 002.5 7.5L0 6M2.5 10a6 6 0 0011-1.5L16 10" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          TEKRAR OYNA
+        </button>
+
+        <!-- İKİNCİL BUTONLAR: HANGAR & MENÜ & PAYLAŞ -->
+        <div class="go-nav-row">
+          <button id="btn-gameover-hangar" class="go-secondary-btn" type="button" data-i18n="btn_hangar">HANGAR</button>
+          <button id="btn-gameover-menu" class="go-secondary-btn" type="button" data-i18n="btn_menu">MENÜ</button>
+          <button id="btn-share-score" class="go-share-btn" type="button" title="Skoru Paylaş" data-i18n="btn_share" data-i18n-title="btn_share">PAYLAŞ</button>
+        </div>
+
+        <!-- SİLAH HASAR ANALİZİ (DPS METRE) -->
+        <div id="go-damage-breakdown" class="go-damage-breakdown" style="display: none;"></div>
 
         <!-- GÜNLÜK GÖREV İLERLEMESİ (1 El Daha Oyna İntikam Kancası) -->
         <div id="go-mission-card" class="go-mission-card" style="display: none;">
@@ -1369,26 +1388,6 @@
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 16 16"><path d="M2 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
             <span id="go-revenge-btn-text">HEMEN YÜKSELT</span>
           </button>
-        </div>
-
-        <!-- REVIVE / CANLANMA SEÇENEĞİ (Canlanma hakkı varsa belirir) -->
-        <button id="btn-ad-revive" class="go-revive-btn">
-          <svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-          <span class="btn-main-text" id="go-revive-main-text" data-i18n="btn_revive_action">CANLAN</span>
-          <span class="btn-pill-tag" id="go-revive-pill-tag" data-i18n="btn_revive_ad">REKLAM</span>
-        </button>
-
-        <!-- BİRİNCİL AKSİYON: YENİDEN OYNA (SADE & NET) -->
-        <button id="btn-restart" class="go-primary-restart-btn" data-i18n="btn_retry">
-          <svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M4 2v4H0M12 14v-4h4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M13.5 6A6 6 0 002.5 7.5L0 6M2.5 10a6 6 0 0011-1.5L16 10" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-          TEKRAR OYNA
-        </button>
-
-        <!-- İKİNCİL BUTONLAR: HANGAR & MENÜ & PAYLAŞ -->
-        <div class="go-nav-row">
-          <button id="btn-gameover-hangar" class="go-secondary-btn" type="button" data-i18n="btn_hangar">HANGAR</button>
-          <button id="btn-gameover-menu" class="go-secondary-btn" type="button" data-i18n="btn_menu">MENÜ</button>
-          <button id="btn-share-score" class="go-share-btn" type="button" title="Skoru Paylaş" data-i18n="btn_share" data-i18n-title="btn_share">PAYLAŞ</button>
         </div>
 
       </div>

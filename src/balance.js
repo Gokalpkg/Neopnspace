@@ -248,40 +248,40 @@ export const TECH_WORKSHOP_CONFIG = {
 export const SPAWN_PACING = {
   getClassicPacing(gameTime, playerLevel) {
     if (gameTime < 12) {
-      return { interval: 26, speedMult: 0.82, maxEnemies: 10 };
+      return { interval: 26, speedMult: 0.82, maxEnemies: 45 };
     }
     if (gameTime < 28 || playerLevel <= 2) {
-      return { interval: 23, speedMult: 0.90, maxEnemies: 12 };
+      return { interval: 23, speedMult: 0.90, maxEnemies: 48 };
     }
     if (playerLevel === 3 || gameTime < 50) {
-      return { interval: 20, speedMult: 0.98, maxEnemies: 14 };
+      return { interval: 20, speedMult: 0.98, maxEnemies: 52 };
     }
     if (gameTime < 85) {
-      return { interval: 18, speedMult: 1.06, maxEnemies: 16 };
+      return { interval: 18, speedMult: 1.06, maxEnemies: 56 };
     }
     return {
       interval: Math.max(13, 18 - Math.floor((gameTime - 85) * 0.12)),
       speedMult: Math.min(1.42, 1.10 + (gameTime - 85) * 0.004),
-      maxEnemies: 18
+      maxEnemies: 60
     };
   },
   getStormPacing(gameTime) {
     if (gameTime < 12) {
-      return { interval: 24, speedMult: 0.85, maxEnemies: 11 };
+      return { interval: 24, speedMult: 0.85, maxEnemies: 45 };
     }
     if (gameTime < 30) {
-      return { interval: 20, speedMult: 0.94, maxEnemies: 13 };
+      return { interval: 20, speedMult: 0.94, maxEnemies: 48 };
     }
     if (gameTime < 60) {
-      return { interval: 17, speedMult: 1.05, maxEnemies: 16 };
+      return { interval: 17, speedMult: 1.05, maxEnemies: 52 };
     }
     if (gameTime < 100) {
-      return { interval: 15, speedMult: 1.16, maxEnemies: 18 };
+      return { interval: 15, speedMult: 1.16, maxEnemies: 56 };
     }
     return {
       interval: Math.max(11, 15 - Math.floor((gameTime - 100) * 0.10)),
       speedMult: Math.min(1.60, 1.22 + (gameTime - 100) * 0.004),
-      maxEnemies: 20
+      maxEnemies: 60
     };
   }
 };

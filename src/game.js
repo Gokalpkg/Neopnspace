@@ -10549,7 +10549,12 @@ class Game {
       }
     } else if (enemy.type === 'scout') {
       this.gems.push(new Gem(enemy.x, enemy.y, 1));
-    } else if (enemy.type === 'escort_fighter' || enemy.type === 'dive_bomber' || enemy.type === 'kamikaze') {
+    } else if (enemy.type === 'kamikaze' || enemy.type === 'dive_bomber') {
+      const val = Math.max(3, Math.round(3 * mult));
+      for (let k = 0; k < 2; k++) {
+        this.gems.push(new Gem(enemy.x + (Math.random() * 16 - 8), enemy.y + (Math.random() * 16 - 8), val));
+      }
+    } else if (enemy.type === 'escort_fighter') {
       this.gems.push(new Gem(enemy.x, enemy.y, 1));
     } else {
       this.gems.push(new Gem(enemy.x, enemy.y, 1));
@@ -10843,7 +10848,7 @@ class Game {
       const weightB = (synergyWeights[b.id] || 1.0) * Math.random();
       return weightB - weightA;
     });
-    while (choices.length < 2 && shuffled.length > 0) {
+    while (choices.length < 3 && shuffled.length > 0) {
       choices.push(shuffled.shift());
     }
 
@@ -10909,7 +10914,7 @@ class Game {
       }
     ];
 
-    while (choices.length < 2 && fallbackOverdrives.length > 0) {
+    while (choices.length < 3 && fallbackOverdrives.length > 0) {
       choices.push(fallbackOverdrives.shift());
     }
 
@@ -13680,6 +13685,36 @@ class Game {
             });
           }
         }
+
+        // === EFSANEVİ EVRİM: HİPER PLAZMA TIRPANI (evo_hyper_plasma / evo_hyper_saber) ===
+        if (this.player.evolutions && (this.player.evolutions.hyperPlasma || this.player.evolutions.hyperSaber)) {
+          this.player.hyperPlasmaCadence = ((this.player.hyperPlasmaCadence || 0) + 1) % 2;
+          if (this.player.hyperPlasmaCadence === 0) {
+            const scytheDmg = (5.8 + step * 1.8) * (this.player.damageMultiplier || 1.0) * critMult;
+            sounds.playLaser();
+            this.particles.spawnShockwave(this.player.x, this.player.y - 12, '#05ffa1', 44);
+            // 3'lü Geniş Süpürücü Zümrüt Tırpan Dalgası (Yüksek Delme & Plazma Yakma DoT)
+            const scytheAngles = [-0.36, 0, 0.36];
+            for (const sAng of scytheAngles) {
+              this.playerBullets.push({
+                x: this.player.x + Math.sin(sAng) * 16,
+                y: this.player.y - 20,
+                vx: Math.sin(sAng) * 9.5,
+                vy: -Math.cos(sAng) * 16.5,
+                damage: scytheDmg,
+                w: 24,
+                h: 24,
+                color: '#05ffa1',
+                piercing: true,
+                pierce: 14,
+                isHyperPlasma: true,
+                plasmaBurnTimer: 100,
+                traveled: 0,
+                maxRange: 750
+              });
+            }
+          }
+        }
       }
     }
 
@@ -14420,7 +14455,13 @@ class Game {
         this.spawnEnemyVanguardFleet(diffScale * bossPlayerPowerScale, speedMult);
       }
 
-      if (this.spawnTimer >= interval && this.enemies.length < maxStormEnemies && !this.stormBossWarningTriggered) {
+      const effectiveStormEnemies = this.enemies.reduce((cnt, e) => {
+        if (!e || e.toRemove || e.hp <= 0) return cnt;
+        if (e.isDebris || e.isSplitPiece || e.type === 'asteroid_split') return cnt;
+        return cnt + 1;
+      }, 0);
+
+      if (this.spawnTimer >= interval && effectiveStormEnemies < maxStormEnemies && !this.stormBossWarningTriggered) {
         this.spawnTimer = 0;
         const x = 30 + Math.random() * (this.width - 60);
         const roll = Math.random();
@@ -14651,8 +14692,14 @@ class Game {
     }
 
     // Ekranda kesintisiz aksiyon ve tatmin edici düşman yoğunluğu (SPAWN_PACING)
+    // Kırmataş ve asteroit parçaları (debris/split) ana filo ve düşman akışını asla kilitlemez!
+    const effectiveEnemyCount = this.enemies.reduce((cnt, e) => {
+      if (!e || e.toRemove || e.hp <= 0) return cnt;
+      if (e.isDebris || e.isSplitPiece || e.type === 'asteroid_split') return cnt;
+      return cnt + 1;
+    }, 0);
     const maxEnemies = classicPacing.maxEnemies;
-    if (this.enemies.length >= maxEnemies) {
+    if (effectiveEnemyCount >= maxEnemies) {
       return;
     }
 
@@ -14968,6 +15015,18 @@ class Game {
         }
       }
 
+      // Plazma Yakma Hasarı (HyperPlasma / Plazma Tırpanı DoT)
+      if (enemy.plasmaBurnTimer > 0 && enemy.hp > 0 && !enemy.toRemove) {
+        enemy.plasmaBurnTimer -= dt;
+        this.applyCappedEnemyDamage(enemy, (enemy.plasmaBurnDmg || 2.4) * 0.05 * dt, false);
+        if (this.frames % 12 === 0) {
+          this.particles.spawnExplosion(enemy.x, enemy.y, '#05ffa1', 1, 1.1);
+        }
+        if (enemy.hp <= 0) {
+          this.handleEnemyDeath(enemy);
+        }
+      }
+
       // Bomba Taşı Zincirleme Patlama Gecikmesi (Organik kademeli patlama)
       if (enemy.delayedBombBlast) {
         enemy.delayedBombBlast.timer -= dt;
@@ -15183,6 +15242,11 @@ class Game {
           if (bullet.isPoison) {
             enemy.poisonTimer = bullet.poisonTime || 90;
             enemy.poisonDmg = Math.max(1.2, bullet.damage * (bullet.poisonMul || 0.35));
+          }
+          if (bullet.isHyperPlasma) {
+            enemy.plasmaBurnTimer = bullet.plasmaBurnTimer || 100;
+            enemy.plasmaBurnDmg = Math.max(2.4, bullet.damage * 0.45);
+            this.particles.spawnExplosion(bullet.x, bullet.y, '#05ffa1', 4, 1.6);
           }
 
           if (bullet.isChronoSlug) {
@@ -15589,7 +15653,7 @@ class Game {
     vibrate.medium();
 
     // Kombo Sistemi (Sessiz ve pürüzsüz akış - ekranda yazı kalabalığı yaratmaz!)
-    this.comboCount = Math.min(50, this.comboCount + 1);
+    this.comboCount = Math.min(250, this.comboCount + 1);
     this.comboTimer = 90; // ~1.5 sn kombo süresi (daha rahat zincir)
     if (this.comboCount > 1) {
       sounds.playComboStreak(this.comboCount);
@@ -15606,17 +15670,40 @@ class Game {
       sounds.playLevelUp();
     }
 
-    // Kombo Kademeleri (Temiz ve sarsıntısız akış - merkezde dev halka veya kör edici flaş patlaması olmadan)
+    // Kombo Kademeleri & Killstreak Şok Dalgaları
     if (this.comboCount === 10) {
       this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 10X] ULTRA!', '#00f0ff', 16);
     } else if (this.comboCount === 20) {
       this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 20X] MEGA!', '#ffbe0b', 18);
+    } else if (this.comboCount === 25) {
+      this.particles.spawnShockwave(this.width / 2, this.height * 0.45, '#00f0ff', 360);
+      this.screenShake = 6;
+      sounds.playPowerup();
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 25X] UNSTOPPABLE!', '#00f0ff', 22);
     } else if (this.comboCount === 30) {
       this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 30X] DURDURULAMAZ!', '#ff0077', 18);
     } else if (this.comboCount === 40) {
       this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, t('float_combo_40'), '#a855f7', 20);
     } else if (this.comboCount === 50) {
-      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, t('float_combo_50'), '#ffd700', 22);
+      this.particles.spawnShockwave(this.width / 2, this.height * 0.45, '#ffd700', 420);
+      this.screenShake = 8;
+      sounds.playEvolution();
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 50X] GODLIKE!', '#ffd700', 24);
+    } else if (this.comboCount === 100) {
+      this.particles.spawnShockwave(this.width / 2, this.height * 0.45, '#ff0055', 460);
+      this.screenShake = 10;
+      sounds.playEvolution();
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 100X] HYPER-FEVER OVERDRIVE!', '#ff0055', 26);
+    } else if (this.comboCount === 150) {
+      this.particles.spawnShockwave(this.width / 2, this.height * 0.45, '#bf5af2', 500);
+      this.screenShake = 12;
+      sounds.playEvolution();
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 150X] LIGHTSPEED CHAIN!', '#bf5af2', 28);
+    } else if (this.comboCount === 200) {
+      this.particles.spawnShockwave(this.width / 2, this.height * 0.45, '#ffbe0b', 540);
+      this.screenShake = 14;
+      sounds.playEvolution();
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 200X] APEX ASCENDANT!', '#ffbe0b', 30);
     }
     
     // Kombo XP Bonusu: 15+ komboda her 5 adımda ekstra XP
@@ -15886,8 +15973,12 @@ class Game {
         // Büyük taş 2 orta taşa bölünür
         const leftM = new Enemy(enemy.x - 12, enemy.y, 'asteroid_m', 1, fragSpeed);
         leftM.speedX = -1.0;
+        leftM.isDebris = true;
+        leftM.isSplitPiece = true;
         const rightM = new Enemy(enemy.x + 12, enemy.y, 'asteroid_m', 1, fragSpeed);
         rightM.speedX = 1.0;
+        rightM.isDebris = true;
+        rightM.isSplitPiece = true;
         this.enemies.push(leftM);
         this.enemies.push(rightM);
         this.particles.spawnExplosion(enemy.x, enemy.y, '#8b9bb4', 12, 2.5);
@@ -15895,8 +15986,12 @@ class Game {
         // Orta taş 2 küçük taşa bölünür
         const leftS = new Enemy(enemy.x - 10, enemy.y, 'asteroid_s', 1, fragSpeed);
         leftS.speedX = -1.1;
+        leftS.isDebris = true;
+        leftS.isSplitPiece = true;
         const rightS = new Enemy(enemy.x + 10, enemy.y, 'asteroid_s', 1, fragSpeed);
         rightS.speedX = 1.1;
+        rightS.isDebris = true;
+        rightS.isSplitPiece = true;
         this.enemies.push(leftS);
         this.enemies.push(rightS);
         this.particles.spawnExplosion(enemy.x, enemy.y, '#a0aec0', 10, 2.2);
@@ -15907,8 +16002,12 @@ class Game {
       if (enemy.type === 'asteroid_m' || enemy.type === 'asteroid_l') {
         const leftKid = new Enemy(enemy.x - 12, enemy.y, 'asteroid_s', 1, fragSpeed);
         leftKid.speedX = -1.1;
+        leftKid.isDebris = true;
+        leftKid.isSplitPiece = true;
         const rightKid = new Enemy(enemy.x + 12, enemy.y, 'asteroid_s', 1, fragSpeed);
         rightKid.speedX = 1.1;
+        rightKid.isDebris = true;
+        rightKid.isSplitPiece = true;
         this.enemies.push(leftKid);
         this.enemies.push(rightKid);
         this.particles.spawnExplosion(enemy.x, enemy.y, '#a0aec0', 10, 2.2);
@@ -17274,7 +17373,31 @@ class Game {
       const w = b.w || 4;
       const h = b.h || 12;
 
-      if (b.isVortexOrb) {
+      if (b.isHyperPlasma) {
+        // HYPER PLASMA SCYTHE / ZÜMRÜT TIRPAN DALGASI
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(Math.atan2(b.vy, b.vx) + Math.PI / 2);
+        // Emerald aura
+        ctx.strokeStyle = 'rgba(5, 255, 161, 0.45)';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(0, 10, 24, Math.PI * 1.05, Math.PI * 1.95);
+        ctx.stroke();
+        // Inner vivid emerald scythe
+        ctx.strokeStyle = '#05ffa1';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(0, 10, 22, Math.PI * 1.12, Math.PI * 1.88);
+        ctx.stroke();
+        // White cutting edge
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 10, 21, Math.PI * 1.25, Math.PI * 1.75);
+        ctx.stroke();
+        ctx.restore();
+      } else if (b.isVortexOrb) {
         // 1. VORTEX TEKİLLİK KÜRESİ: Dönen kara delik & mor/mavi olay ufku
         ctx.save();
         ctx.translate(b.x, b.y);

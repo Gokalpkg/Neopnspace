@@ -467,17 +467,16 @@ export class Enemy {
 
       case 'kamikaze':
         this.radius = 16;
-        this.hp = 999;
-        this.maxHp = 999;
+        this.hp = Math.round(18 * waveMultiplier);
+        this.maxHp = this.hp;
         this.speedY = 1.6 * (speedMultiplier || 1.0);
         this.speedX = 0;
-        this.score = 50;
+        this.score = 250;
         this.color = '#ff0055';
         this.chargeTimer = 22;
         this.charging = false;
         this.chargeVx = 0;
         this.chargeVy = 0;
-        this.isIndestructible = true; // Kullanıcı talebi: Güdümlü füzeler yok edilemez olsun
         this.lifeTimer = 0;
         break;
 
@@ -665,17 +664,16 @@ export class Enemy {
 
       case 'dive_bomber':
         this.radius = 14;
-        this.hp = 999;
-        this.maxHp = 999;
+        this.hp = Math.round(16 * waveMultiplier);
+        this.maxHp = this.hp;
         this.speedY = 1.4 * (speedMultiplier || 1.0);
         this.speedX = 0;
-        this.score = 50;
+        this.score = 250;
         this.color = '#ff9100';
         this.isDiving = false;
         this.diveTimer = 0;
         this.diveTargetAngle = 0;
         this.diveSpeed = 4.4 * (speedMultiplier || 1.0);
-        this.isIndestructible = true; // Kullanıcı talebi: Güdümlü füzeler yok edilemez olsun
         this.lifeTimer = 0;
         break;
 
