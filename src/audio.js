@@ -6,12 +6,13 @@ class SoundEngine {
   constructor() {
     this.ctx = null;
     const savedLevel = localStorage.getItem('neon_audio_level');
+    const savedMuted = localStorage.getItem('neon_audio_muted') === 'true';
     if (savedLevel !== null && savedLevel !== '') {
-      this.audioLevel = Math.max(1, Math.min(8, parseInt(savedLevel, 10) || 8));
+      this.audioLevel = Math.max(0, Math.min(8, parseInt(savedLevel, 10) || 0));
     } else {
-      this.audioLevel = localStorage.getItem('neon_audio_muted') === 'true' ? 1 : 8;
+      this.audioLevel = savedMuted ? 0 : 8;
     }
-    this.isMuted = false;
+    this.isMuted = savedMuted || this.audioLevel === 0;
     this.bgmPlaying = false;
     this.bgmTimer = null;
     this.bgmStep = 0;
@@ -77,7 +78,7 @@ class SoundEngine {
 
         // Ses Kanalları
         this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.setValueAtTime(this.audioLevel / 8, this.ctx.currentTime);
+        this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : (this.audioLevel / 8), this.ctx.currentTime);
         this.masterGain.connect(this.ctx.destination);
 
         this.sfxCompressor = this.ctx.createDynamicsCompressor();
@@ -123,10 +124,10 @@ class SoundEngine {
   }
 
   applyLevel() {
-    this.audioLevel = Math.max(1, Math.min(8, this.audioLevel | 0));
-    this.isMuted = false;
+    this.audioLevel = Math.max(0, Math.min(8, this.audioLevel | 0));
+    this.isMuted = (this.audioLevel === 0);
     localStorage.setItem('neon_audio_level', String(this.audioLevel));
-    localStorage.setItem('neon_audio_muted', 'false');
+    localStorage.setItem('neon_audio_muted', String(this.isMuted));
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setValueAtTime(this.audioLevel / 8, this.ctx.currentTime);
     }
@@ -140,13 +141,21 @@ class SoundEngine {
 
   stepLevel(dir) {
     let next = this.audioLevel + dir;
-    if (next < 1) next = 8;
-    if (next > 8) next = 1;
+    if (next < 0) next = 8;
+    if (next > 8) next = 0;
     return this.setLevel(next);
   }
 
   toggleMute() {
-    return this.stepLevel(-1) <= 0;
+    if (this.isMuted || this.audioLevel === 0) {
+      const restored = (this._prevAudioLevel && this._prevAudioLevel > 0) ? this._prevAudioLevel : 8;
+      this.setLevel(restored);
+      return false;
+    } else {
+      this._prevAudioLevel = this.audioLevel;
+      this.setLevel(0);
+      return true;
+    }
   }
 
   toggleBGM() {

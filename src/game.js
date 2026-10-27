@@ -862,7 +862,7 @@ class Game {
         speedMult: SHIP_BALANCE.cyberpunk.speedMult,
         magnetMult: SHIP_BALANCE.cyberpunk.magnetMult,
         perkTitle: 'AŞIRI İTKİ',
-        perk: 'Mermi sıyırmada (graze) anında +%35 seri atış hızı kazanır.'
+        perk: 'Mermi sıyırmada (graze) 2 sn boyunca +%25 seri atış hızı ve +%20 manevra kazanır.'
       },
       solar: {
         id: 'solar',
@@ -931,8 +931,8 @@ class Game {
         shieldMult: SHIP_BALANCE.chrono.shieldMult,
         speedMult: SHIP_BALANCE.chrono.speedMult,
         magnetMult: SHIP_BALANCE.chrono.magnetMult,
-        perkTitle: 'KRONO SÜPERNOVA',
-        perk: 'Her 11 sn düşmanları ve mermileri 1.1 sn donduran altın zaman dalgası yayar.'
+        perkTitle: 'KRONO SÜPERNOVA (APEX)',
+        perk: '+%55 Üstün Hasar! Sekmeli 3 altın testere çakramı atar ve her 8 sn tüm sahayı 1.3 sn dondurur.'
       }
     };
     this.skinOrder = ['cyberpunk', 'solar', 'toxic', 'vortex', 'phantom', 'chrono'];
@@ -2741,6 +2741,7 @@ class Game {
       crystalsEarned: this.crystalsEarnedThisRun || 0
     };
     try { localStorage.setItem('neon_suspended_run', JSON.stringify(snap)); } catch (e) {}
+    if (typeof this.savePilotStats === 'function') this.savePilotStats();
     this.runInMemory = true;
     this.refreshContinueButton();
   }
@@ -2844,9 +2845,9 @@ class Game {
   }
 
   updateAudioButtons() {
-    const soundLevel = sounds.audioLevel || 8;
+    const soundLevel = (sounds.audioLevel !== undefined) ? sounds.audioLevel : 8;
     const vibLevel = vibrate.level || 8;
-    const isMuted = soundLevel <= 1;
+    const isMuted = sounds.isMuted || soundLevel <= 0;
     const isVibrate = vibLevel > 1;
     const soundOnSvg = `<svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 3h1v1H8zM9 4h1v4H9zM8 8h1v1H8zM11 2h1v8h-1z" fill="#00f0ff"/></svg>`;
     const soundOffSvg = `<svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12"><path d="M1 4h2v4H1zM3 3h2v6H3zM5 2h2v8H5zM8 4h1v1H8zM9 5h1v2H9zM8 7h1v1H8zM10 3h1v1h-1zm1 1h1v1h-1zm-2 2h1v1H9zm-1 1h1v1H8z" fill="#64748b"/><line x1="8" y1="3" x2="12" y2="9" stroke="#ff0055" stroke-width="1.5"/></svg>`;
@@ -3969,8 +3970,9 @@ class Game {
   }
 
   // === DİNAMİK HARCAMA & ALTIN/KRİSTAL PATLAMASI EFEKTİ ===
-  triggerSpendingEffect(sourceEl, cost, label = 'KRİSTAL') {
+  triggerSpendingEffect(sourceEl, cost, label = null) {
     if (!sourceEl) return;
+    const crystalLabel = (label && label !== 'KRİSTAL') ? label : (t('hangar_crystals') || 'CRYSTALS').toUpperCase();
     const rect = sourceEl.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
@@ -3997,7 +3999,7 @@ class Game {
     badge.style.top = `${cy}px`;
     badge.innerHTML = `
       <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 10 10"><polygon points="5,1 9,4 5,9 1,4" fill="#ffd700" stroke="#ffbe0b" stroke-width="0.8"/></svg>
-      <span>-${cost.toLocaleString()} ${label}</span>
+      <span>-${cost.toLocaleString()} ${crystalLabel}</span>
     `;
     container.appendChild(badge);
     setTimeout(() => badge.remove(), 950);
@@ -5034,12 +5036,19 @@ class Game {
             refundAmount += Math.round(item.baseCost * Math.pow(item.costMult || 1.15, i));
           }
         } else {
+          let keptAdLevel = 0;
           for (let i = 0; i < lvl; i++) {
-            if (this.isAdRank(i + 1, item.maxLevel)) continue;
+            if (this.isAdRank(i + 1, item.maxLevel)) {
+              keptAdLevel++;
+              continue;
+            }
             refundAmount += item.costs[i] || 0;
           }
+          this.techUpgrades[item.id] = keptAdLevel;
         }
-        this.techUpgrades[item.id] = 0;
+        if (item.isInfinite) {
+          this.techUpgrades[item.id] = 0;
+        }
       }
     });
 
@@ -9312,7 +9321,7 @@ class Game {
     this.player.hp = this.player.maxHp;
     this.player.critChance = 0.05 + (tech.critChance || 0) * TECH_WORKSHOP_CONFIG.critChance.perLevelAdd;
     this.player.maxShield = Math.round((20 + (tech.shieldMax || 0) * TECH_WORKSHOP_CONFIG.shieldMax.perLevelFlat) * (skinCfg.shieldMult || 1.0));
-    this.player.shield = 0; // Kalkan ile başlama kapalı (kullanıcı talebi: 0 kalkanla başla)
+    this.player.shield = (this.currentSkinId === 'phantom') ? (this.player.maxShield || 20) : 0;
     this.player.level = 1;
     this.player.xp = 0;
     this.player.nextXp = this.getNextLevelXp(1); // 24 XP (İlk yükseltmeyi hak etmek için dengeli başlangıç: ~25-30s)
@@ -9732,11 +9741,14 @@ class Game {
     if (this._hudWaveKey !== waveKey) {
       this._hudWaveKey = waveKey;
       if (this.currentMode === 'storm') {
-        waveDisplay.textContent = `FIRTINA D.${this.wave} • ${sec.subtitle}`;
-        if (levelHudDisplay) levelHudDisplay.textContent = 'FIRTINA';
+        const stormTpl = t('hud_storm_wave') || 'STORM W.{n} • {sub}';
+        waveDisplay.textContent = stormTpl.replace('{n}', this.wave).replace('{sub}', sec.subtitle || '');
+        if (levelHudDisplay) levelHudDisplay.textContent = t('mode_storm_title') || 'STORM';
       } else {
-        waveDisplay.textContent = `BÖLÜM ${this.selectedLevel} • ${sec.subtitle}`;
-        if (levelHudDisplay) levelHudDisplay.textContent = `B.${this.selectedLevel}`;
+        const stageTpl = t('hud_stage_sector') || 'STAGE {n} • {sub}';
+        waveDisplay.textContent = stageTpl.replace('{n}', this.selectedLevel).replace('{sub}', sec.subtitle || '');
+        const shortTpl = t('hud_stage_short') || 'S.{n}';
+        if (levelHudDisplay) levelHudDisplay.textContent = shortTpl.replace('{n}', this.selectedLevel);
       }
       waveDisplay.style.borderColor = sec.color;
       waveDisplay.style.color = sec.color;
@@ -11053,7 +11065,7 @@ class Game {
         sounds.playCardSelect();
         vibrate.medium();
         // 5 Adımlı Koreografi 3: Diğer kartları söndür, seçileni vorteks gibi sıkıştır
-        const allCards = cardsContainer.querySelectorAll('.upgrade-card');
+        const allCards = cardsContainer.querySelectorAll('.upgrade-item-card, .upgrade-card');
         allCards.forEach(c => {
           if (c !== card) c.style.opacity = '0.25';
         });
@@ -11372,7 +11384,7 @@ class Game {
     if (!this.damageStats) {
       this.damageStats = { laser: 0, missiles: 0, tesla: 0, drones: 0, emp: 0 };
     }
-    const mapped = category === 'special' ? 'emp' : category;
+    const mapped = category === 'special' ? 'emp' : (category === 'saws' ? 'drones' : category);
     const key = this.damageStats[mapped] !== undefined ? mapped : 'laser';
     this.damageStats[key] += amount;
   }
@@ -12619,12 +12631,27 @@ class Game {
           if (enemy.hp > 0 && !enemy.toRemove && Math.hypot(enemy.x - sx, enemy.y - sy) < 26 + enemy.radius) {
             const sawDmg = 1.6 * dt * (this.player.damageMultiplier || 1.0);
             this.applyCappedEnemyDamage(enemy, sawDmg);
+            this.recordWeaponDamage('saws', sawDmg);
             if (Math.random() < 0.3 * dt) {
               sounds.playHitmarker();
               this.particles.spawnExplosion(sx, sy, '#ff0055', 3, 1.3);
             }
             if (enemy.hp <= 0) {
               this.handleEnemyDeath(enemy);
+            }
+          }
+        }
+        if (Array.isArray(this.enemyProjectiles)) {
+          for (let p = this.enemyProjectiles.length - 1; p >= 0; p--) {
+            const ep = this.enemyProjectiles[p];
+            if (!ep) continue;
+            const edx = ep.x - sx;
+            const edy = ep.y - sy;
+            if (edx * edx + edy * edy < 28 * 28) {
+              if (this.particles && this.particles.spawnHitSparks) {
+                this.particles.spawnHitSparks(ep.x, ep.y, 0, 0, '#00ffff');
+              }
+              this.enemyProjectiles.splice(p, 1);
             }
           }
         }
@@ -13365,16 +13392,16 @@ class Game {
     const upgradeBonus = (this.player.upgrades.fireRate - 1) * 0.045;
     const stationaryBonus = this.player.isStationary ? 0.06 : 0.0;
     const isCyberpunk = this.currentSkinId === 'cyberpunk';
-    const adrenalineBoost = isCyberpunk ? 0.14 : 0.06;
+    const adrenalineBoost = isCyberpunk ? 0.25 : 0.06;
     const adrenalineBonus = this.player.adrenalineTimer > 0 ? adrenalineBoost : 0.0;
     const phaseFireBonus = (this.currentSkinId === 'phantom' && this.player.phaseTimer > 0) ? 0.12 : 0.0;
     const archBonus = Math.min(0.08, (this.player.fireRateBonus || 1.0) - 1.0);
     const wmLevel = this.player.upgrades.wingman || 0;
     const wingmanSynergy = wmLevel > 0 ? Math.min(0.05, 0.02 + (wmLevel - 1) * 0.01) : 0;
-    const speedMult = Math.min(1.32, 1 + timeBonus + levelBonus + upgradeBonus + stationaryBonus + adrenalineBonus + phaseFireBonus + archBonus + wingmanSynergy);
+    const speedMult = Math.min(1.50, 1 + timeBonus + levelBonus + upgradeBonus + stationaryBonus + adrenalineBonus + phaseFireBonus + archBonus + wingmanSynergy);
 
     const baseInterval = this.player.isFever ? 16 : 30;
-    const fireFloor = this.player.isFever ? 14 : 20;
+    const fireFloor = this.player.isFever ? 10 : 14;
     const fireInterval = Math.max(fireFloor, Math.round(baseInterval / speedMult));
 
     // 1. Ana Silah Sistemi
@@ -13450,14 +13477,17 @@ class Game {
           const masteryCritBonus = (this.masteryTree && this.masteryTree.critDmg) ? this.masteryTree.critDmg * 0.15 : 0;
           const critMult = isCrit ? (2.0 + masteryCritBonus) : 1.0;
           const dmgBonus = (this.player.isFever ? 3.0 : 0) + (isOvercharge ? 2.5 : 0);
-          const mult = critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy) * cadence.dmgScale;
+          const isVortex = !!(this.player.evolutions && this.player.evolutions.vortexLaser);
+          const vortexMult = isVortex ? 1.3 : 1.0;
+          const mult = critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy) * cadence.dmgScale * vortexMult;
 
           const pushHeavy = (bullet) => {
             this.playerBullets.push({
               isCrit,
               maxRange: 980,
               traveled: 0,
-              ...bullet
+              ...bullet,
+              ...(isVortex ? { isVortex: true, piercing: true, color: '#d946ef' } : {})
             });
           };
 
@@ -13502,7 +13532,7 @@ class Game {
             });
             this.particles.spawnShockwave(this.player.x, muzzleY, '#00e5ff', 26);
           } else if (skinId === 'chrono') {
-            // CHRONO APEX: 4 İvmelenen Altın Zaman Mızrağı (pierce 99 + Kolon Dondurma)
+            // CHRONO APEX: 4 İvmelenen Altın Zaman Mızrağı (pierce 99 + Kolon Dondurma) + Seken Altın Çakramlar
             const xOff = (shotIdx % 2 === 0 ? -8 : 8);
             pushHeavy({
               x: this.player.x + xOff, y: muzzleY, vx: 0, vy: -20 - shotIdx * 3.5,
@@ -13511,6 +13541,17 @@ class Game {
               piercing: true, pierce: 99, isChronoSlug: true, isCrit: true
             });
             this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#ffd700', 36);
+            if (shotIdx === 0) {
+              for (const [ox, dir] of [[-12, -1.5], [12, 1.5]]) {
+                pushHeavy({
+                  x: this.player.x + ox, y: muzzleY,
+                  vx: dir, vy: -18.0,
+                  damage: (10 + lvl * 2.5 + dmgBonus) * mult * 0.65,
+                  w: 11, h: 11, color: '#ffd700',
+                  piercing: true, pierce: 2, isChakram: true, isRicochet: true, bouncesLeft: 3
+                });
+              }
+            }
           } else {
             // CYBERPUNK: Çift Askeri Ray Tüfeği (Sol / Sağ alternatif namlu - ÇIV-ÇIV)
             const xOff = shotIdx === 0 ? -7 : 7;
@@ -13521,6 +13562,34 @@ class Game {
               piercing: true, pierce: 10, isHeavyBeam: true
             });
             this.particles.spawnShockwave(this.player.x + xOff, muzzleY, '#00f0ff', 32);
+          }
+
+          // === EFSANEVİ EVRİM: HİPER PLAZMA TIRPANI (Ön Hat Portu) ===
+          if (this.player.evolutions && (this.player.evolutions.hyperPlasma || this.player.evolutions.hyperSaber)) {
+            if (shotIdx === 0) {
+              const scytheDmg = (5.8 + ((lvl - 1) * 0.28) * 1.8) * (this.player.damageMultiplier || 1.0) * critMult;
+              sounds.playLaser();
+              this.particles.spawnShockwave(this.player.x, this.player.y - 12, '#05ffa1', 44);
+              const scytheAngles = [-0.36, 0, 0.36];
+              for (const sAng of scytheAngles) {
+                this.playerBullets.push({
+                  x: this.player.x + Math.sin(sAng) * 16,
+                  y: this.player.y - 20,
+                  vx: Math.sin(sAng) * 9.5,
+                  vy: -Math.cos(sAng) * 16.5,
+                  damage: scytheDmg,
+                  w: 24,
+                  h: 24,
+                  color: '#05ffa1',
+                  piercing: true,
+                  pierce: 14,
+                  isHyperPlasma: true,
+                  plasmaBurnTimer: 100,
+                  traveled: 0,
+                  maxRange: 750
+                });
+              }
+            }
           }
 
           // Bir sonraki atışın aralığını belirle
@@ -13917,8 +13986,10 @@ class Game {
     // === EFSANEVİ EVRİM: KIYAMET TESLA MATRİSİ (evo_matrix) ===
     if (this.player.evolutions && this.player.evolutions.doomsdayMatrix && this.enemies.length > 0) {
       this.tetheredEnemies = [];
+      const hasRealEnemies = this.enemies.some(e => e.hp > 0 && !e.toRemove && !e.isDebris && !e.isSplitPiece && ((e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 < 300 * 300));
       for (let enemy of this.enemies) {
         if (enemy.hp <= 0 || enemy.toRemove) continue;
+        if (hasRealEnemies && (enemy.isDebris || enemy.isSplitPiece)) continue;
         const dx = enemy.x - this.player.x;
         const dy = enemy.y - this.player.y;
         if (dx * dx + dy * dy < 300 * 300) {
@@ -14175,7 +14246,13 @@ class Game {
       }
 
       if (b.isRicochet && b.bouncesLeft > 0 && (b.x <= 14 || b.x >= this.width - 14)) {
-        b.vx = -b.vx;
+        if (b.x <= 14) {
+          b.x = 15;
+          b.vx = Math.max(1.5, Math.abs(b.vx || 0));
+        } else if (b.x >= this.width - 14) {
+          b.x = this.width - 15;
+          b.vx = -Math.max(1.5, Math.abs(b.vx || 0));
+        }
         b.bouncesLeft--;
         this.particles.spawnExplosion(b.x, b.y, '#ffd700', 3, 1.2);
         sounds.playCrit();
@@ -14282,7 +14359,7 @@ class Game {
         const validEnemies = this.enemies.filter(e => e.hp > 0 && !e.toRemove && e.y > -20 && e.y < this.height);
         const targets = validEnemies.sort(() => 0.5 - Math.random()).slice(0, Math.min(8, Math.floor(5 + Math.random() * 4)));
         for (let target of targets) {
-          const stormDmg = 14;
+          const stormDmg = 14 * (this.player.damageMultiplier || 1.0);
           this.applyCappedEnemyDamage(target, stormDmg);
           this.particles.spawnShockwave(target.x, target.y, '#38bdf8', 60);
           this.particles.spawnExplosion(target.x, target.y, '#00f0ff', 6, 2.0);
@@ -14527,7 +14604,7 @@ class Game {
         const bType = stormBossRoster[Math.min(this.stormBossIndex, stormBossRoster.length - 1)];
         const bInfo = Enemy.getBossInfo(bType);
         this.bossEntryDimTimer = 95;
-        flashEventBanner(`SİSTEM İHLALİ: AMİRAL PROTOKOLÜ DEVREDE — ${bInfo.name}`, 'threat');
+        flashEventBanner(`${t('boss_warning_title') || 'WARNING: CAPITAL SHIP APPROACHING'} — ${bInfo.name}`, 'threat');
         sounds.playBossAlarm();
         vibrate.heavy();
         this.screenShake = 7;
@@ -14942,6 +15019,48 @@ class Game {
     }
   }
 
+  applyBossPodDamage(enemy, hitDamage, hitX) {
+    if (!enemy || (!enemy.isBoss && !(enemy.type && String(enemy.type).startsWith('boss')))) return;
+    const relX = hitX - enemy.x;
+    const podHitDmg = Math.min(hitDamage, Math.max(4, (enemy.maxHp || 100) * 0.035));
+    // Sol Pod Vuruşu
+    if (relX < -12 && !enemy.leftPodDestroyed) {
+      enemy.leftPodHp = (enemy.leftPodHp || 50) - podHitDmg;
+      if (this.particles && this.particles.spawnExplosion) {
+        this.particles.spawnExplosion(hitX, enemy.y, '#ff0055', 4, 1.4);
+      }
+      if (enemy.leftPodHp <= 0) {
+        enemy.leftPodDestroyed = true;
+        sounds.playExplosion(true);
+        this.screenShake = 9;
+        if (this.particles && this.particles.spawnShockwave) {
+          this.particles.spawnShockwave(enemy.x - 26, enemy.y, '#ff0055', 130);
+        }
+        if (this.particles && this.particles.spawnExplosion) {
+          this.particles.spawnExplosion(enemy.x - 26, enemy.y, '#ff0055', 20, 3.5);
+        }
+      }
+    }
+    // Sağ Pod Vuruşu
+    else if (relX > 12 && !enemy.rightPodDestroyed) {
+      enemy.rightPodHp = (enemy.rightPodHp || 50) - podHitDmg;
+      if (this.particles && this.particles.spawnExplosion) {
+        this.particles.spawnExplosion(hitX, enemy.y, '#ff0055', 4, 1.4);
+      }
+      if (enemy.rightPodHp <= 0) {
+        enemy.rightPodDestroyed = true;
+        sounds.playExplosion(true);
+        this.screenShake = 9;
+        if (this.particles && this.particles.spawnShockwave) {
+          this.particles.spawnShockwave(enemy.x + 26, enemy.y, '#ff0055', 130);
+        }
+        if (this.particles && this.particles.spawnExplosion) {
+          this.particles.spawnExplosion(enemy.x + 26, enemy.y, '#ff0055', 20, 3.5);
+        }
+      }
+    }
+  }
+
   applyCappedEnemyDamage(enemy, rawDamage, from) {
     if (!enemy || enemy.isIndestructible) return 0;
     let dmg = Math.max(0, rawDamage);
@@ -15086,9 +15205,10 @@ class Game {
         if (enemy.laserActiveTimer > 0 && this.player) {
           this.player.beamHitCooldown = Math.max(0, (this.player.beamHitCooldown || 0) - dt);
           const beamHalfWidth = 24 + (this.player.radius || 16) * 0.65;
-          if (this.player.y > enemy.y && Math.abs(this.player.x - enemy.x) < beamHalfWidth && (this.player.beamHitCooldown || 0) <= 0) {
+          const laserX = enemy.laserTargetX !== undefined ? enemy.laserTargetX : enemy.x;
+          if (this.player.y > enemy.y && Math.abs(this.player.x - laserX) < beamHalfWidth && (this.player.beamHitCooldown || 0) <= 0) {
             this.player.beamHitCooldown = 20;
-            this.takeDamage(18, enemy.x, this.player.y);
+            this.takeDamage(18, laserX, this.player.y);
           }
         }
       }
@@ -15128,33 +15248,9 @@ class Game {
             }
 
           // 7. BOSS KIRILABİLİR SİLAH PODLARI & SAVUNMASIZ ÇEKİRDEK (WEAKPOINT)
-          if (enemy.isBoss || enemy.type.startsWith('boss')) {
+          if (enemy.isBoss || (enemy.type && enemy.type.startsWith('boss'))) {
+            this.applyBossPodDamage(enemy, hitDamage, bullet.x);
             const relX = bullet.x - enemy.x;
-            const podHitDmg = Math.min(hitDamage, Math.max(4, enemy.maxHp * 0.035));
-            // Sol Pod Vuruşu
-            if (relX < -12 && !enemy.leftPodDestroyed) {
-              enemy.leftPodHp = (enemy.leftPodHp || 50) - podHitDmg;
-              this.particles.spawnExplosion(bullet.x, bullet.y, '#ff0055', 4, 1.4);
-              if (enemy.leftPodHp <= 0) {
-                enemy.leftPodDestroyed = true;
-                sounds.playExplosion(true);
-                this.screenShake = 9;
-                this.particles.spawnShockwave(enemy.x - 26, enemy.y, '#ff0055', 130);
-                this.particles.spawnExplosion(enemy.x - 26, enemy.y, '#ff0055', 20, 3.5);
-              }
-            }
-            // Sağ Pod Vuruşu
-            else if (relX > 12 && !enemy.rightPodDestroyed) {
-              enemy.rightPodHp = (enemy.rightPodHp || 50) - podHitDmg;
-              this.particles.spawnExplosion(bullet.x, bullet.y, '#ff0055', 4, 1.4);
-              if (enemy.rightPodHp <= 0) {
-                enemy.rightPodDestroyed = true;
-                sounds.playExplosion(true);
-                this.screenShake = 9;
-                this.particles.spawnShockwave(enemy.x + 26, enemy.y, '#ff0055', 130);
-                this.particles.spawnExplosion(enemy.x + 26, enemy.y, '#ff0055', 20, 3.5);
-              }
-            }
             // İki pod da yok edildiğinde: AÇIK ÇEKİRDEK - %40 KRİTİK ZAYIF NOKTA HASARI!
             if (enemy.leftPodDestroyed && enemy.rightPodDestroyed && Math.abs(relX) <= 16) {
               hitDamage *= 1.4;
@@ -15212,7 +15308,7 @@ class Game {
             }
           }
 
-          if (bullet.isVortex && this.vortices.length < 2 && this.armPerk('vortexHit', 24 * 60)) {
+          if (bullet.isVortex && this.vortices.length < 2 && this.armPerk('vortexHit', 8 * 60)) {
             this.vortices.push({ x: bullet.x, y: bullet.y, timer: 80, radius: 58 });
           }
 
@@ -15232,6 +15328,7 @@ class Game {
             for (let other of this.enemies) {
               if (other !== enemy && !other.toRemove && other.hp > 0) {
                 if (Math.hypot(other.x - bullet.x, other.y - bullet.y) < splashRad) {
+                  this.applyBossPodDamage(other, bullet.damage * splashMul, bullet.x);
                   const splashApplied = this.applyCappedEnemyDamage(other, bullet.damage * splashMul);
                   this.recordWeaponDamage('laser', splashApplied);
                   other.hitFlash = 3;
@@ -15305,6 +15402,7 @@ class Game {
           if (missile.state && missile.state !== 'active') continue;
           const dist = Math.hypot(missile.x - enemy.x, missile.y - enemy.y);
           if (dist < enemy.radius + 8) {
+            this.applyBossPodDamage(enemy, missile.damage, missile.x);
             const mApplied = this.applyCappedEnemyDamage(enemy, missile.damage);
             this.recordWeaponDamage('missiles', mApplied);
             enemy.hitFlash = 4;
@@ -15327,7 +15425,9 @@ class Game {
                 const oDx = other.x - mX;
                 const oDy = other.y - mY;
                 if (oDx * oDx + oDy * oDy < 60 * 60) {
-                  const cApplied = this.applyCappedEnemyDamage(other, 15);
+                  const clusterDmg = 15 * (this.player.damageMultiplier || 1.0);
+                  this.applyBossPodDamage(other, clusterDmg, mX);
+                  const cApplied = this.applyCappedEnemyDamage(other, clusterDmg);
                   this.recordWeaponDamage('missiles', cApplied);
                   this.particles.spawnExplosion(other.x, other.y, '#ff5500', 3, 1.8);
                 }
@@ -15541,8 +15641,8 @@ class Game {
     this.player.xp += 0.3 * xpMult;
     if (this.player.xp >= this.player.nextXp) this.checkLevelUp();
     this.player.score += 45;
-    // 1.3 saniyelik Adrenalin Patlaması (+%25 seri ateş hızı)
-    this.player.adrenalineTimer = this.currentSkinId === 'cyberpunk' ? 150 : 80;
+    // 2 sn Adrenalin Patlaması (+%25 seri ateş hızı)
+    this.player.adrenalineTimer = this.currentSkinId === 'cyberpunk' ? 120 : 80;
     if (this.particles && this.particles.spawnGrazeSparks) {
       this.particles.spawnGrazeSparks(sourceX || this.player.x, sourceY || this.player.y);
     }
@@ -15681,9 +15781,9 @@ class Game {
       sounds.playPowerup();
       this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 25X] UNSTOPPABLE!', '#00f0ff', 22);
     } else if (this.comboCount === 30) {
-      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 30X] DURDURULAMAZ!', '#ff0077', 18);
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 30X] RAMPAGE!', '#ff0077', 18);
     } else if (this.comboCount === 40) {
-      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, t('float_combo_40'), '#a855f7', 20);
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, t('float_combo_40') || '[COMBO 40X] DOMINATING!', '#a855f7', 20);
     } else if (this.comboCount === 50) {
       this.particles.spawnShockwave(this.width / 2, this.height * 0.45, '#ffd700', 420);
       this.screenShake = 8;
@@ -15704,6 +15804,11 @@ class Game {
       this.screenShake = 14;
       sounds.playEvolution();
       this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 200X] APEX ASCENDANT!', '#ffbe0b', 30);
+    } else if (this.comboCount === 250) {
+      this.particles.spawnShockwave(this.width / 2, this.height * 0.45, '#00f0ff', 600);
+      this.screenShake = 16;
+      sounds.playEvolution();
+      this.particles.spawnFloatingText(this.width / 2, this.height * 0.25, '[COMBO 250X] SINGULARITY TRANSCENDENCE!', '#00f0ff', 32);
     }
     
     // Kombo XP Bonusu: 15+ komboda her 5 adımda ekstra XP
@@ -15967,15 +16072,16 @@ class Game {
     // İlk boss yenilene kadar: 2 AŞAMALI PRATİK SİSTEM ("1 Vur 2'ye Bölünsün, O 2'yi Vur Bitsin!")
     // İlk boss yenildikten sonra: ESKİ 3 KADEMELİ SİSTEM GERİ DÖNER (Büyük -> 2 Orta -> her orta 2 Küçük -> Küçük biter)
     const fragSpeed = (this.currentMode === 'storm' ? 0.75 : 0.70) * (this.waveSpeedBonus || 1.0);
+    const waveMult = this.waveMultiplier || 1;
     if (this.firstBossDefeated) {
       // === ESKİ SİSTEM (BOSS SONRASI) ===
       if (enemy.type === 'asteroid_l') {
         // Büyük taş 2 orta taşa bölünür
-        const leftM = new Enemy(enemy.x - 12, enemy.y, 'asteroid_m', 1, fragSpeed);
+        const leftM = new Enemy(enemy.x - 12, enemy.y, 'asteroid_m', waveMult, fragSpeed);
         leftM.speedX = -1.0;
         leftM.isDebris = true;
         leftM.isSplitPiece = true;
-        const rightM = new Enemy(enemy.x + 12, enemy.y, 'asteroid_m', 1, fragSpeed);
+        const rightM = new Enemy(enemy.x + 12, enemy.y, 'asteroid_m', waveMult, fragSpeed);
         rightM.speedX = 1.0;
         rightM.isDebris = true;
         rightM.isSplitPiece = true;
@@ -15984,11 +16090,11 @@ class Game {
         this.particles.spawnExplosion(enemy.x, enemy.y, '#8b9bb4', 12, 2.5);
       } else if (enemy.type === 'asteroid_m') {
         // Orta taş 2 küçük taşa bölünür
-        const leftS = new Enemy(enemy.x - 10, enemy.y, 'asteroid_s', 1, fragSpeed);
+        const leftS = new Enemy(enemy.x - 10, enemy.y, 'asteroid_s', waveMult, fragSpeed);
         leftS.speedX = -1.1;
         leftS.isDebris = true;
         leftS.isSplitPiece = true;
-        const rightS = new Enemy(enemy.x + 10, enemy.y, 'asteroid_s', 1, fragSpeed);
+        const rightS = new Enemy(enemy.x + 10, enemy.y, 'asteroid_s', waveMult, fragSpeed);
         rightS.speedX = 1.1;
         rightS.isDebris = true;
         rightS.isSplitPiece = true;
@@ -16000,11 +16106,11 @@ class Game {
     } else {
       // === YENİ 2 AŞAMALI SİSTEM (İLK BOSS ÖNCESİ) ===
       if (enemy.type === 'asteroid_m' || enemy.type === 'asteroid_l') {
-        const leftKid = new Enemy(enemy.x - 12, enemy.y, 'asteroid_s', 1, fragSpeed);
+        const leftKid = new Enemy(enemy.x - 12, enemy.y, 'asteroid_s', waveMult, fragSpeed);
         leftKid.speedX = -1.1;
         leftKid.isDebris = true;
         leftKid.isSplitPiece = true;
-        const rightKid = new Enemy(enemy.x + 12, enemy.y, 'asteroid_s', 1, fragSpeed);
+        const rightKid = new Enemy(enemy.x + 12, enemy.y, 'asteroid_s', waveMult, fragSpeed);
         rightKid.speedX = 1.1;
         rightKid.isDebris = true;
         rightKid.isSplitPiece = true;

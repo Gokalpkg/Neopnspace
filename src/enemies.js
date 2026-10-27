@@ -883,7 +883,9 @@ export class Enemy {
       // === BOSS 1.2 SN LAZER TELEGRAFI & AKTİF ÖLÜM IŞINI DÖNGÜSÜ ===
       if (this.laserActiveTimer > 0) {
         this.laserActiveTimer = Math.max(0, this.laserActiveTimer - dt);
-        this.laserTargetX = this.x; // Lazer boss ile birlikte hafif kayar
+        if (this.laserLockOffset !== undefined) {
+          this.laserTargetX = this.x + this.laserLockOffset;
+        }
       } else if (this.laserChargeTimer > 0) {
         this.laserChargeTimer = Math.max(0, this.laserChargeTimer - dt);
         // İlk 0.7 saniye oyuncuyu yavaşça takip eder, son 0.5 saniye kilitlenir (adil kaçış penceresi)
@@ -892,6 +894,7 @@ export class Enemy {
         }
         if (this.laserChargeTimer <= 0) {
           this.laserActiveTimer = 45; // 0.75s aktif lazer ateşlemesi
+          this.laserLockOffset = (this.laserTargetX !== undefined) ? (this.laserTargetX - this.x) : 0;
           this.justFiredBossLaser = true;
         }
       } else {
@@ -1186,15 +1189,18 @@ export class Enemy {
       }
     }
 
-    // Düşmanların ve meteorların sağa sola kaçmasını engelle! (Arena Sınırları)
-    const minX = this.radius + 8;
-    const maxX = screenWidth - this.radius - 8;
-    if (this.x < minX) {
-      this.x = minX;
-      if (this.speedX) this.speedX = Math.abs(this.speedX);
-    } else if (this.x > maxX) {
-      this.x = maxX;
-      if (this.speedX) this.speedX = -Math.abs(this.speedX);
+    // Düşmanların ve meteorların sağa sola kaçmasını engelle! (Arena Sınırları - Dalış yapan avcılar hariç)
+    const isDiver = this.type === 'dive_bomber' || this.type === 'kamikaze';
+    if (!isDiver) {
+      const minX = this.radius + 8;
+      const maxX = screenWidth - this.radius - 8;
+      if (this.x < minX) {
+        this.x = minX;
+        if (this.speedX) this.speedX = Math.abs(this.speedX);
+      } else if (this.x > maxX) {
+        this.x = maxX;
+        if (this.speedX) this.speedX = -Math.abs(this.speedX);
+      }
     }
 
     // Ekranın altına inen düşmanlar ve mermiler temizlenir (Bosslar hariç)
@@ -1303,7 +1309,7 @@ export class Enemy {
       const blink = Math.sin(Date.now() * 0.025) > 0;
       ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : (this.charging ? (blink ? '#ff0055' : '#ffbe0b') : '#ff0055');
       ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = this.charging ? 16 : 8;
+      ctx.shadowBlur = this.charging ? 3 : 0;
 
       ctx.beginPath();
       ctx.moveTo(0, -this.radius * 1.3);
@@ -1601,7 +1607,7 @@ export class Enemy {
       ctx.strokeStyle = `rgba(56, 189, 248, ${shieldPulse})`;
       ctx.lineWidth = 3.5;
       ctx.shadowColor = '#00f0ff';
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = 3;
       ctx.beginPath();
       ctx.arc(0, 4, this.radius * 1.35, Math.PI * 0.15, Math.PI * 0.85);
       ctx.stroke();
@@ -1614,7 +1620,7 @@ export class Enemy {
       ctx.strokeStyle = `rgba(0, 240, 255, ${sparkPulse})`;
       ctx.lineWidth = 2.2;
       ctx.shadowColor = '#00f0ff';
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = 2;
       ctx.beginPath();
       ctx.arc(0, 0, this.radius * 1.15, 0, Math.PI * 2);
       ctx.stroke();
@@ -1879,13 +1885,14 @@ export class Enemy {
       const prog = 1 - (this.laserChargeTimer / maxC); // 0 -> 1
       const pulse = 0.55 + Math.sin(Date.now() * 0.035) * 0.45;
       const coneHalfWidth = Math.max(4, (1 - prog) * 38);
+      const targetOffX = (this.laserTargetX !== undefined) ? (this.laserTargetX - this.x) : 0;
       ctx.save();
       // Daralan kırmızı tehdit konisi
       ctx.fillStyle = `rgba(255, 0, 85, ${0.08 + prog * 0.18})`;
       ctx.beginPath();
       ctx.moveTo(0, this.radius * 0.65);
-      ctx.lineTo(-coneHalfWidth, 820);
-      ctx.lineTo(coneHalfWidth, 820);
+      ctx.lineTo(targetOffX - coneHalfWidth, 820);
+      ctx.lineTo(targetOffX + coneHalfWidth, 820);
       ctx.closePath();
       ctx.fill();
 
@@ -1895,7 +1902,7 @@ export class Enemy {
       if (ctx.setLineDash) ctx.setLineDash([10, 6]);
       ctx.beginPath();
       ctx.moveTo(0, this.radius * 0.65);
-      ctx.lineTo(0, 820);
+      ctx.lineTo(targetOffX, 820);
       ctx.stroke();
       if (ctx.setLineDash) ctx.setLineDash([]);
 
@@ -1911,14 +1918,15 @@ export class Enemy {
       ctx.restore();
     } else if (this.laserActiveTimer > 0) {
       // Aktif Boss Ölüm Lazeri (0.75s Boyunca Ekranı Boydan Boya Kesen Kızıl/Beyaz Sütun)
+      const targetOffX = (this.laserTargetX !== undefined) ? (this.laserTargetX - this.x) : 0;
       const beamW = 28 + Math.sin(Date.now() * 0.06) * 5;
       ctx.save();
       ctx.fillStyle = 'rgba(255, 0, 85, 0.38)';
-      ctx.fillRect(-beamW, this.radius * 0.6, beamW * 2, 840);
+      ctx.fillRect(targetOffX - beamW, this.radius * 0.6, beamW * 2, 840);
       ctx.fillStyle = '#ff0055';
-      ctx.fillRect(-beamW * 0.55, this.radius * 0.6, beamW * 1.1, 840);
+      ctx.fillRect(targetOffX - beamW * 0.55, this.radius * 0.6, beamW * 1.1, 840);
       ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(-beamW * 0.25, this.radius * 0.6, beamW * 0.5, 840);
+      ctx.fillRect(targetOffX - beamW * 0.25, this.radius * 0.6, beamW * 0.5, 840);
       ctx.restore();
     } else if (this.shootTimer <= 12 && this.shootTimer > 0) {
       const alpha = (1 - this.shootTimer / 12) * 0.75;
@@ -1945,7 +1953,7 @@ export class Enemy {
       ctx.globalAlpha = Math.min(0.92, this.hitFlash * 0.28);
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = '#ffffff';
-      ctx.shadowBlur = 14;
+      ctx.shadowBlur = 3;
       ctx.beginPath();
       ctx.arc(0, 0, this.radius * 1.08, 0, Math.PI * 2);
       ctx.fill();
