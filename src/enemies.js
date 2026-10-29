@@ -527,7 +527,7 @@ export class Enemy {
         this.isEnraged = false;
         this.justEnraged = false;
         this.enrageShieldTimer = 0;
-        this.maxDamagePerHitRatio = 0.045; // Tek vuruşta maksimum %4.5 hasar alabilir (Asla tek yemez!)
+        this.maxDamagePerHitRatio = 0.18; // Tek vuruşta makul tavan (Kritik, nükleer ve ağır darbeler ödüllendirilir)
         this.shieldPlateAngle = 0;
         this.spiralAngle = 0;
         this.bossAttackTick = 0;
@@ -810,7 +810,7 @@ export class Enemy {
         this.shootTimer = (this.shootTimer || 120) - dt;
         if (this.shootTimer <= 0) {
           // Ekranda çok mermi varsa bekle, oyuncuyu mermi cehennemine boğma
-          if (enemyProjectiles.length >= 14) {
+          if (enemyProjectiles.length >= 36) {
             this.shootTimer = 35 + Math.random() * 25;
           } else {
             this.shootTimer = this.isFleetMember ? (115 + Math.random() * 45) : (145 + Math.random() * 55);
@@ -860,16 +860,19 @@ export class Enemy {
         this.color = info.enragedColor;
       }
 
-      // Boss ekranın üst yarısında süzülür
+      // Boss ekranın üst yarısında süzülür (Dinamik dikey salınım, swoop dalışları ve taktiksel manevralar)
       const targetHoverY = this.type === 'boss_apex' ? 135 : 120;
       if (this.y < targetHoverY) {
         this.y += Math.max(0.85, this.speedY * 2.2) * dt;
       } else {
-        // Hafif dikey salınım ile canlı amiral gemisi hissi
-        this.bossAttackTick = (this.bossAttackTick || 0) + 0.03 * dt;
-        this.y = targetHoverY + Math.sin(this.bossAttackTick) * 8;
+        this.bossAttackTick = (this.bossAttackTick || 0) + (this.phase === 2 ? 0.036 : 0.024) * dt;
+        // Çift frekanslı dikey undülasyon ve 2. fazda agresif taktiksel dalışlar (swoop)
+        const verticalWave = Math.sin(this.bossAttackTick) * 20 + Math.cos(this.bossAttackTick * 1.7) * 10;
+        const phaseSwoop = this.phase === 2 ? Math.max(0, Math.sin(this.bossAttackTick * 0.75)) * 34 : 0;
+        this.y = targetHoverY + verticalWave + phaseSwoop;
       }
-      this.x += this.speedX * this.dirX * dt;
+      const speedMod = 1.0 + 0.22 * Math.sin((this.bossAttackTick || 0) * 1.4);
+      this.x += this.speedX * this.dirX * speedMod * dt;
       if (this.x > screenWidth - this.radius - 12) {
         this.dirX = -1;
       } else if (this.x < this.radius + 12) {
@@ -1054,7 +1057,7 @@ export class Enemy {
       if (this.y > 25 && enemyProjectiles) {
         this.shootTimer = (this.shootTimer || 100) - dt;
         if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 14) {
+          if (enemyProjectiles.length >= 36) {
             this.shootTimer = 40 + Math.random() * 25;
           } else {
             this.shootTimer = 130 + Math.random() * 40;
@@ -1078,7 +1081,7 @@ export class Enemy {
       if (this.y > 25 && enemyProjectiles) {
         this.shootTimer = (this.shootTimer || 100) - dt;
         if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 14) {
+          if (enemyProjectiles.length >= 36) {
             this.shootTimer = 40 + Math.random() * 25;
           } else {
             this.shootTimer = 125 + Math.random() * 45;
@@ -1127,7 +1130,7 @@ export class Enemy {
       if (this.y > 30 && enemyProjectiles) {
         this.shootTimer = (this.shootTimer || 80) - dt;
         if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 14) {
+          if (enemyProjectiles.length >= 36) {
             this.shootTimer = 35 + Math.random() * 20;
           } else {
             this.shootTimer = 95 + Math.random() * 35;
@@ -1160,7 +1163,7 @@ export class Enemy {
       if (this.y > 20 && enemyProjectiles) {
         this.shootTimer = (this.shootTimer || 70) - dt;
         if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 14) {
+          if (enemyProjectiles.length >= 36) {
             this.shootTimer = 30 + Math.random() * 25;
           } else {
             this.shootTimer = 85 + Math.random() * 35;

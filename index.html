@@ -581,6 +581,15 @@
           <canvas id="lucky-wheel-canvas" width="260" height="260" style="border-radius: 50%; box-shadow: 0 0 30px rgba(0, 240, 255, 0.45), inset 0 0 20px rgba(0, 240, 255, 0.25); border: 2.5px solid #00f0ff; touch-action: none; cursor: grab; user-select: none;"></canvas>
         </div>
 
+        <!-- Şeffaf Kazanma Olasılıkları Göstergesi -->
+        <div class="wheel-odds-bar" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; font-size: 0.73rem; font-family: 'Rajdhani', sans-serif; font-weight: 600; color: #94a3b8; margin-bottom: 9px; background: rgba(0, 240, 255, 0.05); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(0, 240, 255, 0.15);">
+          <span><span style="color:#ffd700;">★ 500 CR:</span> 7%</span>
+          <span><span style="color:#ff0055;">♥ CAN:</span> 10%</span>
+          <span><span style="color:#00f0ff;">◆ KRİSTAL:</span> 61%</span>
+          <span><span style="color:#38bdf8;">🛡 KALKAN:</span> 14%</span>
+          <span><span style="color:#c084fc;">⚡ ŞARJ:</span> 8%</span>
+        </div>
+
         <div style="display:flex; justify-content:center; margin-bottom:8px;">
           <button id="wheel-fast-toggle" type="button" class="wheel-fast-toggle-btn" title="4.3s animasyonu 0.38s hızlı moda geçirir">
             <svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="margin-right:4px;"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#ffbe0b"/></svg>
@@ -1532,18 +1541,32 @@
              unitId === window.ADMOB_CONFIG.interstitialFallbackId;
     }
 
-    // Avrupa Birliği (GDPR / UMP) Rıza ve İzin Kontrolü
+    // Avrupa Birliği (GDPR / UMP) Rıza ve iOS ATT İzin Kontrolü
     window.initAdMobConsent = async function() {
       const AdMob = window.Capacitor?.Plugins?.AdMob;
-      if (!AdMob || !AdMob.requestConsentInfo) return;
+      if (!AdMob) return;
+      // 1. GDPR / EU UMP Consent
       try {
-        const consentInfo = await AdMob.requestConsentInfo();
-        console.log('AdMob UMP Consent Info:', consentInfo);
-        if (consentInfo.isConsentFormAvailable && consentInfo.status === 'REQUIRED') {
-          await AdMob.showConsentForm();
+        if (AdMob.requestConsentInfo) {
+          const consentInfo = await AdMob.requestConsentInfo();
+          console.log('AdMob UMP Consent Info:', consentInfo);
+          if (consentInfo && consentInfo.isConsentFormAvailable && consentInfo.status === 'REQUIRED') {
+            await AdMob.showConsentForm();
+          }
         }
       } catch (err) {
         console.warn('AdMob Consent check warning:', err);
+      }
+      // 2. iOS App Tracking Transparency (ATT) - Apple App Store Compliance
+      try {
+        if (AdMob.requestTrackingAuthorization) {
+          const statusObj = AdMob.trackingAuthorizationStatus ? await AdMob.trackingAuthorizationStatus() : null;
+          if (!statusObj || statusObj.status === 'notDetermined') {
+            await AdMob.requestTrackingAuthorization();
+          }
+        }
+      } catch (attErr) {
+        console.warn('ATT authorization warning:', attErr);
       }
     };
 
@@ -1730,13 +1753,15 @@
         const AdMob = window.Capacitor.Plugins.AdMob;
         setAdShield(true);
 
-        if (!window._admobInitialized && AdMob.initialize) {
-          try {
-            await AdMob.initialize({ initializeForTesting: false, maxAdContentRating: 'Teen' });
-            window._admobInitialized = true;
-            if (window.initAdMobConsent) window.initAdMobConsent();
-          } catch (initErr) {
-            console.warn('AdMob başlatma uyarısı:', initErr);
+        if (!window._admobInitialized) {
+          if (window.initAdMobConsent) await window.initAdMobConsent();
+          if (AdMob.initialize) {
+            try {
+              await AdMob.initialize({ initializeForTesting: false, maxAdContentRating: 'Teen' });
+              window._admobInitialized = true;
+            } catch (initErr) {
+              console.warn('AdMob başlatma uyarısı:', initErr);
+            }
           }
         }
 
@@ -2041,6 +2066,11 @@
       const bootAds = async () => {
         const AdMob = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
         if (!AdMob) return;
+
+        // 1. GDPR / EU UMP Consent + iOS ATT Authorization
+        if (window.initAdMobConsent) await window.initAdMobConsent();
+
+        // 3. Google Mobile Ads SDK Initialization
         try {
           if (AdMob.initialize) {
             await AdMob.initialize({
@@ -2056,17 +2086,7 @@
           console.warn('AdMob başlatma hatası:', err);
         }
 
-        try {
-          if (AdMob.requestConsentInfo) {
-            let info = await AdMob.requestConsentInfo();
-            if (info && info.isConsentFormAvailable && info.status === 'REQUIRED') {
-              await AdMob.showConsentForm();
-            }
-          }
-        } catch (consentErr) {
-          // Consent hataları ana akışı bozmasın
-        }
-
+        // 4. Waterfall Mediation Cascade Preload
         if (window.preloadRewardVideo) {
           window.preloadRewardVideo(window.ADMOB_CONFIG.fastHighId);
           window.preloadRewardVideo(window.ADMOB_CONFIG.reviveHighId);

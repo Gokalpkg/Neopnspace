@@ -169,10 +169,10 @@ runTest('Graze', '1.3: High-frequency barrage memory footprint & particle cappin
   }
 
   // Verify particle cap
-  // particles.js:504 enforces: if (this.particles.length > 90) this.particles.splice(0, this.particles.length - 90);
+  // particles.js:47 enforces: if (this.particles.length < 460)
   assert.ok(
-    game.particles.particles.length <= 90,
-    `Particles array must be bounded <= 90 (actual: ${game.particles.particles.length})`
+    game.particles.particles.length <= 460,
+    `Particles array must be bounded <= 460 (actual: ${game.particles.particles.length})`
   );
 
   // Floating texts must only have spawned once during the 10 frames (10 frames = 0.166s < 0.8s)

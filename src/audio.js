@@ -180,14 +180,29 @@ class SoundEngine {
   // WebAudio Grafı Düğüm Temizliği (Hafıza Sızıntısı Önleyici)
   _autoDisconnect(source, ...nodes) {
     if (!source) return;
-    source.onended = () => {
+    let disconnected = false;
+    let fallbackTimer = null;
+    const cleanup = () => {
+      if (disconnected) return;
+      disconnected = true;
+      if (fallbackTimer) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = null;
+      }
       try {
+        source.onended = null;
         source.disconnect();
         for (let i = 0; i < nodes.length; i++) {
           if (nodes[i]) nodes[i].disconnect();
         }
       } catch (e) {}
     };
+    source.onended = cleanup;
+    // Güvenlik zaman aşımı: onended sekteye uğrarsa düğümleri kesin temizle
+    fallbackTimer = setTimeout(cleanup, 2200);
+    if (fallbackTimer && typeof fallbackTimer.unref === 'function') {
+      fallbackTimer.unref();
+    }
   }
 
   // ==========================================
@@ -199,6 +214,7 @@ class SoundEngine {
     if (this.bgmPlaying && this.bgmTimer) return;
     this.bgmPlaying = true;
     this.bgmStep = 0;
+    this.nextBeatTime = this.ctx.currentTime + 0.03;
     if (this.bgmTimer) {
       clearTimeout(this.bgmTimer);
       this.bgmTimer = null;
@@ -206,10 +222,12 @@ class SoundEngine {
     if (this.ctx.state === 'suspended') {
       this.ctx.resume().then(() => {
         if (this.bgmPlaying && !this.bgmTimer) {
+          this.nextBeatTime = this.ctx.currentTime + 0.03;
           this.scheduleNextBeat();
         }
       }).catch(() => {
         if (this.bgmPlaying && !this.bgmTimer) {
+          this.nextBeatTime = this.ctx.currentTime + 0.03;
           this.scheduleNextBeat();
         }
       });
@@ -220,6 +238,7 @@ class SoundEngine {
 
   stopBGM() {
     this.bgmPlaying = false;
+    this.nextBeatTime = undefined;
     if (this.bgmTimer) {
       clearTimeout(this.bgmTimer);
       this.bgmTimer = null;
@@ -238,21 +257,32 @@ class SoundEngine {
   scheduleNextBeat() {
     if (!this.bgmPlaying || !this.ctx) return;
 
-    const tempo = this.isBossEnraged ? 152 : (this.isBossMode ? 138 : 124); // BPM (Öfke modunda hızlanan tempo)
-    const actualBpm = tempo + this.combatIntensity * 25;
-    const stepDuration = 60 / actualBpm / 4; // 16'lık nota süresi (sn)
+    // WebAudio hassas donanımsal saat lookahead planlayıcısı (drift ve jitter'ı engeller)
+    const scheduleAheadTime = 0.12; // saniye bazında önceden planlama penceresi
+    const lookaheadIntervalMs = 25; // zamanlayıcı tetiklenme sıklığı (ms)
 
-    this.playSynthBeat(this.bgmStep);
-    this.bgmStep = (this.bgmStep + 1) % 32;
+    if (this.nextBeatTime === undefined || this.nextBeatTime < this.ctx.currentTime) {
+      this.nextBeatTime = this.ctx.currentTime + 0.02;
+    }
+
+    while (this.nextBeatTime < this.ctx.currentTime + scheduleAheadTime) {
+      const tempo = this.isBossEnraged ? 152 : (this.isBossMode ? 138 : 124);
+      const actualBpm = tempo + (this.combatIntensity || 0) * 25;
+      const stepDuration = 60 / actualBpm / 4;
+
+      this.playSynthBeat(this.bgmStep, this.nextBeatTime);
+      this.bgmStep = (this.bgmStep + 1) % 32;
+      this.nextBeatTime += stepDuration;
+    }
 
     this.bgmTimer = setTimeout(() => {
       this.scheduleNextBeat();
-    }, stepDuration * 1000);
+    }, lookaheadIntervalMs);
   }
 
-  playSynthBeat(step) {
+  playSynthBeat(step, targetTime) {
     if (this.isMuted || !this.ctx || this.ctx.state === 'suspended') return;
-    const now = this.ctx.currentTime;
+    const now = (targetTime !== undefined && targetTime >= this.ctx.currentTime) ? targetTime : this.ctx.currentTime;
 
     // Bas Notaları (A minör / D minör yürüyüşü)
     // A1 = 55Hz, C2 = 65.4Hz, D2 = 73.4Hz, E2 = 82.4Hz, F2 = 87.3Hz

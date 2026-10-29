@@ -62,10 +62,10 @@ export const SHIP_BALANCE = {
     title: 'Dengeli Çevik Avcı',
     primary: '#00f0ff', secondary: '#ff0077', cockpit: '#ff007f', flame: '#00f0ff',
     cost: 0,
-    stats: { dmg: 95, shield: 100, speed: 105, magnet: 100 },
-    dmgMult: 0.95,
+    stats: { dmg: 105, shield: 100, speed: 110, magnet: 100 },
+    dmgMult: 1.05,
     shieldMult: 1.00,
-    speedMult: 1.05,
+    speedMult: 1.10,
     magnetMult: 1.00,
     grazeFireRateBoost: 0.25, // +%25 seri ateş hızı (2 sn)
     grazeDurationFrames: 120,
@@ -78,16 +78,16 @@ export const SHIP_BALANCE = {
     title: 'Ağır Topçu Kruvazörü',
     primary: '#ffbe0b', secondary: '#ff5722', cockpit: '#ff9100', flame: '#ff3d00',
     cost: 1800,
-    stats: { dmg: 112, shield: 85, speed: 88, magnet: 85 },
-    dmgMult: 1.12,
-    shieldMult: 0.85,
-    speedMult: 0.88,
-    magnetMult: 0.85,
+    stats: { dmg: 125, shield: 120, speed: 96, magnet: 100 },
+    dmgMult: 1.25,
+    shieldMult: 1.20,
+    speedMult: 0.96,
+    magnetMult: 1.00,
     solarFlareEveryNShots: 8,
     solarFlareDmgMult: 1.60,
     solarFlareBaseDmg: 5.5,
     perkTitle: 'GÜNEŞ PATLAMASI',
-    perk: '+%12 Ağır Hasar! Her 8. atışta alanı yakan dev güneş plazması fırlatır (Kalkan/Hız -%15).'
+    perk: '+%25 Masif Hasar ve +%20 Zırhlı Kalkan! Her 8. atışta alanı yakan dev güneş plazması fırlatır.'
   },
   toxic: {
     id: 'toxic',
@@ -248,38 +248,38 @@ export const TECH_WORKSHOP_CONFIG = {
 export const SPAWN_PACING = {
   getClassicPacing(gameTime, playerLevel) {
     if (gameTime < 12) {
-      return { interval: 26, speedMult: 0.82, maxEnemies: 45 };
+      return { interval: 18, speedMult: 0.88, maxEnemies: 45 };
     }
     if (gameTime < 28 || playerLevel <= 2) {
-      return { interval: 23, speedMult: 0.90, maxEnemies: 48 };
+      return { interval: 16, speedMult: 0.94, maxEnemies: 48 };
     }
     if (playerLevel === 3 || gameTime < 50) {
-      return { interval: 20, speedMult: 0.98, maxEnemies: 52 };
+      return { interval: 14, speedMult: 1.02, maxEnemies: 52 };
     }
     if (gameTime < 85) {
-      return { interval: 18, speedMult: 1.06, maxEnemies: 56 };
+      return { interval: 13, speedMult: 1.08, maxEnemies: 56 };
     }
     return {
-      interval: Math.max(13, 18 - Math.floor((gameTime - 85) * 0.12)),
+      interval: Math.max(10, 14 - Math.floor((gameTime - 85) * 0.12)),
       speedMult: Math.min(1.42, 1.10 + (gameTime - 85) * 0.004),
       maxEnemies: 60
     };
   },
   getStormPacing(gameTime) {
     if (gameTime < 12) {
-      return { interval: 24, speedMult: 0.85, maxEnemies: 45 };
+      return { interval: 16, speedMult: 0.90, maxEnemies: 45 };
     }
     if (gameTime < 30) {
-      return { interval: 20, speedMult: 0.94, maxEnemies: 48 };
+      return { interval: 14, speedMult: 0.98, maxEnemies: 48 };
     }
     if (gameTime < 60) {
-      return { interval: 17, speedMult: 1.05, maxEnemies: 52 };
+      return { interval: 12, speedMult: 1.08, maxEnemies: 52 };
     }
     if (gameTime < 100) {
-      return { interval: 15, speedMult: 1.16, maxEnemies: 56 };
+      return { interval: 11, speedMult: 1.18, maxEnemies: 56 };
     }
     return {
-      interval: Math.max(11, 15 - Math.floor((gameTime - 100) * 0.10)),
+      interval: Math.max(9, 12 - Math.floor((gameTime - 100) * 0.10)),
       speedMult: Math.min(1.60, 1.22 + (gameTime - 100) * 0.004),
       maxEnemies: 60
     };

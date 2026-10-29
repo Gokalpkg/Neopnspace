@@ -237,3 +237,4 @@ console.log('='.repeat(78));
 if (failed > 0) {
   process.exit(1);
 }
+process.exit(0);

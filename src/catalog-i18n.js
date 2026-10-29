@@ -349,13 +349,13 @@ const RAW = {
 
   // Tech Tree & Upgrades
   tech_damageBoost_name: row('Plasma Resonance', 'Plazma Rezonansı', 'Résonance plasma', 'Plasmaresonanz', '等离子共振', '等離子共振', 'プラズマ共鳴'),
-  tech_damageBoost_desc: row('+6% permanent weapon damage per level.', 'Tüm silahlara her seviyede kalıcı +%6 hasar artışı sağlar.', '+6% de dégâts d\'armes permanent par niveau.', '+6% permanenter Waffenschaden pro Stufe.', '每级永久增加 6% 武器伤害。', '每級永久增加 6% 武器傷害。', 'Lv毎に武器ダメージ+6%（永続）。'),
+  tech_damageBoost_desc: row('+12% permanent weapon damage per level.', 'Tüm silahlara her seviyede kalıcı +%12 hasar artışı sağlar.', '+12% de dégâts d\'armes permanent par niveau.', '+12% permanenter Waffenschaden pro Stufe.', '每级永久增加 12% 武器伤害。', '每級永久增加 12% 武器傷害。', 'Lv毎に武器ダメージ+12%（永続）。'),
   tech_shieldMax_name: row('Energy Shield Core', 'Gövde Kalkanı', 'Noyau de bouclier', 'Schildkern', '能量护盾核心', '能量護盾核心', 'シールドコア'),
-  tech_shieldMax_desc: row('+12 starting shield per level.', 'Her seviyede +12 maksimum başlangıç kalkanı kazandırır.', '+12 de bouclier de départ par niveau.', '+12 Start-Schild pro Stufe.', '每级增加 12 点初始护盾。', '每級增加 12 點初始護盾。', 'Lv毎に初期シールド+12。'),
+  tech_shieldMax_desc: row('+15 starting shield per level.', 'Her seviyede +15 maksimum başlangıç kalkanı kazandırır.', '+15 de bouclier de départ par niveau.', '+15 Start-Schild pro Stufe.', '每级增加 15 点初始护盾。', '每級增加 15 點初始護盾。', 'Lv毎に初期シールド+15。'),
   tech_hullMax_name: row('Titanium Plating', 'Titanyum Zırh', 'Blindage titane', 'Titanpanzerung', '钛合金装甲', '鈦合金裝甲', 'チタン装甲'),
-  tech_hullMax_desc: row('+15 max hull integrity per level.', 'Gemi maksimum gövde canını her kademede +15 artırır.', '+15 d\'intégrité de coque max par niveau.', '+15 max. Hülle pro Stufe.', '每级增加 15 点最大生命。', '每級增加 15 點最大生命。', 'Lv毎に最大船体+15。'),
+  tech_hullMax_desc: row('+20 max hull integrity per level.', 'Gemi maksimum gövde canını her kademede +20 artırır.', '+20 d\'intégrité de coque max par niveau.', '+20 max. Hülle pro Stufe.', '每级增加 20 点最大生命。', '每級增加 20 點最大生命。', 'Lv毎に最大船体+20。'),
   tech_critChance_name: row('Critical Targeting', 'Kritik Odak', 'Visée critique', 'Kritischer Fokus', '暴击瞄准', '暴擊瞄準', 'クリティカル照準'),
-  tech_critChance_desc: row('+2.5% permanent critical strike chance per level.', 'Her seviyede +%2.5 kalıcı kritik vuruş şansı sağlar.', '+2,5% de chances de coup critique par niveau.', '+2,5% kritische Trefferchance pro Stufe.', '每级永久增加 2.5% 暴击率。', '每級永久增加 2.5% 暴擊率。', 'Lv毎に会心率+2.5%（永続）。'),
+  tech_critChance_desc: row('+4% permanent critical strike chance per level.', 'Her seviyede +%4 kalıcı kritik vuruş şansı sağlar.', '+4% de chances de coup critique par niveau.', '+4% kritische Trefferchance pro Stufe.', '每级永久增加 4% 暴击率。', '每級永久增加 4% 暴擊率。', 'Lv毎に会心率+4%（永続）。'),
   tech_magnet_name: row('Crystal Harvester', 'Kristal Çekici', 'Récolteur de cristaux', 'Kristallkollektor', '水晶收集器', '水晶收集器', 'クリスタル吸引機'),
   tech_magnet_desc: row('+18 loot attraction range per level.', 'Kristalleri ve ganimetleri çekme menzilini +18 artırır.', '+18 de portée d\'attraction par niveau.', '+18 Anziehungsreichweite pro Stufe.', '每级增加 18 点吸取范围。', '每級增加 18 點吸取範圍。', 'Lv毎に吸引範囲+18。'),
   tech_reactorCharge_name: row('Overdrive Reactor', 'Plazma Reaktörü', 'Réacteur de surcharge', 'Überlast-Reaktor', '过载反应堆', '過載反應堆', 'オーバードライブ炉'),

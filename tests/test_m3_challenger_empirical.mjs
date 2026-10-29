@@ -421,3 +421,5 @@ console.log('='.repeat(78));
 if (failedTests > 0) {
   process.exit(1);
 }
+
+process.exit(0);

@@ -7617,6 +7617,22 @@ class Game {
         btn.style.opacity = '0.55';
       }
     }
+
+    const oddsBar = document.querySelector('.wheel-odds-bar');
+    if (oddsBar) {
+      const isTr = typeof getCurrentLanguage === 'function' && getCurrentLanguage().startsWith('tr');
+      const labelLife = isTr ? '♥ CAN:' : '♥ REVIVE:';
+      const labelCrystals = isTr ? '◆ KRİSTAL:' : '◆ CRYSTAL:';
+      const labelShield = isTr ? '🛡 KALKAN:' : '🛡 SHIELD:';
+      const labelCharge = isTr ? '⚡ ŞARJ:' : '⚡ OVERDRIVE:';
+      oddsBar.innerHTML = `
+        <span><span style="color:#ffd700;">★ 500 CR:</span> 7%</span>
+        <span><span style="color:#ff0055;">${labelLife}</span> 10%</span>
+        <span><span style="color:#00f0ff;">${labelCrystals}</span> 61%</span>
+        <span><span style="color:#38bdf8;">${labelShield}</span> 14%</span>
+        <span><span style="color:#c084fc;">${labelCharge}</span> 8%</span>
+      `;
+    }
   }
 
   drawLuckyWheel() {
@@ -7795,16 +7811,16 @@ class Game {
     this.wheelIsSpinning = true;
     this.updateWheelUI();
 
-    // Kazanılacak dilimi belirle (Düşük ödüller kullanıcıya hissettirilmeden daha yüksek şanslı)
-    // 0: +100 CR (26%)
-    // 1: Canlanma (5%)
-    // 2: +200 CR (9%)
+    // Adil ve şeffaf ödül dağılım ağırlıkları
+    // 0: +100 CR (20%)
+    // 1: Canlanma (10%)
+    // 2: +200 CR (12%)
     // 3: Kalkan (14%)
-    // 4: 500 CR Jackpot (2%)
-    // 5: +75 CR (28%)
-    // 6: +150 CR (12%)
-    // 7: Süper Şarj (4%)
-    const weights = [26, 5, 9, 14, 2, 28, 12, 4];
+    // 4: 500 CR Jackpot (7%)
+    // 5: +75 CR (15%)
+    // 6: +150 CR (14%)
+    // 7: Süper Şarj (8%)
+    const weights = [20, 10, 12, 14, 7, 15, 14, 8];
     const totalW = weights.reduce((a, b) => a + b, 0);
     let rand = Math.random() * totalW;
     let winningIndex = 0;
@@ -13851,12 +13867,12 @@ class Game {
     if (this.player.upgrades.missiles > 0) {
       const missileRateMult = this.player.isStationary ? 1.25 : 1.0;
       this.player.missileCooldown += dt * missileRateMult;
-      const missileInterval = Math.max(130, 220 - this.player.upgrades.missiles * 22);
+      const missileInterval = Math.max(65, 120 - this.player.upgrades.missiles * 14);
       if (this.player.missileCooldown >= missileInterval && this.enemies.length > 0) {
         this.player.missileCooldown = 0;
         const isCluster = this.player.evolutions.clusterMissiles;
         const totalMissiles = this.player.upgrades.missiles;
-        const baseDmg = (2.8 + this.player.upgrades.missiles * 0.9) * (isCluster ? 1.35 : 1.0) * (this.player.damageMultiplier || 1.0);
+        const baseDmg = (5.5 + this.player.upgrades.missiles * 2.2) * (isCluster ? 1.6 : 1.0) * (this.player.damageMultiplier || 1.0);
 
         for (let i = 0; i < totalMissiles; i++) {
           const isDirect = (i % 2 === 0);
@@ -13903,19 +13919,69 @@ class Game {
       }
     }
 
-    // 3. EMP Şok Dalgası (Acil durum savunması - uzun aralıklı)
+    // 3. EMP Şok Dalgası (Acil durum savunması - sıklaştırılmış aralık ve caydırıcı hasar)
     if (this.player.upgrades.emp > 0) {
       this.player.empCooldown += dt;
-      const empInterval = Math.max(360, 600 - this.player.upgrades.emp * 80);
+      const empInterval = Math.max(180, 320 - this.player.upgrades.emp * 35);
       if (this.player.empCooldown >= empInterval) {
         this.player.empCooldown = 0;
         this.triggerEMP();
       }
     }
 
-    // Dönen Koruyucu Uydular Açısı
+    // Dönen Koruyucu Uydular Açısı & Aktif Savunma Plazması
     if (this.player.upgrades.drones > 0) {
       this.player.droneAngle += 0.06 * dt;
+      this.player.droneShootTimer = (this.player.droneShootTimer || 0) + dt;
+      const droneInterval = Math.max(38, 70 - this.player.upgrades.drones * 10);
+      if (this.player.droneShootTimer >= droneInterval && this.enemies.length > 0) {
+        this.player.droneShootTimer = 0;
+        const droneCount = this.player.upgrades.drones;
+        const isBastion = this.player.evolutions && this.player.evolutions.nanoBastion;
+        const orbitRadius = isBastion ? 85 : 68;
+        const dColor = isBastion ? '#00f0ff' : '#05ffa1';
+
+        for (let d = 0; d < droneCount; d++) {
+          const angle = this.player.droneAngle + (d * (Math.PI * 2 / droneCount));
+          const droneX = this.player.x + Math.cos(angle) * orbitRadius;
+          const droneY = this.player.y + Math.sin(angle) * orbitRadius;
+
+          let target = null;
+          let minDist = 380;
+          for (let e of this.enemies) {
+            if (e.hp <= 0 || e.toRemove) continue;
+            const dist = Math.hypot(e.x - droneX, e.y - droneY);
+            if (dist < minDist) {
+              minDist = dist;
+              target = e;
+            }
+          }
+
+          let vx = 0;
+          let vy = -12;
+          if (target) {
+            const dx = target.x - droneX;
+            const dy = target.y - droneY;
+            const len = Math.hypot(dx, dy) || 1;
+            vx = (dx / len) * 12;
+            vy = (dy / len) * 12;
+          }
+
+          this.playerBullets.push({
+            x: droneX,
+            y: droneY,
+            vx: vx,
+            vy: vy,
+            damage: (7 + this.player.upgrades.drones * 3.0) * (isBastion ? 1.5 : 1.0) * (this.player.damageMultiplier || 1.0),
+            w: 6,
+            h: 12,
+            color: dColor,
+            isDroneShot: true,
+            maxRange: 680,
+            traveled: 0
+          });
+        }
+      }
     }
 
     // === EFSANEVİ EVRİM: SÜPERNOVA ÇEKİRDEĞİ (evo_supernova) ===
@@ -13964,7 +14030,7 @@ class Game {
           targetEnemy = this.enemies.find(e => Math.hypot(e.x - orb.x, e.y - orb.y) <= 95);
         }
         if (targetEnemy && targetEnemy.hp > 0 && !targetEnemy.toRemove) {
-          this.applyCappedEnemyDamage(targetEnemy, 65 * (this.player.damageMultiplier || 1.0));
+          this.applyCappedEnemyDamage(targetEnemy, 65 * (this.player.damageMultiplier || 1.0), { isSupernova: true, isNuke: true, color: '#ffd700', x: orb.x, y: orb.y });
           if (targetEnemy.hp <= 0) {
             this.handleEnemyDeath(targetEnemy);
           }
@@ -13972,7 +14038,7 @@ class Game {
         for (let e of this.enemies) {
           if (e === targetEnemy || e.hp <= 0 || e.toRemove) continue;
           if (Math.hypot(e.x - orb.x, e.y - orb.y) <= 95) {
-            this.applyCappedEnemyDamage(e, 65 * (this.player.damageMultiplier || 1.0) * 0.75);
+            this.applyCappedEnemyDamage(e, 65 * (this.player.damageMultiplier || 1.0) * 0.75, { isSupernova: true, isNuke: true, color: '#ff3d00', x: orb.x, y: orb.y });
             if (e.hp <= 0) {
               this.handleEnemyDeath(e);
             }
@@ -14054,7 +14120,7 @@ class Game {
         const dy = enemy.y - this.player.y;
         if (dx * dx + dy * dy < 300 * 300) {
           this.tetheredEnemies.push(enemy);
-          this.applyCappedEnemyDamage(enemy, 0.45 * dt * (this.player.damageMultiplier || 1.0), false);
+          this.applyCappedEnemyDamage(enemy, 1.8 * dt * (this.player.damageMultiplier || 1.0), false);
           if (enemy.hp <= 0) {
             this.handleEnemyDeath(enemy);
           }
@@ -14063,7 +14129,7 @@ class Game {
       }
 
       this.matrixChargeTimer = (this.matrixChargeTimer || 0) + dt;
-      if (this.matrixChargeTimer >= 240) { // ~4 saniyede bir aşırı voltaj
+      if (this.matrixChargeTimer >= 200) { // ~3.3 saniyede bir aşırı voltaj
         this.matrixChargeTimer = 0;
         if (this.tetheredEnemies.length > 0) {
           this.screenShake = 12;
@@ -14071,7 +14137,7 @@ class Game {
           vibrate.success();
           for (let enemy of this.tetheredEnemies) {
             if (enemy.hp <= 0 || enemy.toRemove) continue;
-            this.applyCappedEnemyDamage(enemy, 55 * (this.player.damageMultiplier || 1.0));
+            this.applyCappedEnemyDamage(enemy, 120 * (this.player.damageMultiplier || 1.0), { isNuke: true, isMatrixBurst: true, color: '#bf5af2', x: enemy.x, y: enemy.y });
             this.particles.spawnShockwave(enemy.x, enemy.y, '#bf5af2', 90);
             this.particles.spawnExplosion(enemy.x, enemy.y, '#00f0ff', 12, 3);
             if (enemy.hp <= 0) {
@@ -14092,7 +14158,7 @@ class Game {
     // === EFSANEVİ EVRİM: VAKUM AVCI DRONLARI (evo_void_drones) ===
     if (this.player.evolutions && this.player.evolutions.voidDrones && this.player.upgrades.drones > 0) {
       const droneCount = Math.min(6, 2 + this.player.upgrades.drones);
-      const orbitRadius = this.player.evolutions.nanoBastion ? 62 : 45;
+      const orbitRadius = this.player.evolutions.nanoBastion ? 85 : 68;
       for (let d = 0; d < droneCount; d++) {
         const angle = this.player.droneAngle + (d * (Math.PI * 2 / droneCount));
         const droneX = this.player.x + Math.cos(angle) * orbitRadius;
@@ -14449,14 +14515,20 @@ class Game {
       });
     }
 
-    // Çevredeki düşmanlara makul ve dengeli alan hasarı
+    // Çevredeki düşmanlara yüksek etki alanı hasarı ve yavaşlatma / sersemletme
+    const empDmg = (18 + this.player.upgrades.emp * 12) * (this.player.damageMultiplier || 1.0);
     for (let enemy of this.enemies) {
       if (enemy.hp <= 0 || enemy.toRemove) continue;
       const dist = Math.hypot(enemy.x - this.player.x, enemy.y - this.player.y);
       if (dist < empRadius) {
-        this.applyCappedEnemyDamage(enemy, 4 + this.player.upgrades.emp * 2);
+        this.applyCappedEnemyDamage(enemy, empDmg, { isEmp: true, isNuke: true, color: '#00f0ff', x: this.player.x, y: this.player.y });
         if (enemy.hp <= 0) {
           this.handleEnemyDeath(enemy);
+        } else {
+          // Hayatta kalan düşmanlara sersemletme ve yavaşlatma etkisi
+          enemy.slowTimer = 90 + this.player.upgrades.emp * 30;
+          enemy.freezeTimer = 15;
+          enemy.hitFlash = 8;
         }
       }
     }
@@ -14522,8 +14594,8 @@ class Game {
     }
     const playerDmgMult = Math.max(1.0, this.player.damageMultiplier || 1.0);
     const powerScaling = (this.player.level - 1) * 0.08 + playerUpgradeCount * 0.04;
-    // Kalıcı Atölye/Gemi gücü (playerDmgMult) boss'a gizli zırh cezası vermez! Sadece oyun içi level ölçeklenir.
-    const bossPlayerPowerScale = 1 + (this.player.level - 1) * 0.14 + playerUpgradeCount * 0.08;
+    // Kalıcı Atölye/Gemi gücü (playerDmgMult) boss'a gizli zırh cezası vermez! Seviye ölçeklenmesi yumuşatılarak bossların aşırı mermi süngeri olması önlenir.
+    const bossPlayerPowerScale = 1 + Math.min(0.20, (this.player.level - 1) * 0.012 + playerUpgradeCount * 0.006);
     const timeScaling = Math.min(0.65, (this.gameTime / 50) * 0.15);
     const diffScale = 0.52 + powerScaling + timeScaling;
 
@@ -15133,27 +15205,36 @@ class Game {
     const frontZoneBonus = (this.player && this.player.combatZone === 'front') ? 1.25 : 1.0;
     const powerBonusScale = Math.min(2.2, Math.sqrt(playerDmgMult)) * frontZoneBonus;
 
+    const isHeavyHit = (from && (from.isCrit || from.isSupernova || from.isNuke || from.isHeavyBeam || from.isChronoSlug || from.isBomb || from.isEmp || from.isMatrixBurst)) || (this.player && (this.player.isFever || (this.player.feverTimer > 0) || (this.player.overchargeTimer > 0) || this.player.hyperDriveActive));
+
     if (enemy.maxDamagePerHitRatio && enemy.maxHp > 0) {
-      const scaledRatio = Math.min(isBossUnit ? 0.14 : 0.65, enemy.maxDamagePerHitRatio * powerBonusScale);
+      const baseRatio = isHeavyHit ? Math.max(0.40, enemy.maxDamagePerHitRatio * 2.5) : enemy.maxDamagePerHitRatio;
+      const scaledRatio = Math.min(isBossUnit ? 0.45 : 0.90, baseRatio * powerBonusScale);
       const maxAllowed = Math.max(1, enemy.maxHp * scaledRatio);
       dmg = Math.min(dmg, maxAllowed);
     } else if (isBossUnit && enemy.maxHp > 0) {
-      const scaledBossHitRatio = Math.min(0.12, 0.045 * powerBonusScale);
+      const scaledBossHitRatio = isHeavyHit ? 0.40 : Math.min(0.28, 0.18 * powerBonusScale);
       dmg = Math.min(dmg, Math.max(2, enemy.maxHp * scaledBossHitRatio));
     }
 
-    // Aynı karede / kısa zaman penceresinde (15 kare ~0.25 sn) çoklu mermi, pompalı ve yetenek kombosuyla tek atmayı önleyen Burst Zırh Tavanı
+    // Kısa zaman penceresinde (15 kare ~0.25 sn) oyuncu patlamalarını ödüllendiren esnetilmiş Burst Penceresi
     if ((isBossUnit || enemy.isFleetMember || enemy.maxDamagePerHitRatio) && enemy.maxHp > 0) {
       const nowFrame = this.frames || 0;
       if (enemy._dmgWinStart === undefined || (nowFrame - enemy._dmgWinStart) >= 15 || nowFrame < enemy._dmgWinStart) {
         enemy._dmgWinStart = nowFrame;
         enemy._dmgWinAccum = 0;
       }
-      const baseWindowRatio = isBossUnit ? 0.075 : (enemy.isFleetCommander ? 0.22 : 0.36);
-      const windowCapRatio = Math.min(isBossUnit ? 0.20 : 0.75, baseWindowRatio * powerBonusScale);
-      const maxWindowDmg = Math.max(2, enemy.maxHp * windowCapRatio);
+      const baseWindowRatio = isBossUnit ? 0.35 : (enemy.isFleetCommander ? 0.50 : 0.65);
+      const windowCapRatio = Math.min(isBossUnit ? 0.55 : 0.90, baseWindowRatio * powerBonusScale);
+      const maxWindowDmg = Math.max(5, enemy.maxHp * windowCapRatio);
       const remainingBudget = Math.max(0, maxWindowDmg - enemy._dmgWinAccum);
-      dmg = Math.min(dmg, remainingBudget);
+      if (dmg > remainingBudget) {
+        if (isHeavyHit) {
+          dmg = remainingBudget + (dmg - remainingBudget) * 0.40;
+        } else {
+          dmg = remainingBudget;
+        }
+      }
       enemy._dmgWinAccum += dmg;
     }
 
@@ -15485,7 +15566,7 @@ class Game {
                 const oDx = other.x - mX;
                 const oDy = other.y - mY;
                 if (oDx * oDx + oDy * oDy < 60 * 60) {
-                  const clusterDmg = 15 * (this.player.damageMultiplier || 1.0);
+                  const clusterDmg = (15 + (this.player.upgrades.missiles || 4) * 4) * (this.player.damageMultiplier || 1.0);
                   this.applyBossPodDamage(other, clusterDmg, mX);
                   const cApplied = this.applyCappedEnemyDamage(other, clusterDmg);
                   this.recordWeaponDamage('missiles', cApplied);
@@ -15508,14 +15589,14 @@ class Game {
       if (this.player.upgrades.drones > 0) {
         const droneCount = this.player.upgrades.drones;
         const isBastion = this.player.evolutions && this.player.evolutions.nanoBastion;
-        const orbitRadius = isBastion ? 62 : 45;
-        const droneDmg = (isBastion ? 0.35 : 0.12) * dt;
+        const orbitRadius = isBastion ? 85 : 68;
+        const droneDmg = (isBastion ? 2.5 : 1.2) * (this.player.damageMultiplier || 1.0) * dt;
         for (let d = 0; d < droneCount; d++) {
           const angle = this.player.droneAngle + (d * (Math.PI * 2 / droneCount));
           const droneX = this.player.x + Math.cos(angle) * orbitRadius;
           const droneY = this.player.y + Math.sin(angle) * orbitRadius;
           const dist = Math.hypot(droneX - enemy.x, droneY - enemy.y);
-          if (dist < enemy.radius + 14) {
+          if (dist < enemy.radius + 16) {
             const dApplied = this.applyCappedEnemyDamage(enemy, droneDmg);
             this.recordWeaponDamage('drones', dApplied);
             this.particles.spawnExplosion(droneX, droneY, isBastion ? '#00f0ff' : '#05ffa1', 2, 1.2);
@@ -15538,7 +15619,7 @@ class Game {
             const closeX = x1 + t * (x2 - x1);
             const closeY = y1 + t * (y2 - y1);
             if (Math.hypot(enemy.x - closeX, enemy.y - closeY) < enemy.radius + 6) {
-              const netApplied = this.applyCappedEnemyDamage(enemy, 0.14 * dt, false);
+              const netApplied = this.applyCappedEnemyDamage(enemy, (isBastion ? 0.8 : 0.4) * (this.player.damageMultiplier || 1.0) * dt, false);
               this.recordWeaponDamage('drones', netApplied);
               if (Math.random() < 0.25) {
                 this.particles.spawnExplosion(closeX, closeY, '#05ffa1', 2, 1);
@@ -15630,7 +15711,7 @@ class Game {
       }
       // Orbital Bastion Plazma Bariyeri (Mermileri Buharlaştırır)
       if (this.player.evolutions && this.player.evolutions.nanoBastion) {
-        if (Math.hypot(this.player.x - p.x, this.player.y - p.y) < 64) {
+        if (Math.hypot(this.player.x - p.x, this.player.y - p.y) < 85) {
           this.particles.spawnExplosion(p.x, p.y, '#05ffa1', 4, 1.4);
           p.toRemove = true;
           this.enemyProjectiles.splice(i, 1);
@@ -15641,13 +15722,13 @@ class Game {
       // Koruyucu Drone mermiyi silebilir
       if (this.player.upgrades.drones > 0) {
         const droneCount = this.player.upgrades.drones;
-        const orbitRadius = this.player.evolutions.nanoBastion ? 62 : 45;
+        const orbitRadius = this.player.evolutions.nanoBastion ? 85 : 68;
         let destroyed = false;
         for (let d = 0; d < droneCount; d++) {
           const angle = this.player.droneAngle + (d * (Math.PI * 2 / droneCount));
           const droneX = this.player.x + Math.cos(angle) * orbitRadius;
           const droneY = this.player.y + Math.sin(angle) * orbitRadius;
-          if (Math.hypot(droneX - p.x, droneY - p.y) < 14) {
+          if (Math.hypot(droneX - p.x, droneY - p.y) < 16) {
             this.particles.spawnExplosion(p.x, p.y, '#05ffa1', 5, 2);
             p.toRemove = true;
             destroyed = true;
@@ -17218,6 +17299,7 @@ class Game {
       this.drawPlayerAfterimages();
       this.drawAimGuide();
       this.drawPlayerShip();
+      this.drawProtectiveDrones();
       this.drawCryoFrostVignette();
       this.drawWingmen();
       this.drawOrbitalSaws();
@@ -18509,6 +18591,23 @@ class Game {
       ctx.restore();
     }
 
+    // === MİMARİ MİKRO-KAÇINMA ÇEKİRDEK NOKTASI (HITBOX CORE DOT) ===
+    // Yoğun mermi cehennemi ve micro-dodging anlarında oyuncunun gerçek merkezini net gösteren parlak çekirdek
+    ctx.save();
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#00f0ff';
+    ctx.beginPath();
+    ctx.arc(0, 0, 4.0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
     ctx.restore();
 
     // === ANLIK TAKTİKSEL MOD ETİKETİ (FLOATING COMBAT ZONE BADGE) ===
@@ -18545,8 +18644,45 @@ class Game {
 
       ctx.restore();
     }
+  }
 
-    // Koruyucu Dönen Uydular (Kullanıcı talebi doğrultusunda etrafta dönen noktalar ve çizgiler tamamen kaldırıldı)
+  drawProtectiveDrones() {
+    if (!this.player || !this.player.upgrades || this.player.upgrades.drones <= 0) return;
+    const droneCount = this.player.upgrades.drones;
+    const isBastion = this.player.evolutions && this.player.evolutions.nanoBastion;
+    const orbitRadius = isBastion ? 85 : 68;
+    const dColor = isBastion ? '#00f0ff' : '#05ffa1';
+
+    ctx.save();
+    // Yörünge rehber halkası
+    ctx.strokeStyle = isBastion ? 'rgba(0, 240, 255, 0.22)' : 'rgba(5, 255, 161, 0.16)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(this.player.x, this.player.y, orbitRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    for (let d = 0; d < droneCount; d++) {
+      const angle = this.player.droneAngle + (d * (Math.PI * 2 / droneCount));
+      const dx = this.player.x + Math.cos(angle) * orbitRadius;
+      const dy = this.player.y + Math.sin(angle) * orbitRadius;
+
+      ctx.save();
+      ctx.translate(dx, dy);
+      ctx.fillStyle = dColor;
+      ctx.shadowColor = dColor;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.arc(0, 0, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   drawOrbitalSaws() {

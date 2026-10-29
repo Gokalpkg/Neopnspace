@@ -72,8 +72,8 @@ test('V16.2: Ship Balance enforces clear tactical trade-offs and crowns Chrono A
   assert.equal(SHIP_BALANCE.chrono.chronoNovaIntervalFrames, 480, 'Chrono freeze interval set to 480 frames (8s)');
   assert.equal(SHIP_BALANCE.chrono.chronoFreezeDurationFrames, 78, 'Chrono freeze duration set to 78 frames (1.3s)');
 
-  assert.equal(game.skins.solar.dmgMult, 1.12, 'Solar rebalanced to 1.12x');
-  assert.equal(game.skins.solar.shieldMult, 0.85, 'Solar has lower shield trade-off (0.85x)');
+  assert.equal(game.skins.solar.dmgMult, 1.25, 'Solar rebalanced to 1.25x heavy gunboat');
+  assert.equal(game.skins.solar.shieldMult, 1.20, 'Solar has fortified shield (1.20x)');
   assert.equal(game.skins.toxic.magnetMult, 1.60, 'Toxic has highest harvester magnet (1.60x)');
   assert.equal(game.skins.phantom.shieldMult, 1.45, 'Phantom is the premier shield tank (1.45x)');
 });
@@ -101,7 +101,7 @@ test('V16.3: Tech Workshop applies perceptible linear stat jumps (+12% dmg, +15 
 
   assert.equal(game.player.maxHp, 140, 'Base 100 + 2 * 20 hullMax = 140 HP');
   assert.equal(game.player.maxShield, 50, 'Base 20 + 2 * 15 shieldMax = 50 Shield');
-  assert.ok(Math.abs(game.player.damageMultiplier - (1.24 * 0.95)) < 1e-6, 'Base (1.0 + 2 * 0.12) * 0.95x skin mult = 1.178x damage');
+  assert.ok(Math.abs(game.player.damageMultiplier - (1.24 * 1.05)) < 1e-6, 'Base (1.0 + 2 * 0.12) * 1.05x skin mult = 1.302x damage');
   assert.ok(Math.abs(game.player.critChance - 0.13) < 1e-6, 'Base 0.05 + 2 * 0.04 = 0.13 crit chance');
 });
 
@@ -193,3 +193,4 @@ console.log('='.repeat(78));
 if (failed > 0) {
   process.exit(1);
 }
+process.exit(0);
