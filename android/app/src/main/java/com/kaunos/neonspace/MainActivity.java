@@ -1,13 +1,13 @@
 package com.kaunos.neonspace;
 
 import android.os.Bundle;
-import androidx.core.view.WindowCompat;
+import androidx.activity.EdgeToEdge;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
     }
 }
