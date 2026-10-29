@@ -25,3 +25,12 @@ screen*.png
 
 # Internal agent data
 .agents/
+
+# iOS build outputs and CocoaPods
+ios/App/Pods/
+ios/App/App/public/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcarchive
+*.ipa
