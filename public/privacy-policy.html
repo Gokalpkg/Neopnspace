@@ -115,52 +115,55 @@
 
     <h2>2. Toplanan Bilgiler ve Kullanımı</h2>
     <p>
-      <strong>Neon Space Survivor</strong>, oyuncuların kimliğini doğrudan belirleyebilecek hiçbir kişisel veriyi (ad, soyad, e-posta, telefon numarası, konum, şifre vb.) doğrudan toplamaz, talep etmez veya kendi sunucularında barındırmaz.
+      <strong>Neon Space Survivor</strong>, oyuncuların gerçek kimliğini doğrudan belirleyebilecek hassas kişisel verileri (gerçek ad-soyad, telefon numarası, ev adresi, şifre veya ödeme kartı bilgisi) talep etmez. Oyun deneyimini ve rekabetçi özellikleri sunmak için aşağıdaki veriler işlenir:
     </p>
     <ul>
-      <li><strong>Yerel Oyun Verileri (Local Storage):</strong> Seviye ilerlemeniz, toplam kristal miktarınız, gemi geliştirmeleriniz, yüksek skorunuz ve oyun içi başarımlarınız tamamen cihazınızın yerel hafızasında (localStorage) saklanır. Cihaz dışına aktarılmaz.</li>
+      <li><strong>Yerel Oyun Verileri (Local Storage):</strong> Seviye ilerlemeniz, toplam kristal miktarınız, gemi geliştirmeleriniz ve oyun ayarlarınız cihazınızın yerel hafızasında (localStorage) saklanır.</li>
+      <li><strong>Küresel Liderlik Tablosu (Google Firebase Firestore):</strong> Liderlik tablosunda yer alabilmeniz için rastgele oluşturulan anonim pilot kimliği (UID), seçtiğiniz takma ad (Callsign), ülke bayrağı kodu ve en yüksek skorunuz güvenli şekilde Google Firebase Cloud Firestore üzerinde saklanır.</li>
+      <li><strong>Google Play Oyun Hizmetleri (Play Games Services):</strong> Oyun içi 32 başarımın (Achievements) ve liderlik sıralamalarının Google Play Games profilinizle senkronize edilmesi için Google Play Games Services SDK'sı kullanılır.</li>
+      <li><strong>Performans ve Analitik (Google Firebase Analytics):</strong> Oyun dengesini iyileştirmek ve olası çökmeleri tespit etmek amacıyla anonim kullanım istatistikleri ve cihaz tanılama bilgileri işlenir.</li>
       <li><strong>Cihaz ve Titreşim Erişimi:</strong> Oyun içi dokunsal geri bildirimler (haptics/vibration) için cihazın titreşim donanımı yerel olarak kullanılır.</li>
     </ul>
 
     <h2>3. Üçüncü Taraf Hizmetleri ve Reklamlar (Google AdMob)</h2>
     <p>
-      Oyunumuz, ücretsiz oyun içi ödüller (örneğin canlanma hakkı, ücretsiz kristal ve şanslı uzay sandığı ekstra ganimeti) sunabilmek için üçüncü taraf bir reklam ağı olan <strong>Google AdMob</strong> altyapısını kullanmaktadır.
+      Oyunumuz, ücretsiz oyun içi ödüller (canlanma hakkı, ücretsiz kristal, çarkıfelek ve şanslı uzay sandığı ganimeti) ve bölüm sonu geçişleri sunabilmek için <strong>Google AdMob</strong> altyapısını kullanmaktadır.
     </p>
     <div class="highlight-box">
       <p>
-        Google AdMob, kullanıcılara uygun ödüllü reklamlar sunmak, sahtekarlığı önlemek ve reklam performansını ölçmek amacıyla cihaz kimliklerini (Google Reklam Kimliği / AAID), IP adresini ve kilitlenme günlüklerini Google'ın kendi gizlilik politikalarına tabi olarak işleyebilir.
+        Google AdMob ve Google Firebase; uygun reklamlar sunmak, sahtekarlığı önlemek ve performansı ölçmek amacıyla cihaz kimliklerini (Google Reklam Kimliği / AAID), yaklaşık konum bilgisini (IP tabanlı) ve tanılama günlüklerini Google'ın kendi gizlilik politikalarına tabi olarak işleyebilir. Avrupa Ekonomik Alanı (AEA/GDPR) kullanıcıları, oyun içi Ayarlar menüsünden "Reklam ve Gizlilik Tercihleri (GDPR)" ekranını istedikleri zaman açarak izinlerini yönetebilir.
       </p>
     </div>
     <p>
-      Google'ın verileri nasıl topladığı ve kullandığı hakkında ayrıntılı bilgi edinmek için lütfen Google Gizlilik Politikası'nı inceleyin:
+      Üçüncü taraf hizmet sağlayıcıların verileri nasıl işlediği hakkında ayrıntılı bilgi için:
     </p>
     <ul>
       <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Gizlilik Politikası (Google Privacy Policy)</a></li>
       <li><a href="https://support.google.com/admob/answer/6128543" target="_blank" rel="noopener">Google AdMob ve Kullanıcı İzin Politikaları</a></li>
-      <li><a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">Google Reklam Teknolojileri ve Tercihleri</a></li>
+      <li><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Google Firebase Gizlilik ve Güvenlik</a></li>
     </ul>
 
     <h2>4. Çocukların Gizliliği (COPPA & Aile Politikası)</h2>
     <p>
-      <strong>Neon Space Survivor</strong>, 13 yaş ve üzeri kitleler ile genel oyunculara yöneliktir. 13 yaşın altındaki çocuklardan bilerek herhangi bir kişisel veri toplanmaz. Ebeveyn veya yasal vasi olarak çocuğunuzun üçüncü taraflarla kişisel veri paylaştığını fark ederseniz lütfen derhal bizimle iletişime geçin.
+      <strong>Neon Space Survivor</strong>, 13 yaş ve üzeri genel oyuncu kitlesine yöneliktir (AdMob içerik derecelendirmesi: Teen). 13 yaşın altındaki çocuklardan bilerek kişisel veri toplanmaz.
     </p>
 
-    <h2>5. Veri Güvenliği</h2>
+    <h2>5. Veri Güvenliği ve Veri Silme Hakkı (Data Deletion)</h2>
     <p>
-      Oyunumuz herhangi bir harici üyelik veya veri tabanı bağlantısı gerektirmez. Tüm yerel veriler cihazınızın güvenli depolama alanında tutulur ve oyun kaldırıldığında cihazınız tarafından otomatik olarak silinir.
+      Tüm veri iletişimi HTTPS/TLS şifrelemesi ile korunmaktadır. Yerel verilerinizi oyunu cihazınızdan kaldırarak veya uygulama verilerini temizleyerek anında silebilirsiniz. Küresel liderlik tablosundaki takma ad ve skor kaydınızın silinmesini talep etmek için aşağıdaki destek e-posta adresimize pilot takma adınızı yazarak başvurabilirsiniz; talebiniz en geç 7 iş günü içinde kalıcı olarak yerine getirilir.
     </p>
 
     <h2>6. Politika Güncellemeleri</h2>
     <p>
-      Gizlilik Politikamız zaman zaman yasal gereksinimlere veya oyun güncellemelerine bağlı olarak güncellenebilir. Herhangi bir değişiklik durumunda yeni politika bu sayfa üzerinden yayınlanacaktır.
+      Gizlilik Politikamız yasal gereksinimlere veya yeni oyun özelliklerine bağlı olarak güncellenebilir. Güncellemeler bu sayfa üzerinden yayınlanır.
     </p>
 
     <h2>7. İletişim</h2>
     <p>
-      Gizlilik Politikamız veya oyunumuzla ilgili herhangi bir soru, görüş ya da geri bildiriminiz için bizimle iletişime geçebilirsiniz:
+      Gizlilik Politikamız, veri silme talepleriniz veya oyunumuzla ilgili her türlü sorunuz için bizimle iletişime geçebilirsiniz:
     </p>
     <p>
-      📧 Destek E-Postası: <a href="mailto:gokalpgames@gmail.com">gokalpgames@gmail.com</a>
+      📧 Geliştirici (Kaunos Games) Destek E-Postası: <a href="mailto:kaunosgames@gmail.com">kaunosgames@gmail.com</a>
     </p>
 
     <div class="footer">

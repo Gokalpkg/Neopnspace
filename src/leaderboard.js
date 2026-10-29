@@ -5,6 +5,7 @@ import {
   setDoc,
   getDoc,
   getDocs,
+  deleteDoc,
   collection,
   query,
   orderBy,
@@ -26,8 +27,138 @@ export const PGS_CONFIG = {
   leaderboards: {
     storm: "CgkIjKWzza4ZEAIQAA",
     campaign: "CgkIjKWzza4ZEAIQAQ"
+  },
+  // Google Play Console Achievements (Başarımlar - Canlı Üretim Kimlikleri)
+  achievements: {
+    // 1. Kategori: İlk Adımlar (1 saat içinde açılanlar)
+    first_flight: "CgkIjKWzza4ZEAIQDQ",     // Kozmik Ateşleme (10 Puan)
+    first_blood: "CgkIjKWzza4ZEAIQEw",      // İlk Kan (10 Puan)
+    first_upgrade: "CgkIjKWzza4ZEAIQFg",    // Gelişmiş Donanım (15 Puan)
+    boss_vanguard: "CgkIjKWzza4ZEAIQEA",    // Öncü Tehdit (25 Puan)
+    crystal_magnet: "CgkIjKWzza4ZEAIQBw",   // Kozmik Mıknatıs (15 Puan)
+
+    // 2. Kategori: Artımlı Maratonlar (Incremental)
+    kills_500: "CgkIjKWzza4ZEAIQFw",       // Uzay Temizliği I (20 Puan)
+    kills_2500: "CgkIjKWzza4ZEAIQDg",      // Uzay Temizliği II (40 Puan)
+    kills_10000: "CgkIjKWzza4ZEAIQGw",     // Uzay Temizliği III (100 Puan)
+    crystals_1000: "CgkIjKWzza4ZEAIQFQ",   // Kristal Madencisi I (20 Puan)
+    crystals_10000: "CgkIjKWzza4ZEAIQAg",  // Kristal Madencisi II (50 Puan)
+    crystals_50000: "CgkIjKWzza4ZEAIQIA",  // Kristal Zengini III (100 Puan)
+    pilot_level_50: "CgkIjKWzza4ZEAIQGA",  // Kıdemli Pilot (35 Puan)
+    asteroids_300: "CgkIjKWzza4ZEAIQDw",   // Göktaşı Kırıcı (30 Puan)
+
+    // 3. Kategori: Sektör & Boss Hakimiyeti
+    boss_dreadnought: "CgkIjKWzza4ZEAIQHQ",// Karanlığın Sonu (30 Puan)
+    boss_nebula: "CgkIjKWzza4ZEAIQAw",     // Nebula Körlüğü (40 Puan)
+    boss_titan: "CgkIjKWzza4ZEAIQBQ",      // Demir Kıran (50 Puan)
+    boss_chrono: "CgkIjKWzza4ZEAIQBA",     // Zaman Hırsızı (70 Puan)
+    boss_apex: "CgkIjKWzza4ZEAIQEQ",       // Boyut Hakimi (150 Puan)
+
+    // 4. Kategori: Hangar, Filo & Atölye
+    ship_unlock_2: "CgkIjKWzza4ZEAIQGg",   // Yeni Bir Kanat (25 Puan)
+    fleet_commander: "CgkIjKWzza4ZEAIQCg", // Filo Komutanı (100 Puan)
+    tech_master: "CgkIjKWzza4ZEAIQHg",     // Mühendislik Harikası (60 Puan)
+    ship_5star: "CgkIjKWzza4ZEAIQBg",      // Yıldız Yağmuru (75 Puan)
+    wheel_10: "CgkIjKWzza4ZEAIQDA",        // Şanslı Pilot (25 Puan)
+
+    // 5. Kategori: Beceri, Kombo & Hayatta Kalma
+    graze_master: "CgkIjKWzza4ZEAIQCA",    // Refleks Ustası (35 Puan)
+    combo_50: "CgkIjKWzza4ZEAIQHA",        // Durdurulamaz Kombo (50 Puan)
+    storm_survivor: "CgkIjKWzza4ZEAIQGQ",  // Fırtına Süvarisi (65 Puan)
+    hyper_slayer: "CgkIjKWzza4ZEAIQHw",    // Hiper Tehdit (80 Puan)
+    flawless_victory: "CgkIjKWzza4ZEAIQEg",// Kusursuz Zafer (100 Puan)
+
+    // 6. Kategori: Gizli Başarımlar (Hidden)
+    edge_of_death: "CgkIjKWzza4ZEAIQFA",   // Ölümün Kıyısında (40 Puan)
+    pacifist_run: "CgkIjKWzza4ZEAIQCw",    // Pasifist Manevra (50 Puan)
+    overload_combo: "CgkIjKWzza4ZEAIQIQ",  // Aşırı Yükleme (45 Puan)
+    time_freeze_12: "CgkIjKWzza4ZEAIQCQ"   // Zamanı Durduran (75 Puan)
   }
 };
+
+/**
+ * Google Play Games Başarımını Kilidini Açar (Unlock)
+ * Hem doğrudan ID hem de semantik anahtar (örn: 'first_flight') destekler.
+ */
+export function unlockPlayGamesAchievement(keyOrId) {
+  if (!keyOrId) return;
+  const achId = (PGS_CONFIG.achievements && PGS_CONFIG.achievements[keyOrId]) || keyOrId;
+  const cacheKey = 'neon_pgs_ach_' + keyOrId;
+
+  // Çevrimdışı / mükerrer çağrı engelleme
+  if (localStorage.getItem(cacheKey) === 'true') return;
+
+  console.log(`[PGS Achievement] Unlocking: ${keyOrId} -> ${achId}`);
+
+  if (window.Capacitor && window.Capacitor.isNativePlatform) {
+    const pg = window.PlayGames || window.Capacitor?.Plugins?.PlayGames;
+    if (pg) {
+      try {
+        if (typeof pg.unlockAchievement === 'function') {
+          pg.unlockAchievement({ achievementId: achId });
+        } else if (typeof pg.unlock === 'function') {
+          pg.unlock({ achievementId: achId });
+        }
+      } catch (err) {
+        console.warn('[PGS Achievement] Native unlock error:', err);
+      }
+    }
+  }
+
+  try {
+    localStorage.setItem(cacheKey, 'true');
+  } catch (e) {}
+}
+
+/**
+ * Google Play Games Artımlı Başarımını İlerletir (Increment)
+ */
+export function incrementPlayGamesAchievement(keyOrId, steps = 1) {
+  if (!keyOrId) return;
+  const achId = (PGS_CONFIG.achievements && PGS_CONFIG.achievements[keyOrId]) || keyOrId;
+
+  if (window.Capacitor && window.Capacitor.isNativePlatform) {
+    const pg = window.PlayGames || window.Capacitor?.Plugins?.PlayGames;
+    if (pg) {
+      try {
+        const numSteps = Math.max(1, Math.round(steps));
+        if (typeof pg.incrementAchievement === 'function') {
+          pg.incrementAchievement({ achievementId: achId, steps: numSteps });
+        } else if (typeof pg.increment === 'function') {
+          pg.increment({ achievementId: achId, steps: numSteps });
+        }
+      } catch (err) {
+        console.warn('[PGS Achievement] Native increment error:', err);
+      }
+    }
+  }
+}
+
+/**
+ * Google Play Games Başarımlar Arayüzünü Ekrana Getirir
+ */
+export function showPlayGamesAchievements() {
+  if (window.Capacitor && window.Capacitor.isNativePlatform) {
+    const pg = window.PlayGames || window.Capacitor?.Plugins?.PlayGames;
+    if (pg) {
+      try {
+        if (typeof pg.showAchievements === 'function') {
+          pg.showAchievements();
+          return true;
+        }
+      } catch (err) {
+        console.warn('[PGS Achievement] Show achievements error:', err);
+      }
+    }
+  }
+  return false;
+}
+
+if (typeof window !== 'undefined') {
+  window.unlockPlayGamesAchievement = unlockPlayGamesAchievement;
+  window.incrementPlayGamesAchievement = incrementPlayGamesAchievement;
+  window.showPlayGamesAchievements = showPlayGamesAchievements;
+}
 
 let db = null;
 let isInitialized = false;
@@ -203,4 +334,34 @@ export async function fetchTopScoresFromFirestore(mode = 'storm', limitCount = 5
     }
     return null;
   }
+}
+
+/**
+ * Google Play Veri Güvenliği (Data Deletion) Politikası Gereği
+ * Kullanıcının bulut liderlik tablosu kaydını kalıcı olarak siler.
+ */
+export async function deletePlayerDataFromFirestore() {
+  const uid = localStorage.getItem('neon_player_uid');
+  try {
+    const firestore = initLeaderboard();
+    if (firestore && uid) {
+      await Promise.allSettled([
+        deleteDoc(doc(firestore, 'leaderboard_storm', uid)),
+        deleteDoc(doc(firestore, 'leaderboard_campaign', uid))
+      ]);
+    }
+  } catch (err) {
+    console.warn('[Leaderboard] Cloud data delete warning:', err);
+  }
+  try {
+    localStorage.removeItem('neon_player_uid');
+    localStorage.removeItem('neon_player_callsign');
+    localStorage.removeItem('neon_cached_lb_storm');
+    localStorage.removeItem('neon_cached_lb_campaign');
+  } catch (e) {}
+  return true;
+}
+
+if (typeof window !== 'undefined') {
+  window.deletePlayerDataFromFirestore = deletePlayerDataFromFirestore;
 }

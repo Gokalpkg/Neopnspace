@@ -227,10 +227,10 @@ export const TRANSLATIONS = {
 
     // Privacy Modal
     privacy_title: "Privacy Policy",
-    privacy_p1: "Neon Space Survivor does not create accounts. Your score, crystals, ships, and settings are saved exclusively on this device.",
-    privacy_p2: "Optional rewarded ads are powered by Google AdMob. If the ad is not completed, no reward is granted. AdMob may process ad IDs and device diagnostics.",
-    privacy_p3: "Internet access is used for ads. Vibration settings remain on your device.",
-    privacy_p4: "Contact: Support email listed on Google Play developer profile.",
+    privacy_p1: "Neon Space Survivor does not collect sensitive personal data. Local progress is saved on your device; leaderboard scores (callsign, flag) and achievements sync via Google Firebase and Play Games Services.",
+    privacy_p2: "Ads and analytics are powered by Google AdMob and Firebase Analytics, which may process Advertising ID (AAID) and diagnostics under Google's Privacy Policy.",
+    privacy_p3: "Internet access is used for ads, leaderboards, and Google Play achievements. Vibration settings remain on your device.",
+    privacy_p4: "Data deletion & support contact: kaunosgames@gmail.com",
     privacy_close: "CLOSE",
 
     // Pause Modal
@@ -723,10 +723,10 @@ export const TRANSLATIONS = {
     privacy_link: "Gizlilik Politikası",
 
     privacy_title: "Gizlilik Politikası",
-    privacy_p1: "Neon Space Survivor hesap açmaz. Skor, kristal, gemi ve ayarlar yalnızca bu cihazda saklanır.",
-    privacy_p2: "İsteğe bağlı ödüllü reklamlar Google AdMob ile gösterilir. Reklam tamamlanmazsa ödül verilmez. AdMob reklam kimliği ve cihaz bilgisi işleyebilir.",
-    privacy_p3: "İnternet bağlantısı reklamlar için kullanılır. Titreşim ayarı cihazında kalır.",
-    privacy_p4: "İletişim: Google Play geliştirici profilindeki e-posta adresi.",
+    privacy_p1: "Neon Space Survivor hassas kişisel veri talep etmez. İlerleme cihazınızda saklanır; liderlik tablosu (takma ad, bayrak, skor) ve başarımlar Google Firebase ve Play Games Services ile senkronize edilir.",
+    privacy_p2: "Reklamlar ve analitikler Google AdMob ve Firebase Analytics ile sağlanır; reklam kimliği (AAID) ve tanılama bilgileri Google Gizlilik Politikası kapsamında işlenebilir.",
+    privacy_p3: "İnternet bağlantısı reklamlar, liderlik tablosu ve Google Play başarımları için kullanılır. Titreşim ayarı cihazınızda kalır.",
+    privacy_p4: "Veri silme talebi ve iletişim: kaunosgames@gmail.com",
     privacy_close: "KAPAT",
 
     pause_title: "OYUN DURAKLATILDI",
@@ -1209,10 +1209,10 @@ export const TRANSLATIONS = {
     privacy_link: "Politique de Confidentialité",
 
     privacy_title: "Politique de Confidentialité",
-    privacy_p1: "Neon Space Survivor ne crée aucun compte. Vos scores, cristaux, vaisseaux et options restent uniquement sur cet appareil.",
-    privacy_p2: "Les publicités avec récompense sont fournies par Google AdMob. En cas d'abandon de la pub, aucune récompense n'est accordée.",
-    privacy_p3: "La connexion réseau sert aux publicités. La vibration reste gérée localement.",
-    privacy_p4: "Contact : consultez le profil développeur sur le Google Play Store.",
+    privacy_p1: "Neon Space Survivor ne collecte pas de données personnelles sensibles. Vos progrès sont stockés localement ; les classements et succès se synchronisent via Google Firebase et Play Games Services.",
+    privacy_p2: "Les publicités et analyses utilisent Google AdMob et Firebase Analytics (identifiant publicitaire AAID et diagnostics selon la politique de Google).",
+    privacy_p3: "La connexion réseau sert aux publicités, classements et succès Google Play. La vibration reste gérée localement.",
+    privacy_p4: "Suppression des données et contact : kaunosgames@gmail.com",
     privacy_close: "FERMER",
 
     pause_title: "JEU EN PAUSE",
@@ -1670,10 +1670,10 @@ export const TRANSLATIONS = {
     privacy_link: "Confidentialité",
 
     privacy_title: "Politique de Confidentialité",
-    privacy_p1: "Neon Space Survivor ne crée aucun compte. Vos progrès, cristaux et vaisseaux restent sur votre appareil.",
-    privacy_p2: "Les pubs avec récompense sont servies par Google AdMob. Aucune récompense n'est remise si la pub n'est pas complétée.",
-    privacy_p3: "Internet sert seulement aux annonces. Les réglages de vibration restent en local.",
-    privacy_p4: "Support : contactez l'adresse courriel sur Google Play.",
+    privacy_p1: "Neon Space Survivor ne collecte pas de renseignements personnels sensibles. Vos progrès restent sur l'appareil ; les classements et succès utilisent Google Firebase et Play Games Services.",
+    privacy_p2: "Les pubs et analyses sont servies par Google AdMob et Firebase Analytics (ID publicitaire AAID et diagnostics).",
+    privacy_p3: "Internet sert aux annonces, classements et succès Google Play. Les réglages de vibration restent en local.",
+    privacy_p4: "Suppression des données et support : kaunosgames@gmail.com",
     privacy_close: "FERMER",
 
     pause_title: "PARTIE EN PAUSE",
@@ -2136,10 +2136,10 @@ export const TRANSLATIONS = {
     privacy_link: "Datenschutz",
 
     privacy_title: "Datenschutzerklärung",
-    privacy_p1: "Neon Space Survivor legt keine Benutzerkonten an. Punktstände, Kristalle und Einstellungen werden lokal auf dem Gerät gespeichert.",
-    privacy_p2: "Optionale Werbevideos nutzen Google AdMob. Wird das Video abgebrochen, wird keine Belohnung vergeben.",
-    privacy_p3: "Internetverbindung dient ausschließlich für Anzeigen. Vibrationseinstellungen verbleiben auf dem Gerät.",
-    privacy_p4: "Kontakt: E-Mail-Adresse im Google Play Entwicklerprofil.",
+    privacy_p1: "Neon Space Survivor erhebt keine sensiblen personenbezogenen Daten. Fortschritte werden lokal gespeichert; Bestenlisten und Erfolge synchronisieren über Google Firebase und Play Games Services.",
+    privacy_p2: "Anzeigen und Analysen nutzen Google AdMob und Firebase Analytics (Werbe-ID AAID und Diagnosedaten gemäß Google-Datenschutz).",
+    privacy_p3: "Internetverbindung dient für Anzeigen, Bestenlisten und Google Play-Erfolge. Vibrationseinstellungen verbleiben auf dem Gerät.",
+    privacy_p4: "Datenlöschung & Kontakt: kaunosgames@gmail.com",
     privacy_close: "SCHLIESSEN",
 
     pause_title: "SPIEL PAUSIERT",
@@ -2616,10 +2616,10 @@ export const TRANSLATIONS = {
     privacy_link: "私隱政策",
 
     privacy_title: "私隱政策",
-    privacy_p1: "Neon Space Survivor 不設帳戶註冊。得分、水晶、戰機及設定僅保存在此裝置本機中。",
-    privacy_p2: "可選的獎勵廣告由 Google AdMob 提供。未看完廣告則不會獲得獎勵。",
-    privacy_p3: "網絡連接僅用於載入廣告。震動及聲音設定保留在本地。",
-    privacy_p4: "聯絡我們：請參閱 Google Play 開發者頁面電郵地址。",
+    privacy_p1: "Neon Space Survivor 不收集敏感個人資料。進度保存在本機；排行榜（代號、分數）與成就透過 Google Firebase 及 Play Games Services 同步。",
+    privacy_p2: "廣告與分析由 Google AdMob 及 Firebase Analytics 提供（依 Google 隱私權政策處理廣告 ID 與診斷資料）。",
+    privacy_p3: "網絡連接用於廣告、排行榜與 Google Play 成就。震動及聲音設定保留在本地。",
+    privacy_p4: "資料刪除與聯絡電郵：kaunosgames@gmail.com",
     privacy_close: "關閉",
 
     pause_title: "遊戲暫停",
@@ -3100,10 +3100,10 @@ export const TRANSLATIONS = {
     privacy_link: "隐私政策",
 
     privacy_title: "隐私政策",
-    privacy_p1: "Neon Space Survivor 无需注册账号。得分、水晶、战机及设置仅保存在您的本机设备上。",
-    privacy_p2: "可选的激励视频广告由 Google AdMob 提供。未看完广告将无法获得奖励。",
-    privacy_p3: "网络连接仅用于加载广告，震动等硬件设置仅在本地运作。",
-    privacy_p4: "联系我们：请查阅 Google Play 开发者页面中的邮箱地址。",
+    privacy_p1: "Neon Space Survivor 不收集敏感个人数据。进度保存在本机；排行榜（代号、分数）与成就通过 Google Firebase 及 Play Games Services 同步。",
+    privacy_p2: "广告与分析由 Google AdMob 和 Firebase Analytics 提供（按 Google 隐私政策处理广告 ID 与诊断信息）。",
+    privacy_p3: "网络连接用于广告、排行榜与 Google Play 成就，震动等硬件设置仅在本地运作。",
+    privacy_p4: "数据删除与联系邮箱：kaunosgames@gmail.com",
     privacy_close: "关闭",
 
     pause_title: "游戏暂停",
@@ -3580,10 +3580,10 @@ export const TRANSLATIONS = {
     privacy_link: "隱私權政策",
 
     privacy_title: "隱私權政策",
-    privacy_p1: "Neon Space Survivor 無需註冊帳號。得分、水晶、戰機及設定皆保留於本機裝置中。",
-    privacy_p2: "自選的獎勵式廣告由 Google AdMob 支援。未完整觀看廣告則無法領取獎勵。",
-    privacy_p3: "網路連線僅供載入廣告。震動等功能設定留存於本機。",
-    privacy_p4: "聯絡信箱：請查看 Google Play 開發者頁面。",
+    privacy_p1: "Neon Space Survivor 不收集敏感個人資料。進度保留於本機；排行榜（代號、分數）與成就透過 Google Firebase 及 Play Games Services 同步。",
+    privacy_p2: "廣告與分析由 Google AdMob 及 Firebase Analytics 支援（依 Google 隱私政策處理廣告 ID 與診斷資料）。",
+    privacy_p3: "網路連線用於廣告、排行榜與 Google Play 成就。震動等功能設定留存於本機。",
+    privacy_p4: "資料刪除與聯絡信箱：kaunosgames@gmail.com",
     privacy_close: "關閉",
 
     pause_title: "遊戲暫停",
@@ -4060,10 +4060,10 @@ export const TRANSLATIONS = {
     privacy_link: "プライバシーポリシー",
 
     privacy_title: "プライバシーポリシー",
-    privacy_p1: "Neon Space Survivor にアカウント登録は不要です。スコア、クリスタル、機体、設定は本端末にのみ保存されます。",
-    privacy_p2: "任意のリワード広告は Google AdMob を利用しています。広告視聴を完了しない場合は報酬は付与されません。",
-    privacy_p3: "インターネット接続は広告表示のみに使用されます。バイブレーション設定は端末内に保存されます。",
-    privacy_p4: "連絡先：Google Play 開発者ページのメールアドレスをご確認ください。",
+    privacy_p1: "Neon Space Survivor は機密性の高い個人情報を収集しません。進行状況は端末に保存され、ランキングと実績は Google Firebase および Play Games Services と同期されます。",
+    privacy_p2: "広告および分析には Google AdMob と Firebase Analytics を利用しています（Google のプライバシーポリシーに基づき広告 ID 等を処理します）。",
+    privacy_p3: "インターネット接続は広告、ランキング、Google Play 実績に使用されます。バイブレーション設定は端末内に保存されます。",
+    privacy_p4: "データ削除リクエスト・連絡先：kaunosgames@gmail.com",
     privacy_close: "閉じる",
 
     pause_title: "一時停止",

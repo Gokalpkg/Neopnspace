@@ -4,4 +4,43 @@
     <string name="title_activity_main">Neon Space Survivor</string>
     <string name="package_name">com.kaunos.neonspace</string>
     <string name="custom_url_scheme">com.kaunos.neonspace</string>
+
+    <!-- Google Play Games Services (PGS) Project & Resource IDs -->
+    <string name="game_services_project_id" translatable="false">871503811212</string>
+    <string name="leaderboard_storm" translatable="false">CgkIjKWzza4ZEAIQAA</string>
+    <string name="leaderboard_campaign" translatable="false">CgkIjKWzza4ZEAIQAQ</string>
+
+    <!-- Google Play Games Achievements (32 Total) -->
+    <string name="achievement_first_flight" translatable="false">CgkIjKWzza4ZEAIQDQ</string>
+    <string name="achievement_first_blood" translatable="false">CgkIjKWzza4ZEAIQEw</string>
+    <string name="achievement_first_upgrade" translatable="false">CgkIjKWzza4ZEAIQFg</string>
+    <string name="achievement_boss_vanguard" translatable="false">CgkIjKWzza4ZEAIQEA</string>
+    <string name="achievement_crystal_magnet" translatable="false">CgkIjKWzza4ZEAIQBw</string>
+    <string name="achievement_kills_500" translatable="false">CgkIjKWzza4ZEAIQFw</string>
+    <string name="achievement_kills_2500" translatable="false">CgkIjKWzza4ZEAIQDg</string>
+    <string name="achievement_kills_10000" translatable="false">CgkIjKWzza4ZEAIQGw</string>
+    <string name="achievement_crystals_1000" translatable="false">CgkIjKWzza4ZEAIQFQ</string>
+    <string name="achievement_crystals_10000" translatable="false">CgkIjKWzza4ZEAIQAg</string>
+    <string name="achievement_crystals_50000" translatable="false">CgkIjKWzza4ZEAIQIA</string>
+    <string name="achievement_pilot_level_50" translatable="false">CgkIjKWzza4ZEAIQGA</string>
+    <string name="achievement_asteroids_300" translatable="false">CgkIjKWzza4ZEAIQDw</string>
+    <string name="achievement_boss_dreadnought" translatable="false">CgkIjKWzza4ZEAIQHQ</string>
+    <string name="achievement_boss_nebula" translatable="false">CgkIjKWzza4ZEAIQAw</string>
+    <string name="achievement_boss_titan" translatable="false">CgkIjKWzza4ZEAIQBQ</string>
+    <string name="achievement_boss_chrono" translatable="false">CgkIjKWzza4ZEAIQBA</string>
+    <string name="achievement_boss_apex" translatable="false">CgkIjKWzza4ZEAIQEQ</string>
+    <string name="achievement_ship_unlock_2" translatable="false">CgkIjKWzza4ZEAIQGg</string>
+    <string name="achievement_fleet_commander" translatable="false">CgkIjKWzza4ZEAIQCg</string>
+    <string name="achievement_tech_master" translatable="false">CgkIjKWzza4ZEAIQHg</string>
+    <string name="achievement_ship_5star" translatable="false">CgkIjKWzza4ZEAIQBg</string>
+    <string name="achievement_wheel_10" translatable="false">CgkIjKWzza4ZEAIQDA</string>
+    <string name="achievement_graze_master" translatable="false">CgkIjKWzza4ZEAIQCA</string>
+    <string name="achievement_combo_50" translatable="false">CgkIjKWzza4ZEAIQHA</string>
+    <string name="achievement_storm_survivor" translatable="false">CgkIjKWzza4ZEAIQGQ</string>
+    <string name="achievement_hyper_slayer" translatable="false">CgkIjKWzza4ZEAIQHw</string>
+    <string name="achievement_flawless_victory" translatable="false">CgkIjKWzza4ZEAIQEg</string>
+    <string name="achievement_edge_of_death" translatable="false">CgkIjKWzza4ZEAIQFA</string>
+    <string name="achievement_pacifist_run" translatable="false">CgkIjKWzza4ZEAIQCw</string>
+    <string name="achievement_overload_combo" translatable="false">CgkIjKWzza4ZEAIQIQ</string>
+    <string name="achievement_time_freeze_12" translatable="false">CgkIjKWzza4ZEAIQCQ</string>
 </resources>

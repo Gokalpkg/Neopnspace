@@ -7,7 +7,7 @@ import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslati
 import { analytics } from './analytics.js';
 import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE, PLAYER_BASE_CONFIG, DROP_RATES, HYPER_MODE_CONFIG } from './balance.js';
 import { EventBus } from './events.js';
-import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, updatePlayerProfileInFirestore, PGS_CONFIG, getPlayerUid } from './leaderboard.js';
+import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, updatePlayerProfileInFirestore, PGS_CONFIG, getPlayerUid, unlockPlayGamesAchievement, incrementPlayGamesAchievement, showPlayGamesAchievements } from './leaderboard.js';
 
 if (typeof window !== 'undefined') {
   window.BalanceConfig = {
@@ -1686,6 +1686,7 @@ class Game {
         localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
         this.updateCrystalsDisplay();
         this.setShipStars(skinId, currentStars + 1);
+        if (currentStars + 1 >= 5) unlockPlayGamesAchievement('ship_5star');
         if (sounds.playUpgrade) sounds.playUpgrade();
         vibrate.medium();
         this.showToast(t('starup_toast_success', { n: currentStars + 1 }), '#ffd700');
@@ -3165,6 +3166,31 @@ class Game {
 
     this.updateTrophiesBadge();
     this.renderTrophies();
+
+    // Google Play Games Achievements Senkronizasyonu
+    try {
+      const pgsMap = {
+        kill_1: 'first_blood',
+        kill_3: 'kills_500',
+        kill_4: 'kills_2500',
+        kill_5: 'kills_10000',
+        crystal_1: 'crystal_magnet',
+        crystal_2: 'crystals_1000',
+        crystal_3: 'crystals_10000',
+        crystal_4: 'crystals_50000',
+        asteroid_2: 'asteroids_300',
+        boss_1: 'boss_vanguard',
+        combo_3: 'combo_50',
+        graze_2: 'graze_master',
+        flight_1: 'first_flight',
+        chest_2: 'wheel_10'
+      };
+      if (pgsMap[id]) {
+        unlockPlayGamesAchievement(pgsMap[id]);
+      }
+    } catch (e) {
+      console.warn('[PGS] Trophy sync error:', e);
+    }
   }
 
   checkTrophy(id) {
@@ -3212,7 +3238,25 @@ class Game {
         <span class="trophies-summary-val" style="color:#00f0ff;">+${totalClaimedCR.toLocaleString()} CR</span>
         <span class="trophies-summary-lbl">${t('trophy_reward_sum') || 'TOTAL REWARD'}</span>
       </div>
+      <button id="btn-open-pgs-achievements" class="trophy-pgs-btn" style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(5, 255, 161, 0.12); border: 1px solid #05ffa1; border-radius: 6px; color: #05ffa1; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px; padding: 7px 12px; margin-top: 6px; cursor: pointer;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1c1.9-.45 3.39-1.99 3.61-3.96C19.08 11.63 21 9.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+        <span>GOOGLE PLAY BAŞARIMLARI</span>
+      </button>
     `;
+
+    const btnPgsAch = summaryBanner.querySelector('#btn-open-pgs-achievements');
+    if (btnPgsAch) {
+      btnPgsAch.onclick = (e) => {
+        e.stopPropagation();
+        sounds.init();
+        sounds.playCardSelect();
+        vibrate.light();
+        const shown = showPlayGamesAchievements();
+        if (!shown) {
+          this.showToast('Google Play Games Servisi bağlanıyor...', '#05ffa1');
+        }
+      };
+    }
 
     // Filtre sekmesi
     let filterBar = document.getElementById('trophies-filter-bar');
@@ -5207,6 +5251,7 @@ class Game {
             sounds.init();
             this.totalCrystals -= nextCost;
             this.techUpgrades[item.id] = (this.techUpgrades[item.id] || 0) + buyCount;
+            if (this.techUpgrades[item.id] >= 10) unlockPlayGamesAchievement('tech_master');
             localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
             this.saveTechUpgrades();
             sounds.playLevelUp();
@@ -5294,6 +5339,10 @@ class Game {
     try { localStorage.removeItem('neon_ui_theme'); } catch (_) {}
 
 
+    const devModeSection = document.getElementById('dev-mode-section');
+    if (import.meta.env.PROD && devModeSection) {
+      devModeSection.remove();
+    }
     const btnToggleDevMode = document.getElementById('btn-toggle-dev-mode');
     const updateDevModeUI = () => {
       if (!btnToggleDevMode) return;
@@ -5516,6 +5565,7 @@ class Game {
 
     if (btnBuyNoAds) {
       btnBuyNoAds.addEventListener('click', () => {
+        if (import.meta.env.PROD) return;
         sounds.playCardSelect();
         const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
         if (isNoAds) {
@@ -6994,6 +7044,8 @@ class Game {
       localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
       this.unlockedSkins.push(skin.id);
       localStorage.setItem('neon_unlocked_skins', JSON.stringify(this.unlockedSkins));
+      if (this.unlockedSkins.length >= 2) unlockPlayGamesAchievement('ship_unlock_2');
+      if (this.unlockedSkins.length >= 6) unlockPlayGamesAchievement('fleet_commander');
       this.currentSkinId = skin.id;
       localStorage.setItem('neon_equipped_skin', skin.id);
 
@@ -7810,6 +7862,12 @@ class Game {
   }
 
   claimWheelPrize(prize) {
+    try {
+      const spins = (parseInt(localStorage.getItem('neon_wheel_spins_count') || '0', 10)) + 1;
+      localStorage.setItem('neon_wheel_spins_count', spins.toString());
+      incrementPlayGamesAchievement('wheel_10', 1);
+      if (spins >= 10) unlockPlayGamesAchievement('wheel_10');
+    } catch (e) {}
     if (prize.type === 'crystals') {
       this.totalCrystals += prize.value;
       this.saveData();
@@ -8642,6 +8700,7 @@ class Game {
     this.launching = true;
     this.launchProgress = 0;
     this.logEvent('run_start', { mode: this.currentMode, games: parseInt(localStorage.getItem('neon_games_played') || '0', 10) });
+    unlockPlayGamesAchievement('first_flight');
     this.requestWakeLock();
     sounds.playWarpDrive();
     vibrate.heavy();
@@ -11439,6 +11498,7 @@ class Game {
   }
 
   applyUpgrade(id) {
+    unlockPlayGamesAchievement('first_upgrade');
     if (id.startsWith('evo_')) {
       this.screenShake = 8;
       this.particles.spawnShockwave(this.player.x, this.player.y, '#ffbe0b', 200);
@@ -16168,6 +16228,19 @@ class Game {
         this.pilotStats.bossesDefeated = (this.pilotStats.bossesDefeated || 0) + 1;
         this.savePilotStats();
       }
+      // Google Play Games Boss & Koşul Başarımları
+      try {
+        if (enemy.type === 'boss_vanguard') unlockPlayGamesAchievement('boss_vanguard');
+        else if (enemy.type === 'boss_dreadnought' || enemy.type === 'boss') unlockPlayGamesAchievement('boss_dreadnought');
+        else if (enemy.type === 'boss_nebula') unlockPlayGamesAchievement('boss_nebula');
+        else if (enemy.type === 'boss_titan') unlockPlayGamesAchievement('boss_titan');
+        else if (enemy.type === 'boss_chrono') unlockPlayGamesAchievement('boss_chrono');
+        else if (enemy.type === 'boss_apex') unlockPlayGamesAchievement('boss_apex');
+        if (this.isHyperMode) unlockPlayGamesAchievement('hyper_slayer');
+        if (this.player && (this.player.hp / Math.max(1, this.player.maxHp)) <= 0.05) {
+          unlockPlayGamesAchievement('edge_of_death');
+        }
+      } catch (e) {}
 
       // === 38 SEVİYELİ SEFER (CAMPAIGN) MODU: BÖLÜM ZAFERİ KONTROLÜ ===
       if (this.currentMode === 'classic' && (enemy.isLevelBoss || enemy === this.currentLevelBoss || this.levelBossSpawned)) {

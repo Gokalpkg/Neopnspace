@@ -357,11 +357,14 @@
       <div class="modal-card privacy-card">
         <h2 data-i18n="privacy_title">Gizlilik Politikası</h2>
         <div class="privacy-body">
-          <p data-i18n="privacy_p1">Neon Space Survivor hesap açmaz. Skor, kristal, gemi ve ayarlar yalnızca bu cihazda saklanır.</p>
-          <p data-i18n="privacy_p2">İsteğe bağlı ödüllü reklamlar Google AdMob ile gösterilir. Reklam tamamlanmazsa ödül verilmez. AdMob reklam kimliği ve cihaz bilgisi işleyebilir.</p>
-          <p data-i18n="privacy_p3">İnternet bağlantısı reklamlar için kullanılır. Titreşim ayarı cihazında kalır.</p>
-          <p data-i18n="privacy_p4">İletişim: Google Play geliştirici profilindeki e-posta adresi.</p>
+          <p data-i18n="privacy_p1">Neon Space Survivor kişisel kimlik bilgisi (ad, telefon, adres) talep etmez. Oyun ilerlemesi cihazınızda yerel olarak saklanır; liderlik tablosu (takma ad, ülke bayrağı ve skor) ile başarımlar Google Play Games Services ve Google Firebase altyapısıyla senkronize edilir.</p>
+          <p data-i18n="privacy_p2">Ödüllü ve geçiş reklamları Google AdMob ile sunulur. AdMob ve Firebase Analytics; reklam kimliği (AAID), cihaz tanılaması ve anonim kullanım verilerini Google Gizlilik Politikası kapsamında işleyebilir.</p>
+          <p data-i18n="privacy_p3">İnternet bağlantısı reklamlar, liderlik tablosu ve Google Play başarımları için kullanılır. Titreşim ayarı cihazınızda kalır.</p>
+          <p data-i18n="privacy_p4">Veri silme talebi ve iletişim: kaunosgames@gmail.com</p>
         </div>
+        <button id="btn-delete-cloud-data" type="button" class="neon-badge-btn" style="width: 100%; margin-bottom: 10px; padding: 8px; font-size: 0.75rem; font-weight: 800; border-radius: 8px; border: 1px solid rgba(255, 0, 85, 0.5); background: rgba(255, 0, 85, 0.12); color: #ff0055; cursor: pointer;" onclick="if(window.deletePlayerDataFromFirestore){window.deletePlayerDataFromFirestore().then(()=>{this.textContent='✓ BULUT KAYDI SİLİNDİ / DELETED';this.style.color='#05ffa1';this.style.borderColor='#05ffa1';});}">
+          LİDERLİK TABLOSU VERİLERİMİ SİL (DELETE CLOUD DATA)
+        </button>
         <button id="btn-close-privacy" type="button" class="neon-btn-secondary" data-i18n="privacy_close">KAPAT</button>
       </div>
     </div>
@@ -454,8 +457,8 @@
           </div>
         </div>
 
-        <!-- 4. Geliştirici Modu: sürüm AAB'sinde bu blok silinir -->
-        <div id="dev-mode-section" class="settings-section" style="margin-top: 14px; border: 1.5px dashed rgba(255, 190, 11, 0.45); padding: 12px; border-radius: 14px; background: rgba(255, 190, 11, 0.06);">
+        <!-- 4. Geliştirici Modu: sürüm AAB'sinde gizlidir -->
+        <div id="dev-mode-section" class="settings-section" style="display: none; margin-top: 14px; border: 1.5px dashed rgba(255, 190, 11, 0.45); padding: 12px; border-radius: 14px; background: rgba(255, 190, 11, 0.06);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span style="display: flex; align-items: center;"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 16 16"><path d="M2 2h4v2H2zM4 4h4v2H4zM6 6h4v4H6zM8 10h4v4H8zM10 12h4v2h-4z" fill="#ffbe0b"/><rect x="11" y="2" width="3" height="4" fill="#ffbe0b"/></svg></span>
@@ -1660,6 +1663,7 @@
 
     async function presentPrepared(AdMob, unitId) {
       window._adReady = null;
+      if (window.sounds && window.sounds.pauseAudio) window.sounds.pauseAudio();
       try {
         if (isStandardInterstitialUnit(unitId) && AdMob.showInterstitial) {
           await AdMob.showInterstitial();
@@ -1679,6 +1683,8 @@
       } catch (err) {
         console.warn('[AdMob] gösterim tamamlanmadı:', err?.message || err);
         return { error: adFailKind(err) };
+      } finally {
+        if (window.sounds && window.sounds.resumeAudio) window.sounds.resumeAudio();
       }
       return false;
     }
@@ -1838,12 +1844,17 @@
         try {
           if (isRewardedInterstitialUnit(unitId) && AdMob.prepareRewardInterstitialAd && AdMob.showRewardInterstitialAd) {
             await withTimeout(AdMob.prepareRewardInterstitialAd({ adId: unitId, isTesting: false }), 3200);
+            if (window.sounds && window.sounds.pauseAudio) window.sounds.pauseAudio();
             await AdMob.showRewardInterstitialAd();
             noteAdWatched();
+            if (window.game && window.game.addGoldReward) {
+              window.game.addGoldReward(50, false);
+            }
             console.log('[AdMob Mediation] Ödüllü Geçiş reklamı gösterildi ->', unitId);
             break;
           } else if (AdMob.prepareInterstitial && AdMob.showInterstitial) {
             await withTimeout(AdMob.prepareInterstitial({ adId: unitId, isTesting: false }), 3200);
+            if (window.sounds && window.sounds.pauseAudio) window.sounds.pauseAudio();
             await AdMob.showInterstitial();
             noteAdWatched();
             console.log('[AdMob Mediation] Standart Geçiş reklamı gösterildi ->', unitId);
@@ -1851,6 +1862,8 @@
           }
         } catch (e) {
           console.warn('[AdMob Mediation] Geçiş birimi yüklenemedi:', unitId, e?.message || e);
+        } finally {
+          if (window.sounds && window.sounds.resumeAudio) window.sounds.resumeAudio();
         }
       }
 

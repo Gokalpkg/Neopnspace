@@ -1,0 +1,32 @@
+Kozmik Ateşleme,Neon Space'te ilk uzay uçuşuna başla.,False,,Revealed,10,1
+İlk Kan,Herhangi bir türde ilk düşman gemisini imha et.,False,,Revealed,10,2
+Gelişmiş Donanım,Seviye atlayarak ilk silah yükseltme kartını seç.,False,,Revealed,15,3
+Öncü Tehdit,İlk boss olan Öncü Komutan'ı mağlup et.,False,,Revealed,25,4
+Kozmik Mıknatıs,Tek bir seferde en az 100 Kristal topla.,False,,Revealed,15,5
+Uzay Temizliği I,Toplam 500 düşman gemisi yok et.,True,500,Revealed,20,6
+Uzay Temizliği II,Toplam 2500 düşman gemisi yok et.,True,2500,Revealed,40,7
+Uzay Temizliği III,Toplam 10000 düşman gemisi yok et.,True,10000,Revealed,100,8
+Kristal Madencisi I,Toplam 1000 Kristal topla.,True,1000,Revealed,20,9
+Kristal Madencisi II,Toplam 10000 Kristal topla.,True,10000,Revealed,50,10
+Kristal Zengini III,Toplam 50000 Kristal topla.,True,50000,Revealed,100,11
+Kıdemli Pilot,Oyunda toplam 50 seviye atla.,True,50,Revealed,35,12
+Göktaşı Kırıcı,Toplam 300 asteroid imha et.,True,300,Revealed,30,13
+Karanlığın Sonu,Sektör 1 Boss'u Kara Muhafız'ı alt et.,False,,Revealed,30,14
+Nebula Körlüğü,Sektör 2 Boss'u Nebula Gözcüsü'nü darmadağın et.,False,,Revealed,40,15
+Demir Kıran,Sektör 3 Boss'u Demir Titan'ı hurdaya çevir.,False,,Revealed,50,16
+Zaman Hırsızı,Sektör 4 Boss'u Kronos Hükümdarı'nı bozguna uğrat.,False,,Revealed,70,17
+Boyut Hakimi,Zirve Boss Kuantum Apex'i mağlup et ve galaksiyi kurtar.,False,,Revealed,150,18
+Yeni Bir Kanat,Hangardan ikinci uzay gemini satın al.,False,,Revealed,25,19
+Filo Komutanı,Tüm gemilerin kilidini aç.,False,,Revealed,100,20
+Mühendislik Harikası,Atölyede herhangi bir yükseltmeyi Seviye 10'a ulaştır.,False,,Revealed,60,21
+Yıldız Yağmuru,Herhangi bir gemini 5 Yıldız rütbesine yükselt.,False,,Revealed,75,22
+Şanslı Pilot,Çarkıfeleği 10 kez çevir.,True,10,Revealed,25,23
+Refleks Ustası,Tek bir koşuda en az 50 mermiyi teğet geç.,False,,Revealed,35,24
+Durdurulamaz Kombo,Kombo sayacını 50x seviyesine ulaştır.,False,,Revealed,50,25
+Fırtına Süvarisi,Fırtına Modunda tek bir koşuda 5 dakika hayatta kal.,False,,Revealed,65,26
+Hiper Tehdit,Hiper Dalga etkinken bir Boss yenilgiye uğrat.,False,,Revealed,80,27
+Kusursuz Zafer,Hiç hasar almadan bir boss savaşını tamamla.,False,,Revealed,100,28
+Ölümün Kıyısında,Canın yüzde 5'in altındayken bir dalgayı sağ salim bitir.,False,,Hidden,40,29
+Pasifist Manevra,Bir koşunun ilk 40 saniyesinde hiç ateş etmeden hayatta kal.,False,,Hidden,50,30
+Aşırı Yükleme,Aynı anda hem Overdrive'ı hem de bir Şans Sandığı'nı tetikle.,False,,Hidden,45,31
+Zamanı Durduran,Chrono Apex süpernovası ile aynı anda en az 12 düşmanı dondur.,False,,Hidden,75,32
