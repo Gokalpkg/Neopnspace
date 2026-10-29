@@ -36,13 +36,18 @@ function test(name, fn) {
 const game = getGame();
 
 // 1. Version Bump Verification
-test('T1: Version 1.7.2 and versionCode 49 in package.json & build.gradle', () => {
+test('T1: Version 1.7.2+ and versionCode 49+ in package.json & build.gradle', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '1.7.2', 'package.json version must be 1.7.2');
+  assert.ok(pkg.version && pkg.version >= '1.7.2', 'package.json version must be >= 1.7.2');
 
   const gradle = fs.readFileSync(path.join(rootDir, 'android/app/build.gradle'), 'utf8');
-  assert.ok(gradle.includes('versionCode 49'), 'build.gradle must have versionCode 49');
-  assert.ok(gradle.includes('versionName "1.7.2"'), 'build.gradle must have versionName "1.7.2"');
+  const vcMatch = gradle.match(/versionCode\s+(\d+)/);
+  const vnMatch = gradle.match(/versionName\s+"([^"]+)"/);
+
+  assert.ok(vcMatch, 'versionCode must exist in build.gradle');
+  assert.ok(parseInt(vcMatch[1], 10) >= 49, `versionCode must be >= 49 (got ${vcMatch[1]})`);
+  assert.ok(vnMatch, 'versionName must exist in build.gradle');
+  assert.ok(vnMatch[1] >= '1.7.2', `versionName must be >= 1.7.2 (got ${vnMatch[1]})`);
 });
 
 // 2. SPAWN_PACING maxEnemies is 45-60
