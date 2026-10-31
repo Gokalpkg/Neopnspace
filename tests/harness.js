@@ -65,6 +65,7 @@ function createMockContext(canvas) {
 
 // DOM Element Mock
 function createMockElement(id = 'mock-elem', tagName = 'div') {
+  const listeners = new Map();
   const elem = {
     id,
     tagName: tagName.toUpperCase(),
@@ -84,16 +85,46 @@ function createMockElement(id = 'mock-elem', tagName = 'div') {
       _classes: new Set(),
       add(...cls) { cls.forEach(c => this._classes.add(c)); },
       remove(...cls) { cls.forEach(c => this._classes.delete(c)); },
-      toggle(c) { if (this._classes.has(c)) { this._classes.delete(c); return false; } this._classes.add(c); return true; },
-      contains(c) { return this._classes.has(c); }
+      toggle(c, force) {
+        if (typeof force === 'boolean') {
+          if (force) this._classes.add(c);
+          else this._classes.delete(c);
+          return force;
+        }
+        if (this._classes.has(c)) { this._classes.delete(c); return false; }
+        this._classes.add(c);
+        return true;
+      },
+      contains(c) {
+        if (this._classes.has(c)) return true;
+        if (elem.className && elem.className.split(/\s+/).includes(c)) return true;
+        return false;
+      }
     },
     setAttribute(k, v) { elem._attrs.set(k, String(v)); },
     getAttribute(k) { return elem._attrs.has(k) ? elem._attrs.get(k) : null; },
     removeAttribute(k) { elem._attrs.delete(k); },
     hasAttribute(k) { return elem._attrs.has(k); },
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => true,
+    addEventListener(type, fn) {
+      if (!listeners.has(type)) listeners.set(type, []);
+      listeners.get(type).push(fn);
+    },
+    removeEventListener(type, fn) {
+      if (listeners.has(type)) {
+        listeners.set(type, listeners.get(type).filter(f => f !== fn));
+      }
+    },
+    click() {
+      if (typeof elem.onclick === 'function') elem.onclick();
+      const cbs = listeners.get('click');
+      if (cbs) cbs.forEach(fn => fn({ target: elem, preventDefault() {}, stopPropagation() {} }));
+    },
+    dispatchEvent: (ev) => {
+      const type = (typeof ev === 'object' && ev.type) ? ev.type : String(ev);
+      const cbs = listeners.get(type);
+      if (cbs) cbs.forEach(fn => fn(ev));
+      return true;
+    },
     appendChild(child) {
       elem.children.push(child);
       if (child) {

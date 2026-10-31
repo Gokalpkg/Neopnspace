@@ -670,7 +670,24 @@ const RAW = {
   smuggler_signal_tap: row('SMUGGLER SIGNAL [TAP]', 'KAÇAKÇI SİNYALİ [DOKUN]', 'SIGNAL DU CONTREBANDIER [TOUCHER]', 'SCHMUGGLER-SIGNAL [ANTIPPEN]', '走私者信号 [点击]', '走私者信號 [點擊]', '密輸業者のシグナル [タップ]'),
   breach_barrier_pressure: row('BARRIER PRESSURE -{n}', 'BARİYER BASKISI -{n}', 'PRESSION DU BOUCLIER -{n}', 'SCHILDDRUCK -{n}', '护盾受压 -{n}', '護盾受壓 -{n}', 'バリア圧力 -{n}'),
   breach_hull_warning: row('HULL WARNING -{n}', 'GÖVDE UYARISI -{n}', 'ALERTE DE COQUE -{n}', 'HUELLENWARNUNG -{n}', '机体警报 -{n}', '機體警報 -{n}', '船体警告 -{n}'),
-  banner_test_flight: row('TEST FLIGHT {s}s', 'DENEME UÇUŞU {s}sn', 'VOL D\'ESSAI {s}s', 'TESTFLUG {s}s', '试飞 {s}秒', '試飛 {s}秒', 'テスト飛行 {s}秒')
+  banner_test_flight: row('TEST FLIGHT {s}s', 'DENEME UÇUŞU {s}sn', 'VOL D\'ESSAI {s}s', 'TESTFLUG {s}s', '试飞 {s}秒', '試飛 {s}秒', 'テスト飛行 {s}秒'),
+
+  // FTUE & Re-engagement Overhaul
+  hangar_instant_launch: row('LAUNCH & ENGAGE', 'HEMEN FIRLA & SAVAŞA GİR', 'DÉCOLLAGE IMMÉDIAT ET COMBAT', 'SOFORT STARTEN & KÄMPFEN', '立即起飞进入战斗', '立即起飛進入戰鬥', '即座に出撃＆戦闘開始'),
+  boss_commander_name: row('VANGUARD COMMANDER', 'ÖNCÜ KOMUTAN', 'COMMANDANT D\'AVANT-GARDE', 'VANGUARD-KOMMANDANT', '先锋指挥官', '先鋒指揮官', 'ヴァンガード指令官'),
+  hybrid_launch_title: row('UPGRADE & INSTANT LAUNCH! 🚀', 'GÜÇLEN & ANINDA FIRLA! 🚀', 'AMÉLIOREZ ET DÉCOLLEZ ! 🚀', 'UPGRADEN & SOFORT STARTEN! 🚀', '强化并立即起飞！🚀', '強化並立即起飛！🚀', '強化して即座に出撃！🚀'),
+  instant_rematch_title: row('INSTANT REMATCH (PLAY AGAIN)', 'ANINDA RÖVANŞ (TEKRAR OYNA)', 'REVANCHE IMMÉDIATE (REJOUER)', 'SOFORTIGE REVANCHE (NOCHMAL)', '立即复仇（再来一局）', '立即復仇（再來一局）', '即座に再戦（リトライ）'),
+  btn_revive_tutorial_action: row('FREE EMERGENCY AID', 'ÜCRETSİZ ACİL DESTEK', 'AIDE D\'URGENCE GRATUITE', 'KOSTENLOSE NOTFALLHILFE', '免费紧急救援', '免費緊急救援', '無料緊急プロトコル'),
+  btn_revive_tutorial_tag: row('1 USE', '1 HAK', '1 ESSAI', '1 VERSUCH', '1次机会', '1次機會', '1回限定'),
+  toast_tutorial_revive: row('[EMERGENCY AID] Emergency shield deployed with zero ads!', '[ACİL DESTEK] Acil durum kalkanı devreye girdi!', '[AIDE D\'URGENCE] Bouclier d\'urgence déployé !', '[NOTFALLHILFE] Notschild ohne Werbung aktiviert!', '[紧急救援] 应急护盾已激活（无广告）！', '[緊急救援] 應急護盾已激活（無廣告）！', '[緊急支援] 緊急シールドが発動しました（広告なし）！'),
+  go_near_miss_boss_hp: row('ONLY {pct}% HP REMAINED ON {name}!', '{name} İÇİN SADECE %{pct} CAN KALMIŞTI!', 'IL NE RESTAIT QUE {pct}% DE VIE À {name} !', 'NUR NOCH {pct}% TP BEI {name} ÜBRIG!', '{name} 只剩下 {pct}% 生命值！', '{name} 只剩下 {pct}% 生命值！', '{name}の残りHPはわずか{pct}%だった！'),
+  go_near_miss_boss_time: row('ONLY {sec}s LEFT UNTIL STAGE {level} BOSS!', 'BÖLÜM {level} BOSS\'UNA SADECE {sec} SANİYE KALMIŞTI!', 'PLUS QUE {sec}s AVANT LE BOSS DU NIVEAU {level} !', 'NUR NOCH {sec}s BIS ZUM BOSS VON STUFE {level}!', '距离第 {level} 关首领仅剩 {sec} 秒！', '距離第 {level} 關首領僅剩 {sec} 秒！', 'ステージ{level}ボスまであと{sec}秒だった！'),
+  go_near_miss_wave: row('ONLY {sec}s LEFT UNTIL WAVE 2!', '2. DALGAYA SADECE {sec} SANİYE KALMIŞTI!', 'PLUS QUE {sec}s AVANT LA VAGUE 2 !', 'NUR NOCH {sec}s BIS ZUR 2. WELLE!', '距离第 2 波仅剩 {sec} 秒！', '距離第 2 波僅剩 {sec} 秒！', '第2ウェーブまであと{sec}秒だった！'),
+  go_near_miss_progress: row('{pct}% Completed', '%{pct} Tamamlandı', '{pct}% Terminé', '{pct}% Abgeschlossen', '已完成 {pct}%', '已完成 {pct}%', '{pct}% 達成'),
+  hybrid_toast_hull: row('+20 HULL INTEGRITY ACTIVE!', '+20 GÖVDE CANI AKTİF!', '+20 INTÉGRITÉ DE COQUE ACTIVE !', '+20 HÜLLENINTEGRITÄT AKTIV!', '+20 装甲已激活！', '+20 裝甲已激活！', '+20 船体耐久が発動！'),
+  hybrid_toast_shield: row('+15 SHIELD ACTIVE!', '+15 KALKAN AKTİF!', '+15 BOUCLIER ACTIF !', '+15 SCHILD AKTIV!', '+15 护盾已激活！', '+15 護盾已激活！', '+15 シールドが発動！'),
+  hybrid_toast_damage: row('+12% DAMAGE ACTIVE!', '+%12 PLAZMA HASARI AKTİF!', '+12% DÉGÂTS ACTIF !', '+12% SCHADEN AKTIV!', '+12% 伤害已激活！', '+12% 傷害已激活！', '+12% ダメージが発動！'),
+  hybrid_toast_magnet: row('+18 MAGNET RANGE ACTIVE!', '+18 ÇEKİM ALANI AKTİF!', '+18 PORTÉE D\'ATTRACTION ACTIVE !', '+18 MAGNETREICHWEITE AKTIV!', '+18 拾取范围已激活！', '+18 拾取範圍已激活！', '+18 吸引範囲が発動！')
 };
 
 export const CATALOG = {};

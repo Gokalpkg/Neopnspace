@@ -291,7 +291,7 @@ export async function fetchTopScoresFromFirestore(mode = 'storm', limitCount = 5
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
       const docUid = data.uid || docSnap.id;
-      const isMe = docUid === myUid;
+      const isMe = docUid === myUid || (data.name && data.name.toUpperCase() === myCallsign.toUpperCase());
       scores.push({
         uid: docUid,
         name: isMe ? myCallsign : data.name,

@@ -314,7 +314,7 @@
           </button>
         </div>
 
-        <button id="btn-start" class="cyber-launch-btn pulse">
+        <button id="btn-start" class="cyber-launch-btn pulse btn-main-play">
           <span class="launch-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M5 1h2v2H5zM4 3h4v3H4zM3 6h6v3H3zM1 8h10v2H1zM0 10h3v2H0zM9 10h3v2H9zM5 9h2v3H5z" fill="#030816"/></svg></span>
           <span class="launch-text" data-i18n="btn_start">GÖREVE BAŞLA</span>
           <span class="launch-sheen"></span>
@@ -1120,7 +1120,11 @@
         </div>
 
         <div class="hangar-footer-bar">
-          <button id="btn-hangar-close" class="neon-btn-primary hangar-confirm-btn">
+          <button id="btn-hangar-launch" class="neon-btn-primary hangar-launch-btn" type="button">
+            <span class="hangar-launch-icon">🚀</span>
+            <span data-i18n="hangar_instant_launch">HEMEN FIRLA & SAVAŞA GİR</span>
+          </button>
+          <button id="btn-hangar-close" class="neon-btn-secondary hangar-confirm-btn" type="button">
             <svg class="pixel-icon pixel-icon-sm" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
             <span data-i18n="hangar_save_exit">KAYDET VE ÇIK</span>
           </button>
@@ -1311,6 +1315,9 @@
             <div id="go-hook" class="go-hook-banner target-banner"></div>
           </div>
         </div>
+
+        <!-- ÖLÜMCÜL DARBE TELEMETRİ KUTUSU (KARA KUTU / TELEMETRY) -->
+        <div id="go-killer-info" class="go-killer-info" style="display:none;"></div>
 
         <!-- HERO SKOR PANELİ -->
         <div class="go-score-card">

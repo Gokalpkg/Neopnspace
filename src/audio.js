@@ -1869,9 +1869,143 @@ class SoundEngine {
       });
     } catch (e) {}
   }
+
+  // 10. Jackpot Sandık Gerilim Tıkırtısı (0ms-800ms Hızlanan 8-Bit Selection Click)
+  playChestTremorTick(progress = 0) {
+    this.lastPlayedSound = 'chest_tremor_tick';
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const p = Math.max(0, Math.min(1, progress || 0));
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      const baseFreq = 260 + p * 420;
+      osc.frequency.setValueAtTime(baseFreq, now);
+      osc.frequency.setValueAtTime(baseFreq * 1.35, now + 0.012);
+
+      gain.gain.setValueAtTime(0.16 + p * 0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.028);
+
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      this._autoDisconnect(osc, gain);
+      osc.start(now);
+      osc.stop(now + 0.03);
+    } catch (e) {}
+  }
+
+  // 11. Jackpot Sandık Kırılma & Gökyüzü Sütunu Patlaması (800ms Heavy Impact)
+  playChestHeavyImpact() {
+    this.lastPlayedSound = 'chest_heavy_impact';
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+
+      // 1. Sismik 8-Bit Sub-Bass Darbesi
+      const bass = this.ctx.createOscillator();
+      const bGain = this.ctx.createGain();
+      bass.type = 'triangle';
+      bass.frequency.setValueAtTime(180, now);
+      bass.frequency.exponentialRampToValueAtTime(34, now + 0.38);
+      bGain.gain.setValueAtTime(0.52, now);
+      bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.40);
+      bass.connect(bGain);
+      bGain.connect(this.sfxGain);
+      this._autoDisconnect(bass, bGain);
+      bass.start(now);
+      bass.stop(now + 0.40);
+
+      // 2. Keskin 8-Bit Kilit Kırılma & Sütun Fırlama Akoru
+      const lead = this.ctx.createOscillator();
+      const lGain = this.ctx.createGain();
+      lead.type = 'square';
+      lead.frequency.setValueAtTime(523.25, now);
+      lead.frequency.setValueAtTime(1046.50, now + 0.045);
+      lead.frequency.setValueAtTime(1567.98, now + 0.09);
+      lGain.gain.setValueAtTime(0.28, now);
+      lGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      lead.connect(lGain);
+      lGain.connect(this.sfxGain);
+      this._autoDisconnect(lead, lGain);
+      lead.start(now);
+      lead.stop(now + 0.29);
+
+      // 3. Beyaz Gürültü Patlama Katmanı
+      if (this.sharedNoiseBuffer) {
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.sharedNoiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1200, now);
+        filter.Q.setValueAtTime(1.5, now);
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.32, now);
+        nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+        noise.connect(filter);
+        filter.connect(nGain);
+        nGain.connect(this.sfxGain);
+        this._autoDisconnect(noise, filter, nGain);
+        noise.start(now);
+        noise.stop(now + 0.25);
+      }
+    } catch (e) {}
+  }
+
+  // 12. Piksel Hazine Fıskiyesi Artan Perdeli Chiptune Sesi (Her 80ms'de Ascending Pitch)
+  playFountainPitchTick(stepIndex = 0) {
+    this.lastPlayedSound = 'fountain_pitch_tick';
+    const clampedStep = Math.max(0, Math.min(32, stepIndex | 0));
+    const freq = Math.round(440 * Math.pow(1.048, clampedStep));
+    this.lastFountainPitchFreq = freq;
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.setValueAtTime(freq * 1.5, now + 0.025);
+
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.068);
+
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      this._autoDisconnect(osc, gain);
+      osc.start(now);
+      osc.stop(now + 0.07);
+    } catch (e) {}
+  }
+
+  // 13. Müjde Kartı Açılışı 8-Bit Efsanevi Fanfar (3000ms+ Elastic Reveal)
+  playLegendaryFanfare() {
+    this.lastPlayedSound = 'legendary_fanfare';
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+      for (let i = 0; i < notes.length; i++) {
+        const start = now + i * 0.055;
+        const dur = i === notes.length - 1 ? 0.45 : 0.14;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(notes[i], start);
+        gain.gain.setValueAtTime(0.22, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        this._autoDisconnect(osc, gain);
+        osc.start(start);
+        osc.stop(start + dur + 0.01);
+      }
+    } catch (e) {}
+  }
 }
 
 export const sounds = new SoundEngine();
 if (typeof window !== 'undefined') {
   window.sounds = sounds;
 }
+

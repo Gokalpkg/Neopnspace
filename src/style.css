@@ -845,42 +845,48 @@ html, body {
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 900;
-  letter-spacing: 5px;
-  background: linear-gradient(180deg, #ffffff 30%, #00f0ff 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 0 #0284c7) drop-shadow(0 4px 0 #030816);
+  letter-spacing: 4px;
+  color: #00f0ff;
+  text-shadow:
+    0 3px 0 #0284c7,
+    0 5px 0 #070b19,
+    0 6px 0 #070b19;
+  filter: none;
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
   margin-bottom: 2px;
   line-height: 1.1;
+  text-align: center;
 }
 
 .hero-subtitle-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .laser-line {
   height: 2px;
-  width: 36px;
-  background: linear-gradient(90deg, transparent, #ff0077);
-  box-shadow: 0 0 6px #ff0077;
+  width: 32px;
+  background: #ff0077;
+  box-shadow: 0 2px 0 #070b19;
 }
 
 .laser-line:last-child {
-  background: linear-gradient(90deg, #ff0077, transparent);
+  background: #ff0077;
 }
 
 .hero-subtitle {
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: 7px;
+  letter-spacing: 6px;
   color: #ff0077;
-  text-shadow: 0 0 8px rgba(255, 0, 119, 0.7), 0 1px 0 #030816;
+  text-shadow: 0 2px 0 #880033, 0 3px 0 #070b19;
 }
 
 /* 3. Canlı Gemi Vitrini (Live Ship Showcase UI) */
@@ -890,9 +896,12 @@ html, body {
   justify-content: space-between;
   width: 100%;
   max-width: 440px;
-  margin: 18px auto 20px auto;
+  margin: 6px auto 8px auto;
   pointer-events: auto;
-  min-height: 98px;
+  min-height: auto;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .ship-nav-arrow {
@@ -911,6 +920,7 @@ html, body {
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   pointer-events: auto;
+  flex-shrink: 0;
 }
 
 .ship-nav-arrow:active {
@@ -926,13 +936,15 @@ html, body {
   background: rgba(10, 16, 34, 0.94);
   border: 2px solid #00f0ff;
   border-radius: 6px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 0 0 1px #030816, 0 5px 0 rgba(0, 180, 220, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.2), 0 12px 28px rgba(0, 0, 0, 0.6);
   cursor: pointer;
   transition: all 0.2s ease;
   pointer-events: auto;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .ship-display-info:active {
@@ -1189,12 +1201,14 @@ html, body {
 .menu-center-controls {
   width: 100%;
   max-width: 440px;
-  margin: 8px auto 8px auto;
+  margin: 6px auto 10px auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
   pointer-events: auto;
   flex-shrink: 0;
+  position: relative;
+  z-index: 3;
 }
 
 .mode-selector-cyber {
@@ -2072,6 +2086,9 @@ html, body {
 }
 
 .hangar-footer-bar {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
   width: 100% !important;
   padding: 8px 0 2px !important;
   background: linear-gradient(180deg, transparent 0%, rgba(8, 12, 24, 0.95) 30%, rgba(8, 12, 24, 0.98) 100%) !important;
@@ -2080,28 +2097,53 @@ html, body {
   flex-shrink: 0 !important;
 }
 
-.hangar-confirm-btn {
+.hangar-launch-btn {
   width: 100%;
-  padding: 12px;
+  padding: 11px 12px;
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 0.96rem;
   font-weight: 900;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, #00f0ff, #05ffa1);
+  background: linear-gradient(135deg, #05ffa1 0%, #00f0ff 60%, #38bdf8 100%);
   color: #030816;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 20px rgba(5, 255, 161, 0.45);
+  cursor: pointer;
+  animation: cyberPulsePrimary 1.4s infinite alternate;
+  transition: all 0.2s ease;
+}
+
+.hangar-launch-btn:active {
+  transform: scale(0.97);
+}
+
+.hangar-confirm-btn {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .hangar-confirm-btn:active {
   transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .hangar-header {
@@ -4592,41 +4634,41 @@ html, body {
 }
 
 /* === AAA GAME OVER (GÖREV SONLANDI) SCREEN REWORK === */
-/* === AAA GAME OVER (GÖREV SONLANDI) SCREEN REWORK === */
 .gameover-card {
-  max-width: 360px !important;
-  width: 92vw !important;
-  background: rgba(10, 14, 26, 0.96) !important;
-  backdrop-filter: blur(28px) !important;
-  -webkit-backdrop-filter: blur(28px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 240, 255, 0.08) !important;
-  padding: 8px 10px 10px !important;
+  max-width: 440px !important;
+  width: 94vw !important;
+  background: #0b1124 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid #00f0ff !important;
+  border-radius: 4px !important;
+  box-shadow: 0 6px 0 #070b19, 0 0 0 2px #070b19, inset 0 2px 0 rgba(255, 255, 255, 0.15) !important;
+  padding: 14px 12px 16px !important;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
   overflow-y: auto;
   scrollbar-width: thin;
-  max-height: calc(100vh - 16px - var(--safe-top) - var(--safe-bottom));
+  max-height: calc(100vh - 20px - var(--safe-top) - var(--safe-bottom));
   box-sizing: border-box;
 }
 
 .go-header-stage {
   display: flex;
   align-items: center;
-  gap: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 3px;
+  gap: 8px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
   flex-shrink: 0;
 }
 
 .go-beacon-circle {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: rgba(255, 0, 85, 0.1);
-  border: 1px solid rgba(255, 0, 85, 0.3);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: rgba(255, 0, 85, 0.15);
+  border: 2px solid #ff0055;
+  box-shadow: 0 2px 0 #88002a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4634,26 +4676,49 @@ html, body {
 }
 
 .go-skull-svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 .go-titles {
   display: flex;
   flex-direction: column;
   text-align: left;
-  gap: 1px;
+  gap: 2px;
   flex: 1;
 }
 
 .gameover-title {
   margin: 0 !important;
   font-family: var(--font-display) !important;
-  font-size: 1.05rem !important;
+  font-size: 1.15rem !important;
   font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 1px !important;
   color: #fff !important;
-  line-height: 1.05;
+  line-height: 1.1;
+  text-shadow: 0 2px 0 #070b19;
+}
+
+.go-killer-info {
+  background: #190914 !important;
+  border: 2px solid #ff0055 !important;
+  border-radius: 3px !important;
+  box-shadow: 0 3px 0 #88002a !important;
+  padding: 8px 10px !important;
+  color: #ff80a0 !important;
+  font-family: var(--font-display) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  letter-spacing: 0.5px !important;
+  flex-shrink: 0;
+}
+
+.go-killer-info strong {
+  color: #ff0055 !important;
+  font-weight: 900 !important;
 }
 
 /* REKOR & HEDEF BİLGİ BANDI (go-hook) */
@@ -4687,156 +4752,210 @@ html, body {
   color: #64748b;
 }
 
+.go-hook-banner.near-miss-banner {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  gap: 3px !important;
+  background: rgba(255, 0, 85, 0.08) !important;
+  border: 1px solid rgba(255, 0, 85, 0.25) !important;
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  margin-top: 3px !important;
+}
+
+.go-near-miss-text {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #ff4d79;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.go-near-miss-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.go-near-miss-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff0055, #ffd700);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.go-near-miss-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #38bdf8;
+  align-self: flex-end;
+}
+
+/* Fast modal exit for zero-lag launch perception */
+.modal-overlay.modal-exit-fast {
+  opacity: 0 !important;
+  transform: scale(0.96) !important;
+  transition: opacity 0.04s ease-out, transform 0.04s ease-out !important;
+  pointer-events: none !important;
+}
+
 /* HERO SKOR PANELİ */
 .go-score-card {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(10, 15, 30, 0.85) 100%);
-  border: 1px solid rgba(0, 240, 255, 0.18);
-  border-radius: 9px;
-  padding: 4px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  position: relative;
-  flex-shrink: 0;
+  background: #111827 !important;
+  border: 2px solid #1e293b !important;
+  border-radius: 3px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 3px !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 0 #070b19, inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
 .go-score-label {
-  font-size: 7.5px;
-  font-weight: 800;
-  color: #64748b;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
 }
 
 .go-score-number {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  color: #00f0ff;
-  text-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
-  line-height: 1.0;
+  font-family: var(--font-display) !important;
+  font-size: 32px !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  color: #00f0ff !important;
+  text-shadow: 0 3px 0 #0284c7, 0 5px 0 #070b19 !important;
+  line-height: 1.05 !important;
 }
 
 .go-best-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 9.5px;
-  color: #94a3b8;
-  font-weight: 700;
-  margin-top: 1px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+  font-weight: 800 !important;
+  margin-top: 2px !important;
 }
 
 .go-best-row strong {
-  color: #ffd700;
-  font-family: var(--font-display);
-  font-size: 10.5px;
+  color: #ffd700 !important;
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
 }
 
 /* 3'LÜ UÇUŞ DETAYLARI (SÜRE • SEVİYE • GANİMET) */
 .go-telemetry-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 4px;
-  flex-shrink: 0;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
 }
 
 .go-tele-item {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 7px;
-  padding: 3px 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0px;
+  background: #111827 !important;
+  border: 2px solid #1e293b !important;
+  border-radius: 3px !important;
+  padding: 8px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  box-shadow: 0 3px 0 #070b19, inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
 .go-tele-label {
-  font-size: 7.5px;
-  font-weight: 800;
-  color: #64748b;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
 }
 
 .go-tele-value {
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 800;
-  color: #f1f5f9;
+  font-family: var(--font-display) !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  color: #f8fafc !important;
 }
 
 .go-tele-value.crystal-val {
-  color: #05ffa1;
+  color: #05ffa1 !important;
 }
 
 /* GANİMET KASASI (2X KATLAMA - KOMPAKT & ŞIK) */
 .go-vault-card {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 4px 7px;
-  background: rgba(255, 215, 0, 0.04);
-  border: 1.5px solid rgba(255, 215, 0, 0.35);
-  border-radius: 4px;
-  box-shadow: 0 2px 0 rgba(180, 120, 0, 0.4);
-  flex-shrink: 0;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  background: #19160a !important;
+  border: 2px solid #ffbe0b !important;
+  border-radius: 3px !important;
+  box-shadow: 0 4px 0 #8c6300, inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  flex-shrink: 0 !important;
 }
 
 .vault-hint {
-  display: none;
+  display: none !important;
 }
 
 .vault-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
 }
 
 .vault-label {
-  font-size: 7.5px;
-  font-weight: 800;
-  color: #94a3b8;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  color: #cbd5e1 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
 }
 
 .vault-multiplier-preview {
-  font-family: var(--font-display);
-  font-size: 11.5px;
-  font-weight: 900;
-  color: #ffd700;
+  font-family: var(--font-display) !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  color: #ffd700 !important;
 }
 
 .vault-double-btn {
-  width: auto;
-  flex: 1;
-  background: linear-gradient(180deg, #ffe566, #ff9100);
-  color: #030816;
-  border: 1.5px solid #fff4c2;
-  border-radius: 3px;
-  padding: 6px 8px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.3px;
-  line-height: 1.15;
-  text-align: center;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 0 #b45309;
+  width: auto !important;
+  flex: 1 !important;
+  background: #ffbe0b !important;
+  color: #070b19 !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 3px !important;
+  padding: 8px 10px !important;
+  font-family: var(--font-display) !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  line-height: 1.15 !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 3px 0 #8c6300 !important;
 }
 
 .vault-double-btn:active {
-  transform: scale(0.96);
+  transform: translateY(2px) !important;
+  box-shadow: 0 1px 0 #8c6300 !important;
 }
 
 .vault-double-btn.done {
@@ -4968,91 +5087,169 @@ html, body {
   letter-spacing: 0.4px;
 }
 
-/* BİRİNCİL TEKRAR OYNA BUTONU (MODERN & NET & ÖNE ÇIKAN) */
+/* 1. UÇUŞ ÜCRETSİZ ACİL DESTEK REVIVE BUTONU (SIFIR REKLAM) */
+.go-revive-btn.go-revive-free-net {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.24) 0%, rgba(5, 255, 161, 0.32) 100%) !important;
+  color: #00f0ff !important;
+  border: 1.5px solid #00f0ff !important;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.45), inset 0 0 8px rgba(5, 255, 161, 0.3) !important;
+  animation: freeRevivePulse 1.2s infinite alternate !important;
+}
+
+.go-revive-btn.go-revive-free-net .btn-pill-tag {
+  background: #00f0ff !important;
+  color: #030816 !important;
+  font-weight: 900 !important;
+}
+
+@keyframes freeRevivePulse {
+  0% {
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 22px rgba(0, 240, 255, 0.7);
+    transform: scale(1.02);
+  }
+}
+
+/* BİRİNCİL TEKRAR OYNA BUTONU (MODERN PIXEL 3D & FERAH & NET) */
 .go-primary-restart-btn {
   width: 100%;
-  background: linear-gradient(135deg, #00f0ff, #0077ff);
-  color: #ffffff;
-  border: none;
-  border-radius: 9px;
-  padding: 10px 14px;
-  font-family: var(--font-display);
-  font-size: 13.5px;
-  font-weight: 900;
-  letter-spacing: 0.6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  cursor: pointer;
-  box-shadow: 0 4px 18px rgba(0, 240, 255, 0.45);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  flex-shrink: 0;
+  min-height: 52px;
+  background: #00f0ff !important;
+  color: #030816 !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 3px !important;
+  padding: 12px 16px !important;
+  font-family: var(--font-display) !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  box-shadow: 0 5px 0 #0284c7, 0 8px 0 #070b19, inset 0 2px 0 rgba(255, 255, 255, 0.7) !important;
+  transition: transform 0.08s ease, box-shadow 0.08s ease !important;
+  flex-shrink: 0 !important;
+  text-transform: uppercase !important;
 }
 
 .go-primary-restart-btn:active {
-  transform: scale(0.97);
+  transform: translateY(3px) !important;
+  box-shadow: 0 2px 0 #0284c7, 0 4px 0 #070b19 !important;
+}
+
+/* HİBRİT: GÜÇLEN & ANINDA FIRLA */
+.go-primary-restart-btn.btn-hybrid-launch {
+  flex-direction: column !important;
+  gap: 3px !important;
+  padding: 10px 14px !important;
+  background: #05ffa1 !important;
+  color: #030816 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 5px 0 #065f46, 0 8px 0 #070b19, inset 0 2px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+.go-primary-restart-btn.btn-hybrid-launch .hybrid-tag {
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  color: #030816 !important;
+  text-transform: uppercase !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  padding: 2px 8px !important;
+  border-radius: 2px !important;
+  line-height: 1.2 !important;
+}
+
+.go-primary-restart-btn.btn-hybrid-launch .hybrid-title {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+  color: #030816 !important;
+}
+
+/* ANINDA RÖVANŞ */
+.go-primary-restart-btn.btn-instant-launch {
+  background: #00f0ff !important;
+  color: #030816 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 5px 0 #0284c7, 0 8px 0 #070b19, inset 0 2px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+.go-primary-restart-btn.btn-instant-launch .hybrid-title {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+  color: #030816 !important;
 }
 
 /* İKİNCİL ALT BUTONLAR (HANGAR & MENÜ & PAYLAŞ) */
 .go-nav-row {
-  display: flex;
-  gap: 5px;
-  flex-shrink: 0;
-  width: 100%;
+  display: flex !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+  width: 100% !important;
 }
 
 .go-secondary-btn {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  padding: 6px 4px;
-  color: #cbd5e1;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  height: 34px;
-  box-sizing: border-box;
-  transition: all 0.15s ease;
+  flex: 1 !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  background: #111827 !important;
+  border: 2px solid #334155 !important;
+  border-radius: 3px !important;
+  padding: 6px 8px !important;
+  color: #e2e8f0 !important;
+  font-family: var(--font-display) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  box-shadow: 0 3px 0 #070b19, inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transition: transform 0.08s ease, box-shadow 0.08s ease !important;
 }
 
 .go-secondary-btn:active {
-  background: rgba(0, 240, 255, 0.12);
-  border-color: rgba(0, 240, 255, 0.4);
-  color: #00f0ff;
-  transform: scale(0.97);
+  transform: translateY(2px) !important;
+  box-shadow: 0 1px 0 #070b19 !important;
+  border-color: #00f0ff !important;
+  color: #00f0ff !important;
 }
 
 .go-share-btn {
-  width: 34px;
-  height: 34px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  color: #cbd5e1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  transition: all 0.15s ease;
+  width: 44px !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  background: #111827 !important;
+  border: 2px solid #334155 !important;
+  border-radius: 3px !important;
+  color: #e2e8f0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 3px 0 #070b19, inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  font-family: var(--font-display) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  transition: transform 0.08s ease, box-shadow 0.08s ease !important;
 }
 
 .go-share-btn:active {
-  background: rgba(255, 215, 0, 0.15);
-  border-color: rgba(255, 215, 0, 0.4);
-  color: #ffd700;
-  transform: scale(0.96);
+  transform: translateY(2px) !important;
+  box-shadow: 0 1px 0 #070b19 !important;
+  border-color: #00f0ff !important;
+  color: #00f0ff !important;
 }
-
-
 
 /* === SİNERJİ VE EFSANEVİ EVRİM REHBERİ STİLLERİ === */
 .card-synergy-pill {
@@ -6967,7 +7164,7 @@ html, body {
     padding: max(6px, var(--safe-top)) 10px calc(70px + var(--safe-bottom)) 10px;
   }
   .menu-ship-showcase {
-    margin: 12px auto 16px auto;
+    margin: 4px auto 6px auto;
   }
   .ship-display-info {
     padding: 6px 8px;
@@ -7008,23 +7205,26 @@ html, body {
     font-size: 8.5px;
   }
   .gameover-card {
-    padding: 8px 10px 10px !important;
-    gap: 5px;
+    padding: 10px 10px 14px !important;
+    gap: 8px;
   }
   .go-score-number {
-    font-size: 24px;
+    font-size: 26px !important;
   }
   .go-primary-restart-btn {
-    padding: 8px 10px;
-    font-size: 12.5px;
+    min-height: 48px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
   }
   .go-secondary-btn {
-    height: 32px;
-    font-size: 10.5px;
+    min-height: 38px !important;
+    height: 38px !important;
+    font-size: 11px !important;
   }
   .go-share-btn {
-    width: 32px;
-    height: 32px;
+    width: 38px !important;
+    min-height: 38px !important;
+    height: 38px !important;
   }
 }
 
@@ -7148,22 +7348,29 @@ html, body {
 
 .px-meter {
   display: flex;
-  gap: 2px;
+  gap: 3px;
+  width: 100%;
+  height: 10px;
+  background: #070b16;
+  padding: 2px;
+  border: 1px solid #1e293b;
+  border-radius: 2px;
+  box-sizing: border-box;
 }
 
 .px-cell {
   display: block;
-  width: 8px;
-  height: 8px;
-  background: #122033;
-  box-shadow: inset 0 0 0 1px #030816;
-  flex-shrink: 0;
+  flex: 1;
+  height: 100%;
+  background: #111e33;
+  box-shadow: inset 0 0 0 1px #070b16;
   font-style: normal;
+  border-radius: 1px;
 }
 
 .px-cell.on {
   background: var(--px, #00f0ff);
-  box-shadow: 0 0 0 1px #030816, 0 0 5px var(--px, #00f0ff);
+  box-shadow: 0 0 4px var(--px, #00f0ff), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 /* HANGAR GEMİ AKSİYON & 15SN TEST UÇUŞU BUTON SATIRI */
@@ -9192,13 +9399,22 @@ html, body {
    v1.7.0 STUDIO AUDIT BOARD: FTUE, QOL & ART POLISH
    ========================================================= */
 
-/* 1. FTUE Progressive Disclosure on Start Screen (Flight 0) */
+/* 1. FTUE Progressive Disclosure on Start Screen (Flights < 3) */
 #start-screen.ftue-first-flight #btn-ship-starup,
 #start-screen.ftue-first-flight #btn-lucky-wheel,
 #start-screen.ftue-first-flight #btn-endless,
 #start-screen.ftue-first-flight #btn-boss-rush,
-#start-screen.ftue-first-flight #mode-mutator {
+#start-screen.ftue-first-flight #mode-mutator,
+#start-screen.ftue-first-flight #mode-storm {
   display: none !important;
+}
+
+#start-screen.ftue-first-flight #btn-start,
+#start-screen.ftue-first-flight #btn-main-play,
+#start-screen.ftue-first-flight .btn-main-play {
+  animation: cyberPulsePrimary 1.2s infinite alternate !important;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), inset 0 0 15px rgba(0, 240, 255, 0.4) !important;
+  transform: scale(1.04) !important;
 }
 
 /* 2. Optional HUD Merchant Signal Pill (No forced combat pause) */

@@ -3,10 +3,12 @@ import { sounds } from './audio.js';
 import { vibrate } from './vibration.js';
 import { ParticleSystem } from './particles.js';
 import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
+import { gemPool, PoolManager } from './pool-manager.js';
 import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslationsToDOM } from './i18n.js';
 import { analytics } from './analytics.js';
 import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE, PLAYER_BASE_CONFIG, DROP_RATES, HYPER_MODE_CONFIG } from './balance.js';
 import { EventBus } from './events.js';
+import { ChestVfxController, LegendaryChestOverlay } from './chest-vfx-controller.js';
 import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, updatePlayerProfileInFirestore, PGS_CONFIG, getPlayerUid, unlockPlayGamesAchievement, incrementPlayGamesAchievement, showPlayGamesAchievements } from './leaderboard.js';
 
 if (typeof window !== 'undefined') {
@@ -575,6 +577,8 @@ class Game {
     this.state = 'MENU'; // 'MENU', 'PLAYING', 'LEVEL_UP', 'GAME_OVER'
 
     this.particles = new ParticleSystem();
+    this.chestVfx = new ChestVfxController({ sounds, vibrate, eventBus: EventBus });
+    this.legendaryChestOverlay = this.chestVfx;
     this.currentSectorId = 'void';
     this.warpTimer = 0;
     
@@ -634,6 +638,8 @@ class Game {
       shootCooldown: 0,
       missileCooldown: 0,
       empCooldown: 0,
+      tetherHitCooldown: 0,
+      knockY: 0,
       droneAngle: 0,
       upgrades: {
         laser: 1,      // 1: Tekli, 2: Çift, 3: Üçlü, 4: Dörtlü, 5: Plazma
@@ -1158,6 +1164,9 @@ class Game {
     }
     this.particles.initStars(this.width, this.height);
     this.particles.setSector(this.currentSectorId || 'void', this.width, this.height);
+    if (this.chestVfx && typeof this.chestVfx.resize === 'function') {
+      this.chestVfx.resize(this.width, this.height);
+    }
   }
 
   initEvents() {
@@ -1243,6 +1252,14 @@ class Game {
 
     window.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'touch') return; // Touch events handled explicitly via activeTouchId below
+      if (this.chestVfx && this.chestVfx.active && this.state === 'LUCKY_CHEST') {
+        const tgt = e.target;
+        const isActionBtn = tgt && tgt.closest && (tgt.closest('#btn-claim-chest') || tgt.closest('#btn-ad-chest-all') || tgt.closest('.upgrade-item-card'));
+        if (!isActionBtn) {
+          this.handleChestVfxTap(typeof performance !== 'undefined' ? performance.now() : Date.now());
+          return;
+        }
+      }
       handleDragStart(e.pointerId, e.clientX, e.clientY, e.target);
     });
 
@@ -1261,8 +1278,26 @@ class Game {
       handleDragEnd(e.pointerId);
     });
 
+    if (luckyChestModal) {
+      luckyChestModal.addEventListener('touchstart', (e) => {
+        if (this.chestVfx && this.chestVfx.active && this.state === 'LUCKY_CHEST') {
+          const tgt = e.target;
+          const isActionBtn = tgt && tgt.closest && (tgt.closest('#btn-claim-chest') || tgt.closest('#btn-ad-chest-all') || tgt.closest('.upgrade-item-card'));
+          if (!isActionBtn) {
+            if (e.cancelable) e.preventDefault();
+            this.handleChestVfxTap(typeof performance !== 'undefined' ? performance.now() : Date.now());
+          }
+        }
+      }, { passive: false });
+    }
+
     // Mobil çoklu dokunuş (Multi-Touch) yönetimi: Sadece ilk hareket parmağını (activeTouchId) takip et
     canvas.addEventListener('touchstart', (e) => {
+      if (this.chestVfx && this.chestVfx.active && this.state === 'LUCKY_CHEST') {
+        if (e.cancelable) e.preventDefault();
+        this.handleChestVfxTap(typeof performance !== 'undefined' ? performance.now() : Date.now());
+        return;
+      }
       if (this.state === 'PLAYING' && e.cancelable) e.preventDefault();
       if (!e.changedTouches) return;
       for (let i = 0; i < e.changedTouches.length; i++) {
@@ -1513,6 +1548,40 @@ class Game {
     if (btnRestart) {
       btnRestart.addEventListener('click', () => {
         sounds.init();
+        if (this.pendingHybridUpgrade) {
+          const up = this.pendingHybridUpgrade;
+          this.pendingHybridUpgrade = null;
+          if (this.totalCrystals >= up.cost) {
+            this.totalCrystals -= up.cost;
+            localStorage.setItem('neon_total_crystals', this.totalCrystals.toString());
+            this.techUpgrades[up.stat] = (this.techUpgrades[up.stat] || 0) + 1;
+            this.saveTechUpgrades();
+            if (this.techUpgrades[up.stat] >= 10) {
+              unlockPlayGamesAchievement('tech_master');
+            }
+            this.updateCrystalsDisplay();
+            sounds.playLevelUp();
+            vibrate.success();
+            this.pendingLaunchBonusToast = up.toast;
+          }
+        }
+        if (gameoverModal) {
+          gameoverModal.classList.add('modal-exit-fast');
+          gameoverModal.classList.add('hidden');
+        }
+        this.triggerLaunch();
+      });
+    }
+
+    const btnHangarLaunch = document.getElementById('btn-hangar-launch');
+    if (btnHangarLaunch) {
+      btnHangarLaunch.addEventListener('click', () => {
+        sounds.init();
+        sounds.playWarpDrive();
+        vibrate.heavy();
+        const hangarModal = document.getElementById('hangar-modal');
+        if (hangarModal) hangarModal.classList.add('hidden');
+        if (typeof this.saveTechUpgrades === 'function') this.saveTechUpgrades();
         this.triggerLaunch();
       });
     }
@@ -1549,6 +1618,15 @@ class Game {
       btnAdRevive.addEventListener('click', () => {
         sounds.init();
         sounds.playCardSelect();
+        if ((this.revivesUsed || 0) >= 1) return;
+        const totalFlights = (this.pilotStats && typeof this.pilotStats.totalFlights === 'number')
+          ? this.pilotStats.totalFlights
+          : parseInt(localStorage.getItem('neon_games_played') || '0', 10);
+        if (totalFlights <= 1) {
+          this.executeRevive();
+          this.showToast(t('toast_tutorial_revive'), '#00f0ff');
+          return;
+        }
         const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
         if (isNoAds && !this.vipReviveUsedThisRun) {
           this.vipReviveUsedThisRun = true;
@@ -2379,9 +2457,12 @@ class Game {
         }
       }, 350);
     } else {
-      // Oyun başı menüde Kozmik Şans Çarkı doğrudan açılsın
+      // Oyun başı menüde Kozmik Şans Çarkı doğrudan açılsın (sadece acemi dönemi bitmişse: totalFlights >= 3)
+      const wheelFlights = (this.pilotStats && typeof this.pilotStats.totalFlights === 'number')
+        ? this.pilotStats.totalFlights
+        : parseInt(localStorage.getItem('neon_games_played') || '0', 10);
       const wheelState = this.getWheelState();
-      if (wheelState && wheelState.spinsUsed === 0) {
+      if (wheelFlights >= 3 && wheelState && wheelState.spinsUsed === 0) {
         setTimeout(() => {
           if (this.state === 'MENU') {
             this.openLuckyWheel();
@@ -2667,6 +2748,7 @@ class Game {
   }
 
   pauseGame() {
+    if (this.deathPop > 0) return;
     if (this.modalTransition && this.state === 'PLAYING') {
       const pendingType = this.modalTransition.type;
       this.modalTransition = null;
@@ -2717,7 +2799,7 @@ class Game {
   }
 
   writeSuspendSnapshot() {
-    if (this.isTestFlight || !this.player || this.player.hp <= 0) return;
+    if (this.isTestFlight || !this.player || this.player.hp <= 0 || this.deathPop > 0) return;
     const liveStates = ['PLAYING', 'PAUSED', 'LEVEL_UP', 'MERCHANT', 'LUCKY_CHEST', 'ROUTE_SELECT'];
     if (!liveStates.includes(this.state) && !this.runInMemory) return;
     const snap = {
@@ -2737,6 +2819,8 @@ class Game {
       xp: this.player.xp,
       nextXp: this.player.nextXp,
       feverCharge: this.player.feverCharge || 0,
+      lastStandUsed: Boolean(this.player.lastStandUsed),
+      phoenixUsed: Boolean(this.player.phoenixUsed),
       upgrades: this.player.upgrades,
       evolutions: this.player.evolutions,
       crystalsEarned: this.crystalsEarnedThisRun || 0
@@ -3792,6 +3876,7 @@ class Game {
           }
           this.saveGold(this.totalCrystals);
           this.updateCrystalsDisplay();
+          this.updateGameOverRestartBtn();
 
           if (finalCrystals) {
             finalCrystals.textContent = `+${this.crystalsEarnedThisRun.toLocaleString()} CR`;
@@ -7345,7 +7430,7 @@ class Game {
     const totalFlights = (this.pilotStats && typeof this.pilotStats.totalFlights === 'number')
       ? this.pilotStats.totalFlights
       : 0;
-    startScreen.classList.toggle('ftue-first-flight', totalFlights === 0);
+    startScreen.classList.toggle('ftue-first-flight', totalFlights < 3);
   }
 
   getWheelRewardScale() {
@@ -8053,6 +8138,18 @@ class Game {
       });
     }
 
+    const inputCallsign = document.getElementById('lb-input-callsign');
+    if (inputCallsign) {
+      inputCallsign.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sounds.init();
+          sounds.playCardSelect();
+          this.savePilotProfile();
+        }
+      });
+    }
+
     const btnMenuProfile = document.getElementById('btn-menu-profile');
     if (btnMenuProfile) {
       btnMenuProfile.addEventListener('click', () => {
@@ -8075,7 +8172,15 @@ class Game {
     const currentRank = this.calculatePlayerRank ? this.calculatePlayerRank(this.lbMode || 'storm') : 1;
 
     if (rankTag) rankTag.textContent = `#${currentRank.toLocaleString()}`;
-    if (input) input.value = currentCallsign;
+    if (input) {
+      input.value = currentCallsign;
+      setTimeout(() => {
+        try {
+          input.focus();
+          input.select();
+        } catch(e) {}
+      }, 80);
+    }
 
     if (selector) {
       selector.innerHTML = '';
@@ -8099,33 +8204,52 @@ class Game {
     modal.classList.remove('hidden');
   }
 
-  closeProfileModal() {
+  closeProfileModal(autoSaveIfChanged = true) {
+    const input = document.getElementById('lb-input-callsign');
+    if (autoSaveIfChanged && input && typeof input.value === 'string') {
+      const currentCallsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
+      const cleanVal = input.value.trim().replace(/[^\p{L}\p{N}_.\s-]/gu, '').replace(/\s+/g, ' ').trim();
+      if (cleanVal && cleanVal.length >= 2 && cleanVal !== currentCallsign) {
+        this.savePilotProfile();
+        return;
+      }
+    }
     const modal = document.getElementById('lb-profile-modal');
     if (modal) modal.classList.add('hidden');
   }
 
   savePilotProfile() {
     const input = document.getElementById('lb-input-callsign');
-    let callsign = (input && input.value ? input.value : 'Pilot Alpha').trim().replace(/[^a-zA-Z0-9_.\s-]/g, '').replace(/\s+/g, ' ');
-    if (!callsign || callsign.length < 2) callsign = 'Pilot Alpha';
+    let raw = (input && typeof input.value === 'string' ? input.value : '').trim();
+    // Türkçe karakterleri (ç, Ç, ğ, Ğ, ı, İ, ö, Ö, ş, Ş, ü, Ü) ve tüm Unicode harf/rakamları tam destekler
+    let callsign = raw.replace(/[^\p{L}\p{N}_.\s-]/gu, '').replace(/\s+/g, ' ').trim();
+    if (!callsign || callsign.length < 2) {
+      callsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
+    }
     if (callsign.length > 15) callsign = callsign.substring(0, 15);
 
-    const countryCode = this.selectedCountryCode || 'TUR';
+    const countryCode = this.selectedCountryCode || localStorage.getItem('neon_player_country') || 'TUR';
 
     localStorage.setItem('neon_player_callsign', callsign);
     localStorage.setItem('neon_player_country', countryCode);
     this.playerCallsign = callsign;
 
-    const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: 'TUR', flag: 'TR' };
-    const myUid = getPlayerUid();
+    const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: countryCode, flag: countryCode, emoji: '🇹🇷' };
+    let myUid = null;
+    try {
+      if (typeof getPlayerUid === 'function') myUid = getPlayerUid();
+    } catch(e) {}
 
     // Canlı Firestore listesi ve yerel önbellekler derhal oyuncunun yeni adıyla senkronlanır
     if (this._liveLeaderboardData) {
       ['storm', 'campaign'].forEach(m => {
         const list = this._liveLeaderboardData[m];
         if (Array.isArray(list)) {
-          list.forEach(item => {
-            if (item.isPlayer || item.uid === myUid) {
+          const playerRank = this.calculatePlayerRank ? this.calculatePlayerRank(m) : 1;
+          list.forEach((item, idx) => {
+            if (item.isPlayer || (myUid && item.uid === myUid) || idx === (playerRank - 1)) {
+              item.isPlayer = true;
+              if (myUid) item.uid = myUid;
               item.name = callsign;
               item.country = pilotCountry;
             }
@@ -8136,16 +8260,19 @@ class Game {
     }
 
     try {
-      updatePlayerProfileInFirestore(callsign, pilotCountry, t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name'));
+      if (typeof updatePlayerProfileInFirestore === 'function') {
+        updatePlayerProfileInFirestore(callsign, pilotCountry, t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name'));
+      }
     } catch (e) {
       console.warn('[Leaderboard] updatePlayerProfileInFirestore err:', e);
     }
-    this.syncSubmitCurrentScores();
+    if (this.syncSubmitCurrentScores) this.syncSubmitCurrentScores();
 
     if (this.updateMainMenuProfileBar) this.updateMainMenuProfileBar();
-    this.closeProfileModal();
-    this.renderLeaderboard(this.lbMode || 'storm');
-    this.showToast(t('float_profile'), '#00f0ff');
+    const modal = document.getElementById('lb-profile-modal');
+    if (modal) modal.classList.add('hidden');
+    this.renderLeaderboard(this.lbMode || 'storm', false);
+    this.showToast(t('float_profile') || 'PROFİL GÜNCELLENDİ', '#00f0ff');
   }
 
   updateMainMenuProfileBar() {
@@ -8242,6 +8369,46 @@ class Game {
 
   calculatePlayerRank(mode) {
     const total = this.totalPilots || 18492;
+    const liveList = (this._liveLeaderboardData && this._liveLeaderboardData[mode]) || null;
+    let myUid = null;
+    try {
+      if (typeof getPlayerUid === 'function') myUid = getPlayerUid();
+    } catch(e) {}
+
+    if (Array.isArray(liveList) && liveList.length > 0) {
+      // 1. Canlı bulut liderlik listesinde doğrudan oyuncu eşleşmesi
+      const myIdx = liveList.findIndex(item => item.isPlayer || (myUid && item.uid === myUid));
+      if (myIdx !== -1) {
+        return myIdx + 1;
+      }
+
+      // 2. Canlı puanlara göre dinamik sıralama
+      if (mode === 'storm') {
+        const score = this.highScores.storm || 0;
+        if (score <= 0) return total - 150;
+        for (let i = 0; i < liveList.length; i++) {
+          if (score >= (liveList[i].score || 0)) {
+            return i + 1;
+          }
+        }
+        const lowestLiveScore = liveList[liveList.length - 1].score || 1000;
+        const norm = Math.max(0, 1 - Math.min(1, score / Math.max(1, lowestLiveScore)));
+        return Math.min(total, liveList.length + 1 + Math.round((total - liveList.length) * Math.pow(norm, 2)));
+      } else {
+        const clearedLevel = Math.max(1, (this.unlockedLevel || 1) - 1);
+        const totalStars = this.getTotalStars ? this.getTotalStars() : clearedLevel * 3;
+        for (let i = 0; i < liveList.length; i++) {
+          const itemLvl = liveList[i].level || 1;
+          const itemStars = liveList[i].stars || (itemLvl * 3);
+          if (clearedLevel > itemLvl || (clearedLevel === itemLvl && totalStars >= itemStars)) {
+            return i + 1;
+          }
+        }
+        return Math.min(total, liveList.length + 1);
+      }
+    }
+
+    // 3. Çevrimdışı Prosedürel Pilot Sıralaması
     if (mode === 'storm') {
       const score = this.highScores.storm || 0;
       if (score <= 0) return total - 150;
@@ -8277,6 +8444,7 @@ class Game {
     const lbModal = document.getElementById('leaderboard-modal');
     if (lbModal) lbModal.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(4);
+    if (this.updateMainMenuProfileBar) this.updateMainMenuProfileBar();
     this.renderLeaderboard(this.lbMode || 'storm');
     this.syncLiveLeaderboard(this.lbMode || 'storm');
   }
@@ -8292,6 +8460,7 @@ class Game {
         if (lbModal && !lbModal.classList.contains('hidden') && this.lbMode === mode && this.lbMainTab !== 'career') {
           this.renderLeaderboard(mode, false);
         }
+        if (this.updateMainMenuProfileBar) this.updateMainMenuProfileBar();
         const activeCountEl = document.getElementById('lb-active-count');
         if (activeCountEl) {
           activeCountEl.innerHTML = `<span style="color:#05ffa1; font-weight:700;">● CANLI BULUT LİGİ (${realScores.length} ÇEVRİMİÇİ)</span>`;
@@ -8551,7 +8720,7 @@ class Game {
       }
       if (liveList && liveList[rank - 1]) {
         const item = liveList[rank - 1];
-        const isMe = item.isPlayer || item.uid === myUid;
+        const isMe = item.isPlayer || (myUid && item.uid === myUid) || (item.name && item.name.toUpperCase() === pilotCallsign.toUpperCase()) || rank === playerRank;
         return {
           rank,
           name: isMe ? pilotCallsign : item.name,
@@ -8712,6 +8881,10 @@ class Game {
 
   triggerLaunch() {
     sounds.init();
+    if (gameoverModal && !gameoverModal.classList.contains('hidden')) {
+      gameoverModal.classList.add('modal-exit-fast');
+      gameoverModal.classList.add('hidden');
+    }
     if (this.launching) return;
     this.launching = true;
     this.launchProgress = 0;
@@ -8859,6 +9032,7 @@ class Game {
   }
 
   startModalTransition(type, duration = 28) {
+    if (this.deathPop > 0) return;
     if (this.player) {
       this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, 90);
     }
@@ -8874,6 +9048,10 @@ class Game {
   }
 
   completeModalTransition(type) {
+    if (this.deathPop > 0) {
+      this.modalTransition = null;
+      return;
+    }
     this.modalTransition = null;
     this.modalInputLockUntil = performance.now() + 260;
     if (this.cancelDrag) this.cancelDrag();
@@ -8912,7 +9090,7 @@ class Game {
   }
 
   triggerMerchantSignal() {
-    if (this.state !== 'PLAYING' || this._pendingVictory || this.isMerchantActive) return;
+    if (this.state !== 'PLAYING' || this._pendingVictory || this.isMerchantActive || this.deathPop > 0) return;
     this.merchantSignalTimer = 540; // 9 saniye (60fps)
     const sigBtn = document.getElementById('merchant-signal-btn');
     const sigTimer = document.getElementById('merchant-signal-timer');
@@ -8923,7 +9101,7 @@ class Game {
         sigBtn._boundMerchantSignal = true;
         sigBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (this.state !== 'PLAYING' || this._pendingVictory) return;
+          if (this.state !== 'PLAYING' || this._pendingVictory || this.deathPop > 0) return;
           this.merchantSignalTimer = 0;
           sigBtn.classList.add('hidden');
           this.openMerchant();
@@ -8937,7 +9115,7 @@ class Game {
   }
 
   openMerchant(immediate = false) {
-    if (this.state !== 'PLAYING' || this._pendingVictory) return;
+    if (this.state !== 'PLAYING' || this._pendingVictory || this.deathPop > 0) return;
     this.merchantSignalTimer = 0;
     const sigBtn = document.getElementById('merchant-signal-btn');
     if (sigBtn) sigBtn.classList.add('hidden');
@@ -9355,6 +9533,13 @@ class Game {
     this.initialHighScore = this.highScores[this.currentMode] || 0;
     this.isNewRecordSet = false;
     this.nextHazardTime = 22;
+    this.hitStopTimer = 0;
+    this.deathPop = 0;
+    this.deathPopMax = 36;
+    this.lastDamageSource = null;
+    this.lastDamageX = null;
+    this.lastDamageY = null;
+    this.lastKillerType = null;
     this.comboCount = 0;
     this.comboTimer = 0;
     this.barrierFlash = 0;
@@ -9406,6 +9591,8 @@ class Game {
     this.player.crystalMultiplier = (1 + (tech.crystalBoost || 0) * TECH_WORKSHOP_CONFIG.crystalBoost.perLevelMult) * (1 + masteryCrystalBonus);
     this.player.hasPhoenix = (tech.phoenix || 0) >= 1;
     this.player.phoenixUsed = false;
+    this.player.lastStandUsed = false;
+    this.player._lastStandClamped = false;
     this.player.feverCharge = 0;
     this.player.isFever = false;
     this.player.feverTimer = 0;
@@ -9415,6 +9602,8 @@ class Game {
     this.player.phaseCooldown = 0;
     this.player.phaseTimer = 0;
     this.player.invulnerableTimer = 0;
+    this.player.tetherHitCooldown = 0;
+    this.player.knockY = 0;
     this.player.cryoSlowTimer = 0;
     this.player.speedMultiplier = skinCfg.speedMult || 1.0;
     this.player.shootCooldown = 60;
@@ -9654,6 +9843,8 @@ class Game {
       this.player.nextXp = resume.nextXp || this.player.nextXp;
       this.player.score = resume.score || 0;
       this.player.feverCharge = resume.feverCharge || 0;
+      if (typeof resume.lastStandUsed === 'boolean') this.player.lastStandUsed = resume.lastStandUsed;
+      if (typeof resume.phoenixUsed === 'boolean') this.player.phoenixUsed = resume.phoenixUsed;
       if (resume.upgrades) this.player.upgrades = { ...this.player.upgrades, ...resume.upgrades };
       if (resume.evolutions) this.player.evolutions = { ...this.player.evolutions, ...resume.evolutions };
       this.crystalsEarnedThisRun = resume.crystalsEarned || 0;
@@ -9670,6 +9861,8 @@ class Game {
     }
 
     this.gems = [];
+    gemPool.releaseAll();
+    PoolManager.releaseAll();
     this.powerups = [];
     this.luckyChests = [];
     this.pendingChestRewards = [];
@@ -9699,6 +9892,11 @@ class Game {
       this.particles.triggerFlash('#c084fc', 0.6);
       this.particles.spawnShockwave(this.player.x, this.player.y, '#c084fc', 280);
       this.particles.spawnFloatingText(this.player.x, this.player.y - 48, 'ÇARKTAN SÜPER OVERDRIVE AKTİF!', '#c084fc', 20);
+    }
+    if (this.pendingLaunchBonusToast) {
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 50, this.pendingLaunchBonusToast, '#05ffa1', 20);
+      this.showToast(this.pendingLaunchBonusToast, '#05ffa1');
+      this.pendingLaunchBonusToast = null;
     }
     this.vortices = [];
     this.fireZones = [];
@@ -9731,7 +9929,10 @@ class Game {
     }
 
     startScreen.classList.add('hidden');
-    gameoverModal.classList.add('hidden');
+    if (gameoverModal) {
+      gameoverModal.classList.remove('modal-exit-fast');
+      gameoverModal.classList.add('hidden');
+    }
     levelModal.classList.add('hidden');
     if (levelSelectModal) levelSelectModal.classList.add('hidden');
     if (levelCompleteModal) levelCompleteModal.classList.add('hidden');
@@ -9758,6 +9959,10 @@ class Game {
   }
 
   updateStatusBarsOnly() {
+    if (this.player && this.player.lastStandUsed && this.player.maxHp > 0 && this.player.hp > 1 && (this.player.hp / this.player.maxHp) > 0.5) {
+      this.player.lastStandUsed = false;
+      this.player._lastStandClamped = false;
+    }
     const hpPercent = Math.max(0, (this.player.hp / this.player.maxHp) * 100);
     if (Math.abs((this._hudHpPct || 0) - hpPercent) > 0.4) {
       this._hudHpPct = hpPercent;
@@ -10649,7 +10854,7 @@ class Game {
   }
 
   triggerLevelUp(immediate = false) {
-    if (this._pendingVictory) return;
+    if (this._pendingVictory || this.deathPop > 0) return;
     if (!immediate && this.state === 'PLAYING') {
       this.startModalTransition('LEVEL_UP', 9);
       return;
@@ -11711,7 +11916,7 @@ class Game {
   }
 
   triggerLuckyChest(immediate = false) {
-    if (this._pendingVictory) return;
+    if (this._pendingVictory || this.deathPop > 0) return;
     if (!immediate && this.state === 'PLAYING') {
       sounds.playJackpot();
       vibrate.success();
@@ -11906,7 +12111,32 @@ class Game {
 
     try { history.pushState({ modal: 'lucky_chest' }, ''); } catch(e) {}
     this.updateModalVitals();
-    if (luckyChestModal) luckyChestModal.classList.remove('hidden');
+
+    // Vampire Survivors Tarzı 5 Adımlı Jackpot Sandık Açılış Koreografisini Başlat
+    if (this.chestVfx) {
+      this.chestVfx.start({
+        width: this.width,
+        height: this.height,
+        rewards: this.pendingChestRewards,
+        primaryReward: this.pendingChestRewards[0],
+        isJackpot: this.pendingChestIsJackpot,
+        onClaim: () => {
+          if (this.state === 'LUCKY_CHEST') {
+            this.claimLuckyChest(false, true);
+          }
+        }
+      });
+    }
+
+    if (luckyChestModal) {
+      luckyChestModal.classList.remove('hidden');
+      luckyChestModal.style.setProperty('background', 'transparent', 'important');
+      const modalCard = luckyChestModal.querySelector('.lucky-chest-card');
+      if (modalCard && this.chestVfx && this.chestVfx.active) {
+        modalCard.style.opacity = '0';
+        modalCard.style.pointerEvents = 'none';
+      }
+    }
 
     // 1. Adım (Hazırlık): Tok iniş sesi ve haptik
     setTimeout(() => {
@@ -11934,7 +12164,7 @@ class Game {
       // 4. Adım (Ödül Fırlaması): Kartlar sandıktan fırlayarak sırayla dizilir
       setTimeout(() => {
         if (this.state !== 'LUCKY_CHEST') return;
-        if (luckyChestContainer) {
+        if (luckyChestContainer && luckyChestContainer.children.length === 0) {
           luckyChestContainer.style.opacity = '1';
           luckyChestContainer.style.transform = 'translateY(0)';
           this.pendingChestRewards.forEach((item, idx) => {
@@ -11958,6 +12188,55 @@ class Game {
         }, 320);
       }, 180);
     }, 850);
+
+    // Adım 5 (3000ms): Canvas koreografisi Müjde Kartı aşamasına ulaştığında DOM ödül kartlarını da görünür kıl
+    setTimeout(() => {
+      if (this.state !== 'LUCKY_CHEST' || !luckyChestModal) return;
+      const modalCard = luckyChestModal.querySelector('.lucky-chest-card');
+      if (modalCard) {
+        modalCard.style.opacity = '1';
+        modalCard.style.pointerEvents = 'auto';
+      }
+    }, 3000);
+  }
+
+  handleChestVfxTap(nowMs) {
+    if (!this.chestVfx || !this.chestVfx.active) return 'INACTIVE';
+    const action = this.chestVfx.handleTap(nowMs);
+    if (action === 'SKIPPED_TO_REVEAL') {
+      const chestBox = document.getElementById('chest-3d-box');
+      const btnClaimChest = document.getElementById('btn-claim-chest');
+      const btnAdChestAll = document.getElementById('btn-ad-chest-all');
+      if (luckyChestModal) {
+        const modalCard = luckyChestModal.querySelector('.lucky-chest-card');
+        if (modalCard) {
+          modalCard.style.opacity = '1';
+          modalCard.style.pointerEvents = 'auto';
+        }
+      }
+      if (chestBox) {
+        chestBox.classList.remove('chest-dropping', 'chest-wobbling');
+        chestBox.classList.add('chest-open');
+      }
+      if (luckyChestContainer && luckyChestContainer.children.length === 0 && Array.isArray(this.pendingChestRewards)) {
+        luckyChestContainer.style.opacity = '1';
+        luckyChestContainer.style.transform = 'translateY(0)';
+        this.pendingChestRewards.forEach((item, idx) => {
+          const row = this.renderChestRewardCard(item, idx);
+          luckyChestContainer.appendChild(row);
+        });
+      }
+      if (btnClaimChest) {
+        btnClaimChest.style.pointerEvents = 'auto';
+        btnClaimChest.style.opacity = '1';
+      }
+      if (btnAdChestAll) {
+        btnAdChestAll.disabled = false;
+        btnAdChestAll.style.pointerEvents = 'auto';
+        btnAdChestAll.style.opacity = '1';
+      }
+    }
+    return action;
   }
 
   createChestRewardCard(item, idx) {
@@ -12115,6 +12394,9 @@ class Game {
       this.pendingChestRewards = [];
     }
 
+    if (this.chestVfx && this.chestVfx.active) {
+      this.chestVfx.reset();
+    }
     if (luckyChestModal) luckyChestModal.classList.add('hidden');
     if (sounds.setPauseFilter) sounds.setPauseFilter(false);
     this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 320);
@@ -12180,18 +12462,58 @@ class Game {
 
     const hook = document.getElementById('go-hook');
     if (hook) {
-      if (isNewRecord && prevBest > 0) {
-        hook.className = 'go-hook-banner record-banner';
-        hook.innerHTML = `<span>${t('go_new_record')}</span> <strong>${score.toLocaleString()}</strong> <em>(${t('go_prev_best', { n: prevBest.toLocaleString() })})</em>`;
-      } else if (isNewRecord) {
-        hook.className = 'go-hook-banner record-banner';
-        hook.innerHTML = `<span>${t('go_first_record')}</span> <strong>${score.toLocaleString()}</strong>`;
+      if (this.currentMode === 'classic') {
+        const lvlCfg = (typeof this.getLevelConfig === 'function') ? this.getLevelConfig(this.selectedLevel || 1) : { targetDuration: 60 };
+        const targetDuration = (lvlCfg && lvlCfg.targetDuration) || 60;
+
+        if (this.currentBoss && this.currentBoss.hp > 0 && this.currentBoss.maxHp > 0) {
+          const bossHpPct = Math.max(1, Math.min(99, Math.round((this.currentBoss.hp / this.currentBoss.maxHp) * 100)));
+          const bossProgressPct = 100 - bossHpPct;
+          const bossInfo = (this.currentBoss.type && typeof Enemy.getBossInfo === 'function') ? Enemy.getBossInfo(this.currentBoss.type) : null;
+          const bossName = (this.currentBoss.name || (bossInfo && bossInfo.name) || t('boss_commander_name') || t('boss_boss_vanguard_name') || 'ÖNCÜ KOMUTAN').toUpperCase();
+          hook.className = 'go-hook-banner near-miss-banner';
+          hook.innerHTML = `
+            <div class="go-near-miss-text">🔥 ${t('go_near_miss_boss_hp', { name: bossName, pct: bossHpPct })}</div>
+            <div class="go-near-miss-track"><div class="go-near-miss-fill" style="width: ${bossProgressPct}%;"></div></div>
+            <span class="go-near-miss-label">${t('go_near_miss_progress', { pct: bossProgressPct })}</span>
+          `;
+        } else if ((this.gameTime || 0) >= 30) {
+          const secLeft = Math.max(1, Math.round(targetDuration - (this.gameTime || 0)));
+          const progressPct = Math.min(95, Math.max(10, Math.round(((this.gameTime || 0) / targetDuration) * 100)));
+          const lvlNum = this.selectedLevel || 1;
+          hook.className = 'go-hook-banner near-miss-banner';
+          hook.innerHTML = `
+            <div class="go-near-miss-text">🔥 ${t('go_near_miss_boss_time', { level: lvlNum, sec: secLeft })}</div>
+            <div class="go-near-miss-track"><div class="go-near-miss-fill" style="width: ${progressPct}%;"></div></div>
+            <span class="go-near-miss-label">${t('go_near_miss_progress', { pct: progressPct })}</span>
+          `;
+        } else {
+          const wave2Target = 30;
+          const secLeft = Math.max(1, wave2Target - Math.round(this.gameTime || 0));
+          const progressPct = Math.min(95, Math.max(10, Math.round(((this.gameTime || 0) / wave2Target) * 100)));
+          hook.className = 'go-hook-banner near-miss-banner';
+          hook.innerHTML = `
+            <div class="go-near-miss-text">🔥 ${t('go_near_miss_wave', { sec: secLeft })}</div>
+            <div class="go-near-miss-track"><div class="go-near-miss-fill" style="width: ${progressPct}%;"></div></div>
+            <span class="go-near-miss-label">${t('go_near_miss_progress', { pct: progressPct })}</span>
+          `;
+        }
       } else {
-        const left = Math.max(1, prevBest - score + 1);
-        hook.className = 'go-hook-banner target-banner';
-        hook.innerHTML = `<span>${t('go_target_left', { n: left.toLocaleString() })}</span> <em>(${t('go_best_label', { n: prevBest.toLocaleString() })})</em>`;
+        if (isNewRecord && prevBest > 0) {
+          hook.className = 'go-hook-banner record-banner';
+          hook.innerHTML = `<span>${t('go_new_record')}</span> <strong>${score.toLocaleString()}</strong> <em>(${t('go_prev_best', { n: prevBest.toLocaleString() })})</em>`;
+        } else if (isNewRecord) {
+          hook.className = 'go-hook-banner record-banner';
+          hook.innerHTML = `<span>${t('go_first_record')}</span> <strong>${score.toLocaleString()}</strong>`;
+        } else {
+          const left = Math.max(1, prevBest - score + 1);
+          hook.className = 'go-hook-banner target-banner';
+          hook.innerHTML = `<span>${t('go_target_left', { n: left.toLocaleString() })}</span> <em>(${t('go_best_label', { n: prevBest.toLocaleString() })})</em>`;
+        }
       }
     }
+
+    this.updateGameOverRestartBtn();
 
     // Günlük Görev İlerlemesi (1 El Daha Oyna İntikam Kancası)
     const missionCard = document.getElementById('go-mission-card');
@@ -12279,6 +12601,7 @@ class Game {
             this.logEvent('revenge_upgrade', { id: best.item.id, lvl: best.lvl + 1 });
             this.showToast(t('toast_upgraded', { name: best.item.name }), '#05ffa1');
             this.buildGameOverHook(prevBest, isNewRecord);
+            this.updateGameOverRestartBtn();
           };
         }
       } else if (allUpgrades.length > 0) {
@@ -12327,6 +12650,60 @@ class Game {
     }
   }
 
+  updateGameOverRestartBtn() {
+    const btnRestart = document.getElementById('btn-restart');
+    if (!btnRestart) return;
+
+    const stats = [
+      { id: 'hullMax', bonus: '+20 HP', toastKey: 'hybrid_toast_hull' },
+      { id: 'shieldMax', bonus: '+15', toastKey: 'hybrid_toast_shield' },
+      { id: 'damageBoost', bonus: '+12%', toastKey: 'hybrid_toast_damage' },
+      { id: 'magnet', bonus: '+18', toastKey: 'hybrid_toast_magnet' }
+    ];
+
+    const affordable = [];
+    for (const s of stats) {
+      const cfg = TECH_WORKSHOP_CONFIG[s.id];
+      if (!cfg) continue;
+      const lvl = (this.techUpgrades && this.techUpgrades[s.id]) || 0;
+      if (lvl >= cfg.maxLevel) continue;
+      const cost = cfg.costs[lvl];
+      if (cost <= this.totalCrystals) {
+        affordable.push({
+          stat: s.id,
+          lvl,
+          cost,
+          name: t('tech_' + s.id + '_name'),
+          bonus: s.bonus,
+          toast: t(s.toastKey)
+        });
+      }
+    }
+
+    if (affordable.length > 0) {
+      // Pick cheapest upgrade so rookie can immediately experience permanent progression
+      affordable.sort((a, b) => a.cost - b.cost);
+      const best = affordable[0];
+      this.pendingHybridUpgrade = best;
+
+      btnRestart.className = 'go-primary-restart-btn btn-hybrid-launch';
+      btnRestart.innerHTML = `
+        <span class="hybrid-tag">⚡ ${best.name.toUpperCase()} (${best.bonus}) • ${best.cost.toLocaleString()} CR</span>
+        <span class="hybrid-title">${t('hybrid_launch_title')}</span>
+      `;
+
+      // Hide lower static revenge card when primary CTA handles the upgrade
+      const revengeCard = document.getElementById('go-revenge-card');
+      if (revengeCard) revengeCard.style.display = 'none';
+    } else {
+      this.pendingHybridUpgrade = null;
+      btnRestart.className = 'go-primary-restart-btn btn-instant-launch';
+      btnRestart.innerHTML = `
+        <span class="hybrid-title">🚀 ${t('instant_rematch_title')}</span>
+      `;
+    }
+  }
+
   gameOver() {
     if (this.isTestFlight) {
       this.endShipTestFlight();
@@ -12341,7 +12718,16 @@ class Game {
     this.modalTransition = null;
     this.resumeRampTimer = 0;
     this.state = 'GAME_OVER';
-    analytics.logGameOver(this.currentMode, this.player ? this.player.score : 0, this.gameTime || 0, this.wave || 1, this.lastKillerType || 'hazard');
+    const killerSource = this.lastDamageSource || this.lastKillerType || 'hazard';
+    this.lastKillerType = killerSource;
+    analytics.logGameOver(this.currentMode, this.player ? this.player.score : 0, this.gameTime || 0, this.wave || 1, killerSource);
+    const killerInfoEl = document.getElementById('go-killer-info');
+    if (killerInfoEl) {
+      const killerLabel = typeof this.getDamageSourceLabel === 'function' ? this.getDamageSourceLabel(killerSource) : String(killerSource).toUpperCase();
+      killerInfoEl.textContent = `SON DARBE: ${killerLabel}`;
+      if (killerInfoEl.dataset) killerInfoEl.dataset.source = killerSource;
+      if (killerInfoEl.style) killerInfoEl.style.display = 'block';
+    }
     this.releaseWakeLock();
     sounds.setBossEnraged(false);
     sounds.setBossMode(false);
@@ -12365,7 +12751,7 @@ class Game {
     const gamesPlayed = parseInt(localStorage.getItem('neon_games_played') || '0', 10) + 1;
     localStorage.setItem('neon_games_played', gamesPlayed.toString());
     this.noteQuietRunForAdGap();
-    this.logEvent('run_end', { score: this.player.score, time: Math.round(this.gameTime), level: this.player.level, mode: this.currentMode, record: isNewRecord });
+    this.logEvent('run_end', { score: this.player.score, time: Math.round(this.gameTime), level: this.player.level, mode: this.currentMode, record: isNewRecord, killer: killerSource });
     this.applyMenuProgression();
     this.buildGameOverHook(prevBest, isNewRecord);
     this.renderDamageBreakdown();
@@ -12430,17 +12816,26 @@ class Game {
 
     const isNoAds = localStorage.getItem('neon_no_ads') === 'true';
     const freeRevives = parseInt(localStorage.getItem('neon_bonus_revives') || '0', 10);
+    const totalFlights = (this.pilotStats && typeof this.pilotStats.totalFlights === 'number')
+      ? this.pilotStats.totalFlights
+      : parseInt(localStorage.getItem('neon_games_played') || '0', 10);
     const btnAdRevive = document.getElementById('btn-ad-revive');
     if (btnAdRevive) {
       if ((this.revivesUsed || 0) >= 1) {
         btnAdRevive.style.display = 'none';
       } else {
         btnAdRevive.style.display = 'flex';
-        if (isNoAds && !this.vipReviveUsedThisRun) {
+        if (totalFlights <= 1) {
+          btnAdRevive.className = 'go-revive-btn go-revive-free-net';
+          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">⚡ ${t('btn_revive_tutorial_action')}</span> <span class="btn-pill-tag">${t('btn_revive_tutorial_tag')}</span>`;
+        } else if (isNoAds && !this.vipReviveUsedThisRun) {
+          btnAdRevive.className = 'go-revive-btn';
           btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_vip_free') || 'VIP FREE'}</span>`;
         } else if (freeRevives > 0) {
+          btnAdRevive.className = 'go-revive-btn';
           btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_revive_free', { n: freeRevives })}</span>`;
         } else {
+          btnAdRevive.className = 'go-revive-btn';
           btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><polygon points="5,3 13,8 5,13" fill="currentColor"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_revive_ad')}</span>`;
         }
       }
@@ -12450,7 +12845,11 @@ class Game {
     if (ultimateBtnContainer) ultimateBtnContainer.classList.add('hidden');
     if (miniQuestCard) miniQuestCard.classList.add('hidden');
     if (merchantModal) merchantModal.classList.add('hidden');
-    gameoverModal.classList.remove('hidden');
+    if (gameoverModal) {
+      gameoverModal.classList.remove('modal-exit-fast');
+      gameoverModal.classList.remove('hidden');
+    }
+    this.updateGameOverRestartBtn();
     this.updateCrystalsDisplay();
     this.checkMissionsBadge();
   }
@@ -12479,12 +12878,15 @@ class Game {
 
   executeRevive() {
     this.revivesUsed = (this.revivesUsed || 0) + 1;
+    this.deathPop = 0;
     if (gameoverModal) gameoverModal.classList.add('hidden');
     this.startSmoothResume(34);
     if (this.player) {
       this.player.hp = Math.round(this.player.maxHp * 0.6);
       this.player.shield = this.player.maxShield;
       this.player.invulnerableTimer = 180; // 3 saniye dokunulmazlık
+      this.player.lastStandUsed = false;
+      this.player._lastStandClamped = false;
       this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 360);
       this.particles.spawnFloatingText(this.player.x, this.player.y - 40, t('float_revived'), '#ffd700', 18);
     }
@@ -12557,6 +12959,9 @@ class Game {
     }
 
     if (this.state !== 'PLAYING') {
+      if (this.chestVfx && this.chestVfx.active) {
+        this.chestVfx.update(dt * 16.667);
+      }
       this.particles.update(this.width, this.height);
       return;
     }
@@ -12795,6 +13200,11 @@ class Game {
     if (this.player.phaseTimer > 0) this.player.phaseTimer -= dt;
     if (this.player.phaseCooldown > 0) this.player.phaseCooldown -= dt;
     if (this.player.invulnerableTimer > 0) this.player.invulnerableTimer = Math.max(0, this.player.invulnerableTimer - dt);
+    if (this.player.tetherHitCooldown > 0) this.player.tetherHitCooldown = Math.max(0, this.player.tetherHitCooldown - dt);
+    if (this.player.lastStandUsed && this.player.maxHp > 0 && this.player.hp > 1 && (this.player.hp / this.player.maxHp) > 0.5) {
+      this.player.lastStandUsed = false;
+      this.player._lastStandClamped = false;
+    }
 
     // Hangar 15 Saniyelik Gemi Test Uçuşu Sayacı (Part 3.4)
     if (this.isTestFlight) {
@@ -13156,8 +13566,8 @@ class Game {
         const beam = this.activeBeams[i];
         beam.timer -= dt;
         if (Math.abs(this.player.x - beam.x) < (beam.width / 2 + this.player.radius * 0.75)) {
-          if (!this.player.beamHitCooldown || this.player.beamHitCooldown <= 0) {
-            this.takeDamage(16);
+          if ((!this.player.beamHitCooldown || this.player.beamHitCooldown <= 0) && !(this.player.phaseTimer > 0 || this.player.invulnerableTimer > 0)) {
+            this.takeDamage(16, beam.x, this.player.y, 'beam');
             this.player.beamHitCooldown = 30;
             this.particles.spawnShockwave(this.player.x, this.player.y, '#ff0055', 110);
             vibrate.heavy();
@@ -14111,10 +14521,11 @@ class Game {
 
     // === EFSANEVİ EVRİM: KIYAMET TESLA MATRİSİ (evo_matrix) ===
     if (this.player.evolutions && this.player.evolutions.doomsdayMatrix && this.enemies.length > 0) {
-      this.tetheredEnemies = [];
-      const hasRealEnemies = this.enemies.some(e => e.hp > 0 && !e.toRemove && !e.isDebris && !e.isSplitPiece && ((e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 < 300 * 300));
+      if (!this.tetheredEnemies) this.tetheredEnemies = [];
+      this.tetheredEnemies.length = 0;
+      const hasRealEnemies = this.enemies.some(e => e.hp > 0 && !e.toRemove && !e.isDebris && !e.isSplitPiece && e.y >= 15 && e.y <= this.height && ((e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 < 300 * 300));
       for (let enemy of this.enemies) {
-        if (enemy.hp <= 0 || enemy.toRemove) continue;
+        if (enemy.hp <= 0 || enemy.toRemove || enemy.y < 15 || enemy.y > this.height) continue;
         if (hasRealEnemies && (enemy.isDebris || enemy.isSplitPiece)) continue;
         const dx = enemy.x - this.player.x;
         const dy = enemy.y - this.player.y;
@@ -14136,7 +14547,7 @@ class Game {
           sounds.playTesla();
           vibrate.success();
           for (let enemy of this.tetheredEnemies) {
-            if (enemy.hp <= 0 || enemy.toRemove) continue;
+            if (enemy.hp <= 0 || enemy.toRemove || enemy.y < 15 || enemy.y > this.height) continue;
             this.applyCappedEnemyDamage(enemy, 120 * (this.player.damageMultiplier || 1.0), { isNuke: true, isMatrixBurst: true, color: '#bf5af2', x: enemy.x, y: enemy.y });
             this.particles.spawnShockwave(enemy.x, enemy.y, '#bf5af2', 90);
             this.particles.spawnExplosion(enemy.x, enemy.y, '#00f0ff', 12, 3);
@@ -14152,7 +14563,7 @@ class Game {
         }
       }
     } else {
-      this.tetheredEnemies = [];
+      if (this.tetheredEnemies) this.tetheredEnemies.length = 0;
     }
 
     // === EFSANEVİ EVRİM: VAKUM AVCI DRONLARI (evo_void_drones) ===
@@ -14548,8 +14959,10 @@ class Game {
   }
 
   checkTetherCollisions(dt = 1.0) {
-    if (this.player.isInvulnerable || this.state !== 'PLAYING') return;
-    const checkedPairs = new Set();
+    if (this.player.isInvulnerable || this.player.invulnerableTimer > 0 || this.player.phaseTimer > 0 || this.deathPop > 0 || this.state !== 'PLAYING') return;
+    if (!this._checkedTetherPairs) this._checkedTetherPairs = new Set();
+    this._checkedTetherPairs.clear();
+    const checkedPairs = this._checkedTetherPairs;
     for (let enemy of this.enemies) {
       if (enemy.isTetherDrone && enemy.tetherPartner && !enemy.toRemove && !enemy.tetherPartner.toRemove && enemy.hp > 0 && enemy.tetherPartner.hp > 0) {
         const p = enemy.tetherPartner;
@@ -14570,12 +14983,18 @@ class Game {
         const closeY = y1 + t * (y2 - y1);
         const dist = Math.hypot(this.player.x - closeX, this.player.y - closeY);
         if (dist < this.player.radius + 6) {
-          this.takeDamage(10);
-          sounds.playTesla();
-          this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 45);
-          this.particles.spawnLightning(x1, y1, this.player.x, this.player.y, '#00f0ff', 4);
-          this.particles.spawnLightning(x2, y2, this.player.x, this.player.y, '#00f0ff', 4);
-          this.screenShake = 6;
+          if ((this.player.tetherHitCooldown || 0) <= 0) {
+            this.player.tetherHitCooldown = 16;
+            this.takeDamage(14, closeX, closeY, 'tether');
+            this.player.vy = (this.player.vy || 0) + 4.5;
+            this.player.knockY = (this.player.knockY || 0) + 12;
+            this.player.targetY = Math.min(this.height - 36, this.player.targetY + 20);
+            sounds.playTesla();
+            this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 45);
+            this.particles.spawnLightning(x1, y1, this.player.x, this.player.y, '#00f0ff', 4);
+            this.particles.spawnLightning(x2, y2, this.player.x, this.player.y, '#00f0ff', 4);
+            this.screenShake = 6;
+          }
         }
       }
     }
@@ -15349,7 +15768,7 @@ class Game {
           const laserX = enemy.laserTargetX !== undefined ? enemy.laserTargetX : enemy.x;
           if (this.player.y > enemy.y && Math.abs(this.player.x - laserX) < beamHalfWidth && (this.player.beamHitCooldown || 0) <= 0) {
             this.player.beamHitCooldown = 20;
-            this.takeDamage(18, laserX, this.player.y);
+            this.takeDamage(18, laserX, this.player.y, 'boss_laser');
           }
         }
       }
@@ -15638,10 +16057,12 @@ class Game {
         let dmg = isThisBoss ? 42 : (enemy.radius > 20 ? 24 : (enemy.type === 'asteroid_s' || enemy.type === 'escort_fighter' ? 8 : 16));
         if (this.player.level <= 2 && this.selectedLevel === 1) dmg = Math.round(dmg * 0.75);
         dmg = Math.round(dmg * dmgMult);
-        this.takeDamage(dmg, enemy.x, enemy.y);
+        const wasInvulnerable = (this.player.phaseTimer > 0 || this.player.invulnerableTimer > 0);
+        const hitSource = isThisBoss ? (enemy.type || 'boss') : (enemy.type || (enemy.isAsteroid ? 'asteroid' : 'enemy'));
+        this.takeDamage(dmg, enemy.x, enemy.y, hitSource);
         if (!isThisBoss && !enemy.isFleetCommander) {
           enemy.toRemove = true;
-        } else {
+        } else if (!wasInvulnerable) {
           this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, 30);
         }
       } else if (!enemy.grazed && playerDist < enemy.radius + this.player.radius + 20) {
@@ -15747,7 +16168,7 @@ class Game {
         const lvlCfg = this.getLevelConfig(this.selectedLevel);
         const dmgMult = this.currentMode === 'classic' ? (lvlCfg.enemyDmgMult || 1.0) : 1.0;
         const pDmg = Math.round(10 * dmgMult);
-        this.takeDamage(pDmg, p.x, p.y);
+        this.takeDamage(pDmg, p.x, p.y, p.sourceType || 'projectile');
         this.particles.spawnExplosion(p.x, p.y, '#ff0055', 6, 2);
         p.toRemove = true;
       } else if (!p.grazed && dist < p.radius + this.player.radius + 18) {
@@ -16609,7 +17030,81 @@ class Game {
     if (this.particles) this.particles.spawnHitSparks(this.player.x, this.player.y, dx, dy, hull ? '#ffffff' : '#7dd3fc');
   }
 
-  takeDamage(amount, sx, sy) {
+  _inferDamageSource(sx, sy) {
+    if (typeof sx === 'number' && typeof sy === 'number') {
+      if (Array.isArray(this.enemyProjectiles)) {
+        for (const p of this.enemyProjectiles) {
+          if (p && Math.hypot(p.x - sx, p.y - sy) < 4) {
+            return p.sourceType || 'projectile';
+          }
+        }
+      }
+      if (Array.isArray(this.enemies)) {
+        for (const e of this.enemies) {
+          if (e && Math.hypot(e.x - sx, e.y - sy) < 4) {
+            const isBoss = e.isBoss || (e.type && String(e.type).startsWith('boss'));
+            return isBoss ? (e.type || 'boss') : (e.type || (e.isAsteroid ? 'asteroid' : 'enemy'));
+          }
+        }
+      }
+      return 'projectile';
+    }
+    return 'hazard';
+  }
+
+  getDamageSourceLabel(source) {
+    const s = String(source || 'hazard').toLowerCase();
+    const map = {
+      projectile: 'DÜŞMAN MERMİSİ',
+      enemy_bullet: 'DÜŞMAN MERMİSİ',
+      beam: 'ÖLÜM IŞINI (LAZER)',
+      boss_laser: 'BOSS YIKIM LAZERİ',
+      tether: 'İKİLİ LAZER BAĞI (TETHER)',
+      tether_drone: 'İKİLİ LAZER DRONU',
+      scout: 'KEŞİF DRONU',
+      elite_scout: 'ELİT KESKİN NİŞANCI',
+      kamikaze: 'KAMİKAZE DRONU',
+      dive_bomber: 'DALIŞ BOMBARDIMANCISI',
+      sniper: 'KESKİN NİŞANCI (SNIPER)',
+      cruiser: 'ZIRHLI KRUVAZÖR',
+      tank: 'ZIRHLI KRUVAZÖR',
+      splitter: 'BÖLÜNEN ORGANİZMA',
+      shield_vanguard: 'KALKANLI MUHAFIZ',
+      shielded: 'KALKANLI MUHAFIZ',
+      guided_missile: 'GÜDÜMLÜ FÜZE',
+      escort_fighter: 'ESKORT AVCISI',
+      cargo_freighter: 'KARGO GEMİSİ',
+      volatile_asteroid: 'KARARSIZ METEOR',
+      volatile_core: 'PATLAYICI ÇEKİRDEK',
+      asteroid: 'ASTEROİT ÇARPMASI',
+      asteroid_s: 'KÜÇÜK METEOR',
+      asteroid_m: 'ORTA METEOR',
+      asteroid_l: 'DEV METEOR',
+      asteroid_bomb: 'PATLAYICI METEOR',
+      asteroid_gold: 'KRİSTAL METEOR',
+      asteroid_cryo: 'BUZUL METEORU',
+      asteroid_ice: 'BUZUL METEORU',
+      asteroid_purple: 'DOMİNO METEORU',
+      asteroid_vortex: 'GİRDAP METEORU',
+      asteroid_geode: 'CEVHER METEORU',
+      boss_vanguard: 'ÖNCÜ KOMUTAN (BOSS)',
+      boss_dreadnought: 'KARA MUHAFIZ (BOSS)',
+      boss_nebula: 'NEBULA GÖZCÜSÜ (BOSS)',
+      boss_titan: 'DEMİR TİTAN (BOSS)',
+      boss_chrono: 'KRONOS HÜKÜMDARI (BOSS)',
+      boss_apex: 'KUANTUM APEX (BOSS)',
+      boss: 'KOZMİK BOSS',
+      enemy: 'DÜŞMAN GEMİSİ',
+      hazard: 'KOZMİK TEHLİKE'
+    };
+    if (map[s]) return map[s];
+    if (s.startsWith('boss')) return 'KOZMİK BOSS';
+    if (s.startsWith('asteroid')) return 'METEOR ÇARPMASI';
+    return s.toUpperCase();
+  }
+
+  takeDamage(amount, sx, sy, source) {
+    if (!(amount > 0)) return;
     if (this.deathPop > 0) return;
     if (this._pendingVictory || this.state !== 'PLAYING' || this.isMerchantActive || this.modalTransition) return;
     if (merchantModal && !merchantModal.classList.contains('hidden')) return;
@@ -16626,12 +17121,25 @@ class Game {
       return;
     }
 
+    // Son Nefes sıfırlama kontrolü: Can %50'nin üzerine çıktıysa Son Nefes yeniden aktif olur
+    if (this.player.lastStandUsed && this.player.maxHp > 0 && this.player.hp > 1 && (this.player.hp / this.player.maxHp) > 0.5) {
+      this.player.lastStandUsed = false;
+      this.player._lastStandClamped = false;
+    }
+
     // Titan Çift Kalkan Modunda Alınan Hasar %50 Azalır
     if (this.player.titanShieldTimer > 0) {
       amount = Math.max(1, Math.round(amount * 0.5));
     }
 
     const incoming = amount;
+    if (incoming > 0) {
+      const resolvedSource = source || this._inferDamageSource(sx, sy);
+      this.lastDamageSource = resolvedSource;
+      this.lastDamageX = typeof sx === 'number' ? sx : this.player.x;
+      this.lastDamageY = typeof sy === 'number' ? sy : this.player.y;
+      this.lastKillerType = resolvedSource;
+    }
     this.player.shieldRegenTimer = 0;
 
     if (this.currentMiniQuest && this.currentMiniQuest.type === 'dodge') {
@@ -16639,7 +17147,7 @@ class Game {
       this.updateMiniQuestProgress('dodge', 0, true);
     }
 
-    // Önce kalkan karşılar
+    // Önce kalkan karşılar (Shield-Gating: Kalkan kırıldığında fazla hasar gövdeye taşmaz)
     const hadShield = this.player.shield > 0;
     if (this.player.shield > 0) {
       sounds.playShieldHit();
@@ -16648,18 +17156,31 @@ class Game {
         this.player.shield -= amount;
         amount = 0;
       } else {
-        amount -= this.player.shield;
         this.player.shield = 0;
+        amount = 0;
       }
     }
 
-    // Kalkan Parçalanması / Kırılması (Crystalline Glass Shatter)
+    // Kalkan Parçalanması / Kırılması (Shield-Gate & Crystalline Glass Shatter)
     if (hadShield && this.player.shield <= 0) {
+      amount = 0;
+      this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, 42);
       sounds.playShieldBreak();
       vibrate.medium();
-      this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 65);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 120);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 34, '[KALKAN KIRILDI!]', '#00f0ff', 15);
       for (let s = 0; s < 12; s++) {
         this.particles.spawnExplosion(this.player.x + (Math.random() * 20 - 10), this.player.y + (Math.random() * 20 - 10), '#00f0ff', 3, 2.0);
+      }
+      if (Array.isArray(this.enemyProjectiles)) {
+        for (let i = this.enemyProjectiles.length - 1; i >= 0; i--) {
+          const ep = this.enemyProjectiles[i];
+          if (!ep) continue;
+          if (Math.hypot(ep.x - this.player.x, ep.y - this.player.y) <= 120) {
+            ep.toRemove = true;
+            this.enemyProjectiles.splice(i, 1);
+          }
+        }
       }
     }
 
@@ -16704,19 +17225,52 @@ class Game {
       if (hpRatio < 0.15) hurtStage = Math.max(hurtStage, 10);
       if (this.player.hp <= 0) hurtStage = 11;
       this.playTakenStage(hurtStage, amount);
+      if (this.player.hp > 0 && this.particles) {
+        const hitLabel = this.getDamageSourceLabel(this.lastDamageSource);
+        this.particles.spawnFloatingText(this.player.x, this.player.y - 34, `-${amount} HP [${hitLabel}]`, '#ff3b30', 13);
+      }
     }
 
+    // Post-Hit Invulnerability (I-Frames): Aynı karede çoklu mermi/düşman tek atmasını engeller
     if (incoming > 0 && (hadShield || amount > 0)) {
+      this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, 28);
       this.feelPlayerHit(sx, sy, amount > 0);
     }
-
-    this.updateHUD();
 
     if (this.player.hp <= 0) {
       if (this.isTestFlight) {
         this.endShipTestFlight();
         return;
       }
+
+      // Son Nefes / Clutch Gate Koruması (Last-Stand): Oyuncu tek darbede aniden ölmez, 1 HP'de savaşma şansı kazanır!
+      if (!this.player.lastStandUsed) {
+        this.player.hp = 1;
+        this.player.lastStandUsed = true;
+        this.player._lastStandClamped = true;
+        this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, 60);
+        this.temporalSlowTimer = Math.max(this.temporalSlowTimer || 0, 28);
+        if (typeof sounds.playBossAlarm === 'function') sounds.playBossAlarm();
+        else sounds.playShieldBreak();
+        vibrate.heavy();
+        this.screenShake = Math.max(this.screenShake || 0, 14);
+        this.particles.spawnShockwave(this.player.x, this.player.y, '#ff0055', 165);
+        this.particles.spawnShockwave(this.player.x, this.player.y, '#ffbe0b', 115);
+        this.particles.spawnFloatingText(this.player.x, this.player.y - 38, '[SON NEFES! KRİTİK HASAR]', '#ffbe0b', 16);
+        if (Array.isArray(this.enemyProjectiles)) {
+          for (let i = this.enemyProjectiles.length - 1; i >= 0; i--) {
+            const ep = this.enemyProjectiles[i];
+            if (!ep) continue;
+            if (Math.hypot(ep.x - this.player.x, ep.y - this.player.y) <= 165) {
+              ep.toRemove = true;
+              this.enemyProjectiles.splice(i, 1);
+            }
+          }
+        }
+        this.updateHUD();
+        return;
+      }
+
       // Anka Protokolü (Phoenix Shield): Ölümcül hasarda 1 kez dev patlama ile dirilme
       if (this.player.hasPhoenix && !this.player.phoenixUsed) {
         this.player.phoenixUsed = true;
@@ -16725,6 +17279,10 @@ class Game {
         this.player.hp = Math.round(this.player.maxHp * revivePct);
         this.player.shield = this.player.maxShield;
         this.player.invulnerableTimer = 120; // 2 saniye diriliş dokunulmazlığı
+        if (revivePct > 0.5) {
+          this.player.lastStandUsed = false;
+          this.player._lastStandClamped = false;
+        }
         sounds.playNuke();
         sounds.playLevelUp();
         vibrate.heavy();
@@ -16747,12 +17305,25 @@ class Game {
         return;
       }
       this.player.hp = 0;
-      this.player.hitFlash = 6;
+      this.player.hitFlash = 10;
       this.player.invulnerableTimer = 40;
       this.hitStopTimer = 0;
-      this.deathPop = 6;
+      this.modalTransition = null;
+      this.merchantSignalTimer = 0;
+      const sigBtn = document.getElementById('merchant-signal-btn');
+      if (sigBtn) sigBtn.classList.add('hidden');
+      this.deathPopMax = 36;
+      this.deathPop = 36;
+      const killerLabel = this.getDamageSourceLabel(this.lastDamageSource);
+      if (this.particles) {
+        this.particles.spawnShockwave(this.player.x, this.player.y, '#ff0055', 140);
+        this.particles.spawnFloatingText(this.player.x, this.player.y - 42, `[ÖLÜMCÜL DARBE: ${killerLabel}]`, '#ff0055', 16);
+      }
+      this.updateHUD();
       return;
     }
+
+    this.updateHUD();
   }
 
   handleEnemyEscaped(enemy) {
@@ -16802,6 +17373,7 @@ class Game {
         totalMergedVal += (g.value || 1);
         avgX += g.x;
         avgY += g.y;
+        gemPool.release(g);
       }
       if (excess.length > 0 && totalMergedVal > 0) {
         avgX /= excess.length;
@@ -16813,6 +17385,7 @@ class Game {
     for (let i = this.gems.length - 1; i >= 0; i--) {
       const gem = this.gems[i];
       if (gem.toRemove) {
+        gemPool.release(gem);
         this.gems.splice(i, 1);
         continue;
       }
@@ -16823,6 +17396,7 @@ class Game {
       const dist = Math.hypot(gem.x - this.player.x, gem.y - this.player.y);
       if (dist < gem.radius + this.player.radius) {
         this.collectGem(gem, this.player.x, this.player.y);
+        gemPool.release(gem);
         this.gems.splice(i, 1);
 
         // Seviye Atlama Kontrolü (Dengeli ve Akıcı Roguelite Seviye İlerlemesi)
@@ -16831,6 +17405,7 @@ class Game {
           break;
         }
       } else if (gem.y > this.height + 40) {
+        gemPool.release(gem);
         this.gems.splice(i, 1);
       }
     }
@@ -17304,6 +17879,7 @@ class Game {
       this.drawWingmen();
       this.drawOrbitalSaws();
       this.drawCompanionDrone();
+      this.drawDeathTelemetry();
     }
 
     // Overdrive / Süper Güç Barı
@@ -17434,6 +18010,11 @@ class Game {
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, this.width, this.height);
       ctx.restore();
+    }
+
+    // Jackpot Sandık Açılış Koreografisi (Safkan Pixel Art 5 Adımlı Overlay)
+    if (this.chestVfx && this.chestVfx.active) {
+      this.chestVfx.render(ctx, this.width, this.height);
     }
 
     ctx.restore();
@@ -17946,12 +18527,12 @@ class Game {
     ctx.strokeStyle = skin.primary || '#00f0ff';
     ctx.globalAlpha = 0.24;
     ctx.lineWidth = 1.4;
-    ctx.setLineDash([4, 6]);
+    if (ctx.setLineDash) ctx.setLineDash([4, 6]);
     ctx.beginPath();
     ctx.moveTo(this.player.x, this.player.y - 28);
     ctx.lineTo(this.player.x, this.player.y - 95);
     ctx.stroke();
-    ctx.setLineDash([]);
+    if (ctx.setLineDash) ctx.setLineDash([]);
 
     // Mikro odak reticle noktası
     ctx.fillStyle = '#ffffff';
@@ -17978,12 +18559,78 @@ class Game {
     ctx.restore();
   }
 
+  drawDeathTelemetry() {
+    if (!(this.deathPop > 0) || !this.player) return;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.shadowBlur = 0;
+    const maxPop = this.deathPopMax || 36;
+    const progress = Math.max(0, Math.min(1, 1 - this.deathPop / maxPop));
+    const pulse = 0.6 + 0.4 * Math.sin(progress * Math.PI * 6);
+    const kx = Math.round(typeof this.lastDamageX === 'number' ? this.lastDamageX : this.player.x);
+    const ky = Math.round(typeof this.lastDamageY === 'number' ? this.lastDamageY : this.player.y);
+    const px = Math.round(this.player.x);
+    const py = Math.round(this.player.y);
+
+    // Katil mermi/düşman ile oyuncu arasında kademeli piksel hedefleme hattı (Stepped Pixel Line)
+    const dist = Math.hypot(kx - px, ky - py);
+    if (dist > 4) {
+      ctx.fillStyle = `rgba(255, 0, 85, ${0.85 * pulse})`;
+      const steps = Math.max(2, Math.floor(dist / 8));
+      for (let s = 0; s <= steps; s += 2) {
+        const lx = Math.round(px + ((kx - px) * s) / steps);
+        const ly = Math.round(py + ((ky - py) * s) / steps);
+        ctx.fillRect(lx - 2, ly - 2, 4, 4);
+      }
+    }
+
+    // Katil kaynağı 8-bit piksel nişangah çerçevesi (Stepped Pixel Killer Reticle - Sıfır Arc)
+    const halfBox = Math.round(16 + Math.round(Math.sin(progress * Math.PI * 4) * 2) * 2);
+    const innerBox = Math.max(6, Math.round(halfBox * 0.55));
+    const bracketLen = 8;
+    ctx.fillStyle = '#ff0055';
+    // 4 Köşe L-Piksel Braketi
+    ctx.fillRect(kx - halfBox, ky - halfBox, bracketLen, 3);
+    ctx.fillRect(kx - halfBox, ky - halfBox, 3, bracketLen);
+    ctx.fillRect(kx + halfBox - bracketLen, ky - halfBox, bracketLen, 3);
+    ctx.fillRect(kx + halfBox - 3, ky - halfBox, 3, bracketLen);
+    ctx.fillRect(kx - halfBox, ky + halfBox - 3, bracketLen, 3);
+    ctx.fillRect(kx - halfBox, ky + halfBox - bracketLen, 3, bracketLen);
+    ctx.fillRect(kx + halfBox - bracketLen, ky + halfBox - 3, bracketLen, 3);
+    ctx.fillRect(kx + halfBox - 3, ky + halfBox - bracketLen, 3, bracketLen);
+
+    // İç Altın Piksel Kare Çerçeve
+    ctx.strokeStyle = '#ffbe0b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(kx - innerBox, ky - innerBox, innerBox * 2, innerBox * 2);
+
+    // Ölüm nedeni 3D Piksel Bilgi Etiketi
+    const label = `[ÖLÜMCÜL DARBE: ${this.getDamageSourceLabel(this.lastDamageSource)}]`;
+    ctx.font = 'bold 12px "Rajdhani", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const by = Math.round(Math.max(36, py - 52));
+    const tw = Math.round((ctx.measureText ? ctx.measureText(label).width : label.length * 7) + 20);
+    const boxLeft = Math.round(px - tw / 2);
+    ctx.fillStyle = '#181425';
+    ctx.fillRect(boxLeft + 2, by - 10, tw, 24);
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(boxLeft, by - 12, tw, 24);
+    ctx.strokeStyle = '#ff0055';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(boxLeft, by - 12, tw, 24);
+    ctx.fillStyle = '#ffbe0b';
+    ctx.fillText(label, px, by);
+    ctx.restore();
+  }
+
   drawPlayerShip() {
     ctx.save();
     ctx.translate(this.player.x, this.player.y);
     ctx.rotate(this.player.tilt);
     if (this.deathPop > 0) {
-      const swell = 1 + (1 - this.deathPop / 6) * 0.6;
+      const maxPop = this.deathPopMax || 36;
+      const swell = 1 + (1 - this.deathPop / maxPop) * 0.6;
       ctx.scale(swell, swell);
     }
     const isHitFlash = (this.player.hitFlash > 0);
@@ -17991,6 +18638,27 @@ class Game {
       this.player.hitFlash -= 1;
     }
     const r = this.player.visualRadius || 26;
+
+    // Dokunulmazlık (I-Frame / Shield-Gate / Son Nefes) Stepped Piksel Koruma Çerçevesi
+    if (this.player.invulnerableTimer > 0 && !(this.deathPop > 0)) {
+      ctx.save();
+      const invPulse = 0.45 + 0.35 * Math.sin((this.frames || 0) * 0.55);
+      const isLastStand = this.player.lastStandUsed && this.player.hp <= 1;
+      const boxR = Math.round(r + 8);
+      const cut = 6;
+      ctx.fillStyle = isLastStand ? `rgba(255, 190, 11, ${invPulse})` : `rgba(0, 240, 255, ${invPulse})`;
+      // 4 Kenar Basamaklı Sekizgen Piksel Kalkan Çerçevesi (Sıfır Arc)
+      ctx.fillRect(-boxR + cut, -boxR, (boxR - cut) * 2, 2);
+      ctx.fillRect(-boxR + cut, boxR - 2, (boxR - cut) * 2, 2);
+      ctx.fillRect(-boxR, -boxR + cut, 2, (boxR - cut) * 2);
+      ctx.fillRect(boxR - 2, -boxR + cut, 2, (boxR - cut) * 2);
+      // 4 Köşe Basamak Pikseli
+      ctx.fillRect(-boxR + 2, -boxR + 2, 4, 2);
+      ctx.fillRect(boxR - 6, -boxR + 2, 4, 2);
+      ctx.fillRect(-boxR + 2, boxR - 4, 4, 2);
+      ctx.fillRect(boxR - 6, boxR - 4, 4, 2);
+      ctx.restore();
+    }
 
     // Kostüm Renkleri
     const skin = this.skins[this.currentSkinId] || this.skins.cyberpunk;
@@ -19129,6 +19797,10 @@ class Game {
     const pauseSoundText = document.getElementById('pause-sound-text');
     if (pauseSoundText) {
       pauseSoundText.textContent = sounds.muted ? t('pause_sound_off') : t('pause_sound_on');
+    }
+    const gameoverModalEl = document.getElementById('gameover-modal');
+    if (gameoverModalEl && !gameoverModalEl.classList.contains('hidden')) {
+      this.updateGameOverRestartBtn();
     }
     const pauseVibrateText = document.getElementById('pause-vibrate-text');
     if (pauseVibrateText) {

@@ -1,5 +1,6 @@
 // === DÜŞMANLAR, METEORLAR, XP KRİSTALLERİ & MERMİLER ===
 import { t } from './i18n.js';
+import { gemPool } from './pool-manager.js';
 
 export const BOSS_ROSTER = {
   boss_vanguard: {
@@ -514,6 +515,7 @@ export class Enemy {
       case 'boss_chrono':
       case 'boss_apex': {
         const info = Enemy.getBossInfo(type);
+        this.name = info.name;
         this.radius = info.radius;
         this.hp = Math.round(info.baseHp * waveMultiplier);
         this.maxHp = this.hp;
@@ -815,7 +817,7 @@ export class Enemy {
           } else {
             this.shootTimer = this.isFleetMember ? (115 + Math.random() * 45) : (145 + Math.random() * 55);
             const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 12, aimAngle, 2.8));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 12, aimAngle, 2.8, this.type));
           }
         }
       }
@@ -922,17 +924,17 @@ export class Enemy {
             this.shootTimer = 54;
             for (let s = 0; s < 4; s++) {
               const sAng = this.spiralAngle + (s * Math.PI / 2);
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 18, sAng, 3.2));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 18, sAng, 3.2, this.type));
             }
             for (let offset of [-0.28, 0, 0.28]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 28, this.y + 18, baseAngle + offset, 3.4));
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 28, this.y + 18, baseAngle + offset, 3.4, this.type));
             }
           } else {
             this.shootTimer = 66;
             for (let offset of [-0.22, 0, 0.22]) {
-              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, baseAngle + offset + Math.sin(this.spiralAngle) * 0.08, 3.2));
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, baseAngle + offset + Math.sin(this.spiralAngle) * 0.08, 3.2, this.type));
             }
           }
         } else if (this.type === 'boss_dreadnought' || this.type === 'boss') {
@@ -943,15 +945,15 @@ export class Enemy {
               const ang = this.spiralAngle + (s * Math.PI * 2 / 5);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.4));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.4, this.type));
             }
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 22, baseAngle, 3.6));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 22, baseAngle, 3.6, this.type));
           } else {
             this.shootTimer = 65;
             for (let offset of [-0.24, 0, 0.24]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2, this.type));
             }
           }
         } else if (this.type === 'boss_nebula') {
@@ -962,20 +964,20 @@ export class Enemy {
               const ang = this.spiralAngle + (s * Math.PI / 3);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.4));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.4, this.type));
             }
             if (!this.leftPodDestroyed) {
-              enemyProjectiles.push(new EnemyProjectile(this.x - 15, this.y + 20, baseAngle - 0.08, 3.7));
+              enemyProjectiles.push(new EnemyProjectile(this.x - 15, this.y + 20, baseAngle - 0.08, 3.7, this.type));
             }
             if (!this.rightPodDestroyed) {
-              enemyProjectiles.push(new EnemyProjectile(this.x + 15, this.y + 20, baseAngle + 0.08, 3.7));
+              enemyProjectiles.push(new EnemyProjectile(this.x + 15, this.y + 20, baseAngle + 0.08, 3.7, this.type));
             }
           } else {
             this.shootTimer = 66;
             for (let offset of [-0.3, -0.1, 0.1, 0.3]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2, this.type));
             }
           }
         } else if (this.type === 'boss_titan') {
@@ -985,14 +987,14 @@ export class Enemy {
               const ang = (s * Math.PI / 4) + (Math.random() * 0.1);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.3));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.3, this.type));
             }
           } else {
             this.shootTimer = 64;
             for (let offset of [-0.35, 0, 0.35]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.2, this.type));
             }
           }
         } else if (this.type === 'boss_chrono') {
@@ -1003,14 +1005,14 @@ export class Enemy {
               const ang = this.spiralAngle + (s * Math.PI / 4);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.5));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.5, this.type));
             }
           } else {
             this.shootTimer = 62;
             for (let offset of [-0.36, -0.18, 0, 0.18, 0.36]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.3));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.3, this.type));
             }
           }
         } else if (this.type === 'boss_apex') {
@@ -1021,14 +1023,14 @@ export class Enemy {
               const ang = this.spiralAngle + (s * Math.PI * 2 / 9);
               if (Math.cos(ang) < -0.2 && this.leftPodDestroyed) continue;
               if (Math.cos(ang) > 0.2 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.6));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 15, ang, 3.6, this.type));
             }
           } else {
             this.shootTimer = 60;
             for (let offset of [-0.28, -0.1, 0.1, 0.28]) {
               if (offset < 0 && this.leftPodDestroyed) continue;
               if (offset > 0 && this.rightPodDestroyed) continue;
-              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.4));
+              enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 20, baseAngle + offset, 3.4, this.type));
             }
           }
         }
@@ -1063,7 +1065,7 @@ export class Enemy {
             this.shootTimer = 130 + Math.random() * 40;
             const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
             for (let offset of [-0.15, 0, 0.15]) {
-              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, aimAngle + offset, 2.9));
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, aimAngle + offset, 2.9, this.type));
             }
           }
         }
@@ -1086,7 +1088,7 @@ export class Enemy {
           } else {
             this.shootTimer = 125 + Math.random() * 45;
             const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle, 2.8));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle, 2.8, this.type));
           }
         }
       }
@@ -1134,7 +1136,7 @@ export class Enemy {
             this.shootTimer = 35 + Math.random() * 20;
           } else {
             this.shootTimer = 95 + Math.random() * 35;
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 10, targetAngle, 3.2));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 10, targetAngle, 3.2, this.type));
           }
         }
       }
@@ -1168,8 +1170,8 @@ export class Enemy {
           } else {
             this.shootTimer = 85 + Math.random() * 35;
             const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle - 0.14, 3.3));
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle + 0.14, 3.3));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle - 0.14, 3.3, this.type));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle + 0.14, 3.3, this.type));
           }
         }
       }
@@ -1973,7 +1975,7 @@ export class Enemy {
 
 // === DÜŞMAN MERMİSİ ===
 export class EnemyProjectile {
-  constructor(x, y, angle, speed) {
+  constructor(x, y, angle, speed, sourceType = null) {
     this.x = x;
     this.y = y;
     this.angle = angle;
@@ -1981,6 +1983,7 @@ export class EnemyProjectile {
     this.vy = Math.sin(angle) * speed;
     this.radius = 4;
     this.toRemove = false;
+    this.sourceType = sourceType || 'projectile';
   }
 
   update(screenWidth, screenHeight, dt = 1.0) {
@@ -2013,7 +2016,15 @@ export class EnemyProjectile {
 
 // === XP / ENERJİ KRİSTALİ ===
 export class Gem {
-  constructor(x, y, value = 1) {
+  constructor(x = 0, y = 0, value = 1, isPoolAlloc = false) {
+    if (!isPoolAlloc && gemPool && gemPool.initialized) {
+      return gemPool.acquire(x, y, value);
+    }
+    this.reset(x, y, value);
+  }
+
+  reset(x = 0, y = 0, value = 1) {
+    this.active = true;
     this.x = x;
     this.y = y;
     this.value = value;
@@ -2025,6 +2036,7 @@ export class Gem {
     this.speedY = 0.55 + Math.random() * 0.3; // Arka planla birlikte yavaş ve akıcı süzülme
     this.vx = 0;
     this.vy = 0;
+    return this;
   }
 
   update(playerX, playerY, magnetDistance, dt = 1.0) {
@@ -2087,6 +2099,15 @@ export class Gem {
     ctx.restore();
   }
 }
+
+// 120 Kapasiteli Gem Havuzunu Başlat
+gemPool.init(Gem);
+Gem.spawn = function(x, y, value = 1) {
+  return gemPool.acquire(x, y, value);
+};
+Gem.release = function(gem) {
+  gemPool.release(gem);
+};
 
 // === DÜŞEN GÜÇLENDİRME KAPSÜLÜ (LOOT / POWER-UP) ===
 export class PowerUp {

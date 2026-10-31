@@ -37,13 +37,26 @@ function test(name, fn) {
 const game = getGame();
 
 // 1. Version Bump Verification
+function isSemverGte(v, target) {
+  const [a1, b1, c1] = (v || '0.0.0').split('.').map(n => parseInt(n, 10) || 0);
+  const [a2, b2, c2] = target.split('.').map(n => parseInt(n, 10) || 0);
+  if (a1 !== a2) return a1 > a2;
+  if (b1 !== b2) return b1 > b2;
+  return c1 >= c2;
+}
+
 test('T1: Version 1.7.1+ and versionCode 48+ in package.json & build.gradle', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
-  assert.ok(['1.7.1', '1.7.2'].includes(pkg.version), 'package.json version must be 1.7.1 or higher');
+  assert.ok(pkg.version && isSemverGte(pkg.version, '1.7.1'), 'package.json version must be 1.7.1 or higher');
 
   const gradle = fs.readFileSync(path.join(rootDir, 'android/app/build.gradle'), 'utf8');
-  assert.ok(gradle.includes('versionCode 48') || gradle.includes('versionCode 49'), 'build.gradle must have versionCode 48 or 49');
-  assert.ok(gradle.includes('versionName "1.7.1"') || gradle.includes('versionName "1.7.2"'), 'build.gradle must have versionName 1.7.1 or 1.7.2');
+  const vcMatch = gradle.match(/versionCode\s+(\d+)/);
+  const vnMatch = gradle.match(/versionName\s+"([^"]+)"/);
+
+  assert.ok(vcMatch, 'versionCode must exist in build.gradle');
+  assert.ok(parseInt(vcMatch[1], 10) >= 48, `build.gradle must have versionCode >= 48 (got ${vcMatch[1]})`);
+  assert.ok(vnMatch, 'versionName must exist in build.gradle');
+  assert.ok(isSemverGte(vnMatch[1], '1.7.1'), `build.gradle must have versionName >= 1.7.1 (got ${vnMatch[1]})`);
 });
 
 // 2. Realistic Jet Banking & Aerodynamic Tilt
