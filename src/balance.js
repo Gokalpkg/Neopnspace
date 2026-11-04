@@ -36,22 +36,83 @@ export const ART_BIBLE_PROMPT_TEMPLATE = {
 export const ECONOMY_FORMULAS = {
   anchorRunSeconds: 90,
   avgCrystalsPerRun: 120,
-  costExponent: 1.22,
-  // Maliyet = TemelFiyat * (1.22)^(Seviye - 1)
-  calcExponentialCost(baseCost, level, mult = 1.22) {
+  costExponent: 1.25,
+  // Maliyet = TemelFiyat * (1.25)^(Seviye - 1)
+  calcExponentialCost(baseCost, level, mult = 1.25) {
     return Math.round(baseCost * Math.pow(mult, Math.max(0, level - 1)));
   },
   // Doğrusal Güç Artışı: Güç = TemelGüç + (Seviye * SabitArtış)
   calcLinearPower(basePower, level, stepPerLevel) {
     return basePower + (level * stepPerLevel);
   },
-  generateCostLadder(baseCost, maxLevel = 10, mult = 1.22) {
+  generateCostLadder(baseCost, maxLevel = 10, mult = 1.25) {
     const ladder = [];
     for (let lvl = 1; lvl <= maxLevel; lvl++) {
       ladder.push(this.calcExponentialCost(baseCost, lvl, mult));
     }
     return ladder;
   }
+};
+
+// === ROGUELITE MATEMATİKSEL İLERLEME VE DENGE MERKEZİ ===
+export const XP_CURVE = {
+  base: 8,
+  linear: 7,
+  gemVariance: [0.7, 1.3],
+  // Vampire Survivors & Survivor.io Kademeli Polinom Modeli:
+  // Seviye 1->2 (8 XP), 2->3 (15 XP), 3->4 (23 XP) ile oyuncuyu ısıtır.
+  // Seviye 4'ten itibaren katlanarak dikleşir (Seviye 5: 64 XP, Seviye 10: 307 XP, Seviye 15: 743 XP).
+  calcLevelXp(level) {
+    if (level <= 1) return 8;
+    if (level === 2) return 15;
+    if (level === 3) return 23;
+    const step = level - 3;
+    return Math.round(23 + step * 12 + Math.pow(step, 1.95) * 4.5);
+  }
+};
+
+export const DIFFICULTY_CURVE = {
+  lin: 0.70,
+  quad: 0.18,
+  stageGrowth: 1.10,
+  calcDifficulty(gameMinutes, stage = 1, isStorm = false) {
+    const m = Math.max(0, gameMinutes);
+    const timeScale = 1 + this.lin * m + this.quad * m * m;
+    const stageScale = isStorm ? 1 : Math.pow(this.stageGrowth, Math.max(0, stage - 1));
+    return timeScale * stageScale;
+  }
+};
+
+export const ENEMY_BASE_HP = {
+  asteroid_s: 5,
+  asteroid_m: 14,
+  asteroid_l: 32,
+  scout: 14,
+  escort_fighter: 22,
+  kamikaze: 16,
+  dive_bomber: 24,
+  tether_drone: 18,
+  cruiser: 75,
+  shield_vanguard: 58,
+  elite_scout: 85,
+  cargo_freighter: 50
+};
+
+export const BOSS_ROSTER_HP = {
+  boss_vanguard: 380,
+  boss_dreadnought: 650,
+  boss_nebula: 980,
+  boss_titan: 1350,
+  boss_chrono: 1800,
+  boss_apex: 2400
+};
+
+export const CARD_RARITY = {
+  normal: 0.72,
+  rare: 0.23,
+  epic: 0.05,
+  rareMult: 1.5,
+  epicLevels: 2
 };
 
 // 6 Geminin Rol, Fiyat Kademesi ve Güç Dengesi (Chrono Apex Zirvede 9.5/10)
@@ -62,8 +123,8 @@ export const SHIP_BALANCE = {
     title: 'Dengeli Çevik Avcı',
     primary: '#00f0ff', secondary: '#ff0077', cockpit: '#ff007f', flame: '#00f0ff',
     cost: 0,
-    stats: { dmg: 105, shield: 100, speed: 110, magnet: 100 },
-    dmgMult: 1.05,
+    stats: { dmg: 100, shield: 100, speed: 110, magnet: 100 },
+    dmgMult: 1.00,
     shieldMult: 1.00,
     speedMult: 1.10,
     magnetMult: 1.00,
@@ -78,8 +139,8 @@ export const SHIP_BALANCE = {
     title: 'Ağır Topçu Kruvazörü',
     primary: '#ffbe0b', secondary: '#ff5722', cockpit: '#ff9100', flame: '#ff3d00',
     cost: 1800,
-    stats: { dmg: 125, shield: 120, speed: 96, magnet: 100 },
-    dmgMult: 1.25,
+    stats: { dmg: 112, shield: 120, speed: 96, magnet: 100 },
+    dmgMult: 1.12,
     shieldMult: 1.20,
     speedMult: 0.96,
     magnetMult: 1.00,
@@ -87,7 +148,7 @@ export const SHIP_BALANCE = {
     solarFlareDmgMult: 1.60,
     solarFlareBaseDmg: 5.5,
     perkTitle: 'GÜNEŞ PATLAMASI',
-    perk: '+%25 Masif Hasar ve +%20 Zırhlı Kalkan! Her 8. atışta alanı yakan dev güneş plazması fırlatır.'
+    perk: '+%12 Hasar ve +%20 Zırhlı Kalkan! Her 8. atışta alanı yakan dev güneş plazması fırlatır.'
   },
   toxic: {
     id: 'toxic',
@@ -95,8 +156,8 @@ export const SHIP_BALANCE = {
     title: 'Hızlı Hasatçı & Biyo-Avcı',
     primary: '#05ffa1', secondary: '#7209b7', cockpit: '#b5179e', flame: '#05ffa1',
     cost: 3400,
-    stats: { dmg: 104, shield: 95, speed: 125, magnet: 160 },
-    dmgMult: 1.04,
+    stats: { dmg: 105, shield: 95, speed: 125, magnet: 160 },
+    dmgMult: 1.05,
     shieldMult: 0.95,
     speedMult: 1.25,
     magnetMult: 1.60,
@@ -110,8 +171,8 @@ export const SHIP_BALANCE = {
     title: 'Alan Kontrol & Tekillik Avcısı',
     primary: '#bf5af2', secondary: '#38bdf8', cockpit: '#f0abfc', flame: '#c084fc',
     cost: 5200,
-    stats: { dmg: 118, shield: 105, speed: 108, magnet: 130 },
-    dmgMult: 1.18,
+    stats: { dmg: 115, shield: 105, speed: 108, magnet: 130 },
+    dmgMult: 1.15,
     shieldMult: 1.05,
     speedMult: 1.08,
     magnetMult: 1.30,
@@ -127,8 +188,8 @@ export const SHIP_BALANCE = {
     title: 'Kuantum Kalkan Siperi',
     primary: '#e0f7fa', secondary: '#00e5ff', cockpit: '#80deea', flame: '#00e5ff',
     cost: 7200,
-    stats: { dmg: 126, shield: 145, speed: 108, magnet: 105 },
-    dmgMult: 1.26,
+    stats: { dmg: 118, shield: 145, speed: 108, magnet: 105 },
+    dmgMult: 1.18,
     shieldMult: 1.45,
     speedMult: 1.08,
     magnetMult: 1.05,
@@ -144,8 +205,8 @@ export const SHIP_BALANCE = {
     title: 'Altın Zaman Taktisyeni (Zirve Kruvazör)',
     primary: '#ffd700', secondary: '#ffffff', cockpit: '#fef08a', flame: '#ffbe0b',
     cost: 9600,
-    stats: { dmg: 155, shield: 125, speed: 115, magnet: 135 },
-    dmgMult: 1.55,
+    stats: { dmg: 130, shield: 125, speed: 115, magnet: 135 },
+    dmgMult: 1.30,
     shieldMult: 1.25,
     speedMult: 1.15,
     magnetMult: 1.35,
@@ -153,92 +214,92 @@ export const SHIP_BALANCE = {
     chronoFreezeFrames: 78,
     chronoFreezeDurationFrames: 78,
     perkTitle: 'KRONO SÜPERNOVA (APEX)',
-    perk: '+%55 Üstün Hasar! Sekmeli 3 altın testere çakramı atar ve her 8 sn tüm sahayı 1.3 sn dondurur.'
+    perk: '+%30 Üstün Hasar! Sekmeli 3 altın testere çakramı atar ve her 8 sn tüm sahayı 1.3 sn dondurur.'
   }
 };
 
 // Atölye (Tech Workshop) Hissedilir Güç Artışı & Üstel Maliyet Tablosu
-// Mikro +%2.5'lik zayıf artışlar yerine oyuncunun anında hissedeceği anlamlı kademeler
+// Çaylak dostu başlangıç (50 Kristal): İlk elde ölen oyuncu bile en az 1 kalıcı yükseltme alabilir!
 export const TECH_WORKSHOP_CONFIG = {
   damageBoost: {
-    baseCost: 90,
-    costMult: 1.22,
+    baseCost: 50,
+    costMult: 1.25,
     maxLevel: 10,
-    stepPct: 12, // Her seviyede +%12 Hasar (Max +%120)
-    perLevelMult: 0.12,
-    costs: ECONOMY_FORMULAS.generateCostLadder(90, 10, 1.22),
-    scoreImpact: '+%12'
+    stepPct: 6, // Her seviyede +%6 Hasar (Max +%60)
+    perLevelMult: 0.06,
+    costs: ECONOMY_FORMULAS.generateCostLadder(50, 10, 1.25),
+    scoreImpact: '+%6'
   },
   critChance: {
-    baseCost: 95,
-    costMult: 1.22,
+    baseCost: 60,
+    costMult: 1.25,
     maxLevel: 10,
-    stepPct: 4, // Her seviyede +%4 Kritik Şansı
-    perLevelAdd: 0.04,
-    costs: ECONOMY_FORMULAS.generateCostLadder(95, 10, 1.22),
-    scoreImpact: '+%4'
+    stepPct: 3, // Her seviyede +%3 Kritik Şansı (Max +%30)
+    perLevelAdd: 0.03,
+    costs: ECONOMY_FORMULAS.generateCostLadder(60, 10, 1.25),
+    scoreImpact: '+%3'
   },
   shieldMax: {
-    baseCost: 80,
-    costMult: 1.22,
+    baseCost: 45,
+    costMult: 1.25,
     maxLevel: 10,
     stepFlat: 15, // Her seviyede +15 Kalkan
     perLevelFlat: 15,
-    costs: ECONOMY_FORMULAS.generateCostLadder(80, 10, 1.22),
+    costs: ECONOMY_FORMULAS.generateCostLadder(45, 10, 1.25),
     scoreImpact: '+15s'
   },
   hullMax: {
-    baseCost: 75,
-    costMult: 1.22,
+    baseCost: 40,
+    costMult: 1.25,
     maxLevel: 10,
     stepFlat: 20, // Her seviyede +20 Maksimum Gövde Canı
     perLevelFlat: 20,
-    costs: ECONOMY_FORMULAS.generateCostLadder(75, 10, 1.22),
+    costs: ECONOMY_FORMULAS.generateCostLadder(40, 10, 1.25),
     scoreImpact: '+20'
   },
   magnet: {
-    baseCost: 65,
-    costMult: 1.22,
+    baseCost: 40,
+    costMult: 1.25,
     maxLevel: 8,
     stepFlat: 18, // Her seviyede +18px Çekim Alanı
     perLevelFlat: 18,
-    costs: ECONOMY_FORMULAS.generateCostLadder(65, 8, 1.22),
+    costs: ECONOMY_FORMULAS.generateCostLadder(40, 8, 1.25),
     scoreImpact: '+18'
   },
   crystalBoost: {
-    baseCost: 120,
-    costMult: 1.22,
+    baseCost: 70,
+    costMult: 1.25,
     maxLevel: 8,
-    stepPct: 12, // Her seviyede +%12 Kristal Kazancı
-    perLevelMult: 0.12,
-    costs: ECONOMY_FORMULAS.generateCostLadder(120, 8, 1.22),
-    scoreImpact: '+%12'
+    stepPct: 8, // Her seviyede +%8 Kristal Kazancı
+    perLevelMult: 0.08,
+    costs: ECONOMY_FORMULAS.generateCostLadder(70, 8, 1.25),
+    scoreImpact: '+%8'
   },
   reactorCharge: {
-    baseCost: 110,
-    costMult: 1.22,
+    baseCost: 65,
+    costMult: 1.25,
     maxLevel: 6,
-    stepPct: 12, // Her seviyede +%12 Overdrive Şarj Hızı
-    perLevelMult: 0.12,
-    costs: ECONOMY_FORMULAS.generateCostLadder(110, 6, 1.22),
-    scoreImpact: '+%12'
+    stepPct: 10, // Her seviyede +%10 Overdrive Şarj Hızı
+    perLevelMult: 0.10,
+    costs: ECONOMY_FORMULAS.generateCostLadder(65, 6, 1.25),
+    scoreImpact: '+%10'
   },
   rerollCount: {
-    baseCost: 220,
+    baseCost: 150,
     costMult: 1.65,
     maxLevel: 4,
     stepFlat: 1, // Her seviyede +1 Kart Yenileme (Reroll)
     perLevelFlat: 1,
-    costs: [220, 580, 1450, 3600],
+    costs: [150, 400, 1000, 2500],
     scoreImpact: '+1 ZAR'
   },
   phoenix: {
-    baseCost: 850,
+    baseCost: 500,
     costMult: 1.0,
     maxLevel: 3,
     stepFlat: 1,
     perLevelFlat: 1,
-    costs: [850, 2600, 6800],
+    costs: [500, 1800, 4500],
     scoreImpact: '+1 CAN'
   }
 };

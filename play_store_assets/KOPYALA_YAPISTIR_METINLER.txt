@@ -1,40 +1,69 @@
 ====================================================================
-NEON SPACE SURVIVOR - GOOGLE PLAY STORE KOPYALA-YAPISTIR METINLERI
+NEON SPACE SURVIVOR - GOOGLE PLAY STORE ASO OPTİMİZASYON METİNLERİ
 ====================================================================
 
+--- [ TÜRKÇE (tr-TR) ] ---
+
 1. UYGULAMA ADI (Title - Maks 30 Karakter):
-Neon Space Survivor
+Neon Space: Uzay Savaşı Oyunu
+(Karakter Sayısı: 29 / 30)
+
+2. KISA AÇIKLAMA (Short Description - Maks 80 Karakter):
+Kozmik uzay savaşı! Gemini geliştir, uzaylı filolarını yok et ve hayatta kal!
+(Karakter Sayısı: 78 / 80)
+
+3. TAM AÇIKLAMA (Full Description - Maks 4000 Karakter):
+Neon Space: Uzay Savaşı Oyunu ile retro-fütüristik, neon ışıklı kozmik bir uzay savaşı ve hayatta kalma mücadelesine hazır olun!
+
+Galaksinin derinliklerinde acımasız uzaylı filoları ve devasa amiral gemileri üzerinize akın ediyor. Uzay geminizi geliştirin, ölümcül silah sinerjilerini keşfedin, mermi yağmurundan sıyrılın ve sonsuz uzay dalgalarına karşı hayatta kalın!
+
+Retro arcade shoot 'em up (shmup) mekanikleri ile modern roguelite survivor dinamiklerini birleştiren bu uzay oyunu, adrenalini en üst seviyeye taşıyor.
+
+🚀 ÖNE ÇIKAN OYUN ÖZELLİKLERİ:
+
+★ Yoğun Rogue-lite Uzay Savaşı: Her uçuşta rastgele kart seçimleri, yüzlerce farklı yetenek kombinasyonu ve taktiksel savaş manevraları.
+★ 10 Efsanevi Silah Evrimi: Plazma Lazeri, Güdümlü Mikro-Füzeler, EMP Şok Dalgası, Tesla Fırtınası, Süpernova ve Kuantum Bombası gibi ölümcül teknolojileri birleştirin!
+★ Devasa Boss Savaşları: Her sektörün sonunda bekleyen komutan gemileri ve zırhlı bosslara karşı reflekslerinizi test edin.
+★ Hangar & Kalıcı Uzay Gemisi Yükseltmeleri: Kazandığınız kristallerle geminizin gövdesini, kalkanını, motor hızını ve hasar gücünü kalıcı olarak güçlendirin.
+★ Farklı Uzay Gemisi Sınıfları: Saldırı Avcısı (Interceptor), Ağır Zırhlı Kruvazör (Dreadnought), Hızlı Hayalet (Phantom) ve Taktiksel Teknisyen sınıflarından tarzınıza uygun olanı seçin.
+★ Şanslı Ganimet Sandıkları: Bossları alt ederek kuantum uzay sandıklarını açın, efsanevi yükseltmeleri ve nadir ödülleri toplayın!
+★ Küresel Liderlik Tablosu: Dünya çapındaki diğer pilotlarla yarışın, rekor kırarak Apex Ligi zirvesine adınızı yazdırın!
+★ İnternetsiz Oynama Desteği (Offline): İnternet bağlantınız olmasa bile her yerde kesintisiz uzay savaşı deneyimi yaşayın.
+★ Görsel & İşitsel Şölen: Büyüleyici retro neon cyberpunk piksel efektleri, dinamik titreşim (haptics) ve synthwave müzikler.
+
+Uzay boşluğunda hayatta kalabilecek misin? Hemen indir, motorları ateşle ve galaksinin en büyük uzay savaşına katıl!
+
 
 --------------------------------------------------------------------
-2. KISA ACIKLAMA (Short Description - Maks 80 Karakter):
-Neon uzay derinliklerinde hayatta kal, filoları yok et ve gemini geliştir!
+--- [ İNGİLİZCE (en-US) ] ---
 
---------------------------------------------------------------------
-3. TAM ACIKLAMA (Full Description):
-Neon Space Survivor ile retro-fütüristik ve neon ışıklı kozmik bir hayatta kalma mücadelesine hazır olun!
+1. APP TITLE (Title - Max 30 Chars):
+Neon Space: Space Shooter Game
+(Character Count: 30 / 30)
 
-Uzayın derinliklerinde acımasız düşman filoları ve devasa amiral gemileri üzerinize akın ediyor. Geminizi geliştirin, ölümcül silah sinerjilerini keşfedin ve sonsuz uzay dalgalarına karşı hayatta kalın!
+2. SHORT DESCRIPTION (Short Description - Max 80 Chars):
+Epic retro space shooter! Upgrade your starship, defeat aliens & survive!
+(Character Count: 74 / 80)
 
-ÖNE ÇIKAN OYUN ÖZELLİKLERİ:
-⚡ Yoğun Rogue-lite Aksiyonu: Her koşuda farklı yetenek kombinasyonları ve dinamik savaş taktikleri.
-🚀 Güçlü Silah Evrimleri: Plazma Lazeri, Güdümlü Mikro-Füzeler, EMP Şok Dalgaları ve Tesla Fırtınası.
-🌌 Efsanevi Boss Savaşları: Devasa amiral gemilerine karşı taktiksel kaçışlar ve nihai saldırılar.
-💎 Hangar & Kalıcı Geliştirmeler: Kazandığınız kristallerle geminizin zırhını, hızını ve teknolojisini kalıcı olarak yükseltin.
-🎁 Şanslı Uzay Sandıkları: Bossları yenerek gizemli uzay sandıklarını açın, efsanevi yükseltmeleri ve nadir ganimetleri toplayın!
-🎵 Retro Synthwave Atmosferi: Büyüleyici neon görseller, synthwave müzikler ve tatmin edici patlama efektleri.
+3. FULL DESCRIPTION (Full Description - Max 4000 Chars):
+Prepare for an intense retro-futuristic cosmic battle with Neon Space: Space Shooter Game! 
 
-Neon evreninde hayatta kalabilecek misin? Hemen indir, motorları ateşle ve savaşa katıl!
+Deep in uncharted neon galaxies, relentless alien fleets and massive flagship commanders are swarming your sector. Upgrade your starship, unlock devastating weapon synergy evolutions, dodge intense bullet hell waves, and survive the endless cosmic storm!
 
---------------------------------------------------------------------
-4. GIZLILIK POLITIKASI LINKI (Privacy Policy URL):
-https://gokalpkg.github.io/Neopnspace/privacy-policy.html
+Combining classic arcade shoot 'em up (shmup) action with modern roguelite survivor depth, Neon Space delivers pure adrenaline-fueled space combat.
 
---------------------------------------------------------------------
-5. DIJITAL IMZA VE SURUM BILGILERI:
-Paket: app-release.aab (16.3 MB)
-Keystore: android/app/neon-release-key.jks
-Alias: neonkey
-Sifre: NeonSurvivor2026!
-Target SDK: 35 (Android 15)
-Min SDK: 23 (Android 6.0+)
+🚀 KEY GAME FEATURES:
+
+★ Intense Rogue-lite Space Action: Dynamic card upgrades and tactical build paths make every single flight unique.
+★ 10 Epic Weapon Evolutions: Forge game-changing fusions including Hyper Plasma, Supernova Barrage, Tesla Chain, Void Singularity, and Quantum Overdrive!
+★ Colossal Boss Battles: Face off against intimidating flagship dreadnoughts and test your reflexes against bullet hell patterns.
+★ Deep Hangar Progression: Collect crystals to permanently upgrade your hull health, energy shields, thruster speed, and damage output.
+★ 4 Unique Starship Classes: Master distinct archetypes including the Interceptor, Heavy Dreadnought, Phantom Cloaker, and Tactical Engineer.
+★ Lucky Quantum Chests: Defeat wave bosses to claim mystery loot crates packed with legendary tech and crystal jackpots!
+★ Global Leaderboards: Compete with pilots worldwide across Storm and Campaign modes to reach the Cosmic Apex rank!
+★ Offline Play Support: Enjoy full-throttle space battles anywhere, anytime—no internet connection required.
+★ Retro Cyberpunk Atmosphere: Dazzling neon pixel VFX, crisp haptic feedback, and an energetic synthwave soundtrack.
+
+Can you survive the cosmic abyss? Download Neon Space now, ignite your thrusters, and conquer the galaxy!
+
 ====================================================================

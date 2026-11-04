@@ -387,11 +387,14 @@ test('F8.5: Rapid double-tap on #btn-ad-revive triggers only 1 revive and increm
 });
 
 test('F8.6: Upgrading via lower revenge card immediately updates primary #btn-restart CTA', () => {
+  // Start with 55 CR. In gameOver(), 25 CR consolation bonus is awarded (55 + 25 = 80 CR).
   resetLocalStorage({
-    neon_total_crystals: 80,
+    neon_total_crystals: 55,
     neon_tech_upgrades: { hullMax: 0, shieldMax: 0, damageBoost: 0, magnet: 0 }
   });
-  game.totalCrystals = 80;
+  game.totalCrystals = 55;
+  game.crystalReward = 0;
+  if (game.player) game.player.crystals = 0;
   game.techUpgrades = { hullMax: 0, shieldMax: 0, damageBoost: 0, magnet: 0 };
 
   game.gameOver();

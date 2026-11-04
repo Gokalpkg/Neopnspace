@@ -1,6 +1,7 @@
 // === DÜŞMANLAR, METEORLAR, XP KRİSTALLERİ & MERMİLER ===
 import { t } from './i18n.js';
 import { gemPool } from './pool-manager.js';
+import { ENEMY_BASE_HP, BOSS_ROSTER_HP } from './balance.js';
 
 export const BOSS_ROSTER = {
   boss_vanguard: {
@@ -12,7 +13,7 @@ export const BOSS_ROSTER = {
     enragedColor: '#ff5500',
     coreColor: '#00f0ff',
     radius: 38,
-    baseHp: 580,
+    baseHp: BOSS_ROSTER_HP.boss_vanguard,
     speedX: 1.45,
     score: 1200
   },
@@ -25,7 +26,7 @@ export const BOSS_ROSTER = {
     enragedColor: '#ff1744',
     coreColor: '#ffbe0b',
     radius: 52,
-    baseHp: 950,
+    baseHp: BOSS_ROSTER_HP.boss_dreadnought,
     speedX: 1.15,
     score: 2500
   },
@@ -38,7 +39,7 @@ export const BOSS_ROSTER = {
     enragedColor: '#bf5af2',
     coreColor: '#05ffa1',
     radius: 56,
-    baseHp: 1380,
+    baseHp: BOSS_ROSTER_HP.boss_nebula,
     speedX: 1.25,
     score: 3400
   },
@@ -51,7 +52,7 @@ export const BOSS_ROSTER = {
     enragedColor: '#10b981',
     coreColor: '#f59e0b',
     radius: 55,
-    baseHp: 1850,
+    baseHp: BOSS_ROSTER_HP.boss_titan,
     speedX: 1.2,
     score: 4200
   },
@@ -64,7 +65,7 @@ export const BOSS_ROSTER = {
     enragedColor: '#ff5500',
     coreColor: '#ffffff',
     radius: 58,
-    baseHp: 2400,
+    baseHp: BOSS_ROSTER_HP.boss_chrono,
     speedX: 1.35,
     score: 5200
   },
@@ -77,7 +78,7 @@ export const BOSS_ROSTER = {
     enragedColor: '#f43f5e',
     coreColor: '#38bdf8',
     radius: 60,
-    baseHp: 3100,
+    baseHp: BOSS_ROSTER_HP.boss_apex,
     speedX: 1.45,
     score: 7000
   }
@@ -402,7 +403,7 @@ export class Enemy {
     switch (type) {
       case 'asteroid_l':
         this.radius = 28;
-        this.hp = Math.round(9 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.asteroid_l * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (0.60 + Math.random() * 0.30) * speedMultiplier;
         this.speedX = (Math.random() - 0.5) * 0.35 * speedMultiplier;
@@ -415,7 +416,7 @@ export class Enemy {
 
       case 'asteroid_m':
         this.radius = 18;
-        this.hp = Math.round(3.5 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.asteroid_m * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (0.75 + Math.random() * 0.35) * speedMultiplier;
         this.speedX = (Math.random() - 0.5) * 0.45 * speedMultiplier;
@@ -428,7 +429,7 @@ export class Enemy {
 
       case 'asteroid_s':
         this.radius = 12;
-        this.hp = Math.round(1.5 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.asteroid_s * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (0.80 + Math.random() * 0.35) * speedMultiplier;
         this.speedX = (Math.random() - 0.5) * 0.5 * speedMultiplier;
@@ -441,7 +442,7 @@ export class Enemy {
 
       case 'scout':
         this.radius = 14;
-        this.hp = Math.round(18 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.scout * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (1.25 + Math.random() * 0.3) * speedMultiplier;
         this.speedX = 0;
@@ -456,7 +457,7 @@ export class Enemy {
 
       case 'cruiser':
         this.radius = 24;
-        this.hp = Math.round(70 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.cruiser * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = 0.65 * speedMultiplier;
         this.speedX = (Math.random() < 0.5 ? -1 : 1) * 0.42 * speedMultiplier;
@@ -468,7 +469,7 @@ export class Enemy {
 
       case 'kamikaze':
         this.radius = 16;
-        this.hp = Math.round(18 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.kamikaze * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = 1.6 * (speedMultiplier || 1.0);
         this.speedX = 0;
@@ -497,7 +498,7 @@ export class Enemy {
 
       case 'cargo_freighter':
         this.radius = 26;
-        this.hp = Math.round(28 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.cargo_freighter * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (0.55 + Math.random() * 0.20) * speedMultiplier;
         this.speedX = (Math.random() < 0.5 ? -1 : 1) * 0.45 * speedMultiplier;
@@ -639,7 +640,7 @@ export class Enemy {
 
       case 'shield_vanguard':
         this.radius = 20;
-        this.hp = Math.round(44 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.shield_vanguard * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = 0.85 * speedMultiplier;
         this.speedX = (Math.random() - 0.5) * 0.3 * speedMultiplier;
@@ -652,7 +653,7 @@ export class Enemy {
 
       case 'tether_drone':
         this.radius = 16;
-        this.hp = Math.round(18 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.tether_drone * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = 0.88 * speedMultiplier;
         this.speedX = 0;
@@ -666,7 +667,7 @@ export class Enemy {
 
       case 'dive_bomber':
         this.radius = 14;
-        this.hp = Math.round(16 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.dive_bomber * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = 1.4 * (speedMultiplier || 1.0);
         this.speedX = 0;
@@ -681,7 +682,7 @@ export class Enemy {
 
       case 'escort_fighter':
         this.radius = 13;
-        this.hp = Math.round(14 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.escort_fighter * waveMultiplier);
         this.maxHp = this.hp;
         this.speed = 2.1 * speedMultiplier;
         this.color = '#00f0ff';
@@ -693,7 +694,7 @@ export class Enemy {
 
       case 'elite_scout':
         this.radius = 18;
-        this.hp = Math.round(58 * waveMultiplier);
+        this.hp = Math.round(ENEMY_BASE_HP.elite_scout * waveMultiplier);
         this.maxHp = this.hp;
         this.speedY = (0.75 + Math.random() * 0.25) * speedMultiplier;
         this.speedX = 0;
@@ -807,20 +808,7 @@ export class Enemy {
       } else if (this.y < 70 && this.speedY < 0) {
         this.speedY = Math.abs(this.speedY);
       }
-
-      if (this.y > 20 && enemyProjectiles) {
-        this.shootTimer = (this.shootTimer || 120) - dt;
-        if (this.shootTimer <= 0) {
-          // Ekranda çok mermi varsa bekle, oyuncuyu mermi cehennemine boğma
-          if (enemyProjectiles.length >= 36) {
-            this.shootTimer = 35 + Math.random() * 25;
-          } else {
-            this.shootTimer = this.isFleetMember ? (115 + Math.random() * 45) : (145 + Math.random() * 55);
-            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 12, aimAngle, 2.8, this.type));
-          }
-        }
-      }
+      // DİKKAT: Standart avcılar (scout) mermi atmaz; yalnızca sürü baskısı ve manevra sıkıştırması yapar.
     } else if (this.type === 'kamikaze') {
       this.lifeTimer = (this.lifeTimer || 0) + dt;
       if (!this.charging) {
@@ -1049,7 +1037,7 @@ export class Enemy {
       this.y += this.speedY * dt;
       this.x += this.speedX * dt;
 
-      // Kruvazör: Üst-orta savaş bölgesinde kalır, manevra yapar ve oyuncuya üçlü plazma yaylım ateşi açar
+      // Kruvazör: Üst-orta savaş bölgesinde kalır, manevra yapar ve oyuncuya telgraflı plazma yaylım ateşi açar
       if (this.y > screenHeight * 0.44 && this.speedY > 0) {
         this.speedY = -Math.abs(this.speedY);
       } else if (this.y < 75 && this.speedY < 0) {
@@ -1057,15 +1045,16 @@ export class Enemy {
       }
 
       if (this.y > 25 && enemyProjectiles) {
-        this.shootTimer = (this.shootTimer || 100) - dt;
+        this.shootTimer = (this.shootTimer || 180) - dt;
+        this.isTelegraphing = (this.shootTimer <= 36 && this.shootTimer > 0);
+        this.targetAngle = Math.atan2(playerY - this.y, playerX - this.x);
         if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 36) {
-            this.shootTimer = 40 + Math.random() * 25;
+          if (enemyProjectiles.length >= 24) {
+            this.shootTimer = 60 + Math.random() * 30;
           } else {
-            this.shootTimer = 130 + Math.random() * 40;
-            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
-            for (let offset of [-0.15, 0, 0.15]) {
-              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, aimAngle + offset, 2.9, this.type));
+            this.shootTimer = 240 + Math.random() * 60; // 4 - 5 saniye yeniden dolum
+            for (let offset of [-0.14, 0, 0.14]) {
+              enemyProjectiles.push(new EnemyProjectile(this.x + offset * 18, this.y + 18, this.targetAngle + offset, 2.4, this.type));
             }
           }
         }
@@ -1081,14 +1070,15 @@ export class Enemy {
         }
       }
       if (this.y > 25 && enemyProjectiles) {
-        this.shootTimer = (this.shootTimer || 100) - dt;
+        this.shootTimer = (this.shootTimer || 220) - dt;
+        this.isTelegraphing = (this.shootTimer <= 36 && this.shootTimer > 0);
+        this.targetAngle = Math.atan2(playerY - this.y, playerX - this.x);
         if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 36) {
-            this.shootTimer = 40 + Math.random() * 25;
+          if (enemyProjectiles.length >= 24) {
+            this.shootTimer = 60 + Math.random() * 30;
           } else {
-            this.shootTimer = 125 + Math.random() * 45;
-            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle, 2.8, this.type));
+            this.shootTimer = 260 + Math.random() * 60; // 4.3 - 5.3 saniye yeniden dolum
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, this.targetAngle, 2.2, this.type));
           }
         }
       }
@@ -1119,7 +1109,7 @@ export class Enemy {
       }
     } else if (this.type === 'escort_fighter') {
       this.lifeTimer = (this.lifeTimer || 0) + dt;
-      // Güdümlü Boss Muhafızı: Oyuncunun yönüne doğru yumuşak kavisle döner ve takip eder
+      // Güdümlü Muhafız / Sürü Avcısı: Oyuncunun yönüne doğru süzülür, mermi atmaz
       const targetAngle = Math.atan2(playerY - this.y, playerX - this.x);
       let diff = targetAngle - this.angle;
       while (diff < -Math.PI) diff += Math.PI * 2;
@@ -1128,18 +1118,6 @@ export class Enemy {
 
       this.x += Math.cos(this.angle) * this.speed * dt;
       this.y += Math.sin(this.angle) * this.speed * dt;
-
-      if (this.y > 30 && enemyProjectiles) {
-        this.shootTimer = (this.shootTimer || 80) - dt;
-        if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 36) {
-            this.shootTimer = 35 + Math.random() * 20;
-          } else {
-            this.shootTimer = 95 + Math.random() * 35;
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 10, targetAngle, 3.2, this.type));
-          }
-        }
-      }
 
       // Ekran altına kaçamaz, oyuncunun etrafında döner ama sonsuza kadar takılmaz
       if (this.y > screenHeight - 65) {
@@ -1150,7 +1128,7 @@ export class Enemy {
         this.toRemove = true;
       }
     } else if (this.type === 'elite_scout') {
-      // Altın Elit Avcı / Filo Komutanı: Sinüsoidal süzülme ve nişancı atışı
+      // Altın Elit Avcı: Sinüsoidal süzülme ve telgraflı ikili mermi
       this.time += dt;
       this.x += Math.sin(this.time * this.sineFreq) * this.sineAmp * dt;
       this.y += this.speedY * dt;
@@ -1163,15 +1141,16 @@ export class Enemy {
       }
 
       if (this.y > 20 && enemyProjectiles) {
-        this.shootTimer = (this.shootTimer || 70) - dt;
+        this.shootTimer = (this.shootTimer || 200) - dt;
+        this.isTelegraphing = (this.shootTimer <= 36 && this.shootTimer > 0);
+        this.targetAngle = Math.atan2(playerY - this.y, playerX - this.x);
         if (this.shootTimer <= 0) {
-          if (enemyProjectiles.length >= 36) {
-            this.shootTimer = 30 + Math.random() * 25;
+          if (enemyProjectiles.length >= 24) {
+            this.shootTimer = 50 + Math.random() * 25;
           } else {
-            this.shootTimer = 85 + Math.random() * 35;
-            const aimAngle = Math.atan2(playerY - this.y, playerX - this.x);
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle - 0.14, 3.3, this.type));
-            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, aimAngle + 0.14, 3.3, this.type));
+            this.shootTimer = 220 + Math.random() * 50; // 3.6 - 4.5 saniye yeniden dolum
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, this.targetAngle - 0.12, 2.5, this.type));
+            enemyProjectiles.push(new EnemyProjectile(this.x, this.y + 14, this.targetAngle + 0.12, 2.5, this.type));
           }
         }
       }
@@ -1235,6 +1214,27 @@ export class Enemy {
       ctx.beginPath();
       ctx.arc(0, 0, this.radius + 4, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.restore();
+    }
+
+    // Telgraflı Nişan Lazeri (Telegraphed Aiming Laser - Düşman ateş etmeden önce 0.6 sn kırmızı kesikli uyarı çizgisi çizer)
+    if (this.isTelegraphing && this.targetAngle !== undefined) {
+      const alpha = Math.min(0.85, 0.35 + (36 - (this.shootTimer || 0)) / 36 * 0.5);
+      ctx.save();
+      ctx.strokeStyle = `rgba(255, 0, 85, ${alpha})`;
+      ctx.lineWidth = 1.6;
+      if (ctx.setLineDash) ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      const lineLen = 380;
+      ctx.lineTo(Math.cos(this.targetAngle) * lineLen, Math.sin(this.targetAngle) * lineLen);
+      ctx.stroke();
+      if (ctx.setLineDash) ctx.setLineDash([]);
+      // Namlu ağzında uyarı kıvılcımı
+      ctx.fillStyle = '#ff0055';
+      ctx.beginPath();
+      ctx.arc(0, this.radius * 0.7, 3.5, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     }
 

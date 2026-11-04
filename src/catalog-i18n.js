@@ -507,7 +507,7 @@ const RAW = {
   bonus_overdrive_name: row('Cyber Overload', 'Siber Aşırı Yükleme', 'Surcharge cyber', 'Cyber-Überlast', '赛博过载', '賽博過載', 'サイバー過負荷'),
   bonus_overdrive_desc: row('The core strains. Permanent +6% damage.', 'Reaktör zorlanır. Kalıcı +%6 hasar.', 'Le cœur force. +6% de dégâts permanents.', 'Der Kern wird belastet. Dauerhaft +6% Schaden.', '反应堆过载。永久 +6% 伤害。', '反應堆過載。永久 +6% 傷害。', '炉心が過負荷。恒久ダメージ+6%。'),
   bonus_overdrive_stat: row('+6% DAMAGE', '+%6 HASAR', '+6% DÉGÂTS', '+6% SCHADEN', '+6% 伤害', '+6% 傷害', '+6% ダメージ'),
-  share_line: row('[NEON SPACE] I scored {score} ({mode}).', '[NEON SPACE] {score} puan ({mode}).', '[NEON SPACE] {score} points ({mode}).', '[NEON SPACE] {score} Punkte ({mode}).', '[NEON SPACE] {score} 分（{mode}）。', '[NEON SPACE] {score} 分（{mode}）。', '[NEON SPACE] {score}点（{mode}）。'),
+  share_line: row('[NEON GALAXY] I scored {score} ({mode}).', '[NEON GALAXY] {score} puan ({mode}).', '[NEON GALAXY] {score} points ({mode}).', '[NEON GALAXY] {score} Punkte ({mode}).', '[NEON GALAXY] {score} 分（{mode}）。', '[NEON GALAXY] {score} 分（{mode}）。', '[NEON GALAXY] {score}点（{mode}）。'),
   share_copied: row('SCORE COPIED', 'SKOR KOPYALANDI', 'SCORE COPIÉ', 'PUNKTZAHL KOPIERT', '分数已复制', '分數已複製', 'スコアをコピー'),
   rec_device: row('THIS DEVICE', 'BU CİHAZ', 'CET APPAREIL', 'DIESES GERÄT', '本机', '本機', 'この端末'),
   rec_local_hint: row('Records stay on this device. There is no global rank.', 'Kayıtlar bu cihazda durur. Küresel sıra yok.', 'Les records restent sur cet appareil.', 'Rekorde bleiben auf diesem Gerät.', '记录只在本机，没有全球排名。', '記錄只在本機，沒有全球排名。', '記録はこの端末だけ。世界順位はない。'),

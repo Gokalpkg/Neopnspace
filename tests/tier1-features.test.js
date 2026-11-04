@@ -53,17 +53,17 @@ export async function runTier1Tests() {
   });
 
   // --------------------------------------------------------------------------
-  // Feature 2: XP Pacing Thresholds (Level 1=24, Level 2=48, Level 3=96 XP)
+  // Feature 2: Quadratic XP Progression Pacing (Level 1=8, Level 2=15, Level 3=23 XP)
   // --------------------------------------------------------------------------
-  test('T1.2: XP Pacing Calibration matches requirements (24 / 48 / 96 XP)', () => {
+  test('T1.2: XP Pacing Calibration matches requirements (8 / 15 / 23 XP)', () => {
     assert.equal(typeof game.getNextLevelXp, 'function', 'game.getNextLevelXp must be a function');
     const xpLvl1 = game.getNextLevelXp(1);
     const xpLvl2 = game.getNextLevelXp(2);
     const xpLvl3 = game.getNextLevelXp(3);
 
-    assert.equal(xpLvl1, 24, `Level 1 XP threshold must be 24 XP (got ${xpLvl1})`);
-    assert.equal(xpLvl2, 48, `Level 2 XP threshold must be 48 XP (got ${xpLvl2})`);
-    assert.equal(xpLvl3, 96, `Level 3 XP threshold must be 96 XP (got ${xpLvl3})`);
+    assert.equal(xpLvl1, 8, `Level 1 XP threshold must be 8 XP (got ${xpLvl1})`);
+    assert.equal(xpLvl2, 15, `Level 2 XP threshold must be 15 XP (got ${xpLvl2})`);
+    assert.equal(xpLvl3, 23, `Level 3 XP threshold must be 23 XP (got ${xpLvl3})`);
   });
 
   // --------------------------------------------------------------------------

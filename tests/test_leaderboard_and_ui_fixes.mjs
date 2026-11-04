@@ -58,8 +58,8 @@ assert(css.includes('0 3px 0 #0284c7'), 'Hero title should have crisp pixel drop
 console.log('  [PASS] 2.1: NEON SPACE SURVIVOR title has 0 webkit-background-clip glitch artifacts & pure pixel shadows');
 
 // Test 6: Showcase and center controls flex-shrink safety (no overlap)
-assert(css.includes('.menu-ship-showcase {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  width: 100%;\n  max-width: 440px;\n  margin: 6px auto 8px auto;\n  pointer-events: auto;\n  min-height: auto;\n  flex-shrink: 0;'), 'menu-ship-showcase must have flex-shrink: 0 and no squashing min-height');
-assert(css.includes('.menu-center-controls {\n  width: 100%;\n  max-width: 440px;\n  margin: 6px auto 10px auto;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  pointer-events: auto;\n  flex-shrink: 0;'), 'menu-center-controls must have flex-shrink: 0');
+assert(css.includes('.menu-ship-showcase {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  width: 100%;\n  max-width: 440px;\n  margin: auto auto 10px auto;\n  pointer-events: auto;\n  min-height: auto;\n  flex-shrink: 0;'), 'menu-ship-showcase must have flex-shrink: 0 and no squashing min-height');
+assert(css.includes('.menu-center-controls {\n  width: 100%;\n  max-width: 440px;\n  margin: 0 auto 10px auto;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  pointer-events: auto;\n  flex-shrink: 0;'), 'menu-center-controls must have flex-shrink: 0');
 console.log('  [PASS] 2.2: Menu ship showcase and mode controls have explicit flex-shrink: 0 preventing any physical overlap');
 
 // Test 7: Game Over Restart button is prominent, spacious and contains TEKRAR OYNA

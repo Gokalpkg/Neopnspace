@@ -6,7 +6,7 @@ import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
 import { gemPool, PoolManager } from './pool-manager.js';
 import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslationsToDOM } from './i18n.js';
 import { analytics } from './analytics.js';
-import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE, PLAYER_BASE_CONFIG, DROP_RATES, HYPER_MODE_CONFIG } from './balance.js';
+import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE, PLAYER_BASE_CONFIG, DROP_RATES, HYPER_MODE_CONFIG, XP_CURVE, DIFFICULTY_CURVE, CARD_RARITY, ENEMY_BASE_HP, BOSS_ROSTER_HP } from './balance.js';
 import { EventBus } from './events.js';
 import { ChestVfxController, LegendaryChestOverlay } from './chest-vfx-controller.js';
 import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, updatePlayerProfileInFirestore, PGS_CONFIG, getPlayerUid, unlockPlayGamesAchievement, incrementPlayGamesAchievement, showPlayGamesAchievements } from './leaderboard.js';
@@ -1161,6 +1161,10 @@ class Game {
       if (ctx.resetTransform) ctx.resetTransform();
       else ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
+      ctx.imageSmoothingEnabled = false;
+      if (typeof ctx.webkitImageSmoothingEnabled !== 'undefined') {
+        ctx.webkitImageSmoothingEnabled = false;
+      }
     }
     this.particles.initStars(this.width, this.height);
     this.particles.setSector(this.currentSectorId || 'void', this.width, this.height);
@@ -1279,16 +1283,26 @@ class Game {
     });
 
     if (luckyChestModal) {
-      luckyChestModal.addEventListener('touchstart', (e) => {
+      const handleChestModalTap = (e) => {
         if (this.chestVfx && this.chestVfx.active && this.state === 'LUCKY_CHEST') {
           const tgt = e.target;
           const isActionBtn = tgt && tgt.closest && (tgt.closest('#btn-claim-chest') || tgt.closest('#btn-ad-chest-all') || tgt.closest('.upgrade-item-card'));
           if (!isActionBtn) {
-            if (e.cancelable) e.preventDefault();
+            if (e.cancelable && e.type === 'touchstart') e.preventDefault();
             this.handleChestVfxTap(typeof performance !== 'undefined' ? performance.now() : Date.now());
           }
         }
-      }, { passive: false });
+      };
+      luckyChestModal.addEventListener('touchstart', handleChestModalTap, { passive: false });
+      luckyChestModal.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') return;
+        handleChestModalTap(e);
+      });
+      luckyChestModal.addEventListener('click', (e) => {
+        if (e.pointerType === 'mouse' || !e.pointerType) {
+          handleChestModalTap(e);
+        }
+      });
     }
 
     // Mobil çoklu dokunuş (Multi-Touch) yönetimi: Sadece ilk hareket parmağını (activeTouchId) takip et
@@ -1418,7 +1432,7 @@ class Game {
       const lbProfileModal = document.getElementById('lb-profile-modal');
       if (lbProfileModal && !lbProfileModal.classList.contains('hidden')) {
         if (e && e.preventDefault) e.preventDefault();
-        lbProfileModal.classList.add('hidden');
+        this.closeProfileModal(true);
         return;
       }
 
@@ -1596,7 +1610,7 @@ class Game {
         if (navigator.share) {
           try {
             await navigator.share({
-              title: 'Neon Space Survivor Rekoru',
+              title: 'Neon Galaxy: Space Shooter Rekoru',
               text: shareText
             });
             return;
@@ -1865,24 +1879,7 @@ class Game {
       });
     }
 
-    const lbTabStorm = document.getElementById('lb-tab-storm');
-    const lbTabCampaign = document.getElementById('lb-tab-campaign');
-    if (lbTabStorm && lbTabCampaign) {
-      lbTabStorm.addEventListener('click', () => {
-        sounds.init();
-        sounds.playCardSelect();
-        lbTabStorm.classList.add('active');
-        lbTabCampaign.classList.remove('active');
-        this.renderLeaderboard('storm');
-      });
-      lbTabCampaign.addEventListener('click', () => {
-        sounds.init();
-        sounds.playCardSelect();
-        lbTabCampaign.classList.add('active');
-        lbTabStorm.classList.remove('active');
-        this.renderLeaderboard('campaign');
-      });
-    }
+
 
     if (btnGameOverHangar) {
       btnGameOverHangar.addEventListener('click', () => {
@@ -3659,7 +3656,7 @@ class Game {
       const item2IconSvg = this.getUpgradeSvg(r.item2) || getPixelIconSvg('energy', 'sm');
 
       const statusClass = isDiscovered ? 'discovered' : 'unknown';
-      const statusText = isDiscovered ? t('codex_discovered') : `<span class="codex-lock-icon">🔒</span> ${t('codex_undiscovered')}`;
+      const statusText = isDiscovered ? t('codex_discovered') : `<span class="codex-lock-icon"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="vertical-align:middle; margin-right:3px;"><rect x="2" y="4" width="6" height="5" fill="#94a3b8"/><path d="M3 4V2.5a2 2 0 0 1 4 0V4" stroke="#94a3b8" stroke-width="1.5" fill="none"/></svg></span> ${t('codex_undiscovered')}`;
       const titleText = isDiscovered ? (t('codex_title_' + r.id) || r.id.toUpperCase()) : `??? ${t('codex_undiscovered')}`;
       const item1Name = t('upg_' + r.item1 + '_name');
       const item2Name = t('upg_' + r.item2 + '_name');
@@ -4308,7 +4305,7 @@ class Game {
             <span class="showcase-subtitle">${t('ship_' + inspected.id + '_title')}</span>
           </div>
           <span class="showcase-status-badge ${isInspectedEquipped ? 'badge-equipped' : (isInspectedUnlocked ? 'badge-owned' : 'badge-locked')}" style="${isInspectedUnlocked && !isInspectedEquipped ? 'cursor:pointer; padding: 4px 10px; font-weight:800; border: 1px solid rgba(0, 240, 255, 0.4);' : ''}">
-            ${isInspectedEquipped ? (t('status_equipped') || 'KUŞANILDI') : (isInspectedUnlocked ? `⚡ ${t('btn_equip') || 'KUŞAN'}` : (t('status_locked') || 'KİLİTLİ'))}
+            ${isInspectedEquipped ? (t('status_equipped') || 'KUŞANILDI') : (isInspectedUnlocked ? `<svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="vertical-align:middle; margin-right:3px;"><path d="M5 0L1 6h4l-1 4 5-6H5l1-4z" fill="currentColor"/></svg>${t('btn_equip') || 'KUŞAN'}` : (t('status_locked') || 'KİLİTLİ'))}
           </span>
         </div>
 
@@ -4319,7 +4316,7 @@ class Game {
           </div>
           <button class="btn-ship-starup btn-hangar-starup ${shipStars >= 5 ? 'maxed' : ''}" type="button" title="${t('starup_btn') || 'Yıldız Yükselt'}">
             <span class="starup-icon">★+</span>
-            <span class="starup-cost">${shipStars >= 5 ? t('starup_max') : `${this.getStarUpCost(shipStars).toLocaleString()} 💎`}</span>
+            <span class="starup-cost">${shipStars >= 5 ? t('starup_max') : `${this.getStarUpCost(shipStars).toLocaleString()} CR`}</span>
           </button>
         </div>` : ''}
 
@@ -6419,7 +6416,7 @@ class Game {
         scoreValMutator.textContent = t('mode_mutator_completed');
         scoreValMutator.style.color = '#05ffa1';
       } else {
-        scoreValMutator.textContent = '+400 💎';
+        scoreValMutator.textContent = '+400 CR';
         scoreValMutator.style.color = '#ff0055';
       }
     }
@@ -7706,16 +7703,16 @@ class Game {
     const oddsBar = document.querySelector('.wheel-odds-bar');
     if (oddsBar) {
       const isTr = typeof getCurrentLanguage === 'function' && getCurrentLanguage().startsWith('tr');
-      const labelLife = isTr ? '♥ CAN:' : '♥ REVIVE:';
-      const labelCrystals = isTr ? '◆ KRİSTAL:' : '◆ CRYSTAL:';
-      const labelShield = isTr ? '🛡 KALKAN:' : '🛡 SHIELD:';
-      const labelCharge = isTr ? '⚡ ŞARJ:' : '⚡ OVERDRIVE:';
+      const labelLife = isTr ? 'CAN:' : 'REVIVE:';
+      const labelCrystals = isTr ? 'KRİSTAL:' : 'CRYSTAL:';
+      const labelShield = isTr ? 'KALKAN:' : 'SHIELD:';
+      const labelCharge = isTr ? 'ŞARJ:' : 'OVERDRIVE:';
       oddsBar.innerHTML = `
         <span><span style="color:#ffd700;">★ 500 CR:</span> 7%</span>
-        <span><span style="color:#ff0055;">${labelLife}</span> 10%</span>
-        <span><span style="color:#00f0ff;">${labelCrystals}</span> 61%</span>
-        <span><span style="color:#38bdf8;">${labelShield}</span> 14%</span>
-        <span><span style="color:#c084fc;">${labelCharge}</span> 8%</span>
+        <span><span style="color:#ff0055;"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 12 12" style="vertical-align:middle; margin-right:2px;"><path d="M2 1h3v2H2zM7 1h3v2H7zM1 3h10v3H1zM2 6h8v2H2zM3 8h6v2H3zM4 10h4v1H4zM5 11h2v1H5z" fill="#ff0055"/></svg>${labelLife}</span> 10%</span>
+        <span><span style="color:#00f0ff;">◆ ${labelCrystals}</span> 61%</span>
+        <span><span style="color:#38bdf8;"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 12 12" style="vertical-align:middle; margin-right:2px;"><path d="M2 1h8v2H2zM1 3h10v4H1zM2 7h8v2H2zM3 9h6v1H3zM4 10h4v1H4zM5 11h2v1H5z" fill="#00f0ff"/><path d="M3 3h6v4H3z" fill="#0077ff"/></svg>${labelShield}</span> 14%</span>
+        <span><span style="color:#c084fc;"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="vertical-align:middle; margin-right:2px;"><path d="M5 0L1 6h4l-1 4 5-6H5l1-4z" fill="#c084fc"/></svg>${labelCharge}</span> 8%</span>
       `;
     }
   }
@@ -8029,6 +8026,19 @@ class Game {
       { code: 'AUS', flag: 'AU', emoji: '🇦🇺', name: 'Australia' }
     ];
 
+    ['storm', 'campaign'].forEach(m => {
+      try {
+        const cached = localStorage.getItem(`neon_cached_lb_${m}`);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            this._liveLeaderboardData = this._liveLeaderboardData || {};
+            this._liveLeaderboardData[m] = parsed;
+          }
+        }
+      } catch(e) {}
+    });
+
     this.setupLeaderboardEvents();
     this.updateMainMenuProfileBar();
   }
@@ -8050,6 +8060,8 @@ class Game {
     const lbLeagueView = document.getElementById('lb-league-view');
     const lbCareerView = document.getElementById('lb-career-view');
 
+    const playerBanner = document.getElementById('leaderboard-player-banner');
+
     if (lbMainTabLeague) {
       lbMainTabLeague.addEventListener('click', () => {
         sounds.init();
@@ -8060,6 +8072,7 @@ class Game {
         if (lbLeagueControls) lbLeagueControls.classList.remove('hidden');
         if (lbLeagueView) lbLeagueView.classList.remove('hidden');
         if (lbCareerView) lbCareerView.classList.add('hidden');
+        if (playerBanner) playerBanner.classList.remove('hidden');
         this.renderLeaderboard(this.lbMode);
       });
     }
@@ -8074,6 +8087,7 @@ class Game {
         if (lbLeagueControls) lbLeagueControls.classList.add('hidden');
         if (lbLeagueView) lbLeagueView.classList.add('hidden');
         if (lbCareerView) lbCareerView.classList.remove('hidden');
+        if (playerBanner) playerBanner.classList.add('hidden');
         this.renderCareerRecords();
       });
     }
@@ -8145,6 +8159,13 @@ class Game {
           e.preventDefault();
           sounds.init();
           sounds.playCardSelect();
+          this.savePilotProfile();
+        }
+      });
+      inputCallsign.addEventListener('blur', () => {
+        const cleanVal = inputCallsign.value.trim().replace(/[^\p{L}\p{N}_.\s-]/gu, '').replace(/\s+/g, ' ').trim();
+        const cur = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
+        if (cleanVal && cleanVal.length >= 2 && cleanVal !== cur) {
           this.savePilotProfile();
         }
       });
@@ -8233,6 +8254,7 @@ class Game {
     localStorage.setItem('neon_player_callsign', callsign);
     localStorage.setItem('neon_player_country', countryCode);
     this.playerCallsign = callsign;
+    this.playerCountry = countryCode;
 
     const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: countryCode, flag: countryCode, emoji: '🇹🇷' };
     let myUid = null;
@@ -8245,9 +8267,8 @@ class Game {
       ['storm', 'campaign'].forEach(m => {
         const list = this._liveLeaderboardData[m];
         if (Array.isArray(list)) {
-          const playerRank = this.calculatePlayerRank ? this.calculatePlayerRank(m) : 1;
-          list.forEach((item, idx) => {
-            if (item.isPlayer || (myUid && item.uid === myUid) || idx === (playerRank - 1)) {
+          list.forEach((item) => {
+            if (item.isPlayer || (myUid && item.uid === myUid)) {
               item.isPlayer = true;
               if (myUid) item.uid = myUid;
               item.name = callsign;
@@ -8362,6 +8383,7 @@ class Game {
       const maxStars = level * 3;
       const loss = Math.floor(rand * 3);
       stars = Math.max(level, maxStars - loss);
+      score = level * 1000 + stars;
     }
 
     return { rank, name, country, ship, title, score, level, stars, isPlayer: false };
@@ -8374,10 +8396,11 @@ class Game {
     try {
       if (typeof getPlayerUid === 'function') myUid = getPlayerUid();
     } catch(e) {}
+    const pilotCallsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
 
     if (Array.isArray(liveList) && liveList.length > 0) {
       // 1. Canlı bulut liderlik listesinde doğrudan oyuncu eşleşmesi
-      const myIdx = liveList.findIndex(item => item.isPlayer || (myUid && item.uid === myUid));
+      const myIdx = liveList.findIndex(item => item.isPlayer || (myUid && item.uid === myUid) || (pilotCallsign !== 'PILOT_ALPHA' && item.name && item.name.toUpperCase() === pilotCallsign.toUpperCase()));
       if (myIdx !== -1) {
         return myIdx + 1;
       }
@@ -8445,8 +8468,32 @@ class Game {
     if (lbModal) lbModal.classList.remove('hidden');
     if (this.updateDockActiveTab) this.updateDockActiveTab(4);
     if (this.updateMainMenuProfileBar) this.updateMainMenuProfileBar();
-    this.renderLeaderboard(this.lbMode || 'storm');
-    this.syncLiveLeaderboard(this.lbMode || 'storm');
+
+    const lbMainTabLeague = document.getElementById('lb-main-tab-league');
+    const lbMainTabCareer = document.getElementById('lb-main-tab-career');
+    const lbLeagueControls = document.getElementById('lb-league-controls');
+    const lbLeagueView = document.getElementById('lb-league-view');
+    const lbCareerView = document.getElementById('lb-career-view');
+    const playerBanner = document.getElementById('leaderboard-player-banner');
+
+    if (this.lbMainTab === 'career') {
+      if (lbMainTabCareer) lbMainTabCareer.classList.add('active');
+      if (lbMainTabLeague) lbMainTabLeague.classList.remove('active');
+      if (lbLeagueControls) lbLeagueControls.classList.add('hidden');
+      if (lbLeagueView) lbLeagueView.classList.add('hidden');
+      if (lbCareerView) lbCareerView.classList.remove('hidden');
+      if (playerBanner) playerBanner.classList.add('hidden');
+      this.renderCareerRecords();
+    } else {
+      if (lbMainTabLeague) lbMainTabLeague.classList.add('active');
+      if (lbMainTabCareer) lbMainTabCareer.classList.remove('active');
+      if (lbLeagueControls) lbLeagueControls.classList.remove('hidden');
+      if (lbLeagueView) lbLeagueView.classList.remove('hidden');
+      if (lbCareerView) lbCareerView.classList.add('hidden');
+      if (playerBanner) playerBanner.classList.remove('hidden');
+      this.renderLeaderboard(this.lbMode || 'storm');
+      this.syncLiveLeaderboard(this.lbMode || 'storm');
+    }
   }
 
   async syncLiveLeaderboard(mode = 'storm') {
@@ -8518,7 +8565,7 @@ class Game {
   getCountryFlagBadge(c) {
     const code = (c && (c.code || c.flag)) || 'GLB';
     const flagSvg = getPixelFlagSvg(code);
-    return `<span class="lb-flag-badge" title="${code}">${flagSvg}<span class="flag-code">${code}</span></span>`;
+    return `<span class="lb-flag-badge" title="${code}">${flagSvg}</span>`;
   }
 
   getRankDeltaHtml(rank) {
@@ -8671,7 +8718,7 @@ class Game {
       percentileEl.style.color = tier.color;
     }
     if (nameEl) {
-      nameEl.innerHTML = `<span class="lb-hud-rank-inline">#${playerRank.toLocaleString()}</span> ${this.getCountryFlagBadge(pilotCountry)} <span class="lb-pilot-name-text">${pilotCallsign}</span> <span class="lb-you-badge">${t('lb_you_badge')}</span>`;
+      nameEl.innerHTML = `${this.getCountryFlagBadge(pilotCountry)} <span class="lb-pilot-name-text">${pilotCallsign}</span> <span class="lb-you-badge">${t('lb_you_badge')}</span>`;
     }
 
     if (mode === 'storm') {
@@ -8685,15 +8732,28 @@ class Game {
     // Rival tracking
     const rivalRank = Math.max(1, playerRank - 1);
     const rivalPilot = this.getPilotAtRank(rivalRank, mode);
-    const currentMetric = mode === 'storm' ? stormScore : totalStars;
-    const targetMetric = rivalPilot.score;
+    const currentMetric = mode === 'storm' ? stormScore : (clearedLevel * 1000 + totalStars);
+    const targetMetric = mode === 'storm'
+      ? (rivalPilot.score || 0)
+      : ((rivalPilot.level || 1) * 1000 + (rivalPilot.stars || 3));
     const ptsNeeded = Math.max(0, targetMetric - currentMetric);
 
-    if (hintEl) hintEl.textContent = ptsNeeded > 0 ? `+${ptsNeeded.toLocaleString()} PTS sıradaki hedefe:` : 'Zirvedesin!';
-    if (rivalTargetEl) rivalTargetEl.textContent = `#${rivalRank} ${rivalPilot.name}`;
-    if (rivalFill) {
-      const pct = ptsNeeded === 0 ? 100 : Math.min(100, Math.max(15, Math.round((1 - (ptsNeeded / (targetMetric * 0.15 || 1))) * 100)));
-      rivalFill.style.width = `${pct}%`;
+    if (playerRank === 1) {
+      if (hintEl) hintEl.textContent = 'Zirvedesin!';
+      if (rivalTargetEl) rivalTargetEl.innerHTML = '<svg class="pixel-icon pixel-icon-xs" viewBox="0 0 12 12" style="vertical-align:middle; margin-right:3px;"><path d="M2 2h8v4a4 4 0 0 1-8 0V2zM0 3h2v2H0zM10 3h2v2h-2zM5 8h2v2H5zM4 10h4v1H4z" fill="#ffd700"/></svg>1. SIRA';
+      if (rivalFill) rivalFill.style.width = '100%';
+    } else {
+      if (mode === 'storm') {
+        if (hintEl) hintEl.textContent = `+${ptsNeeded.toLocaleString()} PTS sıradaki hedefe:`;
+      } else {
+        const stageDiff = Math.max(1, (rivalPilot.level || clearedLevel) - clearedLevel);
+        if (hintEl) hintEl.textContent = `+${stageDiff} BÖLÜM sıradaki hedefe:`;
+      }
+      if (rivalTargetEl) rivalTargetEl.textContent = `#${rivalRank} ${rivalPilot.name}`;
+      if (rivalFill) {
+        const pct = Math.min(100, Math.max(15, Math.round((currentMetric / Math.max(1, targetMetric)) * 100)));
+        rivalFill.style.width = `${pct}%`;
+      }
     }
 
     const seasonPill = document.querySelector('.lb-season-pill');
@@ -8720,16 +8780,21 @@ class Game {
       }
       if (liveList && liveList[rank - 1]) {
         const item = liveList[rank - 1];
-        const isMe = item.isPlayer || (myUid && item.uid === myUid) || (item.name && item.name.toUpperCase() === pilotCallsign.toUpperCase()) || rank === playerRank;
+        const isMe = (myUid && item.uid === myUid) || (pilotCallsign !== 'PILOT_ALPHA' && item.name && item.name.toUpperCase() === pilotCallsign.toUpperCase());
+        let displayName = item.name;
+        // Don't show generic duplicated 'PILOT_ALPHA' on other bots in the cloud list
+        if (!isMe && (!displayName || displayName === 'PILOT_ALPHA')) {
+          displayName = this.getPilotAtRank(rank, mode).name;
+        }
         return {
           rank,
-          name: isMe ? pilotCallsign : item.name,
-          country: isMe ? pilotCountry : item.country,
-          ship: isMe ? currentSkinName : (item.ship || currentSkinName),
+          name: isMe ? pilotCallsign : displayName,
+          country: isMe ? pilotCountry : (item.country || this.getPilotAtRank(rank, mode).country),
+          ship: isMe ? currentSkinName : (item.ship || this.getPilotAtRank(rank, mode).ship),
           title: this.getTierInfo(rank).name,
-          score: isMe ? (mode === 'storm' ? stormScore : item.score) : item.score,
-          level: isMe ? clearedLevel : (item.level || 1),
-          stars: isMe ? totalStars : (item.stars || 0),
+          score: isMe ? (mode === 'storm' ? stormScore : item.score) : (item.score || this.getPilotAtRank(rank, mode).score),
+          level: isMe ? clearedLevel : (item.level || this.getPilotAtRank(rank, mode).level),
+          stars: isMe ? totalStars : (item.stars || this.getPilotAtRank(rank, mode).stars),
           isPlayer: isMe
         };
       }
@@ -8743,26 +8808,42 @@ class Game {
         const p1 = getPilotEntry(1);
         const p2 = getPilotEntry(2);
         const p3 = getPilotEntry(3);
-        const youTag = (p) => p.isPlayer ? `<span class="lb-you-badge" style="margin-left:2px; font-size:0.6rem;">${t('lb_you_badge')}</span>` : '';
+        const youTag = (p) => p.isPlayer ? `<span class="lb-you-badge">${t('lb_you_badge')}</span>` : '';
+        const scoreFmt = (p) => mode === 'storm'
+          ? `${p.score.toLocaleString()} <span class="lb-podium-unit">${t('lb_pts')}</span>`
+          : `${t('lb_stage')} ${p.level} <span class="lb-podium-unit">${p.stars}★</span>`;
+
         podium.innerHTML = `
-          <div class="podium-slot rank-2 ${p2.isPlayer ? 'is-current-player' : ''}">
-            <div class="podium-avatar">${this.getCountryFlagBadge(p2.country)}</div>
-            <div class="podium-name">${p2.name} ${youTag(p2)}</div>
-            <div class="podium-score">${mode === 'storm' ? p2.score.toLocaleString() : 'B.' + p2.level}</div>
-            <div class="podium-pedestal p2"><span class="pedestal-medal">${getPixelIconSvg('medal_silver', 'sm')}</span> 2</div>
+          <div class="lb-podium-slot rank-2 ${p2.isPlayer ? 'is-current-player' : ''}">
+            <div class="lb-podium-pedestal">
+              <div class="lb-podium-badge">${getPixelIconSvg('medal_silver', 'sm')}</div>
+              <div class="lb-podium-flag-pill">${this.getCountryFlagBadge(p2.country)}</div>
+              <div class="lb-podium-name">${p2.name} ${youTag(p2)}</div>
+              <div class="lb-podium-score">${scoreFmt(p2)}</div>
+              <div class="lb-podium-ship">${p2.ship}</div>
+              <div class="lb-podium-rank-tag">#2</div>
+            </div>
           </div>
-          <div class="podium-slot rank-1 ${p1.isPlayer ? 'is-current-player' : ''}">
-            <div class="podium-crown">${getPixelIconSvg('crown', 'md')}</div>
-            <div class="podium-avatar">${this.getCountryFlagBadge(p1.country)}</div>
-            <div class="podium-name">${p1.name} ${youTag(p1)}</div>
-            <div class="podium-score">${mode === 'storm' ? p1.score.toLocaleString() : 'B.' + p1.level}</div>
-            <div class="podium-pedestal p1"><span class="pedestal-medal">${getPixelIconSvg('medal_gold', 'sm')}</span> 1</div>
+          <div class="lb-podium-slot rank-1 ${p1.isPlayer ? 'is-current-player' : ''}">
+            <div class="lb-podium-crown">${getPixelIconSvg('crown', 'md')}</div>
+            <div class="lb-podium-pedestal">
+              <div class="lb-podium-badge">${getPixelIconSvg('medal_gold', 'sm')}</div>
+              <div class="lb-podium-flag-pill">${this.getCountryFlagBadge(p1.country)}</div>
+              <div class="lb-podium-name">${p1.name} ${youTag(p1)}</div>
+              <div class="lb-podium-score">${scoreFmt(p1)}</div>
+              <div class="lb-podium-ship">${p1.ship}</div>
+              <div class="lb-podium-rank-tag">#1</div>
+            </div>
           </div>
-          <div class="podium-slot rank-3 ${p3.isPlayer ? 'is-current-player' : ''}">
-            <div class="podium-avatar">${this.getCountryFlagBadge(p3.country)}</div>
-            <div class="podium-name">${p3.name} ${youTag(p3)}</div>
-            <div class="podium-score">${mode === 'storm' ? p3.score.toLocaleString() : 'B.' + p3.level}</div>
-            <div class="podium-pedestal p3"><span class="pedestal-medal">${getPixelIconSvg('medal_bronze', 'sm')}</span> 3</div>
+          <div class="lb-podium-slot rank-3 ${p3.isPlayer ? 'is-current-player' : ''}">
+            <div class="lb-podium-pedestal">
+              <div class="lb-podium-badge">${getPixelIconSvg('medal_bronze', 'sm')}</div>
+              <div class="lb-podium-flag-pill">${this.getCountryFlagBadge(p3.country)}</div>
+              <div class="lb-podium-name">${p3.name} ${youTag(p3)}</div>
+              <div class="lb-podium-score">${scoreFmt(p3)}</div>
+              <div class="lb-podium-ship">${p3.ship}</div>
+              <div class="lb-podium-rank-tag">#3</div>
+            </div>
           </div>
         `;
       }
@@ -8846,8 +8927,8 @@ class Game {
     const scoreDisplay = p.localRecord
       ? `${p.valueText}`
       : (mode === 'storm'
-      ? `${p.score.toLocaleString()} <span style="font-size: 0.65rem; color: #94a3b8;">${t('lb_pts')}</span>`
-      : `${t('lb_stage')} ${p.level} <span style="font-size: 0.65rem; color: #ffbe0b;">${p.stars}★</span>`);
+      ? `${p.score.toLocaleString()} <span class="lb-score-unit">${t('lb_pts')}</span>`
+      : `${t('lb_stage')} ${p.level} <span class="lb-score-unit stars">${p.stars}★</span>`);
 
     const medalIcon = p.rank === 1
       ? getPixelIconSvg('medal_gold', 'xs')
@@ -8856,23 +8937,27 @@ class Game {
       : (p.rank === 3 ? getPixelIconSvg('medal_bronze', 'xs') : ''));
 
     row.innerHTML = `
-      <div class="lb-left">
-        <span class="lb-rank-num">${medalIcon} #${p.rank.toLocaleString()}</span>
+      <div class="lb-col-rank">
+        ${medalIcon ? `<span class="lb-rank-medal">${medalIcon}</span>` : ''}
+        <span class="lb-rank-num">#${p.rank.toLocaleString()}</span>
         ${p.localRecord ? '' : this.getRankDeltaHtml(p.rank)}
+      </div>
+      <div class="lb-col-flag">
         ${this.getCountryFlagBadge(p.country)}
-        <div class="lb-pilot-info">
-          <div class="lb-name-row">
-            <span class="lb-pilot-name">${p.name}</span>
-            ${isPlayer ? `<span class="lb-hud-rank-inline" style="font-size:0.72rem; margin-left:4px;">#${p.rank.toLocaleString()}</span><span class="lb-you-badge">${t('lb_you_badge')}</span>` : ''}
-          </div>
-          <div class="lb-pilot-sub">
-            <span class="lb-ship-tag">${p.ship}</span>
-            <span>· ${p.title}</span>
-          </div>
+      </div>
+      <div class="lb-col-info">
+        <div class="lb-name-line">
+          <span class="lb-pilot-name">${p.name}</span>
+          ${isPlayer ? `<span class="lb-you-badge">${t('lb_you_badge')}</span>` : ''}
+        </div>
+        <div class="lb-sub-line">
+          <span class="lb-ship-tag">${p.ship}</span>
+          <span class="lb-dot-sep">·</span>
+          <span class="lb-tier-tag">${p.title}</span>
         </div>
       </div>
-      <div class="lb-right">
-        <div class="lb-score-val">${scoreDisplay}</div>
+      <div class="lb-col-score">
+        <span class="lb-score-val">${scoreDisplay}</span>
       </div>
     `;
 
@@ -9584,7 +9669,7 @@ class Game {
     this.player.shield = (this.currentSkinId === 'phantom') ? (this.player.maxShield || 20) : 0;
     this.player.level = 1;
     this.player.xp = 0;
-    this.player.nextXp = this.getNextLevelXp(1); // 24 XP (İlk yükseltmeyi hak etmek için dengeli başlangıç: ~25-30s)
+    this.player.nextXp = this.getNextLevelXp(1); // 8 XP (XP_CURVE ile ilk 6-8 saniyede akıcı ilk seçim)
     this.player.score = 0;
     this.player.magnetRange = Math.round((60 + (tech.magnet || 0) * TECH_WORKSHOP_CONFIG.magnet.perLevelFlat) * (skinCfg.magnetMult || 1.0));
     const masteryCrystalBonus = (this.masteryTree && this.masteryTree.crystalBonus) ? this.masteryTree.crystalBonus * 0.10 : 0;
@@ -9866,6 +9951,9 @@ class Game {
     this.powerups = [];
     this.luckyChests = [];
     this.pendingChestRewards = [];
+    if (this.chestVfx && this.chestVfx.active) {
+      this.chestVfx.reset();
+    }
     this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 240);
     if (luckyChestModal) luckyChestModal.classList.add('hidden');
     this.telegraphs = [];
@@ -10074,12 +10162,13 @@ class Game {
       bossBarContainer.classList.add('hidden');
     }
 
-    // Aktif Nihai Güç (Ultimate) Butonu Şarj Göstergesi
+    // Aktif Nihai Güç (Ultimate) Butonu Şarj Göstergesi (Dairesel Dolum)
     if (ultimateChargeFill) {
       const chargePct = Math.min(100, this.player.feverCharge || 0);
       if (Math.abs((this._hudChargePct || 0) - chargePct) > 0.5) {
         this._hudChargePct = chargePct;
-        ultimateChargeFill.style.height = `${chargePct}%`;
+        const deg = chargePct * 3.6;
+        ultimateChargeFill.style.background = `conic-gradient(from -90deg, rgba(0, 240, 255, 0.6) ${deg}deg, transparent ${deg}deg)`;
       }
       if (chargePct >= 100 && !this.player.isFever) {
         if (btnUltimate && !btnUltimate.classList.contains('ready')) {
@@ -10094,7 +10183,7 @@ class Game {
       }
     }
 
-    // Aktif Pilot Yeteneği Butonu & Bekleme Süresi Göstergesi
+    // Aktif Pilot Yeteneği Butonu & Bekleme Süresi Göstergesi (Dairesel Dolum)
     if (btnAbility) {
       const pilotId = this.player.pilotId || this.activeArchetype || 'interceptor';
       if (pilotId === 'interceptor') {
@@ -10104,7 +10193,8 @@ class Game {
         const cd = Math.max(0, this.player.abilityCooldown || 0);
         const maxCd = this.player.abilityCooldownMax || 1200;
         const cdPct = (cd / maxCd) * 100;
-        abilityCooldownFill.style.height = `${cdPct}%`;
+        const cdDeg = cdPct * 3.6;
+        abilityCooldownFill.style.background = `conic-gradient(from -90deg, rgba(0, 0, 0, 0.75) ${cdDeg}deg, transparent ${cdDeg}deg)`;
 
         const pCfg = this.pilots[pilotId] || this.pilots.interceptor;
         if (abilityIcon && pCfg.icon && abilityIcon.dataset.pilotId !== pilotId) {
@@ -10561,6 +10651,30 @@ class Game {
           <polygon points="16,13 21,22 11,22" fill="#ffffff"/>
         </svg>`;
 
+      case 'power_core':
+        // Güç Çekirdeği: Altın-amber plazma reaktör çekirdeği (+%12 Hasar)
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#1c1303"/>
+          <circle cx="16" cy="16" r="11" fill="#b45309"/>
+          <circle cx="16" cy="16" r="8" fill="#f59e0b"/>
+          <circle cx="16" cy="16" r="5" fill="#fef08a"/>
+          <circle cx="16" cy="16" r="2.5" fill="#ffffff"/>
+          <rect x="15" y="2" width="2" height="4" fill="#fbbf24"/>
+          <rect x="15" y="26" width="2" height="4" fill="#fbbf24"/>
+          <rect x="2" y="15" width="4" height="2" fill="#fbbf24"/>
+          <rect x="26" y="15" width="4" height="2" fill="#fbbf24"/>
+        </svg>`;
+
+      case 'cooldown_cooler':
+        // Kriyo Soğutucu: Neon cyan kriyojenik fan/soğutma kanatları (+%8 Seri Atış)
+        return `<svg ${P}>
+          <rect width="32" height="32" fill="#041824"/>
+          <rect x="5" y="5" width="22" height="22" rx="3" fill="#0369a1"/>
+          <rect x="8" y="8" width="16" height="16" rx="2" fill="#0284c7"/>
+          <polygon points="16,9 18,14 23,16 18,18 16,23 14,18 9,16 14,14" fill="#38bdf8"/>
+          <circle cx="16" cy="16" r="3" fill="#ffffff"/>
+        </svg>`;
+
       case 'crystal_shrapnel':
         // Kristal Şarapneli (Sinerji)
         return `<svg ${P}>
@@ -10612,18 +10726,12 @@ class Game {
   // === DENGELİ LEVEL VE XP GELİŞİM EĞRİSİ ===
   // Kullanıcı Tasarım Kriterleri:
   // - Seviye 1->2 (8 XP) ve 2->3 (16 XP): Hızlı, akıcı ve teşvik edici başlangıç (ilk build temelleri atılır)
-  // Roguelite XP İlerleme Eğrisi:
-  // - Seviye 1->2 (25 XP): Açılış meteor kümesi ve ilk avcılarla ~20-30. saniyede ilk seçim
-  // - Seviye 2->3 (55 XP): İkinci yükseltme için gerçek dövüş ve manevra gerekir (~1. dakika)
-  // - Seviye 3->4 (110 XP): Belirgin roguelite eşiği ve sinerji geçişi (~1.5-2. dakika)
-  // - Seviye 4->5 (190 XP): Elit filoları yenerek hak edilir
-  // - Seviye 5+: Sabit %36 bileşik artış formülü (sürekli kart popup yorgunluğunu önler)
+  // Roguelite XP İlerleme Eğrisi (XP_CURVE):
+  // - Seviye 1->2 (8 XP): Açılış 2 meteor/avcı taşıyla ilk 6-8 saniyede anında ilk seçim
+  // - Seviye 2->3 (15 XP), Seviye 3->4 (23 XP): Akıcı, doyurucu ve ödüllendirici kadans
+  // - İkinci dereceden quadratik eğri: level-up akışı hiçbir zaman tıkanmaz
   getNextLevelXp(level) {
-    if (level === 1) return 24;
-    if (level === 2) return 48;
-    if (level === 3) return 96;
-    if (level === 4) return 160;
-    return Math.round(160 * Math.pow(1.36, level - 4));
+    return XP_CURVE.calcLevelXp(level);
   }
 
   // Derinlik / İlerleme Çarpanı: Dalga, Sektör, Süre ve Bölüme göre düşmanların XP çıktısını dengeli biçimde artırır
@@ -11109,6 +11217,24 @@ class Game {
         level: this.player.synergies && this.player.synergies.crystalShrapnel ? 1 : 0,
         maxLevel: 1,
         desc: t('syn_shrapnel_desc')
+      },
+      {
+        id: 'power_core',
+        name: t('upg_power_core_name'),
+        stat: '+%12 HASAR',
+        color: '#ffbe0b',
+        level: this.player.upgrades.power_core || 0,
+        maxLevel: 3,
+        desc: t('upg_power_core_desc')
+      },
+      {
+        id: 'cooldown_cooler',
+        name: t('upg_cooldown_cooler_name'),
+        stat: '+%8 SERİ ATIŞ',
+        color: '#00f0ff',
+        level: this.player.upgrades.cooldown_cooler || 0,
+        maxLevel: 3,
+        desc: t('upg_cooldown_cooler_desc')
       }
     ].filter(u => u.level < u.maxLevel);
 
@@ -11120,15 +11246,32 @@ class Game {
       btnReroll.style.display = (this.player.rerollCount || 0) > 0 ? 'inline-block' : 'none';
     }
 
-    // KULLANICI İSTEĞİ: 3 DEĞİL TAM 2 SEÇENEK SUNULSUN!
     const choices = [];
     if (evolutions.length > 0) {
       choices.push(evolutions[0]);
     }
+
+    // Evrim Pity (Garanti Sinerji Eşi) Sistemi:
+    // Eğer bir ana silah Lv4 veya Lv5 ise ve henüz sinerji ortağı alınmamışsa,
+    // oyuncunun build'inin tıkanmasını önlemek için sinerji ortağı zorunlu olarak ilk seçeneklere enjekte edilir.
+    const upg = this.player.upgrades;
+    let guaranteedPartnerId = null;
+    if ((upg.laser || 0) >= 4 && (upg.magnet || 0) < 1) guaranteedPartnerId = 'magnet';
+    else if ((upg.missiles || 0) >= 4 && (upg.emp || 0) < 1) guaranteedPartnerId = 'emp';
+    else if ((upg.tesla || 0) >= 4 && (upg.fireRate || 0) < 4) guaranteedPartnerId = 'fireRate';
+    else if ((upg.drones || 0) >= 3 && (upg.shield || 0) < 4) guaranteedPartnerId = 'shield';
+
+    if (guaranteedPartnerId && evolutions.length === 0) {
+      const pIdx = availableUpgrades.findIndex(u => u.id === guaranteedPartnerId);
+      if (pIdx >= 0) {
+        const partnerItem = availableUpgrades.splice(pIdx, 1)[0];
+        choices.push(partnerItem);
+      }
+    }
+
     // Akıllı Sinerji Ağırlıklandırması: Oyuncunun elindeki silaha uygun sinerji kartlarının çıkma şansı +%60 artar
     const synergyWeights = {};
-    const upg = this.player.upgrades;
-    if ((upg.laser || 0) >= 1) { synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; }
+    if ((upg.laser || 0) >= 1) { synergyWeights.magnet = (synergyWeights.magnet || 1) + 0.6; synergyWeights.shield = (synergyWeights.shield || 1) + 0.6; synergyWeights.power_core = (synergyWeights.power_core || 1) + 0.5; }
     if ((upg.missiles || 0) >= 1) { synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.tesla = (synergyWeights.tesla || 1) + 0.6; }
     if ((upg.tesla || 0) >= 1) { synergyWeights.fireRate = (synergyWeights.fireRate || 1) + 0.6; synergyWeights.emp = (synergyWeights.emp || 1) + 0.6; synergyWeights.missiles = (synergyWeights.missiles || 1) + 0.6; }
     if ((upg.shield || 0) >= 1) { synergyWeights.drones = (synergyWeights.drones || 1) + 0.6; synergyWeights.laser = (synergyWeights.laser || 1) + 0.6; }
@@ -11212,10 +11355,32 @@ class Game {
 
     cardsContainer.innerHTML = '';
     choices.forEach((upgrade, idx) => {
+      if (!upgrade.rarity && !upgrade.isEvolution && !upgrade.isCorrupted && !upgrade.isBonus) {
+        const roll = Math.random();
+        if (roll < CARD_RARITY.epic) {
+          upgrade.rarity = 'epic';
+        } else if (roll < (CARD_RARITY.epic + CARD_RARITY.rare)) {
+          upgrade.rarity = 'rare';
+        } else {
+          upgrade.rarity = 'normal';
+        }
+      }
+      const isEpic = upgrade.rarity === 'epic';
+      const isRare = upgrade.rarity === 'rare';
+      const cardBorderColor = isEpic ? '#ffd700' : (isRare ? '#00f0ff' : (upgrade.color || '#00f0ff'));
+      const cardGlow = isEpic ? 'rgba(255, 215, 0, 0.7)' : (isRare ? 'rgba(0, 240, 255, 0.55)' : `${upgrade.color || '#00f0ff'}55`);
+
       const card = document.createElement('div');
-      card.className = `upgrade-item-card ${upgrade.isEvolution ? 'evolution-card' : ''} ${upgrade.isCorrupted ? 'corrupted-card' : ''}`;
-      card.style.setProperty('--card-color', upgrade.color || '#00f0ff');
-      card.style.setProperty('--card-glow', `${upgrade.color || '#00f0ff'}55`);
+      card.className = `upgrade-item-card ${upgrade.isEvolution ? 'evolution-card' : ''} ${upgrade.isCorrupted ? 'corrupted-card' : ''} ${isEpic ? 'card-rarity-epic' : ''} ${isRare ? 'card-rarity-rare' : ''}`;
+      card.style.setProperty('--card-color', cardBorderColor);
+      card.style.setProperty('--card-glow', cardGlow);
+      if (isEpic) {
+        card.style.border = '2px solid #ffd700';
+        card.style.boxShadow = '0 0 18px rgba(255, 215, 0, 0.45)';
+      } else if (isRare) {
+        card.style.border = '1.5px solid #00f0ff';
+        card.style.boxShadow = '0 0 12px rgba(0, 240, 255, 0.35)';
+      }
       card.style.animation = `jackpotCardPop 0.42s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.08}s both`;
       card.addEventListener('animationend', () => {
         card.style.animation = 'none';
@@ -11242,6 +11407,10 @@ class Game {
         levelTag = `<span class="corrupted-badge">RİSK / ÖDÜL</span>`;
       } else if (upgrade.isBonus) {
         levelTag = `<span class="card-level-badge" style="background: rgba(255, 190, 11, 0.2); color: #ffbe0b; border: 1px solid #ffbe0b;">${txt('card_overdrive_tag')}</span>`;
+      } else if (isEpic) {
+        levelTag = `<span class="card-level-badge epic-tag" style="background: rgba(255, 215, 0, 0.25); color: #ffd700; border: 1px solid #ffd700; box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);">★ ${t('card_rarity_epic')}</span>`;
+      } else if (isRare) {
+        levelTag = `<span class="card-level-badge rare-tag" style="background: rgba(0, 240, 255, 0.25); color: #00f0ff; border: 1px solid #00f0ff; box-shadow: 0 0 6px rgba(0, 240, 255, 0.35);">◆ ${t('card_rarity_rare')}</span>`;
       } else {
         levelTag = `<span class="card-level-badge">${t('card_level', { n: upgrade.level + 1, m: upgrade.maxLevel })}</span>`;
       }
@@ -11287,6 +11456,13 @@ class Game {
         wingman: [
           { partner: 'fireRate', name: txt('syn_cyber'), hasPartner: (this.player.upgrades.fireRate || 0) >= 3 },
           { partner: 'laser', name: txt('syn_twin'), hasPartner: (this.player.upgrades.laser || 0) >= 3 }
+        ],
+        power_core: [
+          { partner: 'laser', name: txt('syn_vortex'), hasPartner: (this.player.upgrades.laser || 0) >= 1 },
+          { partner: 'missiles', name: txt('syn_nuke'), hasPartner: (this.player.upgrades.missiles || 0) >= 1 }
+        ],
+        cooldown_cooler: [
+          { partner: 'fireRate', name: txt('syn_ion'), hasPartner: (this.player.upgrades.fireRate || 0) >= 1 }
         ]
       };
 
@@ -11328,6 +11504,8 @@ class Game {
               magnet: [t('prev_magnet', { a: 60 + lvl * 20, b: 60 + (lvl + 1) * 20 })],
               hull: [t('prev_hull', { a: 65 + lvl * 15, b: 65 + (lvl + 1) * 15 }), t('prev_repair')],
               wingman: [t('prev_clone'), t('prev_ship', { n: (lvl + 1) * 4 })],
+              power_core: [t('prev_dmg', { n: 12 * (lvl + 1) })],
+              cooldown_cooler: [t('prev_firerate', { n: 8 * (lvl + 1) })],
               overload_reactor: [t('prev_overload')],
               apex_overdrive: [t('prev_apex')],
               crystal_shrapnel: [t('prev_shrapnel')]
@@ -11352,6 +11530,9 @@ class Game {
         card.style.transform = 'scale(0.92)';
         card.style.borderColor = '#ffd700';
         card.style.boxShadow = '0 0 25px rgba(255, 215, 0, 0.6)';
+        if (isEpic && upgrade.maxLevel && (this.player.upgrades[upgrade.id] || 0) + 1 < upgrade.maxLevel) {
+          this.player.upgrades[upgrade.id] = (this.player.upgrades[upgrade.id] || 0) + 1;
+        }
         this.applyUpgrade(upgrade.id);
       });
 
@@ -11892,7 +12073,17 @@ class Game {
     this.player.upgrades[id] = (this.player.upgrades[id] || 0) + 1;
 
     // Özel etki ayarlamaları (Dengeli ve tatmin edici oranlar)
-    if (id === 'magnet') {
+    if (id === 'power_core') {
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#ffbe0b', 200);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 30, '+%12 HASAR!', '#ffbe0b', 16);
+      sounds.playEvolution();
+      vibrate.success();
+    } else if (id === 'cooldown_cooler') {
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 200);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 30, '+%8 SERİ ATIŞ!', '#00f0ff', 16);
+      sounds.playEvolution();
+      vibrate.success();
+    } else if (id === 'magnet') {
       this.player.magnetRange += 20;
     } else if (id === 'shield') {
       this.player.maxShield += 15;
@@ -12235,6 +12426,10 @@ class Game {
         btnAdChestAll.style.pointerEvents = 'auto';
         btnAdChestAll.style.opacity = '1';
       }
+    } else if (action === 'CLAIMED_AND_CLOSED') {
+      if (this.state === 'LUCKY_CHEST') {
+        this.claimLuckyChest(false, true);
+      }
     }
     return action;
   }
@@ -12473,7 +12668,7 @@ class Game {
           const bossName = (this.currentBoss.name || (bossInfo && bossInfo.name) || t('boss_commander_name') || t('boss_boss_vanguard_name') || 'ÖNCÜ KOMUTAN').toUpperCase();
           hook.className = 'go-hook-banner near-miss-banner';
           hook.innerHTML = `
-            <div class="go-near-miss-text">🔥 ${t('go_near_miss_boss_hp', { name: bossName, pct: bossHpPct })}</div>
+            <div class="go-near-miss-text"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="vertical-align:middle; margin-right:4px;"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/><path d="M5 4c0 1-1 1.2-1 2 0 0.8 0.5 1 1 1s1-0.2 1-1c0-0.8-1-1-1-2z" fill="#ffe600"/></svg>${t('go_near_miss_boss_hp', { name: bossName, pct: bossHpPct })}</div>
             <div class="go-near-miss-track"><div class="go-near-miss-fill" style="width: ${bossProgressPct}%;"></div></div>
             <span class="go-near-miss-label">${t('go_near_miss_progress', { pct: bossProgressPct })}</span>
           `;
@@ -12483,7 +12678,7 @@ class Game {
           const lvlNum = this.selectedLevel || 1;
           hook.className = 'go-hook-banner near-miss-banner';
           hook.innerHTML = `
-            <div class="go-near-miss-text">🔥 ${t('go_near_miss_boss_time', { level: lvlNum, sec: secLeft })}</div>
+            <div class="go-near-miss-text"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="vertical-align:middle; margin-right:4px;"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/><path d="M5 4c0 1-1 1.2-1 2 0 0.8 0.5 1 1 1s1-0.2 1-1c0-0.8-1-1-1-2z" fill="#ffe600"/></svg>${t('go_near_miss_boss_time', { level: lvlNum, sec: secLeft })}</div>
             <div class="go-near-miss-track"><div class="go-near-miss-fill" style="width: ${progressPct}%;"></div></div>
             <span class="go-near-miss-label">${t('go_near_miss_progress', { pct: progressPct })}</span>
           `;
@@ -12493,7 +12688,7 @@ class Game {
           const progressPct = Math.min(95, Math.max(10, Math.round(((this.gameTime || 0) / wave2Target) * 100)));
           hook.className = 'go-hook-banner near-miss-banner';
           hook.innerHTML = `
-            <div class="go-near-miss-text">🔥 ${t('go_near_miss_wave', { sec: secLeft })}</div>
+            <div class="go-near-miss-text"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="vertical-align:middle; margin-right:4px;"><path d="M5 1c0 2-2 2.5-2 4.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5C7 3.5 5 3 5 1z" fill="#ff5500"/><path d="M5 4c0 1-1 1.2-1 2 0 0.8 0.5 1 1 1s1-0.2 1-1c0-0.8-1-1-1-2z" fill="#ffe600"/></svg>${t('go_near_miss_wave', { sec: secLeft })}</div>
             <div class="go-near-miss-track"><div class="go-near-miss-fill" style="width: ${progressPct}%;"></div></div>
             <span class="go-near-miss-label">${t('go_near_miss_progress', { pct: progressPct })}</span>
           `;
@@ -12688,7 +12883,7 @@ class Game {
 
       btnRestart.className = 'go-primary-restart-btn btn-hybrid-launch';
       btnRestart.innerHTML = `
-        <span class="hybrid-tag">⚡ ${best.name.toUpperCase()} (${best.bonus}) • ${best.cost.toLocaleString()} CR</span>
+        <span class="hybrid-tag"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="margin-right:2px;"><path d="M5 0L1 6h4l-1 4 5-6H5l1-4z" fill="#00f0ff"/></svg>${best.name.toUpperCase()} (${best.bonus}) • ${best.cost.toLocaleString()} CR</span>
         <span class="hybrid-title">${t('hybrid_launch_title')}</span>
       `;
 
@@ -12699,7 +12894,7 @@ class Game {
       this.pendingHybridUpgrade = null;
       btnRestart.className = 'go-primary-restart-btn btn-instant-launch';
       btnRestart.innerHTML = `
-        <span class="hybrid-title">🚀 ${t('instant_rematch_title')}</span>
+        <span class="hybrid-title"><svg class="pixel-icon pixel-icon-sm" viewBox="0 0 12 12" style="margin-right:6px;"><path d="M6 1c1.5 0 3 2.5 3 5.5l1.5 2.5-2.5-1-2 4-2-4-2.5 1 1.5-2.5C2.5 3.5 4 1 6 1z" fill="currentColor"/><rect x="5" y="4" width="2" height="2" fill="#030816"/></svg>${t('instant_rematch_title')}</span>
       `;
     }
   }
@@ -12827,7 +13022,7 @@ class Game {
         btnAdRevive.style.display = 'flex';
         if (totalFlights <= 1) {
           btnAdRevive.className = 'go-revive-btn go-revive-free-net';
-          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">⚡ ${t('btn_revive_tutorial_action')}</span> <span class="btn-pill-tag">${t('btn_revive_tutorial_tag')}</span>`;
+          btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text"><svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="margin-right:3px;"><path d="M5 0L1 6h4l-1 4 5-6H5l1-4z" fill="currentColor"/></svg>${t('btn_revive_tutorial_action')}</span> <span class="btn-pill-tag">${t('btn_revive_tutorial_tag')}</span>`;
         } else if (isNoAds && !this.vipReviveUsedThisRun) {
           btnAdRevive.className = 'go-revive-btn';
           btnAdRevive.innerHTML = `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><path d="M8 1v6M8 9v6M1 8h6M9 8h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> <span class="btn-main-text">${t('btn_revive_action')}</span> <span class="btn-pill-tag">${t('btn_vip_free') || 'VIP FREE'}</span>`;
@@ -12880,6 +13075,10 @@ class Game {
     this.revivesUsed = (this.revivesUsed || 0) + 1;
     this.deathPop = 0;
     if (gameoverModal) gameoverModal.classList.add('hidden');
+    if (hud) hud.classList.remove('hidden');
+    if (ultimateBtnContainer) ultimateBtnContainer.classList.remove('hidden');
+    if (miniQuestCard && this.currentMiniQuest) miniQuestCard.classList.remove('hidden');
+    this.updateHUD();
     this.startSmoothResume(34);
     if (this.player) {
       this.player.hp = Math.round(this.player.maxHp * 0.6);
@@ -13518,18 +13717,8 @@ class Game {
       }
     }
 
-    // Kalkan Yenilenmesi (Dengeli Hayatta Kalma: Hasar almadan 4.5 sn durulmalı, serbest ölümsüzlük yok!)
-    const regenThreshold = this.player.combatZone === 'rear' ? 240 : 300; // ~4 - 5 saniye hasar almama şartı
-    const regenRate = 0.12; // Yavaş ve dikkatli kalkan şarjı
-
-    this.player.shieldRegenTimer += dt;
-    if (this.player.shieldRegenTimer > regenThreshold) {
-      if (this.player.shield < this.player.maxShield) {
-        this.player.shield = Math.min(this.player.maxShield, this.player.shield + regenRate * dt);
-        if (this.frames % 4 === 0) this.updateStatusBarsOnly();
-      }
-      // Otomatik bedava CAN (HP) yenilenmesi kaldırıldı: Can sadece Gövde Onarım kartları veya nanobotlarla iyileşir!
-    }
+    // Pasif otomatik kalkan yenilenmesi kaldırıldı: Kalkan SADECE düşen kalkan güçlendiricisi (pickup_shield) veya seviye atlama kartlarıyla yenilenir!
+    this.player.shieldRegenTimer = 0;
 
     // Telegraph Lazer Uyarılarını Güncelle (Boss aktifken yeni telegraf uyarıları iptal edilir)
     if (this.currentBoss && !this.currentBoss.toRemove) {
@@ -13884,11 +14073,13 @@ class Game {
     const archBonus = Math.min(0.08, (this.player.fireRateBonus || 1.0) - 1.0);
     const wmLevel = this.player.upgrades.wingman || 0;
     const wingmanSynergy = wmLevel > 0 ? Math.min(0.05, 0.02 + (wmLevel - 1) * 0.01) : 0;
-    const speedMult = Math.min(1.50, 1 + timeBonus + levelBonus + upgradeBonus + stationaryBonus + adrenalineBonus + phaseFireBonus + archBonus + wingmanSynergy);
+    const coolerBonus = ((this.player.upgrades.cooldown_cooler || 0) * 0.08);
+    const speedMult = Math.min(2.00, 1 + timeBonus + levelBonus + upgradeBonus + coolerBonus + stationaryBonus + adrenalineBonus + phaseFireBonus + archBonus + wingmanSynergy);
 
-    const baseInterval = this.player.isFever ? 16 : 30;
-    const fireFloor = this.player.isFever ? 10 : 14;
+    const baseInterval = this.player.isFever ? 14 : 28;
+    const fireFloor = this.player.isFever ? 8 : 10;
     const fireInterval = Math.max(fireFloor, Math.round(baseInterval / speedMult));
+    const powerCoreMult = 1 + ((this.player.upgrades.power_core || 0) * 0.12);
 
     // 1. Ana Silah Sistemi
     const zone = this.player.combatZone || 'rear';
@@ -13965,7 +14156,7 @@ class Game {
           const dmgBonus = (this.player.isFever ? 3.0 : 0) + (isOvercharge ? 2.5 : 0);
           const isVortex = !!(this.player.evolutions && this.player.evolutions.vortexLaser);
           const vortexMult = isVortex ? 1.3 : 1.0;
-          const mult = critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy) * cadence.dmgScale * vortexMult;
+          const mult = critMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy) * cadence.dmgScale * vortexMult * powerCoreMult;
 
           const pushHeavy = (bullet) => {
             this.playerBullets.push({
@@ -14118,7 +14309,7 @@ class Game {
         const dmgBonus = (this.player.isFever ? 1.5 : 0) + (isOvercharge ? 1.4 : 0);
         const isPiercing = isOvercharge || isVortex;
 
-        const calcDmg = (base) => (base + dmgBonus) * critMult * vortexMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy);
+        const calcDmg = (base) => (base + dmgBonus) * critMult * vortexMult * powerCoreMult * (this.player.damageMultiplier || 1.0) * (1 + wingmanSynergy);
 
         const step = (lvl - 1) * 0.28;
         const skinId = this.currentSkinId;
@@ -14208,22 +14399,71 @@ class Game {
             });
           }
         } else {
-          // 6. CYBERPUNK: Kesintisiz Askeri Vulcan Gatling Akışı (Yüksek kadans, sıkı çift hat)
-          const bolt = 2.55 + step;
-          this.player.gatlingToggle = !this.player.gatlingToggle;
-          const gx = this.player.gatlingToggle ? -5 : 5;
-          fire({
-            x: this.player.x + gx, y: this.player.y - 18,
-            vx: 0, vy: -19,
-            damage: calcDmg(bolt * 1.05),
-            w: 4, h: 14, color: '#00f0ff', isGatling: true
-          });
-          fire({
-            x: this.player.x - gx * 0.5, y: this.player.y - 15,
-            vx: 0, vy: -18.5,
-            damage: calcDmg(bolt * 0.95),
-            w: 3.5, h: 12, color: '#ffffff', isGatling: true
-          });
+          // 6. CYBERPUNK & MAIN CANNON: Namlu Evrimi & Görsel Çoklu Atış (Multi-Barrel Progression)
+          const baseBolt = 2.65 + (lvl - 1) * 0.45;
+          if (lvl <= 1) {
+            // Seviye 1: Çift dar seri hat
+            this.player.gatlingToggle = !this.player.gatlingToggle;
+            const gx = this.player.gatlingToggle ? -4 : 4;
+            fire({
+              x: this.player.x + gx, y: this.player.y - 18,
+              vx: 0, vy: -19,
+              damage: calcDmg(baseBolt * 1.05),
+              w: 4, h: 14, color: '#00f0ff', isGatling: true
+            });
+            fire({
+              x: this.player.x - gx * 0.5, y: this.player.y - 15,
+              vx: 0, vy: -18.5,
+              damage: calcDmg(baseBolt * 0.95),
+              w: 3.5, h: 12, color: '#ffffff', isGatling: true
+            });
+          } else if (lvl === 2) {
+            // Seviye 2: Net İkiz Namlu (Twin Barrel) - İki yan yana paralel lazer
+            for (const ox of [-7, 7]) {
+              fire({
+                x: this.player.x + ox, y: this.player.y - 18,
+                vx: 0, vy: -20,
+                damage: calcDmg(baseBolt * 0.95),
+                w: 5, h: 16, color: '#00f0ff', isGatling: true
+              });
+            }
+          } else if (lvl === 3) {
+            // Seviye 3: Ağır İkiz Plazma (Heavy Twin) - Büyütülmüş mermiler ve sarsıcı vuruş
+            for (const ox of [-8, 8]) {
+              fire({
+                x: this.player.x + ox, y: this.player.y - 19,
+                vx: 0, vy: -21,
+                damage: calcDmg(baseBolt * 1.1),
+                w: 6.5, h: 20, color: '#00f0ff', isGatling: true
+              });
+            }
+          } else if (lvl === 4) {
+            // Seviye 4: Üçlü Yelpaze (Triple Spread Fan) - Merkez düz + iki yan açılı
+            fire({
+              x: this.player.x, y: this.player.y - 20,
+              vx: 0, vy: -21,
+              damage: calcDmg(baseBolt * 1.15),
+              w: 6, h: 20, color: '#00f0ff', isGatling: true
+            });
+            for (const [ox, vx] of [[-10, -1.8], [10, 1.8]]) {
+              fire({
+                x: this.player.x + ox, y: this.player.y - 18,
+                vx: vx, vy: -20,
+                damage: calcDmg(baseBolt * 0.95),
+                w: 5, h: 16, color: '#38bdf8', isGatling: true
+              });
+            }
+          } else {
+            // Seviye 5: Dörtlü Ağır Baraj (Quad Barrage / Delici Dalga) - 4 namlu ateş fırtınası
+            for (const [ox, vx] of [[-13, -1.2], [-5, -0.4], [5, 0.4], [13, 1.2]]) {
+              fire({
+                x: this.player.x + ox, y: this.player.y - 19,
+                vx: vx, vy: -22,
+                damage: calcDmg(baseBolt * 0.95),
+                w: 5.5, h: 18, color: '#00f0ff', isGatling: true, piercing: true, pierce: 2
+              });
+            }
+          }
         }
 
         if (skinId === 'solar') {
@@ -15005,18 +15245,14 @@ class Game {
     this.spawnTimer += dt;
 
     // Dinamik Karşı Güçlenme (Kullanıcı İsteği: Oyuncu güçlendikçe düşmanlar ve zorluk da paralel olarak artsın)
-    let playerUpgradeCount = 0;
-    if (this.player.upgrades) {
-      for (let k in this.player.upgrades) {
-        playerUpgradeCount += Math.max(0, (this.player.upgrades[k] || 0) - 1);
-      }
-    }
-    const playerDmgMult = Math.max(1.0, this.player.damageMultiplier || 1.0);
-    const powerScaling = (this.player.level - 1) * 0.08 + playerUpgradeCount * 0.04;
-    // Kalıcı Atölye/Gemi gücü (playerDmgMult) boss'a gizli zırh cezası vermez! Seviye ölçeklenmesi yumuşatılarak bossların aşırı mermi süngeri olması önlenir.
-    const bossPlayerPowerScale = 1 + Math.min(0.20, (this.player.level - 1) * 0.012 + playerUpgradeCount * 0.006);
-    const timeScaling = Math.min(0.65, (this.gameTime / 50) * 0.15);
-    const diffScale = 0.52 + powerScaling + timeScaling;
+    // DÜŞMAN VE ZORLUK ÖLÇEKLENMESİ (DIFFICULTY_CURVE):
+    // Rubber-band cezalandırması KESİNLİKLE KALDIRILDI!
+    // Oyuncunun seviye atlaması düşmanların canını artırmaz; güçlenme hissi %100 korunur.
+    // Zorluk yalnızca geçen süreye ve seçilen bölüme göre doğal olarak akar.
+    const m = (this.gameTime || 0) / 60;
+    const stage = this.selectedLevel || 1;
+    const diffScale = DIFFICULTY_CURVE.calcDifficulty(m, stage, this.currentMode === 'storm');
+    const bossPlayerPowerScale = 1.0;
 
     // === BOSS AKTİFKEN VEYA BOSS UYARISI BAŞLADIĞINDA SIKI SPAWN KONTROLÜ (HER İKİ MOD İÇİN ORTAK) ===
     // Boss sahnedeyken rastgele meteor yağmuru, bomba/mor taşlar, karadelik/kriyojenik taşlar ve telegraflar KESİNLİKLE çıkmaz!
@@ -16719,6 +16955,10 @@ class Game {
       }
       // Can yenile
       this.player.hp = Math.min(this.player.maxHp, this.player.hp + (isIntro ? 35 : 45));
+      // Boss Zafer Vakumu: Ekrandaki tüm XP kristallerini oyuncuya çeken epik çekim dalgası (Dopamin Patlaması)
+      this.player.vacuumTimer = Math.max(this.player.vacuumTimer || 0, 180);
+      this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 320);
+      this.particles.spawnFloatingText(this.player.x, this.player.y - 45, t('vacuum_burst_float'), '#ffd700', 18);
       // Boss öldürme ödülü: +1 Ücretsiz Kart Yenileme (Reroll) hakkı!
       this.player.rerollCount = (this.player.rerollCount || 0) + 1;
       this.flashEventBanner(t('banner_boss_reroll'), 'info');
@@ -17675,6 +17915,7 @@ class Game {
     if (ctx.resetTransform) ctx.resetTransform();
     else ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
+    ctx.imageSmoothingEnabled = false;
 
     // 1. Ekranı tamamen temizle ve zemin rengiyle doldur (kenar bozulmalarını ve iz kalmasını önler)
     ctx.clearRect(0, 0, this.width, this.height);
@@ -17683,11 +17924,11 @@ class Game {
 
     ctx.save();
 
-    // Ekran Sarsıntısı (Screen Shake - Organik Dinamik Sarsıntı)
+    // Ekran Sarsıntısı (Screen Shake - Pixel-Snapped Tam Sayı Sarsıntı)
     if (this.screenShake > 0) {
       const shakeAmt = Math.min(10, this.screenShake * 0.65);
-      const shakeX = (Math.random() - 0.5) * shakeAmt;
-      const shakeY = (Math.random() - 0.5) * shakeAmt;
+      const shakeX = Math.round((Math.random() - 0.5) * shakeAmt);
+      const shakeY = Math.round((Math.random() - 0.5) * shakeAmt);
       ctx.translate(shakeX, shakeY);
     }
 
