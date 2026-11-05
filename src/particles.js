@@ -1,6 +1,54 @@
 // === GÖRSEL EFEKTLER & KOZMİK PARÇACIK MOTORU ===
 import { shockwavePool, rockDebrisPool, blastFireballPool, particleDebrisPool } from './pool-manager.js';
 
+export function hexToRgba(hex, alpha = 1.0) {
+  if (!hex || typeof hex !== 'string') return `rgba(255, 255, 255, ${alpha})`;
+  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  const num = parseInt(c, 16);
+  if (isNaN(num)) return `rgba(255, 255, 255, ${alpha})`;
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const neonGlowCache = new Map();
+
+export function drawCachedNeonGlow(ctx, x, y, radius, color, alpha = 1.0) {
+  if (!ctx || radius <= 0 || alpha <= 0) return;
+  const quantRadius = Math.max(4, Math.min(128, Math.round(radius / 2) * 2));
+  const key = `${color}_${quantRadius}`;
+  let glowCanvas = neonGlowCache.get(key);
+  if (!glowCanvas && typeof document !== 'undefined') {
+    const size = quantRadius * 4;
+    glowCanvas = document.createElement('canvas');
+    glowCanvas.width = size;
+    glowCanvas.height = size;
+    const gctx = glowCanvas.getContext('2d');
+    const cx = size / 2;
+    const cy = size / 2;
+    const grad = gctx.createRadialGradient(cx, cy, 0, cx, cy, quantRadius * 1.6);
+    grad.addColorStop(0, hexToRgba(color, 0.95));
+    grad.addColorStop(0.35, hexToRgba(color, 0.55));
+    grad.addColorStop(0.7, hexToRgba(color, 0.2));
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    gctx.fillStyle = grad;
+    gctx.beginPath();
+    gctx.arc(cx, cy, quantRadius * 1.6, 0, Math.PI * 2);
+    gctx.fill();
+    neonGlowCache.set(key, glowCanvas);
+  }
+  if (glowCanvas) {
+    const prevAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = prevAlpha * alpha;
+    const drawSize = quantRadius * 4;
+    ctx.drawImage(glowCanvas, x - drawSize / 2, y - drawSize / 2, drawSize, drawSize);
+    ctx.globalAlpha = prevAlpha;
+  }
+}
+
 export class ParticleSystem {
   constructor() {
     // Sabit Boyutlu Nesne Havuzu (Object Pooling - 0 Heap Allocation)
@@ -177,22 +225,30 @@ export class ParticleSystem {
     }
   }
 
-  // 7. Düşman Patlamalarında Parça Saçılması (Debris & Shards - 0 GC Havuz Tahsisi)
-  spawnDebris(x, y, color = '#ff0055', count = 4) {
-    if (particleDebrisPool.getActiveCount() >= 25) return;
-    const finalCount = Math.min(count, 6);
+  // 7. Düşman Patlamalarında Parça Saçılması (Persistent Floating Debris: 3-4s süzülen metalik gövde parçaları ve parlayan şarapneller)
+  spawnDebris(x, y, color = '#ff0055', count = 6) {
+    if (particleDebrisPool.getActiveCount() >= 75) return;
+    const finalCount = Math.min(count, 12);
     for (let i = 0; i < finalCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 1.4 + Math.random() * 2.6;
+      const speed = 0.7 + Math.random() * 2.2;
+      const shapeType = i % 2; // 0: Metalik zırh gövde parçası, 1: Parlayan neon şarapnel
+      const rot = Math.random() * Math.PI * 2;
+      const rotSpeed = (Math.random() - 0.5) * 0.055;
+      // 3-4 saniye uzayda süzülme (60 FPS'te ~190-240 kare ömür, decay: 0.0042 - 0.0052)
+      const decay = 0.0042 + Math.random() * 0.0010;
       particleDebrisPool.acquire(
         x,
         y,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
-        1.8 + Math.random() * 2.2,
+        shapeType === 0 ? (2.8 + Math.random() * 2.4) : (1.8 + Math.random() * 1.6),
         color,
-        1,
-        0.045 + Math.random() * 0.03
+        1.0,
+        decay,
+        rot,
+        rotSpeed,
+        shapeType
       );
     }
   }
@@ -602,15 +658,15 @@ export class ParticleSystem {
       }
     }
 
-    // Shards / Enkaz Parçaları (Sıfır GC Havuz Güncellemesi)
+    // Shards / Enkaz Parçaları (3-4 sn Uzayda Süzülen Metalik Gövde Parçaları & Parlayan Şarapneller)
     for (let i = 0; i < this.shards.length; i++) {
       const s = this.shards[i];
       if (!s.active) continue;
       s.x += s.vx * dt;
       s.y += s.vy * dt;
-      if (s.rotSpeed !== undefined) s.rot += s.rotSpeed * dt;
-      s.vx *= Math.pow(0.95, dt);
-      s.vy *= Math.pow(0.95, dt);
+      if (s.rotSpeed !== undefined) s.rot = (s.rot || 0) + s.rotSpeed * dt;
+      s.vx *= Math.pow(0.988, dt);
+      s.vy *= Math.pow(0.988, dt);
       s.alpha -= s.decay * dt;
       if (s.alpha <= 0) {
         s.active = false;
@@ -858,22 +914,41 @@ export class ParticleSystem {
       }
     }
 
-    // 4.5. Metal & Diğer Enkaz Parçaları (Shards)
+    // 4.5. Metalik Gövde Parçaları & Parlayan Şarapneller (Persistent Floating Debris: Shards & Hull Plates)
     if (this.shards && this.shards.length > 0) {
       for (let s of this.shards) {
         if (!s.active || s.alpha <= 0) continue;
-        ctx.fillStyle = s.color;
-        ctx.globalAlpha = Math.max(0, s.alpha);
-        const sz = s.size || 2;
-        if (s.rot !== undefined) {
-          ctx.save();
-          ctx.translate(s.x, s.y);
-          ctx.rotate(s.rot);
-          ctx.fillRect(-sz * 0.5, -sz * 0.5, sz, sz);
-          ctx.restore();
+        const sz = s.size || 3;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, s.alpha));
+        ctx.translate(s.x, s.y);
+        ctx.rotate(s.rot || 0);
+
+        if (s.shapeType === 1) {
+          // Parlayan sivri neon şarapnel
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(-sz * 0.3, -sz * 1.2, sz * 0.6, sz * 2.4);
+          ctx.fillStyle = s.color || '#00f0ff';
+          ctx.fillRect(-sz * 0.5, -sz * 0.8, sz, sz * 1.6);
         } else {
-          ctx.fillRect(s.x - sz * 0.5, s.y - sz * 0.5, sz, sz);
+          // Çokgen metalik gövde zırh plakası (Metalik gri çekirdek + neon kenar)
+          ctx.fillStyle = '#1e293b';
+          ctx.strokeStyle = s.color || '#94a3b8';
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(-sz, -sz * 0.6);
+          ctx.lineTo(sz * 0.7, -sz);
+          ctx.lineTo(sz, sz * 0.4);
+          ctx.lineTo(-sz * 0.4, sz);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // İç metalik plaka detayı
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(-sz * 0.3, -sz * 0.3, sz * 0.6, sz * 0.6);
         }
+        ctx.restore();
       }
     }
 

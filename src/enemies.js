@@ -2,6 +2,7 @@
 import { t } from './i18n.js';
 import { gemPool } from './pool-manager.js';
 import { ENEMY_BASE_HP, BOSS_ROSTER_HP } from './balance.js';
+import { drawCachedNeonGlow } from './particles.js';
 
 export const BOSS_ROSTER = {
   boss_vanguard: {
@@ -542,6 +543,7 @@ export class Enemy {
         this.rightPodHp = Math.round(this.hp * 0.28);
         this.leftPodDestroyed = false;
         this.rightPodDestroyed = false;
+        this.coreExposed = false;
         break;
       }
 
@@ -833,20 +835,20 @@ export class Enemy {
       }
     } else if (this.isBoss) {
       const info = Enemy.getBossInfo(this.type);
-      const enrageThreshold = this.type === 'boss_apex' ? 0.45 : 0.50;
+      const enrageThreshold = 0.45;
 
       if (this.enrageShieldTimer > 0) {
         this.enrageShieldTimer -= dt;
       }
 
-      // 2. Faz (Öfke Modu) Kontrolü
+      // 2. Faz (Öfke Modu) Kontrolü (%45 Can Barında Acil Durum Dönüşümü)
       if (this.phase === 1 && this.hp <= this.maxHp * enrageThreshold) {
         this.phase = 2;
         this.isEnraged = true;
         this.justEnraged = true;
         this.enrageShieldTimer = 45; // Faz geçişinde kısa zırh koruması
         this.hp = Math.max(this.hp, Math.round(this.maxHp * enrageThreshold));
-        this.speedX = info.speedX * 1.38;
+        this.speedX = info.speedX * 1.45;
         this.color = info.enragedColor;
       }
 
@@ -867,6 +869,66 @@ export class Enemy {
         this.dirX = -1;
       } else if (this.x < this.radius + 12) {
         this.dirX = 1;
+      }
+
+      // === FAZ 2 YÜKSEK YOĞUNLUKLU PATTERNLER (MID-SCREEN CHARGE & ROTATING DUAL LASERS) ===
+      if (this.leftPodDestroyed || this.rightPodDestroyed) {
+        this.coreExposed = true;
+      }
+      if (this.phase === 2) {
+        // 1. Ekran Ortası Şarj Hücumu (Mid-Screen Charging Rush)
+        this.chargeRushTimer = (this.chargeRushTimer || 0) + dt;
+        if (!this.chargeRushActive && this.chargeRushTimer >= 260) {
+          this.chargeRushActive = true;
+          this.chargeRushPhase = 'windup';
+          this.chargeRushStep = 0;
+          this.chargeRushTargetX = playerX !== undefined ? playerX : this.x;
+          this.chargeRushTargetY = Math.min((screenHeight || 700) * 0.52, 280);
+          this.justStartedChargeRush = true;
+        }
+
+        if (this.chargeRushActive) {
+          this.chargeRushStep += dt;
+          if (this.chargeRushPhase === 'windup') {
+            this.hitTremor = 3.5;
+            if (this.chargeRushStep >= 30) {
+              this.chargeRushPhase = 'rush';
+              this.chargeRushStep = 0;
+            }
+          } else if (this.chargeRushPhase === 'rush') {
+            this.y += (this.chargeRushTargetY - this.y) * 0.16 * dt;
+            this.x += (this.chargeRushTargetX - this.x) * 0.12 * dt;
+            if (Math.abs(this.y - this.chargeRushTargetY) < 10 || this.chargeRushStep >= 40) {
+              this.chargeRushPhase = 'burst';
+              this.chargeRushStep = 0;
+              for (let b = 0; b < 8; b++) {
+                const bAng = b * (Math.PI * 2 / 8);
+                enemyProjectiles.push(new EnemyProjectile(this.x, this.y, bAng, 3.4, this.type));
+              }
+            }
+          } else if (this.chargeRushPhase === 'burst') {
+            if (this.chargeRushStep >= 18) {
+              this.chargeRushPhase = 'return';
+            }
+          } else if (this.chargeRushPhase === 'return') {
+            this.y += (targetHoverY - this.y) * 0.08 * dt;
+            if (Math.abs(this.y - targetHoverY) < 15 || this.chargeRushStep >= 55) {
+              this.chargeRushActive = false;
+              this.chargeRushTimer = 0;
+            }
+          }
+        }
+
+        // 2. Dönen Çift Lazer Süpürmesi (Rotating Dual Laser Sweeps)
+        this.dualLaserAngle = (this.dualLaserAngle || 0) + 0.032 * dt;
+        this.dualLaserTimer = (this.dualLaserTimer || 0) + dt;
+        if (this.dualLaserTimer >= 180) {
+          this.dualLaserActive = true;
+          if (this.dualLaserTimer >= 250) {
+            this.dualLaserActive = false;
+            this.dualLaserTimer = 0;
+          }
+        }
       }
 
       if (this.type === 'boss_nebula') {
@@ -1186,9 +1248,28 @@ export class Enemy {
         if (this.speedX) this.speedX = -Math.abs(this.speedX);
       }
     }
+ 
+    if (this.isSideFlanker) {
+      if (this.x >= 0 && this.x <= screenWidth) {
+        this.enteredScreen = true;
+      }
+      if (this.enteredScreen && (this.x < -60 || this.x > screenWidth + 60)) {
+        this.toRemove = true;
+      }
+    }
+    if (this.isLowerSweep) {
+      this.y += (this.speedY || -1.8) * dt;
+      if (this.y <= screenHeight * 0.65) {
+        this.x += (this.sweepDir || 1) * 1.5 * dt;
+        this.speedY = Math.min(1.2, (this.speedY || -1.8) + 0.04 * dt);
+      }
+      if (this.y <= screenHeight) {
+        this.enteredScreen = true;
+      }
+    }
 
-    // Ekranın altına inen düşmanlar ve mermiler temizlenir (Bosslar hariç)
-    if (this.y > screenHeight + 40 && !this.isBoss && !(this.type && this.type.startsWith('boss'))) {
+    // Ekranın altına inen düşmanlar ve mermiler temizlenir (Bosslar ve alt süpürme yapanlar hariç)
+    if (this.y > screenHeight + 40 && !this.isBoss && !(this.type && this.type.startsWith('boss')) && (!this.isLowerSweep || this.enteredScreen)) {
       this.toRemove = true;
     }
   }
@@ -1313,8 +1394,9 @@ export class Enemy {
 
       const blink = Math.sin(Date.now() * 0.025) > 0;
       ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : (this.charging ? (blink ? '#ff0055' : '#ffbe0b') : '#ff0055');
-      ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = this.charging ? 3 : 0;
+      if (this.charging) {
+        drawCachedNeonGlow(ctx, 0, 0, this.radius * 0.9, '#ff0055', 0.6);
+      }
 
       ctx.beginPath();
       ctx.moveTo(0, -this.radius * 1.3);
@@ -1611,8 +1693,7 @@ export class Enemy {
       ctx.save();
       ctx.strokeStyle = `rgba(56, 189, 248, ${shieldPulse})`;
       ctx.lineWidth = 3.5;
-      ctx.shadowColor = '#00f0ff';
-      ctx.shadowBlur = 3;
+      drawCachedNeonGlow(ctx, 0, 4, this.radius * 1.25, '#00f0ff', 0.55);
       ctx.beginPath();
       ctx.arc(0, 4, this.radius * 1.35, Math.PI * 0.15, Math.PI * 0.85);
       ctx.stroke();
@@ -1624,8 +1705,7 @@ export class Enemy {
       ctx.save();
       ctx.strokeStyle = `rgba(0, 240, 255, ${sparkPulse})`;
       ctx.lineWidth = 2.2;
-      ctx.shadowColor = '#00f0ff';
-      ctx.shadowBlur = 2;
+      drawCachedNeonGlow(ctx, 0, 0, this.radius * 1.1, '#00f0ff', 0.5);
       ctx.beginPath();
       ctx.arc(0, 0, this.radius * 1.15, 0, Math.PI * 2);
       ctx.stroke();
@@ -1872,8 +1952,9 @@ export class Enemy {
         ctx.strokeRect(this.radius * 0.72 - 3, -3, 6, 6);
       }
     }
-    // Her iki pod yoksa: Açık Savunmasız Çekirdek
+    // Her iki pod yoksa: Açık Savunmasız Çekirdek (2.5x Kritik Zayıf Nokta Hasarı)
     if (this.leftPodDestroyed && this.rightPodDestroyed) {
+      this.coreExposed = true;
       const corePulse = 0.5 + Math.sin(Date.now() * 0.012) * 0.5;
       ctx.strokeStyle = '#ff0055';
       ctx.lineWidth = 2.2;
@@ -1882,6 +1963,44 @@ export class Enemy {
       ctx.beginPath();
       ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
       ctx.fill();
+    } else {
+      this.coreExposed = false;
+    }
+
+    // 4.6. Dönen Çift Lazer Süpürmesi (Rotating Dual Laser Sweeps)
+    if (this.dualLaserActive) {
+      const sw1 = -0.42 + Math.sin(this.dualLaserAngle || 0) * 0.35;
+      const sw2 = 0.42 - Math.sin(this.dualLaserAngle || 0) * 0.35;
+      for (const ang of [sw1, sw2]) {
+        ctx.save();
+        ctx.strokeStyle = '#ff0055';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 10);
+        ctx.lineTo(Math.sin(ang) * 850, Math.cos(ang) * 850);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(0, 10);
+        ctx.lineTo(Math.sin(ang) * 850, Math.cos(ang) * 850);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 4.7. Şarj Hücumu Uyarısı (Mid-Screen Charging Telegraph)
+    if (this.chargeRushActive && this.chargeRushPhase === 'windup') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 190, 11, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(0, this.radius);
+      ctx.lineTo((this.chargeRushTargetX || this.x) - this.x, (this.chargeRushTargetY || 240) - this.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
     }
 
     // 5. Boss Saldırı Nişanlama Telegrafı (1.2s Kırmızı Lazer Telegraf Hattı & Aktif Ölüm Işını)
@@ -1957,8 +2076,7 @@ export class Enemy {
       ctx.save();
       ctx.globalAlpha = Math.min(0.92, this.hitFlash * 0.28);
       ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = '#ffffff';
-      ctx.shadowBlur = 3;
+      drawCachedNeonGlow(ctx, 0, 0, this.radius * 1.1, '#ffffff', 0.5);
       ctx.beginPath();
       ctx.arc(0, 0, this.radius * 1.08, 0, Math.PI * 2);
       ctx.fill();

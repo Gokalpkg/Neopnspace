@@ -1,5 +1,6 @@
 // === NEON SPACE SURVIVOR - ANA OYUN MOTORU ===
 import { sounds } from './audio.js';
+import { COSMIC_RELICS, RELIC_TIERS, getRandomRelicChoices } from './relics.js';
 import { vibrate } from './vibration.js';
 import { ParticleSystem } from './particles.js';
 import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
@@ -49,6 +50,9 @@ const startScreen = document.getElementById('start-screen');
 const levelModal = document.getElementById('level-modal');
 const gameoverModal = document.getElementById('gameover-modal');
 const cardsContainer = document.getElementById('cards-container');
+const relicModal = document.getElementById('relic-modal');
+const relicCardsContainer = document.getElementById('relic-cards-container');
+const hudRelicsStrip = document.getElementById('hud-relics-strip');
 
 // Altın Uzay Sandığı (Lucky Chest) Modalı
 const luckyChestModal = document.getElementById('lucky-chest-modal');
@@ -1237,7 +1241,8 @@ class Game {
 
       // Genişletilmiş hareket alanı: jet tüm ekranda serbest ve çevik manevra yapar
       this.player.targetX = Math.max(16, Math.min(this.width - 16, this.player.targetX + deltaX));
-      this.player.targetY = Math.max(36, Math.min(this.height - 36, this.player.targetY + deltaY));
+      const minY = Math.max(36, this.height * 0.38);
+      this.player.targetY = Math.max(minY, Math.min(this.height - 36, this.player.targetY + deltaY));
       if (this.dismissTutorial) this.dismissTutorial();
     };
 
@@ -9655,6 +9660,12 @@ class Game {
     this.player.visualRadius = 26;
     this.player.tilt = 0;
     this.player.combatZone = 'rear';
+    this.player.activeRelics = {};
+    this.player.relicKills = 0;
+    this.player.nanoRepairTimer = 0;
+    this.player.orbitalFamiliarAngle = 0;
+    this.player.magneticOverdriveTimer = 0;
+    if (hudRelicsStrip) hudRelicsStrip.innerHTML = '';
     this.revivesUsed = 0;
     this.vipReviveUsedThisRun = false;
 
@@ -10067,6 +10078,154 @@ class Game {
       this._hudShieldPct = shieldPercent;
       shieldBarFill.style.width = `${shieldPercent}%`;
     }
+  }
+
+  
+  // === SÜTUN 1: KOZMİK ESERLER (RELIC DRAFTING) SİSTEMİ ===
+  triggerRelicDraft() {
+    if (!this.player) return;
+    if (!this.player.activeRelics) this.player.activeRelics = {};
+
+    const choices = getRandomRelicChoices(this.player.activeRelics, 3);
+    if (!choices || choices.length === 0) return;
+
+    this.state = 'RELIC_DRAFT';
+    if (sounds.setPauseFilter) sounds.setPauseFilter(true);
+
+    if (!relicModal || !relicCardsContainer) return;
+    relicCardsContainer.innerHTML = '';
+
+    choices.forEach((relic, idx) => {
+      const card = document.createElement('div');
+      card.className = `upgrade-item-card relic-item-card tier-${relic.tier}`;
+      card.style.setProperty('--card-color', relic.color || '#00f0ff');
+      card.style.animation = `jackpotCardPop 0.42s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.08}s both`;
+
+      const tierTag = relic.tier === 'cosmic' ? 'epic-tag' : (relic.tier === 'legendary' ? 'evolution-tag' : 'rare-tag');
+      const iconSvg = getPixelIconSvg(relic.icon, 'lg') || getPixelIconSvg('energy', 'lg');
+
+      card.innerHTML = `
+        <div class="card-art-box" style="color: ${relic.color};">
+          ${iconSvg}
+        </div>
+        <div class="card-content">
+          <div class="card-header-row">
+            <span class="card-title">${t(relic.nameKey)}</span>
+            <span class="card-level-badge ${tierTag}">${relic.tier.toUpperCase()}</span>
+          </div>
+          <div class="card-desc">${t(relic.descKey)}</div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (performance.now() < (this.modalInputLockUntil || 0)) return;
+        this.modalInputLockUntil = performance.now() + 200;
+
+        sounds.playRelicAcquire();
+        vibrate.success();
+
+        const allCards = relicCardsContainer.querySelectorAll('.relic-item-card');
+        allCards.forEach(c => { if (c !== card) c.style.opacity = '0.25'; });
+        card.style.transform = 'scale(0.92)';
+
+        this.acquireRelic(relic);
+
+        setTimeout(() => {
+          relicModal.classList.add('hidden');
+          if (sounds.setPauseFilter) sounds.setPauseFilter(false);
+          this.startSmoothResume(6);
+          this.updateHUD();
+        }, 180);
+      });
+
+      relicCardsContainer.appendChild(card);
+    });
+
+    relicModal.classList.remove('hidden');
+  }
+
+  acquireRelic(relic) {
+    if (!this.player.activeRelics) this.player.activeRelics = {};
+    this.player.activeRelics[relic.id] = true;
+
+    if (relic.id === 'titan_bulkhead') {
+      this.player.maxHp += 40;
+      this.player.hp += 40;
+    } else if (relic.id === 'hyper_thrusters') {
+      this.player.speedMultiplier = (this.player.speedMultiplier || 1.0) * 1.25;
+    } else if (relic.id === 'glass_annihilator') {
+      this.player.damageMultiplier = (this.player.damageMultiplier || 1.0) * 1.45;
+      this.player.maxHp = Math.round(this.player.maxHp * 0.7);
+      this.player.hp = Math.min(this.player.hp, this.player.maxHp);
+    } else if (relic.id === 'astral_harvester') {
+      this.player.magnetRange = Math.round(this.player.magnetRange * 1.5);
+      this.player.crystalMultiplier = (this.player.crystalMultiplier || 1.0) * 1.25;
+    }
+
+    this.particles.spawnShockwave(this.player.x, this.player.y, relic.color || '#00f0ff', 240);
+    this.particles.spawnFloatingText(this.player.x, this.player.y - 45, t(relic.nameKey), relic.color || '#00f0ff', 18);
+    this.flashEventBanner(t(relic.nameKey), 'info');
+    this.updateRelicsHUD();
+  }
+
+  updateRelicsHUD() {
+    if (!hudRelicsStrip || !this.player || !this.player.activeRelics) return;
+    const relicKeys = Object.keys(this.player.activeRelics);
+    const sig = relicKeys.sort().join('|');
+    if (this._hudRelicsSig === sig) return;
+    this._hudRelicsSig = sig;
+
+    hudRelicsStrip.innerHTML = '';
+    relicKeys.forEach(relicId => {
+      const relic = COSMIC_RELICS.find(r => r.id === relicId);
+      if (!relic) return;
+      const tierBadge = document.createElement('div');
+      tierBadge.className = `hud-relic-badge tier-${relic.tier}`;
+      tierBadge.title = `${t(relic.nameKey)}: ${t(relic.descKey)}`;
+      tierBadge.innerHTML = getPixelIconSvg(relic.icon, 'xs') || getPixelIconSvg('energy', 'xs');
+      hudRelicsStrip.appendChild(tierBadge);
+    });
+  }
+
+  spawnGrazeMines(x, y) {
+    for (let m = -1; m <= 1; m += 2) {
+      this.playerBullets.push({
+        x: x + m * 24,
+        y: y - 10,
+        vx: m * 1.6,
+        vy: -1.8,
+        damage: 35,
+        color: '#ffbe0b',
+        radius: 7,
+        isMine: true,
+        penetrations: 0,
+        pierce: 0
+      });
+    }
+  }
+
+  spawnFlankingSquad() {
+    const fromLeft = Math.random() < 0.5;
+    const spawnX = fromLeft ? -25 : this.width + 25;
+    const dirX = fromLeft ? 1 : -1;
+    const speed = 1.8 * (this.waveSpeedBonus || 1.0);
+    for (let i = 0; i < 3; i++) {
+      const e = new Enemy(spawnX - dirX * (i * 32), this.height * 0.25 + (i * 24), 'scout', this.waveMultiplier || 1.0, speed);
+      e.isSideFlanker = true;
+      e.speedX = dirX * speed;
+      e.speedY = 0.6;
+      this.enemies.push(e);
+    }
+  }
+
+  spawnLowerSweep() {
+    const fromLeft = Math.random() < 0.5;
+    const spawnX = fromLeft ? 40 : this.width - 40;
+    const e = new Enemy(spawnX, this.height + 25, 'scout', (this.waveMultiplier || 1.0) * 1.2, 1.5 * (this.waveSpeedBonus || 1.0));
+    e.isLowerSweep = true;
+    e.speedY = -2.2;
+    e.sweepDir = fromLeft ? 1 : -1;
+    this.enemies.push(e);
   }
 
   updateHUD() {
@@ -13399,11 +13558,53 @@ class Game {
       if (Math.abs(this.player.knockY) < 0.04) this.player.knockY = 0;
     }
     this.player.x = Math.max(16, Math.min(this.width - 16, this.player.x));
-    this.player.y = Math.max(36, Math.min(this.height - 36, this.player.y));
+    const minY = Math.max(36, this.height * 0.38);
+    this.player.y = Math.max(minY, Math.min(this.height - 36, this.player.y));
     // Kuantum Faz Sayacı (Phantom Jet Özel Koruması) & Diriliş Dokunulmazlığı
     if (this.player.phaseTimer > 0) this.player.phaseTimer -= dt;
     if (this.player.phaseCooldown > 0) this.player.phaseCooldown -= dt;
     if (this.player.invulnerableTimer > 0) this.player.invulnerableTimer = Math.max(0, this.player.invulnerableTimer - dt);
+
+    // Kozmik Eserler Periyodik Döngüsü
+    if (this.player.activeRelics) {
+      // 1. Nanobot Otomatik Onarım (Nano Repair: 7sn hasarsızlıkta 2sn'de bir +2 HP)
+      if (this.player.activeRelics.nano_repair) {
+        this.player.nanoRepairTimer = (this.player.nanoRepairTimer || 0) + dt;
+        if (this.player.nanoRepairTimer >= 420) {
+          if (this.player.hp < this.player.maxHp) {
+            this.player.hp = Math.min(this.player.maxHp, this.player.hp + 2);
+            this.particles.spawnFloatingText(this.player.x, this.player.y - 30, '+2 HP', '#05ffa1', 12);
+          }
+          this.player.nanoRepairTimer = 300;
+        }
+      }
+      // 2. Manyetik Aşırı Yükleme (Magnetic Overdrive: 12sn'de bir global vakum)
+      if (this.player.activeRelics.magnetic_overdrive) {
+        this.player.magneticOverdriveTimer = (this.player.magneticOverdriveTimer || 0) + dt;
+        if (this.player.magneticOverdriveTimer >= 720) {
+          this.player.magneticOverdriveTimer = 0;
+          this.player.vacuumTimer = Math.max(this.player.vacuumTimer || 0, 120);
+          this.particles.spawnShockwave(this.player.x, this.player.y, '#38bdf8', 260);
+          sounds.playPowerup();
+        }
+      }
+      // 3. Yörünge Savunma Uydusu (Orbital Familiar: mermileri saptırır)
+      if (this.player.activeRelics.orbital_familiar) {
+        this.player.orbitalFamiliarAngle = (this.player.orbitalFamiliarAngle || 0) + 0.055 * dt;
+        const famX = this.player.x + Math.cos(this.player.orbitalFamiliarAngle) * 44;
+        const famY = this.player.y + Math.sin(this.player.orbitalFamiliarAngle) * 44;
+        if (Array.isArray(this.enemyProjectiles)) {
+          for (let pi = this.enemyProjectiles.length - 1; pi >= 0; pi--) {
+            const ep = this.enemyProjectiles[pi];
+            if (Math.hypot(ep.x - famX, ep.y - famY) < 20) {
+              ep.toRemove = true;
+              this.particles.spawnExplosion(famX, famY, '#00f0ff', 4, 1.2);
+              sounds.playHitmarker();
+            }
+          }
+        }
+      }
+    }
     if (this.player.tetherHitCooldown > 0) this.player.tetherHitCooldown = Math.max(0, this.player.tetherHitCooldown - dt);
     if (this.player.lastStandUsed && this.player.maxHp > 0 && this.player.hp > 1 && (this.player.hp / this.player.maxHp) > 0.5) {
       this.player.lastStandUsed = false;
@@ -13724,6 +13925,10 @@ class Game {
 
     // Pasif otomatik kalkan yenilenmesi kaldırıldı: Kalkan SADECE düşen kalkan güçlendiricisi (pickup_shield) veya seviye atlama kartlarıyla yenilenir!
     this.player.shieldRegenTimer = 0;
+    this.player.nanoRepairTimer = 0; // Hasar alınınca nanobot onarımı sıfırlanır
+    if (this.player.activeRelics && this.player.activeRelics.titan_bulkhead) {
+      amount = Math.max(1, amount - 2);
+    }
 
     // Telegraph Lazer Uyarılarını Güncelle (Boss aktifken yeni telegraf uyarıları iptal edilir)
     if (this.currentBoss && !this.currentBoss.toRemove) {
@@ -15027,7 +15232,13 @@ class Game {
         continue;
       }
 
-      if (b.isRicochet && b.bouncesLeft > 0 && (b.x <= 14 || b.x >= this.width - 14)) {
+      if (this.player.activeRelics && this.player.activeRelics.quantum_mirror && !b.mirrorBounced && (b.x <= 16 || b.x >= this.width - 16)) {
+        b.mirrorBounced = true;
+        b.vx = (b.x <= 16) ? Math.max(2.0, Math.abs(b.vx || 0) * 1.1) : -Math.max(2.0, Math.abs(b.vx || 0) * 1.1);
+        b.damage = (b.damage || 20) * 1.25;
+        this.particles.spawnHitSparks(b.x, b.y, b.vx > 0 ? 1 : -1, 0, '#bf5af2');
+        sounds.playCrit();
+      } else if (b.isRicochet && b.bouncesLeft > 0 && (b.x <= 14 || b.x >= this.width - 14)) {
         if (b.x <= 14) {
           b.x = 15;
           b.vx = Math.max(1.5, Math.abs(b.vx || 0));
@@ -15926,6 +16137,16 @@ class Game {
       }
       enemy.update(this.player.x, this.player.y, this.enemyProjectiles, this.width, this.height, dt);
 
+      // Boss Faz 2 Öfke & Acil Durum Sireni
+      if ((enemy.isBoss || (enemy.type && enemy.type.startsWith('boss'))) && enemy.justEnraged) {
+        enemy.justEnraged = false;
+        sounds.playEmergencySiren();
+        sounds.setBossEnraged(true);
+        this.screenShake = Math.max(this.screenShake || 0, 16);
+        this.particles.triggerFlash(enemy.color || '#ff0055', 0.85);
+        this.flashEventBanner(t('banner_boss_enraged'), 'danger');
+      }
+
       // Zehir Hasarı (Toxic iğneleriyle zehirlenmiş düşmanlar)
       if (enemy.poisonTimer > 0 && enemy.hp > 0 && !enemy.toRemove) {
         enemy.poisonTimer -= dt;
@@ -16038,6 +16259,26 @@ class Game {
               continue;
             }
             let hitDamage = bullet.damage;
+            // Berserker Core: Can <%35 iken +%40 Hasar
+            if (this.player.activeRelics && this.player.activeRelics.berserker_core && (this.player.hp / Math.max(1, this.player.maxHp)) < 0.35) {
+              hitDamage *= 1.40;
+            }
+            // Frostbite Shards: Buz yavaşlatması
+            if (this.player.activeRelics && this.player.activeRelics.frostbite_shards) {
+              enemy.cryoSlowTimer = Math.max(enemy.cryoSlowTimer || 0, 120);
+            }
+            // Chain Lightning: %35 ihtimalle 2 düşmana sıçrama
+            if (this.player.activeRelics && this.player.activeRelics.chain_lightning && Math.random() < 0.35) {
+              let arcs = 0;
+              for (const oe of this.enemies) {
+                if (oe !== enemy && !oe.toRemove && Math.hypot(oe.x - enemy.x, oe.y - enemy.y) < 130) {
+                  this.applyCappedEnemyDamage(oe, Math.round(hitDamage * 0.45), bullet);
+                  this.particles.spawnHitSparks(oe.x, oe.y, 0, -1, '#00f0ff');
+                  arcs++;
+                  if (arcs >= 2) break;
+                }
+              }
+            }
             if (enemy.hasFrontShield && bullet.y > enemy.y && enemy.isFleetMember) {
               hitDamage *= 0.55;
               sounds.playDeflect();
@@ -16053,10 +16294,13 @@ class Game {
             this.applyBossPodDamage(enemy, hitDamage, bullet.x);
             const relX = bullet.x - enemy.x;
             // İki pod da yok edildiğinde: AÇIK ÇEKİRDEK - %40 KRİTİK ZAYIF NOKTA HASARI!
-            if (enemy.leftPodDestroyed && enemy.rightPodDestroyed && Math.abs(relX) <= 16) {
-              hitDamage *= 1.4;
+            if ((enemy.coreExposed || (enemy.leftPodDestroyed && enemy.rightPodDestroyed)) && Math.abs(relX) <= 20) {
+              hitDamage *= 2.5;
               sounds.playCrit();
-              this.particles.spawnExplosion(bullet.x, bullet.y, '#ffe600', 8, 2.5);
+              this.particles.spawnExplosion(bullet.x, bullet.y, '#ffe600', 12, 3.2);
+              if (this.frames % 12 === 0) {
+                this.particles.spawnFloatingText(enemy.x, enemy.y - 25, 'CORE CRIT x2.5!', '#ffd700', 16);
+              }
             }
           }
 
@@ -16426,6 +16670,10 @@ class Game {
 
   triggerGraze(sourceX, sourceY) {
     sounds.playGraze();
+    // Kozmik Eser: Sıyırma Mayınları (Graze Mines)
+    if (this.player.activeRelics && this.player.activeRelics.graze_mines) {
+      this.spawnGrazeMines(this.player.x, this.player.y);
+    }
     vibrate.light();
 
     this.screenShake = Math.max(this.screenShake || 0, 3.5);
@@ -16960,6 +17208,8 @@ class Game {
       }
       // Can yenile
       this.player.hp = Math.min(this.player.maxHp, this.player.hp + (isIntro ? 35 : 45));
+      // Sütun 1: Boss Zaferinde Kozmik Eser (Relic Drafting) Modalı
+      this.triggerRelicDraft();
       // Boss Zafer Vakumu: Ekrandaki tüm XP kristallerini oyuncuya çeken epik çekim dalgası (Dopamin Patlaması)
       this.player.vacuumTimer = Math.max(this.player.vacuumTimer || 0, 180);
       this.particles.spawnShockwave(this.player.x, this.player.y, '#ffd700', 320);
@@ -17034,6 +17284,10 @@ class Game {
       const pTypes = ['overcharge', 'shield', 'magnet'];
       const pType = pTypes[Math.floor(Math.random() * pTypes.length)];
       this.powerups.push(new PowerUp(enemy.x, enemy.y, pType));
+      // Elit Düşman Zaferinde %45 Şansla Kozmik Eser Keşfi
+      if (Math.random() < 0.45) {
+        this.triggerRelicDraft();
+      }
     } else if (enemy.type === 'elite_scout') {
       sounds.playLevelUp();
       vibrate.success();
@@ -17408,6 +17662,24 @@ class Game {
 
     // Kalkan Parçalanması / Kırılması (Shield-Gate & Crystalline Glass Shatter)
     if (hadShield && this.player.shield <= 0) {
+      // Kozmik Eser: Reaktif Aşırı Yükleme EMP Şok Dalgası
+      if (this.player.activeRelics && this.player.activeRelics.reactive_overload) {
+        sounds.playExplosion(true);
+        this.screenShake = Math.max(this.screenShake || 0, 14);
+        this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 200);
+        this.particles.triggerFlash('#00f0ff', 0.55);
+        if (Array.isArray(this.enemyProjectiles)) {
+          for (const ep of this.enemyProjectiles) {
+            if (Math.hypot(ep.x - this.player.x, ep.y - this.player.y) < 200) ep.toRemove = true;
+          }
+        }
+        for (const ne of this.enemies) {
+          if (Math.hypot(ne.x - this.player.x, ne.y - this.player.y) < 200) {
+            this.applyCappedEnemyDamage(ne, 45, false);
+            ne.stunTimer = Math.max(ne.stunTimer || 0, 90);
+          }
+        }
+      }
       amount = 0;
       this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, 42);
       sounds.playShieldBreak();

@@ -105,13 +105,22 @@ class SoundEngine {
         this.musicGain.gain.setValueAtTime(this.isBgmActive ? 0.48 : 0, this.ctx.currentTime);
         this.musicGain.connect(this.mainMusicFilter);
 
-        // Performans: Paylaşımlı tek gürültü tamponu (Her patlamada yeniden buffer üretmeyi önler)
+        // Performans: Paylaşımlı tek gürültü tamponu ve distorsiyonlu vuruş tamponu
         if (!this.sharedNoiseBuffer) {
           const sr = this.ctx.sampleRate || 44100;
           this.sharedNoiseBuffer = this.ctx.createBuffer(1, sr, sr);
           const d = this.sharedNoiseBuffer.getChannelData(0);
           for (let i = 0; i < sr; i++) {
             d[i] = Math.random() * 2 - 1;
+          }
+        }
+        if (!this.sharedDistortedNoiseBuffer) {
+          const sr = this.ctx.sampleRate || 44100;
+          this.sharedDistortedNoiseBuffer = this.ctx.createBuffer(1, sr, sr);
+          const dd = this.sharedDistortedNoiseBuffer.getChannelData(0);
+          for (let i = 0; i < sr; i++) {
+            const raw = Math.random() * 2 - 1;
+            dd[i] = Math.max(-1, Math.min(1, 1.6 * raw - 0.6 * raw * raw * raw));
           }
         }
       }
@@ -542,6 +551,7 @@ class SoundEngine {
   // ==========================================
 
   // Standart Lazer Atışı (Tok & Akıcı - Pitch Randomization & Punchy Low-End)
+  // Standart Lazer Atışı (Tok & Akıcı - Pitch Randomization & 50Hz Sub-Bass Punch)
   playLaser() {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -549,12 +559,11 @@ class SoundEngine {
       if (this.lastLaserTime && now - this.lastLaserTime < 0.045) return;
       this.lastLaserTime = now;
 
-      // Dinamik pitch varyasyonu (%±6 rastgele sapma - monotonlaşmayı kırar ama uyumu bozmaz)
+      // Dinamik pitch varyasyonu (%±6 rastgele sapma - monotonlaşmayı kırar)
       const pitchVariance = 1 + (Math.random() - 0.5) * 0.12;
       const startFreq = 640 * pitchVariance;
       const endFreq = 120 * pitchVariance;
 
-      // Üst frekansları yumuşatan ve kulak yorgunluğunu önleyen sıcak analog low-pass filtre
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(1400, now);
@@ -563,22 +572,22 @@ class SoundEngine {
 
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = 'triangle'; // Sert testere yerine sıcak üçgen dalga
+      osc.type = 'triangle';
       osc.frequency.setValueAtTime(startFreq, now);
       osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.085);
 
       gain.gain.setValueAtTime(0.13, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
 
-      // Göğüste hissedilen yumuşak sub-punch darbesi (Tokluk hissi)
+      // Göğüste hissedilen 50Hz sub-bass darbesi
       const subOsc = this.ctx.createOscillator();
       const subGain = this.ctx.createGain();
       subOsc.type = 'sine';
-      subOsc.frequency.setValueAtTime(190 * pitchVariance, now);
-      subOsc.frequency.exponentialRampToValueAtTime(55, now + 0.065);
+      subOsc.frequency.setValueAtTime(52 * pitchVariance, now);
+      subOsc.frequency.exponentialRampToValueAtTime(24, now + 0.075);
 
-      subGain.gain.setValueAtTime(0.09, now);
-      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+      subGain.gain.setValueAtTime(0.14, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
 
       osc.connect(filter);
       filter.connect(gain);
@@ -593,11 +602,61 @@ class SoundEngine {
       osc.start(now);
       osc.stop(now + 0.085);
       subOsc.start(now);
-      subOsc.stop(now + 0.065);
+      subOsc.stop(now + 0.075);
     } catch (e) {}
   }
 
-  // Güdümlü Mikro Füze Ateşleme (Hava İtişi)
+  // Ağır Plazma & Lazer Işını (Visceral Heavy Laser - 58Hz Sub-Bass & Distorsiyon)
+  playHeavyLaser() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      if (this._lastHeavyLaserTime && now - this._lastHeavyLaserTime < 0.07) return;
+      this._lastHeavyLaserTime = now;
+
+      const dur = 0.22;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(95, now + dur);
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(800, now);
+      filter.frequency.exponentialRampToValueAtTime(140, now + dur);
+
+      gain.gain.setValueAtTime(0.24, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+      // 58Hz -> 25Hz Sub-Bass Exponential Ramp
+      const sub = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      sub.type = 'sine';
+      sub.frequency.setValueAtTime(58, now);
+      sub.frequency.exponentialRampToValueAtTime(25, now + dur);
+
+      subGain.gain.setValueAtTime(0.36, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.sfxGain);
+
+      sub.connect(subGain);
+      subGain.connect(this.sfxGain);
+
+      this._autoDisconnect(osc, filter, gain);
+      this._autoDisconnect(sub, subGain);
+
+      osc.start(now);
+      osc.stop(now + dur);
+      sub.start(now);
+      sub.stop(now + dur);
+    } catch (e) {}
+  }
+
+  // Güdümlü Mikro Füze & Roket Ateşleme (Punchy Distorted Noise Buffer & 55Hz Sub-Bass Ramp)
   playMissile() {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -605,25 +664,60 @@ class SoundEngine {
       if (this._lastMissileTime && now - this._lastMissileTime < 0.08) return;
       this._lastMissileTime = now;
 
+      const dur = 0.24;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(180, now);
-      osc.frequency.exponentialRampToValueAtTime(650, now + 0.16);
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.exponentialRampToValueAtTime(540, now + dur);
 
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + dur);
+
+      // Distorsiyonlu Patlayıcı Roket İtkisi (Punchy Distorted Noise Transient)
+      if (this.sharedDistortedNoiseBuffer || this.sharedNoiseBuffer) {
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.sharedDistortedNoiseBuffer || this.sharedNoiseBuffer;
+        const nFilter = this.ctx.createBiquadFilter();
+        nFilter.type = 'bandpass';
+        nFilter.frequency.setValueAtTime(340, now);
+        nFilter.frequency.exponentialRampToValueAtTime(80, now + dur);
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.26, now);
+        nGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        noise.connect(nFilter);
+        nFilter.connect(nGain);
+        nGain.connect(this.sfxGain);
+        this._autoDisconnect(noise, nFilter, nGain);
+        noise.start(now);
+        noise.stop(now + dur);
+      }
+
+      // 55Hz -> 22Hz Roket Sub-Bass İtki Basıncı
+      const sub = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      sub.type = 'sine';
+      sub.frequency.setValueAtTime(55, now);
+      sub.frequency.exponentialRampToValueAtTime(22, now + dur);
+      subGain.gain.setValueAtTime(0.32, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+      sub.connect(subGain);
+      subGain.connect(this.sfxGain);
 
       osc.connect(gain);
       gain.connect(this.sfxGain);
 
       this._autoDisconnect(osc, gain);
+      this._autoDisconnect(sub, subGain);
       osc.start(now);
-      osc.stop(now + 0.16);
+      osc.stop(now + dur);
+      sub.start(now);
+      sub.stop(now + dur);
     } catch (e) {}
   }
 
-  // Patlama Sesi (Büyük & Küçük) - Sinematik Sub-Bass Katmanı ile Gerçek Tokluk
+  // Patlama Sesi (Büyük & Küçük) - 40Hz-60Hz Sub-Bass Exponential Ramp & Distorted Noise Buffer
   playExplosion(isLarge = false) {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -631,31 +725,32 @@ class SoundEngine {
       if (this.lastExplosionTime && now - this.lastExplosionTime < 0.04 && !isLarge) return;
       this.lastExplosionTime = now;
 
-      const duration = isLarge ? 0.48 : 0.24;
+      const duration = isLarge ? 0.52 : 0.28;
       const noise = this.ctx.createBufferSource();
-      noise.buffer = this.sharedNoiseBuffer;
+      noise.buffer = this.sharedDistortedNoiseBuffer || this.sharedNoiseBuffer;
 
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(isLarge ? 420 : 750, now);
-      filter.frequency.exponentialRampToValueAtTime(28, now + duration);
+      filter.frequency.setValueAtTime(isLarge ? 480 : 720, now);
+      filter.frequency.exponentialRampToValueAtTime(24, now + duration);
 
       const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(isLarge ? 0.38 : 0.22, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+      gain.gain.setValueAtTime(isLarge ? 0.44 : 0.26, now);
+      gain.gain.exponentialRampToValueAtTime(0.008, now + duration);
 
       noise.connect(filter);
       filter.connect(gain);
       gain.connect(this.sfxGain);
 
-      // Sinematik Sub-Bass Titremesi (65Hz -> 20Hz Sub Darbe)
+      // 40Hz-60Hz Sinematik Sub-Bass Titremesi (60Hz / 48Hz -> 20Hz Sub Darbe Rampası)
       const subOsc = this.ctx.createOscillator();
       const subGain = this.ctx.createGain();
       subOsc.type = 'sine';
-      subOsc.frequency.setValueAtTime(isLarge ? 72 : 55, now);
+      const startSubHz = isLarge ? 60 : 48;
+      subOsc.frequency.setValueAtTime(startSubHz, now);
       subOsc.frequency.exponentialRampToValueAtTime(20, now + duration);
 
-      subGain.gain.setValueAtTime(isLarge ? 0.32 : 0.16, now);
+      subGain.gain.setValueAtTime(isLarge ? 0.42 : 0.24, now);
       subGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
       subOsc.connect(subGain);
@@ -668,6 +763,77 @@ class SoundEngine {
       noise.stop(now + duration);
       subOsc.start(now);
       subOsc.stop(now + duration);
+    } catch (e) {}
+  }
+
+  // Boss Faz 2 Acil Durum Alarmı (Emergency Klaxon Siren)
+  playEmergencySiren() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const dur = 1.6;
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc1.type = 'sawtooth';
+      osc2.type = 'sine';
+
+      // 480Hz -> 820Hz -> 480Hz çift tur acil durum modülasyonu
+      osc1.frequency.setValueAtTime(480, now);
+      osc1.frequency.linearRampToValueAtTime(840, now + 0.4);
+      osc1.frequency.linearRampToValueAtTime(480, now + 0.8);
+      osc1.frequency.linearRampToValueAtTime(840, now + 1.2);
+      osc1.frequency.linearRampToValueAtTime(480, now + 1.6);
+
+      osc2.frequency.setValueAtTime(485, now);
+      osc2.frequency.linearRampToValueAtTime(845, now + 0.4);
+      osc2.frequency.linearRampToValueAtTime(485, now + 0.8);
+      osc2.frequency.linearRampToValueAtTime(845, now + 1.2);
+      osc2.frequency.linearRampToValueAtTime(485, now + 1.6);
+
+      gain.gain.setValueAtTime(0.28, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + dur);
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1600, now);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.sfxGain);
+
+      this._autoDisconnect(osc1, osc2, filter, gain);
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + dur);
+      osc2.stop(now + dur);
+    } catch (e) {}
+  }
+
+  // Kozmik Eser Kazanma Sesi (Celestial Relic Resonant Chime)
+  playRelicAcquire() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+      freqs.forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.06);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.setValueAtTime(0.22, now + i * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.7);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        this._autoDisconnect(osc, gain);
+        osc.start(now + i * 0.06);
+        osc.stop(now + i * 0.06 + 0.7);
+      });
     } catch (e) {}
   }
 

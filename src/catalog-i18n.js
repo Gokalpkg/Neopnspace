@@ -687,7 +687,76 @@ const RAW = {
   hybrid_toast_hull: row('+20 HULL INTEGRITY ACTIVE!', '+20 GÖVDE CANI AKTİF!', '+20 INTÉGRITÉ DE COQUE ACTIVE !', '+20 HÜLLENINTEGRITÄT AKTIV!', '+20 装甲已激活！', '+20 裝甲已激活！', '+20 船体耐久が発動！'),
   hybrid_toast_shield: row('+15 SHIELD ACTIVE!', '+15 KALKAN AKTİF!', '+15 BOUCLIER ACTIF !', '+15 SCHILD AKTIV!', '+15 护盾已激活！', '+15 護盾已激活！', '+15 シールドが発動！'),
   hybrid_toast_damage: row('+12% DAMAGE ACTIVE!', '+%12 PLAZMA HASARI AKTİF!', '+12% DÉGÂTS ACTIF !', '+12% SCHADEN AKTIV!', '+12% 伤害已激活！', '+12% 傷害已激活！', '+12% ダメージが発動！'),
-  hybrid_toast_magnet: row('+18 MAGNET RANGE ACTIVE!', '+18 ÇEKİM ALANI AKTİF!', '+18 PORTÉE D\'ATTRACTION ACTIVE !', '+18 MAGNETREICHWEITE AKTIV!', '+18 拾取范围已激活！', '+18 拾取範圍已激活！', '+18 吸引範囲が発動！')
+  hybrid_toast_magnet: row('+18 MAGNET RANGE ACTIVE!', '+18 ÇEKİM ALANI AKTİF!', '+18 PORTÉE D\'ATTRACTION ACTIVE !', '+18 MAGNETREICHWEITE AKTIV!', '+18 拾取范围已激活！', '+18 拾取範圍已激活！', '+18 吸引範囲が発動！'),
+
+  // Sütun 1: Kozmik Eserler Sistemi (Cosmic Relics)
+  relic_modal_title: row('COSMIC RELIC DISCOVERY', 'KOZMİK ESER KEŞFİ', 'DÉCOUVERTE DE RELIQUE COSMIQUE', 'KOSMISCHE RELIKT-ENTDECKUNG', '宇宙遗物探索', '宇宙遺物探索', 'コズミックレリック発見'),
+  relic_modal_subtitle: row('Select a permanent cosmic relic for your ship', 'Gemin için kalıcı bir kozmik eser seç', 'Choisissez une relique cosmique pour votre vaisseau', 'Waehle ein kosmisches Relikt fuer dein Schiff', '为战机选择一个永久宇宙遗物', '為戰機選擇一個永久宇宙遺物', '機体に装備する恒久レリックを選択'),
+  relic_modal_hint: row('Active throughout the entire flight.', 'Tüm sefer boyunca aktiftir.', 'Actif pendant tout le vol.', 'Waehrend des gesamten Fluges aktiv.', '在本次出击全程生效。', '在本次出擊全程生效。', '出撃中ずっと効果が持続します。'),
+  relic_tier_rare: row('RARE', 'NADİR', 'RARE', 'SELTEN', '稀有', '稀有', 'レア'),
+  relic_tier_legendary: row('LEGENDARY', 'EFSANEVİ', 'LÉGENDAIRE', 'LEGENDÄR', '传奇', '傳奇', 'レジェンド'),
+  relic_tier_cosmic: row('COSMIC', 'KOZMİK', 'COSMIQUE', 'KOSMISCH', '宇宙', '宇宙', 'コズミック'),
+  banner_boss_enraged: row('PHASE 2 ENRAGE: EMERGENCY SIREN & CORE OVERLOAD!', 'FAZ 2 ÖFKE: ACİL DURUM SİRENİ VE ÇEKİRDEK AŞIRI YÜKLEMESİ!', 'ENRAGÉ PHASE 2 : SIRÈNE D\'URGENCE ET SURCHARGE !', 'PHASE 2 RAGE: NOTFALLSIRENE UND KERN-UEBERLASTUNG!', '第2阶段狂暴：警报与核心过载！', '第2階段狂暴：警報與核心過載！', 'フェーズ2激怒：非常サイレン＆コア過負荷！'),
+
+  relic_reactive_overload_name: row('REACTIVE OVERLOAD', 'REAKTİF AŞIRI YÜKLEME', 'SURCHARGE RÉACTIVE', 'REAKTIVE UEBERLASTUNG', '反应过载', '反應過載', 'リアクティブオーバーロード'),
+  relic_reactive_overload_desc: row('When shield breaks, emits a 180px EMP shockwave dealing 35 damage and clearing enemy bullets.', 'Kalkan kırıldığında 180px alanda düşman mermilerini silen 35 hasarlı EMP şok dalgası yayar.', 'Brise de bouclier émet une onde IEM de 180px infligeant 35 dégâts et dissipant les tirs.', 'Schildbruch loest eine 180px EMP-Schockwelle mit 35 Schaden aus und loescht Geschosse.', '护盾破碎时释放 180px EMP 冲击波，造成 35 伤害并消除敌弹。', '護盾破碎時釋放 180px EMP 衝擊波，造成 35 傷害並消除敵彈。', 'シールド破壊時に180pxのEMP衝撃波を放ち、35ダメージと敵弾消去。'),
+
+  relic_quantum_mirror_name: row('QUANTUM MIRROR', 'KUANTUM AYNA', 'MIROIR QUANTIQUE', 'QUANTENSPIEGEL', '量子镜像', '量子鏡像', '量子ミラー'),
+  relic_quantum_mirror_desc: row('Player bullets bounce off arena side edges with +20% bonus damage.', 'Mermiler arena yan sınırlarından sekerek +%20 ek hasarla hedeflere yönelir.', 'Les tirs rebondissent sur les parois avec +20% de dégâts supplémentaires.', 'Projektile prallen an Waenden mit +20% Bonusschaden ab.', '战机子弹撞击边缘反弹并附带 +20% 额外伤害。', '戰機子彈撞擊邊緣反彈並附帶 +20% 額外傷害。', '弾丸が壁で跳ね返り、+20%のボーナスダメージを与える。'),
+
+  relic_graze_mines_name: row('GRAZE MINES', 'SIYIRMA MAYINLARI', 'MINES DE FRÔLEMENT', 'STREIFMINEN', '擦弹地雷', '擦彈地雷', 'かすりマイン'),
+  relic_graze_mines_desc: row('Grazing enemy bullets drops an explosive contact mine dealing 45 area damage.', 'Düşman mermilerini her sıyırmada (graze) 45 alan hasarı veren temas mayını bırakır.', 'Frôler un tir dépose une mine de contact infligeant 45 dégâts de zone.', 'Streifen von Geschossen platziert eine Kontaktmine mit 45 Flaechenschaden.', '擦弹时在后方部署一枚接触式地雷，造成 45 范围伤害。', '擦彈時在後方部署一枚接觸式地雷，造成 45 範圍傷害。', '敵弾かすり時に接触地雷を投下し、45の範囲ダメージ。'),
+
+  relic_glass_annihilator_name: row('GLASS ANNIHILATOR', 'CAM YOK EDİCİ', 'ANNIHILATEUR DE VERRE', 'GLASVERNICHTER', '玻璃歼灭者', '玻璃殲滅者', 'グラスアナイアレーター'),
+  relic_glass_annihilator_desc: row('Grants +80% weapon damage, but maximum HP is reduced by 50%.', 'Tüm silahlara +%80 saf hasar artışı sağlar, azami can %50 azalır.', 'Confère +80% de dégâts mais réduit les PV max de 50%.', 'Gewaehrt +80% Waffenschaden, verringert aber max. TP um 50%.', '提升 +80% 武器伤害，但最大生命值减少 50%。', '提升 +80% 武器傷害，但最大生命值減少 50%。', '全武器の攻撃力+80%、ただし最大HPが50%減少。'),
+
+  relic_chrono_drift_name: row('CHRONO DRIFT', 'KRONO SÜZÜLME', 'DÉRIVE TEMPORELLE', 'CHRONO-DRIFT', '时空漂移', '時空漂移', 'クロノ漂流'),
+  relic_chrono_drift_desc: row('When the ship stays stationary for 0.35s, time slows down by 50%.', 'Gemi 0.35 saniye hareketsiz durduğunda zaman akışı %50 yavaşlar.', 'Immobile pendant 0.35s, le temps ralentit de 50%.', 'Wenn das Schiff 0.35s stillsteht, verlangsamt sich die Zeit um 50%.', '战机静止超过 0.35 秒时，时间流速减缓 50%。', '戰機靜止超過 0.35 秒時，時間流速減緩 50%。', '機体が0.35秒間静止すると、時間の流れが50%スローになる。'),
+
+  relic_plasma_leech_name: row('PLASMA LEECH', 'PLAZMA EMİCİ', 'SANGSUE DE PLASMA', 'PLASMA-EGEL', '等离子汲取', '等離子汲取', 'プラズマリーチ'),
+  relic_plasma_leech_desc: row('Defeating enemies recovers +1.5 shield (+5 on elites and bosses).', 'Düşman yok edildiğinde kalkanı +1.5, elitlerde +5 yeniler.', 'Vaincre un ennemi restaure +1.5 de bouclier (+5 sur les élites).', 'Gegnerabschuesse stellen +1.5 Schild wieder her (+5 bei Eliten).', '消灭敌人恢复 +1.5 护盾（精英和首领恢复 +5）。', '消滅敵人恢復 +1.5 護盾（精英和首領恢復 +5）。', '敵撃破でシールド+1.5回復（エリートやボスは+5）。'),
+
+  relic_orbital_familiar_name: row('ORBITAL FAMILIAR', 'YÖRÜNGE YOLDAŞI', 'FAMILIER ORBITAL', 'ORBITAL-FAMILIAR', '轨道使魔', '軌道使魔', 'オービタルファミリア'),
+  relic_orbital_familiar_desc: row('Celestial drone orbiting the ship that consumes enemy projectiles on contact.', 'Gemi etrafında dönen ve temas ettiği düşman mermilerini yutan göksel drone.', 'Drone céleste en orbite qui absorbe les projectiles ennemis.', 'Himmelsdrohne in der Umlaufbahn, die feindliche Geschosse verschlingt.', '环绕战机飞行的守护无人机，触碰时吞噬敌方子弹。', '環繞戰機飛行的守護無人機，觸碰時吞噬敵方子彈。', '機体の周りを旋回し、接触した敵弾を消滅させる守護ドローン。'),
+
+  relic_chain_lightning_name: row('CHAIN LIGHTNING', 'ZİNCİRLEME YILDIRIM', 'ÉCLAIR EN CHAÎNE', 'KETTENBLITZ', '连锁闪电', '連鎖閃電', 'チェインライトニング'),
+  relic_chain_lightning_desc: row('Critical hits arc lightning to 2 nearby enemies dealing 30 damage.', 'Kritik vuruşlarda yakındaki 2 düşmana 30 hasarlı elektrik arkı sıçrar.', 'Les coups critiques projettent un arc électrique de 30 dégâts sur 2 ennemis.', 'Kritische Treffer erzeugen Blitze auf 2 Gegner mit 30 Schaden.', '暴击时向附近 2 个敌人弹射造成 30 伤害的电弧。', '暴擊時向附近 2 個敵人彈射造成 30 傷害的電弧。', 'クリティカル命中時、付近の敵2体に30ダメージの電撃が連鎖。'),
+
+  relic_void_singularity_name: row('VOID SINGULARITY', 'BOŞLUK TEKİLLİĞİ', 'SINGULARITÉ DU NÉANT', 'LEEREN-SINGULARITAET', '虚空奇点', '虛空奇點', 'ヴォイドシンギュラリティ'),
+  relic_void_singularity_desc: row('Defeating an elite or boss opens a mini singularity pulling in enemies.', 'Elit veya boss öldüğünde çevredeki düşmanları içine çeken minik karadelik açar.', 'Vaincre un élite ouvre une micro-singularité aspirant les ennemis.', 'Besiegen von Eliten erzeugt eine Mini-Singularitaet, die Gegner anzieht.', '击败精英或首领时撕开微型黑洞，吸入并碾碎周围敌人。', '擊敗精英或首領時撕開微型黑洞，吸入並碾碎周圍敵人。', 'エリートやボス撃破時、敵を引き寄せる超小型ブラックホールを生成。'),
+
+  relic_supercharged_dash_name: row('SUPERCHARGED DASH', 'AŞIRI YÜKLÜ TAARRUZ', 'PROPULSION SURVOLTÉE', 'UEBERLADENER SPRINT', '超载冲锋', '超載衝鋒', 'スーパーチャージダッシュ'),
+  relic_supercharged_dash_desc: row('Rapid movement leaves a burning plasma wake dealing 35 damage per second.', 'Hızlı manevralarda arkasında 35 saniyelik hasar veren plazma alev izi bırakır.', 'Déplacement rapide laisse un sillage de plasma infligeant 35 dps.', 'Schnelle Bewegung hinterlaesst eine Plasmaspur mit 35 Schaden/s.', '快速机动时在尾迹留下燃烧等离子尾流，每秒造成 35 伤害。', '快速機動時在尾跡留下燃燒等離子尾流，每秒造成 35 傷害。', '高速移動時に毎秒35ダメージのプラズマ航跡を残す。'),
+
+  relic_astral_harvester_name: row('ASTRAL HARVESTER', 'ASTRAL HASATÇI', 'MOISSONNEUR ASTRAL', 'ASTRAL-ERNTER', '星界收割者', '星界收割者', 'アストラルハーベスター'),
+  relic_astral_harvester_desc: row('Increases gem pickup range by +80% and grants +15% bonus XP.', 'Kristal çekim menzilini +%80 artırır ve toplanan XP kristallerine +%15 bonus verir.', 'Portée des gemmes +80% et +15% d\'expérience bonus.', 'Sammelradius +80% und +15% Bonus-XP auf Kristalle.', '能量晶体拾取范围提升 +80%，并获得 +15% 经验加成。', '能量晶體拾取範圍提升 +80%，並獲得 +15% 經驗加成。', 'クリスタルの回収範囲+80%、取得経験値+15%。'),
+
+  relic_berserker_core_name: row('BERSERKER CORE', 'BERSERKER ÇEKİRDEĞİ', 'CŒUR DE BERSERKER', 'BERSERKER-KERN', '狂战士核心', '狂戰士核心', 'バーサーカーコア'),
+  relic_berserker_core_desc: row('Grants up to +60% weapon damage as ship HP drops below 50%.', 'Can %50 altına düştüğünde azalan can oranına göre +%60\'a varan hasar artışı.', 'Confère jusqu\'à +60% de dégâts quand la vie est sous 50%.', 'Bis zu +60% Waffenschaden bei weniger als 50% TP.', '战机生命值低于 50% 时，根据损血比例最高提升 +60% 伤害。', '戰機生命值低於 50% 時，根據損血比例最高提升 +60% 傷害。', 'HPが50%を下回ると、失ったHPに応じて最大+60%攻撃力アップ。'),
+
+  relic_titan_bulkhead_name: row('TITAN BULKHEAD', 'TİTAN ZIRHI', 'CLOISON TITAN', 'TITAN-SCHOTT', '泰坦隔舱', '泰坦隔艙', 'タイタンバルクヘッド'),
+  relic_titan_bulkhead_desc: row('Grants +40 Max HP and a permanent 15% damage reduction.', '+40 Azami Can ve alınan tüm hasarlarda %15 kalıcı direnç sağlar.', 'Confère +40 PV max et 15% de réduction permanente des dégâts.', 'Gewaehrt +40 max. TP und 15% Schadensreduktion.', '获得 +40 最大生命值并永久减免 15% 受到的伤害。', '獲得 +40 最大生命值並永久減免 15% 受到的傷害。', '最大HP+40、受ける全ダメージを恒久的に15%軽減。'),
+
+  relic_photon_accelerator_name: row('PHOTON ACCELERATOR', 'FOTON HIZLANDIRICI', 'ACCÉLÉRATEUR DE PHOTONS', 'PHOTONEN-BESCHLEUNIGER', '光子加速器', '光子加速器', 'フォトンアクセラレータ'),
+  relic_photon_accelerator_desc: row('Increases all projectile speeds by +40% and weapon fire rates by +15%.', 'Tüm silah mermilerinin hızını +%40 ve atış sıklığını +%15 artırır.', 'Vitesse des projectiles +40% et cadence de tir +15%.', 'Projektilgeschwindigkeit +40% und Feuerrate +15%.', '所有弹丸速度提升 +40%，武器发射速率提升 +15%。', '所有彈丸速度提升 +40%，武器發射速率提升 +15%。', '全弾速+40%、全武器の発射速度+15%。'),
+
+  relic_frostbite_shards_name: row('FROSTBITE SHARDS', 'DONMA ŞARAPNELİ', 'ÉCLATS DE GIVRE', 'FROSTBISS-SPLITTER', '冰霜碎屑', '冰霜碎屑', 'フロストバイトシャード'),
+  relic_frostbite_shards_desc: row('Frozen and slowed enemies take +40% bonus damage from all sources.', 'Donmuş veya yavaşlatılmış tüm düşmanlara +%40 ilave hasar verilir.', 'Ennemis gelés subissent +40% de dégâts bonus.', 'Gefrorene Feinde erleiden +40% Bonusschaden.', '所有处于冰冻或减速状态的敌人额外承受 +40% 伤害。', '所有處於冰凍或減速狀態的敵人額外承受 +40% 傷害。', '凍結およびスロー状態の敵が受ける全ダメージ+40%。'),
+
+  relic_magnetic_overdrive_name: row('MAGNETIC OVERDRIVE', 'MANYETİK AŞIRI YÜK', 'SURDRIVE MAGNÉTIQUE', 'MAGNET-OVERDRIVE', '磁暴过载', '磁暴過載', 'マグネティックオーバードライブ'),
+  relic_magnetic_overdrive_desc: row('Doubles magnet duration and triggers a full-screen vacuum pulse on level up.', 'Mıknatıs süresini ikiye katlar ve her seviye atlamada tüm haritayı vakumlar.', 'Double l\'aimant et aspire tout l\'écran à chaque niveau.', 'Verdoppelt Magnet-Dauer und saugt bei Levelaufstieg alle Kristalle ein.', '磁铁持续时间翻倍，且每次升级自动触发全屏水晶聚拢。', '磁鐵持續時間翻倍，且每次升級自動觸發全屏水晶聚攏。', '磁石効果時間を2倍にし、レベルアップ毎に全画面吸引パルス。'),
+
+  relic_cosmic_catalyst_name: row('COSMIC CATALYST', 'KOZMİK KATALİZÖR', 'CATALYSEUR COSMIQUE', 'KOSMISCHER KATALYSATOR', '宇宙催化剂', '宇宙催化劑', 'コズミックカタリスト'),
+  relic_cosmic_catalyst_desc: row('Ultimate ability charges 35% faster.', 'Nihai yetenek dolum hızını %35 artırır.', 'Capacité ultime se recharge 35% plus vite.', 'Ultimative Faehigkeit laedt 35% schneller auf.', '终极技能充能速度提升 35%。', '終極技能充能速度提升 35%。', 'アルティメットスキルのチャージ速度+35%。'),
+
+  relic_nano_repair_name: row('NANO REPAIR', 'NANO ONARIM', 'NANO-RÉPARATION', 'NANO-REPARATUR', '纳米修复', '奈米修復', 'ナノリペア'),
+  relic_nano_repair_desc: row('Repairs 1 HP every 8 seconds when no damage is taken.', 'Hasar alınmadığında her 8 saniyede 1 HP gövde onarımı yapar.', 'Répare 1 PV toutes les 8s en dehors des dégâts.', 'Repariert alle 8s 1 TP, wenn kein Schaden erlitten wird.', '脱战未受伤害时，每 8 秒自动修复 1 点机体生命值。', '脫戰未受傷害時，每 8 秒自動修復 1 點機體生命值。', '被弾していない時、8秒毎にHPを1修復する。'),
+
+  relic_hyper_thrusters_name: row('HYPER THRUSTERS', 'HİPER İTİCİLER', 'HYPER-PROPULSEURS', 'HYPER-TRIEBWERKE', '超能推进器', '超能推進器', 'ハイパースラスター'),
+  relic_hyper_thrusters_desc: row('Ship speed +25% and grants 0.5s invulnerability upon taking heavy damage.', 'Gemi hızını +%25 artırır ve ağır darbe anında 0.5s dokunulmazlık sağlar.', 'Vitesse +25% et 0.5s d\'invulnérabilité lors d\'un coup violent.', 'Geschwindigkeit +25% und 0.5s Unverwundbarkeit bei schwerem Treffer.', '战机机动速度提升 +25%，且受到重创时获得 0.5 秒无敌。', '戰機機動速度提升 +25%，且受到重創時獲得 0.5 秒無敵。', '移動速度+25%、大ダメージ被弾時に0.5秒の無敵時間を獲得。'),
+
+  relic_solar_flair_name: row('SOLAR FLARE', 'GÜNEŞ PARLAMASI', 'ÉRUPTION SOLAIRE', 'SONNEN-ERUPTION', '太阳耀斑', '太陽耀斑', 'ソーラーフレア'),
+  relic_solar_flair_desc: row('Taking hull damage releases 8 seeking micro-fireballs.', 'Gövde hasarı alındığında 8 adet güdümlü plazma alev küresi fırlatır.', 'Subir des dégâts de coque libère 8 micro-boules de feu guidées.', 'Huellenschaden setzt 8 zielsuchende Mini-Feuerbaelle frei.', '战机装甲受损时释放 8 枚追踪等离子微型火球反击敌人。', '戰機裝甲受損時釋放 8 枚追蹤等離子微型火球反擊敵人。', '船体ダメージを受けた際、敵を自動追尾する8発の火球を放出。')
 };
 
 export const CATALOG = {};

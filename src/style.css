@@ -8934,6 +8934,70 @@ html, body {
   animation: evoPulseBurst 0.75s ease-out;
 }
 
+/* === KOZMİK ESERLER (RELICS) HUD & MODAL STİLLERİ === */
+.hud-relics-strip {
+  position: absolute;
+  top: calc(max(38px, calc(var(--safe-top, 0px) + 4px)) + 78px);
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 100;
+  pointer-events: none;
+  max-width: 85%;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.hud-relic-badge {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: rgba(18, 10, 36, 0.88);
+  border: 1px solid rgba(192, 132, 252, 0.55);
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease;
+}
+
+.hud-relic-badge.tier-cosmic {
+  border-color: #ff0055;
+  box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+}
+
+.hud-relic-badge.tier-legendary {
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.relic-card {
+  max-width: 440px;
+  border: 1.5px solid #a855f7;
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.35);
+}
+
+.relic-item-card {
+  background: rgba(14, 18, 38, 0.92);
+  border: 1.5px solid rgba(168, 85, 247, 0.4);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.relic-item-card:hover, .relic-item-card:active {
+  transform: scale(1.02);
+  border-color: #00f0ff;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
 @keyframes evoBadgePulse {
   0%, 100% {
     transform: scale(1);

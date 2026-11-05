@@ -331,9 +331,9 @@ export class BlastFireballPool {
   }
 }
 
-// 5. ENKAZ PARÇASI / SHARD HAVUZU (32 KAPASİTE)
+// 5. ENKAZ PARÇASI / SHARD HAVUZU (80 KAPASİTE - 120 FPS OPTİMİZE)
 export class ParticleDebrisPool {
-  constructor(capacity = 32) {
+  constructor(capacity = 80) {
     this.capacity = capacity;
     this.fallbackIndex = 0;
     this.pool = new Array(capacity);
@@ -349,12 +349,13 @@ export class ParticleDebrisPool {
         alpha: 0,
         decay: 0.05,
         rot: 0,
-        rotSpeed: 0
+        rotSpeed: 0,
+        shapeType: 0
       };
     }
   }
 
-  acquire(x, y, vx, vy, size, color, alpha = 1, decay = 0.05, rot = 0, rotSpeed = 0) {
+  acquire(x, y, vx, vy, size, color, alpha = 1, decay = 0.05, rot = 0, rotSpeed = 0, shapeType = 0) {
     for (let i = 0; i < this.capacity; i++) {
       const p = this.pool[i];
       if (!p.active) {
@@ -369,6 +370,7 @@ export class ParticleDebrisPool {
         p.decay = decay;
         p.rot = rot;
         p.rotSpeed = rotSpeed;
+        p.shapeType = shapeType;
         return p;
       }
     }
@@ -385,6 +387,7 @@ export class ParticleDebrisPool {
     fallback.decay = decay;
     fallback.rot = rot;
     fallback.rotSpeed = rotSpeed;
+    fallback.shapeType = shapeType;
     return fallback;
   }
 
@@ -412,7 +415,7 @@ export const gemPool = new GemPool(120);
 export const shockwavePool = new ShockwavePool(40);
 export const rockDebrisPool = new RockDebrisPool(24);
 export const blastFireballPool = new BlastFireballPool(16);
-export const particleDebrisPool = new ParticleDebrisPool(32);
+export const particleDebrisPool = new ParticleDebrisPool(80);
 
 // ÇATI YÖNETİCİ NESNESİ
 export const PoolManager = {

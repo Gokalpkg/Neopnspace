@@ -104,6 +104,7 @@
 
       <!-- Aktif Silah ve Evrim Rozetleri Şeridi -->
       <div id="hud-weapons-strip" class="hud-weapons-strip"></div>
+      <div id="hud-relics-strip" class="hud-relics-strip"></div>
 
       <!-- İsteğe Bağlı Uzay Kaçakçısı Çağrı Sinyali (Savaşı Zorla Durdurmayan HUD Rozeti) -->
       <button id="merchant-signal-btn" class="merchant-signal-btn hidden" type="button" aria-label="Uzay Kaçakçısı Sinyali">
@@ -768,6 +769,26 @@
             <svg class="pixel-icon pixel-icon-xs" viewBox="0 0 10 10" style="margin-right:4px"><path d="M6 1L2 5h3l-1 4 4-4H5l1-4z" fill="#05ffa1"/></svg>
             <span id="auto-synergy-text">OTO-SİNERJİ: KAPALI</span>
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kozmik Eser (Relic Drafting) Modalı -->
+    <div id="relic-modal" class="modal-overlay hidden">
+      <div class="modal-card relic-card">
+        <div class="upgrade-header">
+          <div class="upgrade-stars">
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#a855f7"/></svg>
+            <svg class="pixel-icon pixel-icon-lg" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#ffd700"/></svg>
+            <svg class="pixel-icon pixel-icon-md" viewBox="0 0 10 10" style="margin: 0 4px;"><polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="#a855f7"/></svg>
+          </div>
+          <h2 data-i18n="relic_modal_title">KOZMİK ESER KEŞFİ</h2>
+          <p data-i18n="relic_modal_subtitle">Gemin için kalıcı bir kozmik eser seç</p>
+          <p class="role-hint" data-i18n="relic_modal_hint">Tüm sefer boyunca aktiftir.</p>
+        </div>
+
+        <div id="relic-cards-container" class="cards-container relic-cards-container">
+          <!-- 3 Seçenekli Eser Kartları Dinamik Üretilecek -->
         </div>
       </div>
     </div>
