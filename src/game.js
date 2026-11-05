@@ -13224,9 +13224,8 @@ class Game {
         if (remainingClusterCount > 0) {
           for (let ci = 0; ci < this.enemies.length; ci++) {
             const rock = this.enemies[ci];
-            if (rock && rock.isOpeningCluster && !rock.toRemove && rock.hp > 0) {
-              rock.hp = 0;
-              rock.toRemove = true;
+            if (rock && rock.isOpeningCluster) {
+              rock.isOpeningCluster = false;
             }
           }
         }
