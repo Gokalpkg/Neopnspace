@@ -1,6 +1,6 @@
 // === DÜŞMANLAR, METEORLAR, XP KRİSTALLERİ & MERMİLER ===
 import { t } from './i18n.js';
-import { gemPool } from './pool-manager.js';
+import { gemPool, swarmerPool } from './pool-manager.js';
 import { ENEMY_BASE_HP, BOSS_ROSTER_HP } from './balance.js';
 import { drawCachedNeonGlow } from './particles.js';
 
@@ -708,12 +708,29 @@ export class Enemy {
         this.shootTimer = 38 + Math.random() * 22;
         this.maxDamagePerHitRatio = 0.22;
         break;
+
+      case 'cosmic_swarmer':
+      case 'swarmer':
+        this.radius = 9;
+        this.hp = 1;
+        this.maxHp = 1;
+        this.speedY = (2.2 + Math.random() * 0.8) * speedMultiplier;
+        this.speedX = (Math.random() - 0.5) * 1.4 * speedMultiplier;
+        this.sineFreq = 0.08 + Math.random() * 0.04;
+        this.sineAmp = 2.4;
+        this.time = Math.random() * 100;
+        this.score = 15;
+        this.color = '#ff0077';
+        this.isSwarmer = true;
+        this._balloonDone = true;
+        this.maxDamagePerHitRatio = 1.0;
+        break;
     }
 
     // Mini-Elit Şampiyon Düşman Sistemi (Arena İçi Özel Güçlü Düşmanlar)
     this.isChampion = false;
     this.affix = null;
-    if (!this.isBoss && !this.shape && this.type !== 'asteroid_s' && this.type !== 'asteroid_m' && this.type !== 'asteroid_l' && waveMultiplier >= 1.15) {
+    if (!this.isBoss && !this.shape && !this.isSwarmer && this.type !== 'asteroid_s' && this.type !== 'asteroid_m' && this.type !== 'asteroid_l' && waveMultiplier >= 1.15) {
       if (Math.random() < 0.14) {
         this.isChampion = true;
         this.radius = Math.round(this.radius * 1.25);
@@ -794,6 +811,16 @@ export class Enemy {
         window.game.player.targetX += (vDx / vDist) * pull;
         window.game.player.targetY += (vDy / vDist) * pull;
       }
+    }
+
+    if (this.isSwarmer || this.type === 'cosmic_swarmer') {
+      this.time = (this.time || 0) + dt;
+      this.x += (Math.sin(this.time * (this.sineFreq || 0.08)) * (this.sineAmp || 2.4) + (this.speedX || 0)) * dt;
+      this.y += (this.speedY || 2.5) * dt;
+      if (this.y > screenHeight + 40 || this.x < -60 || this.x > screenWidth + 60) {
+        this.toRemove = true;
+      }
+      return;
     }
 
     if (this.type === 'scout') {
@@ -1415,6 +1442,35 @@ export class Enemy {
         ctx.closePath();
         ctx.fill();
       }
+      ctx.restore();
+      return;
+    }
+
+    if (this.isSwarmer || this.type === 'cosmic_swarmer') {
+      const flutter = Math.sin((this.time || 0) * 0.45) * 0.4;
+      const r = this.radius || 9;
+      ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : 'rgba(255, 0, 119, 0.75)';
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.7, 0, r * 0.65, Math.max(1, r * 0.35 + flutter * 2), -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(r * 0.7, 0, r * 0.65, Math.max(1, r * 0.35 - flutter * 2), 0.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : '#ff1744';
+      ctx.beginPath();
+      ctx.moveTo(0, r * 1.1);
+      ctx.lineTo(r * 0.65, -r * 0.3);
+      ctx.lineTo(0, -r * 1.0);
+      ctx.lineTo(-r * 0.65, -r * 0.3);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#00f0ff';
+      ctx.beginPath();
+      ctx.arc(0, r * 0.2, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.restore();
       return;
     }
@@ -2220,6 +2276,13 @@ export class Gem {
 
 // 120 Kapasiteli Gem Havuzunu Başlat
 gemPool.init(Gem);
+swarmerPool.init(Enemy);
+Enemy.spawnSwarmer = function(x, y, waveMult, speedMult) {
+  return swarmerPool.acquire(x, y, waveMult, speedMult);
+};
+Enemy.releaseSwarmer = function(e) {
+  swarmerPool.release(e);
+};
 Gem.spawn = function(x, y, value = 1) {
   return gemPool.acquire(x, y, value);
 };

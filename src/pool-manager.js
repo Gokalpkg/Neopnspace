@@ -410,12 +410,107 @@ export class ParticleDebrisPool {
   }
 }
 
+// 6. MİKRO PARAZİT / KOZMİK SÜRÜ HAVUZU (35 KAPASİTE, 0 GC)
+export class SwarmerPool {
+  constructor(capacity = 35) {
+    this.capacity = capacity;
+    this.pool = [];
+    this.initialized = false;
+    this.EnemyClass = null;
+  }
+
+  init(EnemyClass) {
+    if (this.initialized) return;
+    this.EnemyClass = EnemyClass;
+    this.pool = new Array(this.capacity);
+    for (let i = 0; i < this.capacity; i++) {
+      const e = new EnemyClass(0, -100, 'cosmic_swarmer', 1, 1);
+      e.active = false;
+      e.toRemove = true;
+      this.pool[i] = e;
+    }
+    this.initialized = true;
+  }
+
+  acquire(x, y, waveMult = 1, speedMult = 1) {
+    if (!this.initialized && this.EnemyClass) {
+      this.init(this.EnemyClass);
+    }
+    if (this.pool && this.pool.length > 0) {
+      for (let i = 0; i < this.pool.length; i++) {
+        const e = this.pool[i];
+        if (e && (!e.active || e.toRemove)) {
+          e.active = true;
+          e.toRemove = false;
+          e.x = x;
+          e.y = y;
+          e.type = 'cosmic_swarmer';
+          e.radius = 9;
+          e.hp = 1;
+          e.maxHp = 1;
+          e.speedY = (2.2 + Math.random() * 0.8) * speedMult;
+          e.speedX = (Math.random() - 0.5) * 1.4 * speedMult;
+          e.sineFreq = 0.08 + Math.random() * 0.04;
+          e.sineAmp = 2.4;
+          e.time = Math.random() * 100;
+          e.color = '#ff0077';
+          e.isSwarmer = true;
+          e.hitFlash = 0;
+          e.score = 15;
+          e._deathHandled = false;
+          e._ballooning = false;
+          e._balloonDone = true;
+          e.maxDamagePerHitRatio = 1.0;
+          return e;
+        }
+      }
+      if (this.EnemyClass) {
+        const fallback = new this.EnemyClass(x, y, 'cosmic_swarmer', waveMult, speedMult);
+        fallback.active = true;
+        this.pool.push(fallback);
+        this.capacity = this.pool.length;
+        return fallback;
+      }
+    }
+    if (this.EnemyClass) {
+      return new this.EnemyClass(x, y, 'cosmic_swarmer', waveMult, speedMult);
+    }
+    return { active: true, toRemove: false, x, y, hp: 1, maxHp: 1, radius: 9, isSwarmer: true };
+  }
+
+  release(e) {
+    if (e) {
+      e.active = false;
+      e.toRemove = true;
+    }
+  }
+
+  releaseAll() {
+    for (let i = 0; i < this.pool.length; i++) {
+      const e = this.pool[i];
+      if (e) {
+        e.active = false;
+        e.toRemove = true;
+      }
+    }
+  }
+
+  getActiveCount() {
+    let count = 0;
+    for (let i = 0; i < this.pool.length; i++) {
+      if (this.pool[i] && this.pool[i].active && !this.pool[i].toRemove) count++;
+    }
+    return count;
+  }
+}
+
 // TEKİL NESNE HAVUZU ÖRNEKLERİ (SINGLETON INSTANCES)
 export const gemPool = new GemPool(120);
 export const shockwavePool = new ShockwavePool(40);
 export const rockDebrisPool = new RockDebrisPool(24);
 export const blastFireballPool = new BlastFireballPool(16);
 export const particleDebrisPool = new ParticleDebrisPool(80);
+export const swarmerPool = new SwarmerPool(35);
 
 // ÇATI YÖNETİCİ NESNESİ
 export const PoolManager = {
@@ -424,12 +519,14 @@ export const PoolManager = {
   rockDebrisPool,
   blastFireballPool,
   particleDebrisPool,
+  swarmerPool,
   releaseAll() {
     gemPool.releaseAll();
     shockwavePool.releaseAll();
     rockDebrisPool.releaseAll();
     blastFireballPool.releaseAll();
     particleDebrisPool.releaseAll();
+    swarmerPool.releaseAll();
   },
   getStats() {
     return {
@@ -437,7 +534,8 @@ export const PoolManager = {
       shockwaves: `${shockwavePool.getActiveCount()} / ${shockwavePool.capacity}`,
       rockDebris: `${rockDebrisPool.getActiveCount()} / ${rockDebrisPool.capacity}`,
       blastFireballs: `${blastFireballPool.getActiveCount()} / ${blastFireballPool.capacity}`,
-      particleDebris: `${particleDebrisPool.getActiveCount()} / ${particleDebrisPool.capacity}`
+      particleDebris: `${particleDebrisPool.getActiveCount()} / ${particleDebrisPool.capacity}`,
+      swarmers: `${swarmerPool.getActiveCount()} / ${swarmerPool.capacity}`
     };
   }
 };

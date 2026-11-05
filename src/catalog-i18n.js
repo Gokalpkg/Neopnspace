@@ -756,7 +756,14 @@ const RAW = {
   relic_hyper_thrusters_desc: row('Ship speed +25% and grants 0.5s invulnerability upon taking heavy damage.', 'Gemi hızını +%25 artırır ve ağır darbe anında 0.5s dokunulmazlık sağlar.', 'Vitesse +25% et 0.5s d\'invulnérabilité lors d\'un coup violent.', 'Geschwindigkeit +25% und 0.5s Unverwundbarkeit bei schwerem Treffer.', '战机机动速度提升 +25%，且受到重创时获得 0.5 秒无敌。', '戰機機動速度提升 +25%，且受到重創時獲得 0.5 秒無敵。', '移動速度+25%、大ダメージ被弾時に0.5秒の無敵時間を獲得。'),
 
   relic_solar_flair_name: row('SOLAR FLARE', 'GÜNEŞ PARLAMASI', 'ÉRUPTION SOLAIRE', 'SONNEN-ERUPTION', '太阳耀斑', '太陽耀斑', 'ソーラーフレア'),
-  relic_solar_flair_desc: row('Taking hull damage releases 8 seeking micro-fireballs.', 'Gövde hasarı alındığında 8 adet güdümlü plazma alev küresi fırlatır.', 'Subir des dégâts de coque libère 8 micro-boules de feu guidées.', 'Huellenschaden setzt 8 zielsuchende Mini-Feuerbaelle frei.', '战机装甲受损时释放 8 枚追踪等离子微型火球反击敌人。', '戰機裝甲受損時釋放 8 枚追蹤等離子微型火球反擊敵人。', '船体ダメージを受けた際、敵を自動追尾する8発の火球を放出。')
+  relic_solar_flair_desc: row('Taking hull damage releases 8 seeking micro-fireballs.', 'Gövde hasarı alındığında 8 adet güdümlü plazma alev küresi fırlatır.', 'Subir des dégâts de coque libère 8 micro-boules de feu guidées.', 'Huellenschaden setzt 8 zielsuchende Mini-Feuerbaelle frei.', '战机装甲受损时释放 8 枚追踪等离子微型火球反击敌人。', '戰機裝甲受損時釋放 8 枚追蹤等離子微型火球反擊敵人。', '船体ダメージを受けた際、敵を自動追尾する8発の火球を放出。'),
+
+  float_cosmic_swarm: row('COSMIC SWARM BURST', 'KOZMİK SÜRÜ PATLAMASI', 'ESSAIM COSMIQUE', 'KOSMISCHER SCHWARM', '宇宙虫群爆发', '宇宙蟲群爆發', 'コズミック・スウォーム'),
+  codex_subtab_evolutions: row('WEAPON EVOLUTIONS', 'SİLAH EVRİMLERİ', 'ÉVOLUTIONS D\'ARMES', 'WAFFENEVOLUTIONEN', '武器进化', '武器進化', '武器進化'),
+  codex_subtab_relics: row('COSMIC RELICS', 'KOZMİK ESERLER', 'RELIQUES COSMIQUES', 'KOSMISCHE RELIKTE', '宇宙遗物', '宇宙遺物', 'コズミックレリック'),
+  codex_relic_title: row('COSMIC RELIC COLLECTION', 'KOZMİK ESERLER KOLEKSİYONU', 'COLLECTION DE RELIQUES COSMIQUES', 'KOSMISCHE RELIKT-SAMMLUNG', '宇宙遗物收藏', '宇宙遺物收藏', 'コズミックレリックコレクション'),
+  codex_relic_subtitle: row('Discover 20 Ancient Relics by Defeating Elites & Bosses', 'Elit Düşmanları ve Bossları Yenerek 20 Kadim Eseri Keşfedin', 'Découvrez 20 reliques antiques en vainquant élites et boss', 'Entdecke 20 uralte Relikte durch das Besiegen von Eliten und Bossen', '击败精英与首领以发现 20 件古代遗物', '擊敗精英與首領以發現 20 件古代遺物', 'エリートやボスを倒して20個の古代レリックを発見する'),
+  codex_relic_locked_hint: row('Defeat Elite Enemies and Bosses in campaigns to discover this Relic.', 'Seferlerde Elit Düşmanları ve Bossları mağlup ederek bu eseri keşfet.', 'Battez des ennemis d\'élite et des boss pour découvrir cette relique.', 'Besiege Elite-Feinde und Bosse, um dieses Relikt zu entdecken.', '在战役中击败精英敌人和首领以解锁此遗物。', '在戰役中擊敗精英敵人和首領以解鎖此遺物。', 'キャンペーンでエリートやボスを倒してこのレリックを解放する。')
 };
 
 export const CATALOG = {};

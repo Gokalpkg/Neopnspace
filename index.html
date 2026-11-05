@@ -480,7 +480,7 @@
           </button>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <button id="btn-settings-privacy" type="button" class="privacy-link" style="padding: 4px 0;" data-i18n="settings_privacy">Gizlilik Politikası</button>
-            <span style="font-size: 0.75rem; color: #64748b;">v1.7.9</span>
+            <span style="font-size: 0.75rem; color: #64748b;">v1.8.0</span>
           </div>
         </div>
 
@@ -1131,10 +1131,18 @@
         </div>
 
         <div id="codex-tab-view" class="codex-tab-view hidden">
+          <div class="codex-subtabs-bar">
+            <button id="btn-codex-subtab-evolutions" class="codex-subtab-btn active" type="button">
+              <span data-i18n="codex_subtab_evolutions">SİLAH EVRİMLERİ</span>
+            </button>
+            <button id="btn-codex-subtab-relics" class="codex-subtab-btn" type="button">
+              <span data-i18n="codex_subtab_relics">KOZMİK ESERLER</span>
+            </button>
+          </div>
           <div class="codex-header-bar">
             <div class="codex-header-title">
-              <span data-i18n="codex_title">EVRİM KODEKSİ VE SİNERJİ REHBERİ</span>
-              <span class="role-hint" data-i18n="codex_subtitle">2 Silahı Birleştirerek Efsanevi Siber-Silahları Açın</span>
+              <span id="codex-main-title" data-i18n="codex_title">EVRİM KODEKSİ VE SİNERJİ REHBERİ</span>
+              <span id="codex-main-subtitle" class="role-hint" data-i18n="codex_subtitle">2 Silahı Birleştirerek Efsanevi Siber-Silahları Açın</span>
             </div>
             <div class="codex-progress-badge">
               <span id="codex-unlocked-count">0 / 10 KEŞFEDİLDİ</span>
@@ -1142,6 +1150,9 @@
           </div>
           <div id="codex-grid" class="codex-grid">
             <!-- Dinamik olarak game.js'den doldurulacak -->
+          </div>
+          <div id="codex-relics-grid" class="codex-relics-grid hidden">
+            <!-- 20 Kozmik Eser Vitrini game.js'den doldurulacak -->
           </div>
         </div>
 

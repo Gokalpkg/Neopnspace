@@ -4,7 +4,7 @@ import { COSMIC_RELICS, RELIC_TIERS, getRandomRelicChoices } from './relics.js';
 import { vibrate } from './vibration.js';
 import { ParticleSystem } from './particles.js';
 import { Enemy, EnemyProjectile, Gem, PowerUp, LuckyChest } from './enemies.js';
-import { gemPool, PoolManager } from './pool-manager.js';
+import { gemPool, swarmerPool, PoolManager } from './pool-manager.js';
 import { t, getCurrentLanguage, setLanguage, SUPPORTED_LANGUAGES, applyTranslationsToDOM } from './i18n.js';
 import { analytics } from './analytics.js';
 import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE, PLAYER_BASE_CONFIG, DROP_RATES, HYPER_MODE_CONFIG, XP_CURVE, DIFFICULTY_CURVE, CARD_RARITY, ENEMY_BASE_HP, BOSS_ROSTER_HP } from './balance.js';
@@ -690,6 +690,8 @@ class Game {
     this.playerBullets = [];
     this.homingMissiles = [];
     this.enemies = [];
+    if (swarmerPool) swarmerPool.releaseAll();
+    this.nextSwarmTime = 18 + Math.random() * 6;
     this.dominoQueue = [];
     this.enemyProjectiles = [];
     this.gems = [];
@@ -2277,6 +2279,21 @@ class Game {
     bindHangarTabBtn(tabBtnTrophies, 'trophies');
     bindHangarTabBtn(tabBtnCodex, 'codex');
 
+    const btnCodexSubEvo = document.getElementById('btn-codex-subtab-evolutions');
+    const btnCodexSubRelics = document.getElementById('btn-codex-subtab-relics');
+    if (btnCodexSubEvo) {
+      btnCodexSubEvo.addEventListener('click', () => {
+        sounds.playClick();
+        this.switchCodexSubtab('evolutions');
+      });
+    }
+    if (btnCodexSubRelics) {
+      btnCodexSubRelics.addEventListener('click', () => {
+        sounds.playClick();
+        this.switchCodexSubtab('relics');
+      });
+    }
+
     if (btnResetTech) {
       btnResetTech.addEventListener('click', () => {
         sounds.init();
@@ -3636,21 +3653,76 @@ class Game {
     }
   }
 
+  getDiscoveredRelics() {
+    try {
+      const raw = localStorage.getItem('neon_discovered_relics');
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === 'object') ? parsed : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  recordDiscoveredRelic(relicId) {
+    if (!relicId) return;
+    try {
+      const discovered = this.getDiscoveredRelics();
+      if (!discovered[relicId]) {
+        discovered[relicId] = true;
+        localStorage.setItem('neon_discovered_relics', JSON.stringify(discovered));
+      }
+    } catch (e) {}
+  }
+
+  switchCodexSubtab(subtab = 'evolutions') {
+    this.activeCodexSubtab = subtab;
+    const btnEvo = document.getElementById('btn-codex-subtab-evolutions');
+    const btnRelics = document.getElementById('btn-codex-subtab-relics');
+    const codexGrid = document.getElementById('codex-grid');
+    const relicsGrid = document.getElementById('codex-relics-grid');
+    const mainTitle = document.getElementById('codex-main-title');
+    const mainSubtitle = document.getElementById('codex-main-subtitle');
+
+    if (btnEvo) {
+      if (subtab === 'evolutions') btnEvo.classList.add('active');
+      else btnEvo.classList.remove('active');
+    }
+    if (btnRelics) {
+      if (subtab === 'relics') btnRelics.classList.add('active');
+      else btnRelics.classList.remove('active');
+    }
+
+    if (subtab === 'relics') {
+      if (codexGrid) codexGrid.classList.add('hidden');
+      if (relicsGrid) relicsGrid.classList.remove('hidden');
+      if (mainTitle) mainTitle.textContent = t('codex_relic_title');
+      if (mainSubtitle) mainSubtitle.textContent = t('codex_relic_subtitle');
+    } else {
+      if (codexGrid) codexGrid.classList.remove('hidden');
+      if (relicsGrid) relicsGrid.classList.add('hidden');
+      if (mainTitle) mainTitle.textContent = t('codex_title');
+      if (mainSubtitle) mainSubtitle.textContent = t('codex_subtitle');
+    }
+
+    this.renderCodex();
+  }
+
   renderCodex() {
     const codexGrid = document.getElementById('codex-grid');
+    const relicsGrid = document.getElementById('codex-relics-grid');
     const unlockedCountEl = document.getElementById('codex-unlocked-count');
     if (!codexGrid) return;
+
+    this.activeCodexSubtab = this.activeCodexSubtab || 'evolutions';
+
+    // 1. Render Evolutions
     codexGrid.innerHTML = '';
     if (Array.isArray(codexGrid.children)) codexGrid.children.length = 0;
 
     const discoveredList = this.getDiscoveredEvolutions();
-
     const RECIPES = this.getEvolutionRecipes();
-
     const discoveredCount = RECIPES.filter(r => this.isEvolutionDiscovered(r.id, discoveredList)).length;
-    if (unlockedCountEl) {
-      unlockedCountEl.textContent = `${discoveredCount} / 10 ${t('codex_discovered')}`;
-    }
 
     RECIPES.forEach(r => {
       const isDiscovered = this.isEvolutionDiscovered(r.id, discoveredList);
@@ -3697,6 +3769,54 @@ class Game {
       `;
       codexGrid.appendChild(card);
     });
+
+    // 2. Render 20 Cosmic Relics Showcase
+    const discoveredRelics = this.getDiscoveredRelics();
+    const discoveredRelicsCount = COSMIC_RELICS.filter(rel => discoveredRelics[rel.id]).length;
+
+    if (relicsGrid) {
+      relicsGrid.innerHTML = '';
+      if (Array.isArray(relicsGrid.children)) relicsGrid.children.length = 0;
+
+      COSMIC_RELICS.forEach(relic => {
+        const isDiscovered = !!discoveredRelics[relic.id];
+        const tierCfg = RELIC_TIERS[relic.tier] || RELIC_TIERS.rare;
+        const tierName = t(tierCfg.nameKey) || relic.tier.toUpperCase();
+        const card = document.createElement('div');
+        card.className = `relic-codex-card ${isDiscovered ? 'discovered' : 'locked'} tier-${relic.tier}`;
+        card.style.borderColor = isDiscovered ? tierCfg.color : 'rgba(255, 255, 255, 0.12)';
+
+        const iconSvg = isDiscovered
+          ? (getPixelIconSvg(relic.icon, 'md') || getPixelIconSvg('energy', 'md'))
+          : `<svg class="pixel-icon pixel-icon-md" viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="8" rx="1.5" fill="#475569"/><path d="M5 7V4.5a3 3 0 0 1 6 0V7" stroke="#475569" stroke-width="2" fill="none"/></svg>`;
+
+        const titleText = isDiscovered ? t(relic.nameKey) : `??? ${t('codex_undiscovered')}`;
+        const descText = isDiscovered ? t(relic.descKey) : t('codex_relic_locked_hint');
+
+        card.innerHTML = `
+          <div class="relic-codex-icon-box" style="border-color: ${isDiscovered ? tierCfg.color : 'rgba(255,255,255,0.2)'}; background: ${isDiscovered ? (relic.color + '22') : 'rgba(0,0,0,0.5)'};">
+            ${iconSvg}
+          </div>
+          <div class="relic-codex-info">
+            <div class="relic-codex-top-row">
+              <span class="relic-codex-name" style="color: ${isDiscovered ? relic.color : '#94a3b8'};">${titleText}</span>
+              <span class="relic-codex-tier-badge" style="color: ${tierCfg.color}; border-color: ${tierCfg.color};">${tierName}</span>
+            </div>
+            <div class="relic-codex-desc" style="color: ${isDiscovered ? '#e2e8f0' : '#64748b'};">${descText}</div>
+          </div>
+        `;
+        relicsGrid.appendChild(card);
+      });
+    }
+
+    // 3. Update Progress Badge Text
+    if (unlockedCountEl) {
+      if (this.activeCodexSubtab === 'relics') {
+        unlockedCountEl.textContent = `${discoveredRelicsCount} / 20 ${t('codex_discovered')}`;
+      } else {
+        unlockedCountEl.textContent = `${discoveredCount} / 10 ${t('codex_discovered')}`;
+      }
+    }
   }
 
   openHangar(targetSkinId) {
@@ -10147,6 +10267,7 @@ class Game {
   acquireRelic(relic) {
     if (!this.player.activeRelics) this.player.activeRelics = {};
     this.player.activeRelics[relic.id] = true;
+    this.recordDiscoveredRelic(relic.id);
 
     if (relic.id === 'titan_bulkhead') {
       this.player.maxHp += 40;
@@ -14727,12 +14848,12 @@ class Game {
     if (this.player.upgrades.missiles > 0) {
       const missileRateMult = this.player.isStationary ? 1.25 : 1.0;
       this.player.missileCooldown += dt * missileRateMult;
-      const missileInterval = Math.max(65, 120 - this.player.upgrades.missiles * 14);
+      const missileInterval = Math.max(48, 92 - this.player.upgrades.missiles * 12);
       if (this.player.missileCooldown >= missileInterval && this.enemies.length > 0) {
         this.player.missileCooldown = 0;
         const isCluster = this.player.evolutions.clusterMissiles;
         const totalMissiles = this.player.upgrades.missiles;
-        const baseDmg = (5.5 + this.player.upgrades.missiles * 2.2) * (isCluster ? 1.6 : 1.0) * (this.player.damageMultiplier || 1.0);
+        const baseDmg = (16 + this.player.upgrades.missiles * 6.5) * (isCluster ? 1.6 : 1.0) * (this.player.damageMultiplier || 1.0);
 
         for (let i = 0; i < totalMissiles; i++) {
           const isDirect = (i % 2 === 0);
@@ -14782,7 +14903,7 @@ class Game {
     // 3. EMP Şok Dalgası (Acil durum savunması - sıklaştırılmış aralık ve caydırıcı hasar)
     if (this.player.upgrades.emp > 0) {
       this.player.empCooldown += dt;
-      const empInterval = Math.max(180, 320 - this.player.upgrades.emp * 35);
+      const empInterval = Math.max(160, 270 - (this.player.upgrades.emp - 1) * 40);
       if (this.player.empCooldown >= empInterval) {
         this.player.empCooldown = 0;
         this.triggerEMP();
@@ -14793,7 +14914,7 @@ class Game {
     if (this.player.upgrades.drones > 0) {
       this.player.droneAngle += 0.06 * dt;
       this.player.droneShootTimer = (this.player.droneShootTimer || 0) + dt;
-      const droneInterval = Math.max(38, 70 - this.player.upgrades.drones * 10);
+      const droneInterval = Math.max(30, 56 - this.player.upgrades.drones * 8);
       if (this.player.droneShootTimer >= droneInterval && this.enemies.length > 0) {
         this.player.droneShootTimer = 0;
         const droneCount = this.player.upgrades.drones;
@@ -14807,7 +14928,7 @@ class Game {
           const droneY = this.player.y + Math.sin(angle) * orbitRadius;
 
           let target = null;
-          let minDist = 380;
+          let minDist = 480;
           for (let e of this.enemies) {
             if (e.hp <= 0 || e.toRemove) continue;
             const dist = Math.hypot(e.x - droneX, e.y - droneY);
@@ -14832,12 +14953,12 @@ class Game {
             y: droneY,
             vx: vx,
             vy: vy,
-            damage: (7 + this.player.upgrades.drones * 3.0) * (isBastion ? 1.5 : 1.0) * (this.player.damageMultiplier || 1.0),
+            damage: (14 + this.player.upgrades.drones * 5.0) * (isBastion ? 1.6 : 1.0) * (this.player.damageMultiplier || 1.0),
             w: 6,
             h: 12,
             color: dColor,
             isDroneShot: true,
-            maxRange: 680,
+            maxRange: 820,
             traveled: 0
           });
         }
@@ -15369,39 +15490,45 @@ class Game {
   triggerEMP() {
     sounds.playEMP();
     vibrate.medium();
-    this.screenShake = 4;
-    this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', 200);
+    this.screenShake = 6;
 
-    const empRadius = 150 + this.player.upgrades.emp * 20;
+    const empRadius = 180 + this.player.upgrades.emp * 30;
+    this.particles.spawnShockwave(this.player.x, this.player.y, '#00f0ff', empRadius);
+    this.particles.spawnShockwave(this.player.x, this.player.y, '#38bdf8', empRadius * 0.65);
 
-    // Yalnızca EMP etki alanı (empRadius) içindeki düşman mermilerini temizle (Tüm ekranı bedava silmez)
+    // EMP etki alanı (empRadius) içindeki düşman mermilerini anında buharlaştır ve kıvılcım saç
     if (this.enemyProjectiles && this.enemyProjectiles.length > 0) {
       this.enemyProjectiles = this.enemyProjectiles.filter(proj => {
         const d = Math.hypot(proj.x - this.player.x, proj.y - this.player.y);
-        return d >= empRadius;
+        if (d < empRadius) {
+          this.particles.spawnExplosion(proj.x, proj.y, '#00f0ff', 2, 1.2);
+          return false;
+        }
+        return true;
       });
     }
 
-    // Çevredeki düşmanlara yüksek etki alanı hasarı ve yavaşlatma / sersemletme
-    const empDmg = (18 + this.player.upgrades.emp * 12) * (this.player.damageMultiplier || 1.0);
+    // Çevredeki düşmanlara yüksek etki alanı hasarı ve derin sersemletme / yavaşlatma
+    const empDmg = (28 + this.player.upgrades.emp * 16) * (this.player.damageMultiplier || 1.0);
     for (let enemy of this.enemies) {
       if (enemy.hp <= 0 || enemy.toRemove) continue;
       const dist = Math.hypot(enemy.x - this.player.x, enemy.y - this.player.y);
       if (dist < empRadius) {
-        this.applyCappedEnemyDamage(enemy, empDmg, { isEmp: true, isNuke: true, color: '#00f0ff', x: this.player.x, y: this.player.y });
+        const applied = this.applyCappedEnemyDamage(enemy, empDmg, { isEmp: true, isNuke: true, color: '#00f0ff', x: this.player.x, y: this.player.y });
+        this.recordWeaponDamage('emp', applied);
         if (enemy.hp <= 0) {
           this.handleEnemyDeath(enemy);
         } else {
           // Hayatta kalan düşmanlara sersemletme ve yavaşlatma etkisi
-          enemy.slowTimer = 90 + this.player.upgrades.emp * 30;
-          enemy.freezeTimer = 15;
-          enemy.hitFlash = 8;
+          enemy.slowTimer = 120 + this.player.upgrades.emp * 40;
+          enemy.freezeTimer = 25 + this.player.upgrades.emp * 5;
+          enemy.hitFlash = 12;
         }
       }
     }
   }
 
-  spawnTetherPair(waveMultiplier, speedMult) {
+    spawnTetherPair(waveMultiplier, speedMult) {
     const span = Math.min(190, Math.max(95, this.width * 0.44));
     const cx = 55 + Math.random() * (this.width - 110);
     const leftX = Math.max(28, cx - span / 2);
@@ -15694,6 +15821,15 @@ class Game {
 
     // === SEFER ARA ETKİNLİKLERİ (INTERMISSION DIRECTOR) ===
     if (!this.currentBoss && !this.levelBossSpawned && this.intermissionEvents) {
+      // === MİKRO PARAZİT / KOZMİK SÜRÜ PATLAMASI (COSMIC SWARM BURST - CATHARSIS) ===
+      if (this.nextSwarmTime === undefined) {
+        this.nextSwarmTime = 18 + Math.random() * 6;
+      }
+      if (this.gameTime >= this.nextSwarmTime && (lvlCfg.targetDuration - this.gameTime) >= 6) {
+        this.nextSwarmTime = this.gameTime + 18 + Math.random() * 6;
+        this.spawnCosmicSwarmBurst();
+      }
+
       // 1. FAZ (12. sn): KOZMİK HAZİNE & ALTIN ASTEROİD AKINTISI (Gold Rush)
       if (this.gameTime >= 12 && !this.intermissionEvents.goldRush && (lvlCfg.targetDuration - this.gameTime) >= 10) {
         this.intermissionEvents.goldRush = true;
@@ -15938,7 +16074,29 @@ class Game {
     }
   }
 
-  spawnEnemyVanguardFleet(fleetScale = 1.2, speedBonus = 1.0) {
+  spawnCosmicSwarmBurst() {
+    const count = 20 + Math.floor(Math.random() * 6); // 20-25 adet tek vuruşluk mikro sürü
+    const waveMult = this.waveMultiplier || 1.0;
+    const speedMult = (this.waveSpeedBonus || 1.0) * 1.08;
+    const centerX = 50 + Math.random() * (this.width - 100);
+
+    for (let s = 0; s < count; s++) {
+      const offsetX = (Math.random() - 0.5) * Math.min(this.width * 0.75, 240);
+      const spawnX = Math.max(20, Math.min(this.width - 20, centerX + offsetX));
+      const spawnY = -25 - Math.random() * 110 - (s * 7);
+
+      const swarmer = swarmerPool.acquire(spawnX, spawnY, waveMult, speedMult);
+      this.enemies.push(swarmer);
+    }
+
+    if (this.particles && this.particles.spawnFloatingText) {
+      this.particles.spawnFloatingText(this.width / 2, 110, t('float_cosmic_swarm'), '#ff0077', 16);
+    }
+    sounds.playCrit();
+    vibrate.light();
+  }
+
+    spawnEnemyVanguardFleet(fleetScale = 1.2, speedBonus = 1.0) {
     sounds.playBossAlarm();
     vibrate.medium();
     this.screenShake = 6;
@@ -16331,14 +16489,14 @@ class Game {
           }
 
           // Tesla Zincirleme Yıldırım (Dengeli hayatta kalma ölçeklemesi)
-          if (this.player.upgrades.tesla > 0 && Math.random() < (0.18 + this.player.upgrades.tesla * 0.08)) {
+          if (this.player.upgrades.tesla > 0 && Math.random() < (0.35 + this.player.upgrades.tesla * 0.12)) {
             let zapCount = 0;
             const maxZaps = this.player.upgrades.tesla; // Seviye arttıkça hedef sayısı (1, 2, 3, 4 hedef)
-            const teslaDmg = (2.2 + this.player.upgrades.tesla * 1.4) * (this.player.damageMultiplier || 1);
+            const teslaDmg = (9 + this.player.upgrades.tesla * 4.5) * (this.player.damageMultiplier || 1);
             for (let other of this.enemies) {
               if (other !== enemy && !other.toRemove && other.hp > 0) {
                 const ed = Math.hypot(other.x - enemy.x, other.y - enemy.y);
-                if (ed < 155) {
+                if (ed < 230) {
                   const zapApplied = this.applyCappedEnemyDamage(other, teslaDmg);
                   this.recordWeaponDamage('tesla', zapApplied);
                   this.particles.spawnLightning(enemy.x, enemy.y, other.x, other.y, '#38bdf8');
@@ -16451,39 +16609,74 @@ class Game {
             const mApplied = this.applyCappedEnemyDamage(enemy, missile.damage);
             this.recordWeaponDamage('missiles', mApplied);
             enemy.hitFlash = 4;
-          if (missile.isCluster || this.player.evolutions.clusterMissiles) {
-            sounds.playNuke();
-            this.screenShake = 3;
-            this.particles.spawnShockwave(missile.x, missile.y, '#ff3d00', 70);
+            const isClusterMissile = missile.isCluster || this.player.evolutions.clusterMissiles;
             const mX = missile.x;
             const mY = missile.y;
-            for (let p = this.enemyProjectiles.length - 1; p >= 0; p--) {
-              const ep = this.enemyProjectiles[p];
-              const epDx = ep.x - mX;
-              const epDy = ep.y - mY;
-              if (epDx * epDx + epDy * epDy < 48 * 48) {
-                this.enemyProjectiles.splice(p, 1);
+
+            if (isClusterMissile) {
+              sounds.playNuke();
+              this.screenShake = 3.5;
+              this.particles.spawnShockwave(mX, mY, '#ff3d00', 80);
+              for (let p = this.enemyProjectiles.length - 1; p >= 0; p--) {
+                const ep = this.enemyProjectiles[p];
+                const epDx = ep.x - mX;
+                const epDy = ep.y - mY;
+                if (epDx * epDx + epDy * epDy < 54 * 54) {
+                  this.particles.spawnExplosion(ep.x, ep.y, '#ff3d00', 2, 1.0);
+                  this.enemyProjectiles.splice(p, 1);
+                }
               }
-            }
-            for (let other of this.enemies) {
-              if (other !== enemy && other.hp > 0) {
-                const oDx = other.x - mX;
-                const oDy = other.y - mY;
-                if (oDx * oDx + oDy * oDy < 60 * 60) {
-                  const clusterDmg = (15 + (this.player.upgrades.missiles || 4) * 4) * (this.player.damageMultiplier || 1.0);
-                  this.applyBossPodDamage(other, clusterDmg, mX);
-                  const cApplied = this.applyCappedEnemyDamage(other, clusterDmg);
-                  this.recordWeaponDamage('missiles', cApplied);
-                  this.particles.spawnExplosion(other.x, other.y, '#ff5500', 3, 1.8);
+              const clusterDmg = (22 + (this.player.upgrades.missiles || 4) * 5) * (this.player.damageMultiplier || 1.0);
+              for (let other of this.enemies) {
+                if (other !== enemy && other.hp > 0 && !other.toRemove) {
+                  const oDx = other.x - mX;
+                  const oDy = other.y - mY;
+                  if (oDx * oDx + oDy * oDy < 80 * 80) {
+                    this.applyBossPodDamage(other, clusterDmg, mX);
+                    const cApplied = this.applyCappedEnemyDamage(other, clusterDmg);
+                    this.recordWeaponDamage('missiles', cApplied);
+                    this.particles.spawnExplosion(other.x, other.y, '#ff5500', 3, 1.8);
+                    if (other.hp <= 0) {
+                      this.handleEnemyDeath(other);
+                    }
+                  }
+                }
+              }
+            } else {
+              // Standart Güdümlü Füze Patlama Yarıçapı & Mermi Buharlaştırma (Tatmin edici alan hasarı)
+              this.particles.spawnExplosion(mX, mY, '#ff5500', 5, 2.4);
+              this.particles.spawnShockwave(mX, mY, '#ff7700', 46);
+              this.screenShake = 2;
+              sounds.playExplosion(false);
+
+              for (let p = this.enemyProjectiles.length - 1; p >= 0; p--) {
+                const ep = this.enemyProjectiles[p];
+                const epDx = ep.x - mX;
+                const epDy = ep.y - mY;
+                if (epDx * epDx + epDy * epDy < 36 * 36) {
+                  this.particles.spawnExplosion(ep.x, ep.y, '#ffbe0b', 2, 0.8);
+                  this.enemyProjectiles.splice(p, 1);
+                }
+              }
+
+              const splashDmg = missile.damage * 0.75;
+              for (let other of this.enemies) {
+                if (other !== enemy && other.hp > 0 && !other.toRemove) {
+                  const oDx = other.x - mX;
+                  const oDy = other.y - mY;
+                  if (oDx * oDx + oDy * oDy < 46 * 46) {
+                    this.applyBossPodDamage(other, splashDmg, mX);
+                    const sApplied = this.applyCappedEnemyDamage(other, splashDmg);
+                    this.recordWeaponDamage('missiles', sApplied);
+                    this.particles.spawnExplosion(other.x, other.y, '#ff5500', 2, 1.3);
+                    if (other.hp <= 0) {
+                      this.handleEnemyDeath(other);
+                    }
+                  }
                 }
               }
             }
-          } else {
-            this.particles.spawnExplosion(missile.x, missile.y, '#ff5500', 4, 2.2);
-            this.screenShake = 1.5;
-            sounds.playExplosion(false);
-          }
-          this.homingMissiles.splice(j, 1);
+            this.homingMissiles.splice(j, 1);
           break;
         }
       }
@@ -16788,6 +16981,7 @@ class Game {
 
   handleEnemyDeath(enemy) {
     if (!enemy || enemy._deathHandled) return;
+    if (enemy.isSwarmer) enemy._balloonDone = true;
     if (!enemy._balloonDone && !enemy.isIndestructible) {
       if (!enemy._ballooning) {
         enemy._ballooning = true;

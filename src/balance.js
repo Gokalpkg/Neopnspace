@@ -95,7 +95,9 @@ export const ENEMY_BASE_HP = {
   cruiser: 75,
   shield_vanguard: 58,
   elite_scout: 85,
-  cargo_freighter: 50
+  cargo_freighter: 50,
+  cosmic_swarmer: 1,
+  swarmer: 1
 };
 
 export const BOSS_ROSTER_HP = {
