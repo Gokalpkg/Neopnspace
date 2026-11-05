@@ -9,6 +9,7 @@ import { analytics } from './analytics.js';
 import { THEME_PALETTE, SHIP_BALANCE, TECH_WORKSHOP_CONFIG, SPAWN_PACING, ECONOMY_FORMULAS, ART_BIBLE_PROMPT_TEMPLATE, PLAYER_BASE_CONFIG, DROP_RATES, HYPER_MODE_CONFIG, XP_CURVE, DIFFICULTY_CURVE, CARD_RARITY, ENEMY_BASE_HP, BOSS_ROSTER_HP } from './balance.js';
 import { EventBus } from './events.js';
 import { ChestVfxController, LegendaryChestOverlay } from './chest-vfx-controller.js';
+import { notifications } from './notifications.js';
 import { initLeaderboard, submitScoreToFirestore, fetchTopScoresFromFirestore, updatePlayerProfileInFirestore, PGS_CONFIG, getPlayerUid, unlockPlayGamesAchievement, incrementPlayGamesAchievement, showPlayGamesAchievements } from './leaderboard.js';
 
 if (typeof window !== 'undefined') {
@@ -4226,6 +4227,11 @@ class Game {
     sounds.stopBGM();
     sounds.playCardSelect();
     vibrate.light();
+
+    try {
+      notifications.requestPermissionAfterFlight(totalFlights);
+      notifications.scheduleNextDailyNotification();
+    } catch (e) {}
 
     hud.classList.add('hidden');
     if (ultimateBtnContainer) ultimateBtnContainer.classList.add('hidden');
@@ -20054,6 +20060,7 @@ class Game {
 function bootGame() {
   try {
     const game = new Game();
+    try { notifications.init(); } catch (e) {}
     game.loop();
   } catch (err) {
     console.error("Oyun başlatma hatası:", err);
