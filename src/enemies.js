@@ -1450,12 +1450,21 @@ export class Enemy {
       const flutter = Math.sin((this.time || 0) * 0.45) * 0.4;
       const r = this.radius || 9;
       ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : 'rgba(255, 0, 119, 0.75)';
-      ctx.beginPath();
-      ctx.ellipse(-r * 0.7, 0, r * 0.65, Math.max(1, r * 0.35 + flutter * 2), -0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(r * 0.7, 0, r * 0.65, Math.max(1, r * 0.35 - flutter * 2), 0.4, 0, Math.PI * 2);
-      ctx.fill();
+      if (typeof ctx.ellipse === 'function') {
+        ctx.beginPath();
+        ctx.ellipse(-r * 0.7, 0, r * 0.65, Math.max(1, r * 0.35 + flutter * 2), -0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(r * 0.7, 0, r * 0.65, Math.max(1, r * 0.35 - flutter * 2), 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(-r * 0.7, 0, Math.max(1, r * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(r * 0.7, 0, Math.max(1, r * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : '#ff1744';
       ctx.beginPath();

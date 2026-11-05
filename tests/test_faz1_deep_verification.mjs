@@ -1,5 +1,5 @@
 // ==============================================================================
-// 🏛️ NEON SPACE SURVIVOR - FAZ 1.1 & FAZ 1.2 DEEP VERIFICATION SUITE
+//  NEON SPACE SURVIVOR - FAZ 1.1 & FAZ 1.2 DEEP VERIFICATION SUITE
 // Tests Tether Drone Cooldown, Doomsday Matrix boundary filters, and PoolManager.
 // ==============================================================================
 

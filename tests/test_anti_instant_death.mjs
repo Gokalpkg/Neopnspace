@@ -1,5 +1,5 @@
 // ==============================================================================
-// 🛡️ NEON SPACE SURVIVOR — ANTI-INSTANT-DEATH & SURVIVABILITY VERIFICATION SUITE
+//  NEON SPACE SURVIVOR — ANTI-INSTANT-DEATH & SURVIVABILITY VERIFICATION SUITE
 // Verifies:
 // 1. Post-Hit Invulnerability (I-Frames: 28 frames on normal hit, blocks same-frame multi-hits)
 // 2. Shield-Gating (Absorbs overflow damage on shield break, 42 I-Frames, clears 120px bullets, [KALKAN KIRILDI!])

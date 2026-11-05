@@ -1449,6 +1449,8 @@ class SoundEngine {
     if (this.isMuted || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
+      if (this._lastComboStreakTime && (now - this._lastComboStreakTime) < 0.035) return;
+      this._lastComboStreakTime = now;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 

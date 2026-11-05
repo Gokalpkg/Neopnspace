@@ -401,9 +401,9 @@ console.log(`Failed: ${totalFailed}`);
 console.log('='.repeat(80));
 
 if (totalFailed > 0) {
-  console.error('\n❌ VERDICT: REQUEST_CHANGES — Failure detected in stress harness.');
+  console.error('\n[FAIL] VERDICT: REQUEST_CHANGES — Failure detected in stress harness.');
   process.exit(1);
 } else {
-  console.log('\n✅ VERDICT: APPROVE — All empirical stress tests passed flawlessly.');
+  console.log('\n[PASS] VERDICT: APPROVE — All empirical stress tests passed flawlessly.');
   process.exit(0);
 }

@@ -164,6 +164,40 @@ runTest('R3.5: Sıfır Unicode Emoji kuralı tüm yeni özellik ve çevirilerde 
   });
 });
 
+runTest('S2.4: Kaçan Cosmic Swarmer gezegen bariyer hasarı vermez ve komboyu bozmaz', () => {
+  const gameSrc = fs.readFileSync('src/game.js', 'utf8');
+  assert.ok(gameSrc.includes('!enemy.isSwarmer && enemy.type !== \'cosmic_swarmer\' && !enemy.isIndestructible'), 'Bariyer kaçış kontrolünden swarmer muaf tutulmalı');
+  assert.ok(gameSrc.includes('if (enemy && (enemy.isSwarmer || enemy.type === \'cosmic_swarmer\' || enemy.type === \'swarmer\')) return;'), 'handleEnemyEscaped içinde swarmer bariyere zarar vermemeli');
+});
+
+runTest('S2.5: Swarmer öldüğünde/kaçtığında swarmerPool.release ile havuza döner ve kirli durum temizlenir', () => {
+  const gameSrc = fs.readFileSync('src/game.js', 'utf8');
+  assert.ok(gameSrc.includes('swarmerPool.release(enemy)'), 'Düşman öldüğünde/silindiğinde swarmerPool.release çağrılmalı');
+
+  // Havuz kirli durum sıfırlama kontrolü
+  const s1 = swarmerPool.acquire(100, 100, 1.0, 1.0);
+  s1.barrierHit = true;
+  s1.frozen = 60;
+  s1.slowTimer = 90;
+  swarmerPool.release(s1);
+
+  const s2 = swarmerPool.acquire(150, 150, 1.0, 1.0);
+  assert.strictEqual(s2.barrierHit, false, 'Geri dönüştürülen swarmer barrierHit sıfırlanmalı');
+  assert.strictEqual(s2.frozen, 0, 'Geri dönüştürülen swarmer frozen sıfırlanmalı');
+  assert.strictEqual(s2.slowTimer, 0, 'Geri dönüştürülen swarmer slowTimer sıfırlanmalı');
+  swarmerPool.release(s2);
+});
+
+runTest('W1.6: Dron mermisi vurduğunda hasar istatistiği drones silahına yazılır', () => {
+  const gameSrc = fs.readFileSync('src/game.js', 'utf8');
+  assert.ok(gameSrc.includes('const weaponKey = bullet.isDroneShot ? \'drones\' : (bullet.isMissile ? \'missiles\' : \'laser\');'), 'Mermi hasarı doğru silaha kaydedilmeli');
+});
+
+runTest('A1.1: Çoklu sürü imhasında playComboStreak ses kanalı taşmasını önleyecek şekilde kısıtlanır', () => {
+  const audioSrc = fs.readFileSync('src/audio.js', 'utf8');
+  assert.ok(audioSrc.includes('_lastComboStreakTime') && audioSrc.includes('0.035'), 'playComboStreak ses kısıtlaması (throttling) mevcut olmalı');
+});
+
 console.log('==============================================================================');
 console.log(` SUMMARY: ${passedCount}/${passedCount + failedCount} passed (${failedCount} failed)`);
 console.log('==============================================================================');

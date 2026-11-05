@@ -10,10 +10,10 @@ console.log('===============================================================\n')
 let failed = false;
 function assert(condition, message) {
   if (!condition) {
-    console.error(`❌ FAIL: ${message}`);
+    console.error(`[FAIL] FAIL: ${message}`);
     failed = true;
   } else {
-    console.log(`✅ PASS: ${message}`);
+    console.log(`[PASS] PASS: ${message}`);
   }
 }
 
@@ -307,9 +307,9 @@ if (!meetsStrictInvariant) {
 
 console.log('\n===============================================================');
 if (failed) {
-  console.error('❌ CHALLENGER STRESS SUITE: SOME TESTS FAILED');
+  console.error('[FAIL] CHALLENGER STRESS SUITE: SOME TESTS FAILED');
   process.exit(1);
 } else {
-  console.log('✅ CHALLENGER STRESS SUITE: EXECUTION COMPLETED');
+  console.log('[PASS] CHALLENGER STRESS SUITE: EXECUTION COMPLETED');
   process.exit(0);
 }

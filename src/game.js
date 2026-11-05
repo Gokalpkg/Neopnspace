@@ -3677,10 +3677,19 @@ class Game {
 
   switchCodexSubtab(subtab = 'evolutions') {
     this.activeCodexSubtab = subtab;
-    const btnEvo = document.getElementById('btn-codex-subtab-evolutions');
-    const btnRelics = document.getElementById('btn-codex-subtab-relics');
+    this.renderCodex();
+  }
+
+  renderCodex() {
     const codexGrid = document.getElementById('codex-grid');
     const relicsGrid = document.getElementById('codex-relics-grid');
+    const unlockedCountEl = document.getElementById('codex-unlocked-count');
+    if (!codexGrid) return;
+
+    this.activeCodexSubtab = this.activeCodexSubtab || 'evolutions';
+    const subtab = this.activeCodexSubtab;
+    const btnEvo = document.getElementById('btn-codex-subtab-evolutions');
+    const btnRelics = document.getElementById('btn-codex-subtab-relics');
     const mainTitle = document.getElementById('codex-main-title');
     const mainSubtitle = document.getElementById('codex-main-subtitle');
 
@@ -3704,17 +3713,6 @@ class Game {
       if (mainTitle) mainTitle.textContent = t('codex_title');
       if (mainSubtitle) mainSubtitle.textContent = t('codex_subtitle');
     }
-
-    this.renderCodex();
-  }
-
-  renderCodex() {
-    const codexGrid = document.getElementById('codex-grid');
-    const relicsGrid = document.getElementById('codex-relics-grid');
-    const unlockedCountEl = document.getElementById('codex-unlocked-count');
-    if (!codexGrid) return;
-
-    this.activeCodexSubtab = this.activeCodexSubtab || 'evolutions';
 
     // 1. Render Evolutions
     codexGrid.innerHTML = '';
@@ -3757,7 +3755,7 @@ class Game {
             <div class="codex-mini-icon" title="${item2Name} Lv.${r.item2Lvl}">
               ${item2IconSvg}
             </div>
-            <span class="codex-recipe-arrow">➜</span>
+            <span class="codex-recipe-arrow">></span>
             <div class="codex-mini-icon codex-mini-evo" style="border-color: ${isDiscovered ? r.color : 'rgba(255,255,255,0.2)'};" title="${isDiscovered ? titleText : '???'}">
               ${evoIconSvg}
             </div>
@@ -4258,7 +4256,7 @@ class Game {
 
     // 4. Havaya fırlayan 30 Adet Altın / Kristal Parçacığı (360 derece patlama + yukarı süzülüş)
     const count = 30;
-    const gemChars = ['❖', '◆', '✦', '▲', '●'];
+    const gemChars = ['◆', '▲', '●', '■'];
     const colors = ['#ffd700', '#ffbe0b', '#05ffa1', '#ffffff', '#ff9100'];
 
     for (let i = 0; i < count; i++) {
@@ -11242,6 +11240,10 @@ class Game {
       }
     } else if (enemy.type === 'escort_fighter') {
       this.gems.push(new Gem(enemy.x, enemy.y, 1));
+    } else if (enemy.isSwarmer || enemy.type === 'cosmic_swarmer' || enemy.type === 'swarmer') {
+      if (Math.random() < 0.4) {
+        this.gems.push(Gem.spawn(enemy.x, enemy.y, 1));
+      }
     } else {
       this.gems.push(new Gem(enemy.x, enemy.y, 1));
     }
@@ -16471,7 +16473,8 @@ class Game {
           }
 
           const appliedDmg = this.applyCappedEnemyDamage(enemy, hitDamage, { x: bullet.x, y: bullet.y, color: bullet.color || '#00f0ff' });
-          this.recordWeaponDamage((bullet.pierce && bullet.pierce > 0) ? 'drones' : 'laser', appliedDmg);
+          const weaponKey = bullet.isDroneShot ? 'drones' : (bullet.isMissile ? 'missiles' : 'laser');
+          this.recordWeaponDamage(weaponKey, appliedDmg);
 
           if (isCrit) {
             sounds.playCritHit();
@@ -16750,7 +16753,7 @@ class Game {
       }
 
       // 5. Ekranın Altına Kaçan Düşmanlar (Gezegen Savunma Hattı / Bariyer)
-      if (enemy.y >= this.height - 10 && !enemy.barrierHit && !isThisBoss && enemy.type !== 'escort_fighter' && !enemy.isIndestructible) {
+      if (enemy.y >= this.height - 10 && !enemy.barrierHit && !isThisBoss && enemy.type !== 'escort_fighter' && !enemy.isSwarmer && enemy.type !== 'cosmic_swarmer' && !enemy.isIndestructible) {
         enemy.barrierHit = true;
         this.handleEnemyEscaped(enemy);
       }
@@ -16758,8 +16761,12 @@ class Game {
       // Düşman Öldü mü?
       if (enemy.hp <= 0) {
         this.handleEnemyDeath(enemy);
-        if (!enemy._ballooning) this.enemies.splice(i, 1);
+        if (!enemy._ballooning) {
+          if (enemy.isSwarmer || enemy.type === 'cosmic_swarmer') swarmerPool.release(enemy);
+          this.enemies.splice(i, 1);
+        }
       } else if (enemy.toRemove) {
+        if (enemy.isSwarmer || enemy.type === 'cosmic_swarmer') swarmerPool.release(enemy);
         this.enemies.splice(i, 1);
       }
     }
@@ -18039,6 +18046,7 @@ class Game {
 
   handleEnemyEscaped(enemy) {
     if (this._pendingVictory || this.state !== 'PLAYING' || this.isMerchantActive || this.modalTransition) return;
+    if (enemy && (enemy.isSwarmer || enemy.type === 'cosmic_swarmer' || enemy.type === 'swarmer')) return;
     if (merchantModal && !merchantModal.classList.contains('hidden')) return;
     if (this.player && (this.player.phaseTimer > 0 || this.player.invulnerableTimer > 0)) return;
     // Kaçan meteor veya düşman gezegen savunma hattını zorlar!

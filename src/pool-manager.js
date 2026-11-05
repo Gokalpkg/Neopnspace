@@ -461,6 +461,14 @@ export class SwarmerPool {
           e._ballooning = false;
           e._balloonDone = true;
           e.maxDamagePerHitRatio = 1.0;
+          e.barrierHit = false;
+          e.frozen = 0;
+          e.slowTimer = 0;
+          e.freezeTimer = 0;
+          e.poisonTimer = 0;
+          e.plasmaBurnTimer = 0;
+          e.isPrimedForDomino = false;
+          e.rot = 0;
           return e;
         }
       }

@@ -408,7 +408,7 @@ const RAW = {
   ftue_start_battle: row('LAUNCH FIRST MISSION', 'İLK SEFERİ BAŞLAT', 'LANCER LA PREMIÈRE MISSION', 'ERSTE MISSION STARTEN', '启动首次出击', '啟動首次出擊', '初出撃を開始する'),
   go_mission_label: row('DAILY QUEST PROGRESS', 'GÜNÜN GÖREVİ', 'QUÊTE DU JOUR', 'TAGESMISSION', '今日任务进度', '今日任務進度', 'デイリー任務進行度'),
   go_upgrade_ready_label: row('UPGRADE READY IN WORKSHOP', 'ATÖLYEDE YÜKSELTMEN HAZIR!', 'AMÉLIORATION PRÊTE À L\'ATELIER', 'VERBESSERUNG BEREIT', '工坊升级已就绪', '工坊升級已就緒', 'ワークショップ強化準備完了'),
-  go_to_hangar: row('GO TO HANGAR ➜', 'ATÖLYEYE GİT ➜', 'ALLER AU HANGAR ➜', 'ZUM HANGAR ➜', '前往机库 ➜', '前往機庫 ➜', 'ハンガーへ ➜'),
+  go_to_hangar: row('GO TO HANGAR >', 'ATÖLYEYE GİT >', 'ALLER AU HANGAR >', 'ZUM HANGAR >', '前往机库 >', '前往機庫 >', 'ハンガーへ >'),
   wheel_swipe_hint: row('Swipe down on the wheel to spin!', 'Çarkı aşağı kaydırarak veya butona basarak çevir!', 'Faites glisser vers le bas pour tourner !', 'Nach unten wischen zum Drehen!', '向下轻扫转动轮盘！', '向下輕掃轉動輪盤！', '下にスワイプしてスピン！'),
   tut_zone_line: row('Fly up for a slow heavy shot. Drop back for a fast stream.', 'Yukarı çıkınca ağır ve yavaş atış, aşağı inince seri atış.', 'Monte pour un tir lourd et lent. Descends pour une rafale.', 'Oben: schwerer langsamer Schuss. Unten: schnelle Salve.', '飞到上方是慢速重击，回到下方是连射。', '飛到上方是慢速重擊，回到下方是連射。', '上は重い単発、下は速い連射。'),
   tut_zone_front: row('FRONT: slow heavy shot.', 'ÖN HAT: yavaş ve ağır atış.', 'AVANT: tir lourd et lent.', 'VORN: schwerer langsamer Schuss.', '前排：慢速重击。', '前排：慢速重擊。', '前方：重い単発。'),

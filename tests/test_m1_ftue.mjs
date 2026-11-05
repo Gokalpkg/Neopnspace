@@ -6,10 +6,10 @@ console.log('=== TEST SUITE: MILESTONE 1 (FTUE & EARLY GAME PACING) ===\n');
 let failed = false;
 function assert(condition, message) {
   if (!condition) {
-    console.error(`❌ FAIL: ${message}`);
+    console.error(`[FAIL] FAIL: ${message}`);
     failed = true;
   } else {
-    console.log(`✅ PASS: ${message}`);
+    console.log(`[PASS] PASS: ${message}`);
   }
 }
 
@@ -123,9 +123,9 @@ assert(
 
 console.log('\n----------------------------------------');
 if (failed) {
-  console.error('❌ TEST SUITE FAILED');
+  console.error('[FAIL] TEST SUITE FAILED');
   process.exit(1);
 } else {
-  console.log('✅ ALL TEST SUITE CHECKS PASSED PERFECTLY!');
+  console.log('[PASS] ALL TEST SUITE CHECKS PASSED PERFECTLY!');
   process.exit(0);
 }
