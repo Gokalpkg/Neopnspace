@@ -675,7 +675,7 @@ const RAW = {
   // FTUE & Re-engagement Overhaul
   hangar_instant_launch: row('LAUNCH & ENGAGE', 'HEMEN FIRLA & SAVAŞA GİR', 'DÉCOLLAGE IMMÉDIAT ET COMBAT', 'SOFORT STARTEN & KÄMPFEN', '立即起飞进入战斗', '立即起飛進入戰鬥', '即座に出撃＆戦闘開始'),
   boss_commander_name: row('VANGUARD COMMANDER', 'ÖNCÜ KOMUTAN', 'COMMANDANT D\'AVANT-GARDE', 'VANGUARD-KOMMANDANT', '先锋指挥官', '先鋒指揮官', 'ヴァンガード指令官'),
-  hybrid_launch_title: row('UPGRADE & INSTANT LAUNCH! 🚀', 'GÜÇLEN & ANINDA FIRLA! 🚀', 'AMÉLIOREZ ET DÉCOLLEZ ! 🚀', 'UPGRADEN & SOFORT STARTEN! 🚀', '强化并立即起飞！🚀', '強化並立即起飛！🚀', '強化して即座に出撃！🚀'),
+  hybrid_launch_title: row('UPGRADE & INSTANT LAUNCH!', 'GÜÇLEN & ANINDA FIRLA!', 'AMÉLIOREZ ET DÉCOLLEZ !', 'UPGRADEN & SOFORT STARTEN!', '强化并立即起飞！', '強化並立即起飛！', '強化して即座に出撃！'),
   instant_rematch_title: row('INSTANT REMATCH (PLAY AGAIN)', 'ANINDA RÖVANŞ (TEKRAR OYNA)', 'REVANCHE IMMÉDIATE (REJOUER)', 'SOFORTIGE REVANCHE (NOCHMAL)', '立即复仇（再来一局）', '立即復仇（再來一局）', '即座に再戦（リトライ）'),
   btn_revive_tutorial_action: row('FREE EMERGENCY AID', 'ÜCRETSİZ ACİL DESTEK', 'AIDE D\'URGENCE GRATUITE', 'KOSTENLOSE NOTFALLHILFE', '免费紧急救援', '免費緊急救援', '無料緊急プロトコル'),
   btn_revive_tutorial_tag: row('1 USE', '1 HAK', '1 ESSAI', '1 VERSUCH', '1次机会', '1次機會', '1回限定'),

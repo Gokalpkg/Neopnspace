@@ -8009,21 +8009,21 @@ class Game {
     this.totalPilots = 18492;
 
     this.lbCountries = [
-      { code: 'TUR', flag: 'TR', emoji: '🇹🇷', name: 'Türkiye' },
-      { code: 'AZE', flag: 'AZ', emoji: '🇦🇿', name: 'Azerbaycan' },
-      { code: 'USA', flag: 'US', emoji: '🇺🇸', name: 'USA' },
-      { code: 'GER', flag: 'DE', emoji: '🇩🇪', name: 'Germany' },
-      { code: 'GBR', flag: 'UK', emoji: '🇬🇧', name: 'UK' },
-      { code: 'JPN', flag: 'JP', emoji: '🇯🇵', name: 'Japan' },
-      { code: 'KOR', flag: 'KR', emoji: '🇰🇷', name: 'Korea' },
-      { code: 'FRA', flag: 'FR', emoji: '🇫🇷', name: 'France' },
-      { code: 'BRA', flag: 'BR', emoji: '🇧🇷', name: 'Brazil' },
-      { code: 'CAN', flag: 'CA', emoji: '🇨🇦', name: 'Canada' },
-      { code: 'ESP', flag: 'ES', emoji: '🇪🇸', name: 'Spain' },
-      { code: 'ITA', flag: 'IT', emoji: '🇮🇹', name: 'Italy' },
-      { code: 'NLD', flag: 'NL', emoji: '🇳🇱', name: 'Netherlands' },
-      { code: 'SWE', flag: 'SE', emoji: '🇸🇪', name: 'Sweden' },
-      { code: 'AUS', flag: 'AU', emoji: '🇦🇺', name: 'Australia' }
+      { code: 'TUR', flag: 'TR', name: 'Türkiye' },
+      { code: 'AZE', flag: 'AZ', name: 'Azerbaycan' },
+      { code: 'USA', flag: 'US', name: 'USA' },
+      { code: 'GER', flag: 'DE', name: 'Germany' },
+      { code: 'GBR', flag: 'UK', name: 'UK' },
+      { code: 'JPN', flag: 'JP', name: 'Japan' },
+      { code: 'KOR', flag: 'KR', name: 'Korea' },
+      { code: 'FRA', flag: 'FR', name: 'France' },
+      { code: 'BRA', flag: 'BR', name: 'Brazil' },
+      { code: 'CAN', flag: 'CA', name: 'Canada' },
+      { code: 'ESP', flag: 'ES', name: 'Spain' },
+      { code: 'ITA', flag: 'IT', name: 'Italy' },
+      { code: 'NLD', flag: 'NL', name: 'Netherlands' },
+      { code: 'SWE', flag: 'SE', name: 'Sweden' },
+      { code: 'AUS', flag: 'AU', name: 'Australia' }
     ];
 
     ['storm', 'campaign'].forEach(m => {
@@ -8256,7 +8256,7 @@ class Game {
     this.playerCallsign = callsign;
     this.playerCountry = countryCode;
 
-    const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: countryCode, flag: countryCode, emoji: '🇹🇷' };
+    const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: countryCode, flag: countryCode };
     let myUid = null;
     try {
       if (typeof getPlayerUid === 'function') myUid = getPlayerUid();
@@ -8522,7 +8522,7 @@ class Game {
     try {
       const callsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
       const countryCode = localStorage.getItem('neon_player_country') || 'TUR';
-      const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' };
+      const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === countryCode)) || { code: 'TUR', flag: 'TR' };
       const currentSkinName = t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name');
 
       const stormScore = this.highScores.storm || 0;
@@ -8698,7 +8698,7 @@ class Game {
     // Player Data
     const pilotCallsign = localStorage.getItem('neon_player_callsign') || 'PILOT_ALPHA';
     const pilotCountryCode = localStorage.getItem('neon_player_country') || 'TUR';
-    const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === pilotCountryCode)) || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' };
+    const pilotCountry = (this.lbCountries && this.lbCountries.find(c => c.code === pilotCountryCode)) || { code: 'TUR', flag: 'TR' };
     const currentSkinName = t('ship_' + (this.currentSkinId || 'cyberpunk') + '_name');
 
     const stormScore = this.highScores.storm || 0;

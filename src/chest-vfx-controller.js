@@ -1,5 +1,5 @@
 // ============================================================================
-// 🏛️ NEON SPACE SURVIVOR — JACKPOT SANDIK AÇILIŞ KOREOGRAFİSİ (VAMPIRE SURVIVORS TARZI)
+// NEON SPACE SURVIVOR — JACKPOT SANDIK AÇILIŞ KOREOGRAFİSİ (VAMPIRE SURVIVORS TARZI)
 // Safkan Pixel Art (0 Blur, 0 Radial/LinearGradient, 0 Circle/Arc, Integer Math.round)
 // 160 Parçacıklı Sabit Boyutlu Object Pool (Zero GC Allocation) + 5 Adımlı Milisaniyeli Akış
 // ============================================================================

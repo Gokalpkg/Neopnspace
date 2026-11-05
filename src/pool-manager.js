@@ -1,5 +1,5 @@
 // =======================================================================
-// 🏛️ NEON SPACE SURVIVOR - NESNE HAVUZU YÖNETİCİSİ (POOL MANAGER)
+// NEON SPACE SURVIVOR - NESNE HAVUZU YÖNETİCİSİ (POOL MANAGER)
 // Anayasa & Mimari Standart: Supercell / Habby - Zero GC Churn Zırhı
 // Heap üzerinde nesne tahsisatını (garbage collection pause) sıfıra indirir.
 // =======================================================================

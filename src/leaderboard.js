@@ -220,7 +220,7 @@ export async function submitScoreToFirestore(mode, scoreData) {
     const payload = {
       uid,
       name: scoreData.name || 'PILOT_ALPHA',
-      country: scoreData.country || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' },
+      country: scoreData.country || { code: 'TUR', flag: 'TR' },
       ship: scoreData.ship || 'Siberpunk',
       updatedAt: Date.now()
     };
@@ -252,7 +252,7 @@ export async function updatePlayerProfileInFirestore(callsign, country, ship) {
   const updateData = {
     uid,
     name: callsign,
-    country: country || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' },
+    country: country || { code: 'TUR', flag: 'TR' },
     ship: ship || 'Siberpunk',
     updatedAt: Date.now()
   };
@@ -295,7 +295,7 @@ export async function fetchTopScoresFromFirestore(mode = 'storm', limitCount = 5
       scores.push({
         uid: docUid,
         name: isMe ? myCallsign : data.name,
-        country: isMe ? { code: myCountryCode, flag: myCountryCode } : (data.country || { code: 'TUR', flag: 'TR', emoji: '🇹🇷' }),
+        country: isMe ? { code: myCountryCode, flag: myCountryCode } : (data.country || { code: 'TUR', flag: 'TR' }),
         score: data.score || 0,
         level: data.level || 1,
         stars: data.stars || 0,
