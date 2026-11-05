@@ -1611,7 +1611,7 @@ class Game {
         if (navigator.share) {
           try {
             await navigator.share({
-              title: 'Neon Galaxy: Space Shooter Rekoru',
+              title: 'Neon Space Survivor Rekoru',
               text: shareText
             });
             return;

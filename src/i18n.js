@@ -227,7 +227,7 @@ export const TRANSLATIONS = {
 
     // Privacy Modal
     privacy_title: "Privacy Policy",
-    privacy_p1: "Neon Galaxy: Space Shooter does not collect sensitive personal data. Local progress is saved on your device; leaderboard scores (callsign, flag) and achievements sync via Google Firebase and Play Games Services.",
+    privacy_p1: "Neon Space Survivor does not collect sensitive personal data. Local progress is saved on your device; leaderboard scores (callsign, flag) and achievements sync via Google Firebase and Play Games Services.",
     privacy_p2: "Ads and analytics are powered by Google AdMob and Firebase Analytics, which may process Advertising ID (AAID) and diagnostics under Google's Privacy Policy.",
     privacy_p3: "Internet access is used for ads, leaderboards, and Google Play achievements. Vibration settings remain on your device.",
     privacy_p4: "Data deletion & support contact: kaunosgames@gmail.com",
@@ -730,7 +730,7 @@ export const TRANSLATIONS = {
     privacy_link: "Gizlilik Politikası",
 
     privacy_title: "Gizlilik Politikası",
-    privacy_p1: "Neon Galaxy: Space Shooter hassas kişisel veri talep etmez. İlerleme cihazınızda saklanır; liderlik tablosu (takma ad, bayrak, skor) ve başarımlar Google Firebase ve Play Games Services ile senkronize edilir.",
+    privacy_p1: "Neon Space Survivor hassas kişisel veri talep etmez. İlerleme cihazınızda saklanır; liderlik tablosu (takma ad, bayrak, skor) ve başarımlar Google Firebase ve Play Games Services ile senkronize edilir.",
     privacy_p2: "Reklamlar ve analitikler Google AdMob ve Firebase Analytics ile sağlanır; reklam kimliği (AAID) ve tanılama bilgileri Google Gizlilik Politikası kapsamında işlenebilir.",
     privacy_p3: "İnternet bağlantısı reklamlar, liderlik tablosu ve Google Play başarımları için kullanılır. Titreşim ayarı cihazınızda kalır.",
     privacy_p4: "Veri silme talebi ve iletişim: kaunosgames@gmail.com",
