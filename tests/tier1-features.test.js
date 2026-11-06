@@ -278,11 +278,11 @@ export async function runTier1Tests() {
     assert.equal(calcBonus(4), 1.30, 'Star 4 must have 1.3x multiplier (+30%)');
     assert.equal(calcBonus(5), 1.40, 'Star 5 must have 1.4x multiplier (+40%)');
 
-    // Test cost ladder: [0, 500, 1200, 2500, 5000]
-    assert.equal(game.getStarUpCost(1), 500, 'Cost to upgrade from Star 1 to 2 is 500 crystals');
-    assert.equal(game.getStarUpCost(2), 1200, 'Cost to upgrade from Star 2 to 3 is 1200 crystals');
-    assert.equal(game.getStarUpCost(3), 2500, 'Cost to upgrade from Star 3 to 4 is 2500 crystals');
-    assert.equal(game.getStarUpCost(4), 5000, 'Cost to upgrade from Star 4 to 5 is 5000 crystals');
+    // Test cost ladder: [0, 150, 350, 750, 1500]
+    assert.equal(game.getStarUpCost(1), 150, 'Cost to upgrade from Star 1 to 2 is 150 crystals');
+    assert.equal(game.getStarUpCost(2), 350, 'Cost to upgrade from Star 2 to 3 is 350 crystals');
+    assert.equal(game.getStarUpCost(3), 750, 'Cost to upgrade from Star 3 to 4 is 750 crystals');
+    assert.equal(game.getStarUpCost(4), 1500, 'Cost to upgrade from Star 4 to 5 is 1500 crystals');
   });
 
   // --------------------------------------------------------------------------

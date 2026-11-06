@@ -47,11 +47,11 @@ test('S1.1: Default ship star is 1 when unset in storage', () => {
   assert.equal(game.getShipStars('vortex'), 1);
 });
 
-test('S1.2: Star ascension cost progression matches [500, 1200, 2500, 5000]', () => {
-  assert.equal(game.getStarUpCost(1), 500, 'Star 1 -> 2 cost is 500');
-  assert.equal(game.getStarUpCost(2), 1200, 'Star 2 -> 3 cost is 1200');
-  assert.equal(game.getStarUpCost(3), 2500, 'Star 3 -> 4 cost is 2500');
-  assert.equal(game.getStarUpCost(4), 5000, 'Star 4 -> 5 cost is 5000');
+test('S1.2: Star ascension cost progression matches [150, 350, 750, 1500]', () => {
+  assert.equal(game.getStarUpCost(1), 150, 'Star 1 -> 2 cost is 150');
+  assert.equal(game.getStarUpCost(2), 350, 'Star 2 -> 3 cost is 350');
+  assert.equal(game.getStarUpCost(3), 750, 'Star 3 -> 4 cost is 750');
+  assert.equal(game.getStarUpCost(4), 1500, 'Star 4 -> 5 cost is 1500');
 });
 
 test('S1.3: Stat multipliers scale by +10% per star across HP, DMG, and Speed', () => {

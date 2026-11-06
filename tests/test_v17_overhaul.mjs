@@ -217,7 +217,7 @@ test('V17.9: Excess gems (> 60) are merged into hyper-gems without XP loss', () 
 });
 
 // 10. Escaped Rocks do not inflict HP damage penalty
-test('V17.10: Escaped rocks reset combo but do not inflict HP/shield damage', () => {
+test('V17.10: Escaped enemies do not inflict HP/shield damage and do not reset combo', () => {
   resetLocalStorage();
   game.startNewGame();
   game.player.hp = 100;
@@ -231,7 +231,7 @@ test('V17.10: Escaped rocks reset combo but do not inflict HP/shield damage', ()
 
   game.handleEnemyEscaped(rock);
 
-  assert.equal(game.comboCount, 0, 'Combo count should reset');
+  assert.equal(game.comboCount, 10, 'Combo count should NOT reset when dodging enemy');
   assert.equal(game.player.hp, 100, 'Player HP must NOT take damage when rock escapes');
   assert.equal(game.player.shield, 50, 'Player Shield must NOT take damage when rock escapes');
 });

@@ -2222,15 +2222,19 @@ export class Gem {
     return this;
   }
 
-  update(playerX, playerY, magnetDistance, dt = 1.0) {
+  update(playerX, playerY, magnetDistance, dt = 1.0, screenHeight) {
     this.pulse += 0.06 * dt;
     const dx = playerX - this.x;
     const dy = playerY - this.y;
     const dist = Math.hypot(dx, dy);
 
-    // Mıknatıs çekim menzili: Sadece oyuncu yaklaştığında yumuşak ve tatmin edici şekilde çekilir
-    if (dist < magnetDistance) {
-      const pull = Math.min(9, (magnetDistance - dist) * 0.08 + 2.4);
+    // Mıknatıs Reformu: Ekran tabanına yaklaşan (y > height - 120) kristaller toplanmadan silinmek yerine oyuncuya doğru süzülür
+    const h = screenHeight || (typeof window !== 'undefined' && window.game ? window.game.height : 800);
+    const isNearFloor = this.y > h - 120;
+
+    if (dist < magnetDistance || isNearFloor) {
+      const effectiveRange = isNearFloor ? Math.max(magnetDistance, 320) : magnetDistance;
+      const pull = Math.min(10, Math.max(2.5, (effectiveRange - dist) * 0.08 + 2.4));
       this.vx = (this.vx || 0) * 0.82 + (dx / (dist || 1)) * pull * 0.55;
       this.vy = (this.vy || 0) * 0.82 + (dy / (dist || 1)) * pull * 0.55;
       this.x += this.vx * dt;

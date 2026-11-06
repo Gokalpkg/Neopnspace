@@ -310,9 +310,9 @@ test('FAZ 1.2.7: BlastFireballPool (16 cap) accepts zero-allocation scalar argum
   assert.strictEqual(blastFireballPool.getActiveCount(), 0);
 });
 
-test('FAZ 1.2.8: ParticleDebrisPool (32 cap) acquire and releaseAll', () => {
+test('FAZ 1.2.8: ParticleDebrisPool (80 cap) acquire and releaseAll', () => {
   particleDebrisPool.releaseAll();
-  assert.strictEqual(particleDebrisPool.capacity, 32);
+  assert.strictEqual(particleDebrisPool.capacity, 80);
 
   const p = particleDebrisPool.acquire(10, 20, 1, 2, 3, '#ff0055', 1.0, 0.05);
   assert.strictEqual(p.active, true);

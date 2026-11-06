@@ -10398,5 +10398,32 @@ html, body {
   gap: 8px;
 }
 
+/* ==========================================================================
+   FAZ 2 — FTUE SIFIR SÜRTÜNMELİ İLK GİRİŞ (FLIGHT 0)
+   ========================================================================== */
+body.ftue-active #menu-bottom-dock,
+body.ftue-active #btn-prev-ship,
+body.ftue-active #btn-next-ship,
+body.ftue-active .menu-ship-stats-grid,
+body.ftue-active #mode-storm,
+body.ftue-active #mode-mutator,
+body.ftue-active #btn-ship-starup,
+body.ftue-active .menu-ship-perk-box,
+body.ftue-active #btn-menu-ship-action {
+  display: none !important;
+}
+
+body.ftue-active #btn-start {
+  will-change: transform, box-shadow;
+  transform: scale(1.08) !important;
+  box-shadow: 0 0 35px rgba(0, 240, 255, 0.8), 0 0 15px rgba(5, 255, 161, 0.6) !important;
+  animation: ftueGlowCta 1.5s infinite alternate !important;
+}
+
+@keyframes ftueGlowCta {
+  0% { transform: scale(1.04); box-shadow: 0 0 25px rgba(0, 240, 255, 0.6); }
+  100% { transform: scale(1.10); box-shadow: 0 0 45px rgba(0, 240, 255, 0.95), 0 0 25px rgba(5, 255, 161, 0.7); }
+}
+
 
 

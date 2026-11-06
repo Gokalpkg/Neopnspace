@@ -67,29 +67,29 @@ test('V16.1: Art Bible 60-30-10 HEX Palette avoids pure #000000 and #FFFFFF', ()
 
 // 2. Ship Power Rebalancing & Economy Math Verification
 test('V16.2: Ship Balance enforces clear tactical trade-offs and crowns Chrono Apex as tier pinnacle', () => {
-  assert.equal(game.skins.chrono.dmgMult, 1.55, 'Chrono damage multiplier set to true Apex tier (1.55x)');
+  assert.equal(game.skins.chrono.dmgMult, 1.30, 'Chrono damage multiplier set to true Apex tier (1.30x)');
   assert.equal(game.skins.chrono.shieldMult, 1.25, 'Chrono shield multiplier set to 1.25x');
   assert.equal(SHIP_BALANCE.chrono.chronoNovaIntervalFrames, 480, 'Chrono freeze interval set to 480 frames (8s)');
   assert.equal(SHIP_BALANCE.chrono.chronoFreezeDurationFrames, 78, 'Chrono freeze duration set to 78 frames (1.3s)');
 
-  assert.equal(game.skins.solar.dmgMult, 1.25, 'Solar rebalanced to 1.25x heavy gunboat');
+  assert.equal(game.skins.solar.dmgMult, 1.12, 'Solar rebalanced to 1.12x heavy gunboat');
   assert.equal(game.skins.solar.shieldMult, 1.20, 'Solar has fortified shield (1.20x)');
   assert.equal(game.skins.toxic.magnetMult, 1.60, 'Toxic has highest harvester magnet (1.60x)');
   assert.equal(game.skins.phantom.shieldMult, 1.45, 'Phantom is the premier shield tank (1.45x)');
 });
 
 // 3. Tech Workshop Linear Power & Exponential Costs
-test('V16.3: Tech Workshop applies perceptible linear stat jumps (+12% dmg, +15 shield, +20 hull)', () => {
+test('V16.3: Tech Workshop applies perceptible linear stat jumps (+6% dmg, +15 shield, +20 hull)', () => {
   const catalog = game.getTechCatalog();
   const dmgItem = catalog.find(i => i.id === 'damageBoost');
   const shieldItem = catalog.find(i => i.id === 'shieldMax');
   const hullItem = catalog.find(i => i.id === 'hullMax');
   const critItem = catalog.find(i => i.id === 'critChance');
 
-  assert.equal(dmgItem.formatVal(3), '+36%', 'Level 3 damageBoost formats as +36% (+12%/lvl)');
+  assert.equal(dmgItem.formatVal(3), '+18%', 'Level 3 damageBoost formats as +18% (+6%/lvl)');
   assert.equal(shieldItem.formatVal(2), '+30', 'Level 2 shieldMax formats as +30 (+15/lvl)');
   assert.equal(hullItem.formatVal(2), '+40', 'Level 2 hullMax formats as +40 (+20/lvl)');
-  assert.equal(critItem.formatVal(3), '+12%', 'Level 3 critChance formats as +12% (+4%/lvl)');
+  assert.equal(critItem.formatVal(3), '+9%', 'Level 3 critChance formats as +9% (+3%/lvl)');
 
   resetLocalStorage({
     neon_tech_upgrades: { damageBoost: 2, hullMax: 2, shieldMax: 2, critChance: 2 },
@@ -101,8 +101,8 @@ test('V16.3: Tech Workshop applies perceptible linear stat jumps (+12% dmg, +15 
 
   assert.equal(game.player.maxHp, 140, 'Base 100 + 2 * 20 hullMax = 140 HP');
   assert.equal(game.player.maxShield, 50, 'Base 20 + 2 * 15 shieldMax = 50 Shield');
-  assert.ok(Math.abs(game.player.damageMultiplier - (1.24 * 1.05)) < 1e-6, 'Base (1.0 + 2 * 0.12) * 1.05x skin mult = 1.302x damage');
-  assert.ok(Math.abs(game.player.critChance - 0.13) < 1e-6, 'Base 0.05 + 2 * 0.04 = 0.13 crit chance');
+  assert.ok(Math.abs(game.player.damageMultiplier - (1.12 * 1.0)) < 1e-6, 'Base (1.0 + 2 * 0.06) * 1.0x skin mult = 1.12x damage');
+  assert.ok(Math.abs(game.player.critChance - 0.11) < 1e-6, 'Base 0.05 + 2 * 0.03 = 0.11 crit chance');
 });
 
 // 4. Enemy Spawning Fix (No 30s Opening Blockade)

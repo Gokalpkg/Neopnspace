@@ -43,8 +43,8 @@ for (const lvl of levels) {
     const maxStage = game.unlockedLevel || 1;
     const flights = (game.pilotStats && game.pilotStats.totalFlights) || parseInt(getStorage().getItem('neon_games_played') || '0', 10);
 
-    const stormLockedActual = (maxStage < 2 && flights < 1);
-    const stormExpected = !(lvl >= 2 || fl >= 1);
+    const stormLockedActual = (maxStage < 4);
+    const stormExpected = !(lvl >= 4);
 
     const mutatorLockedActual = (maxStage < 3 && flights < 3);
     const mutatorExpected = !(lvl >= 3 || fl >= 3);

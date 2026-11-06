@@ -550,8 +550,7 @@ class SoundEngine {
   // SES EFEKTLERİ (SFX)
   // ==========================================
 
-  // Standart Lazer Atışı (Tok & Akıcı - Pitch Randomization & Punchy Low-End)
-  // Standart Lazer Atışı (Tok & Akıcı - Pitch Randomization & 50Hz Sub-Bass Punch)
+  // Standart Lazer Atışı (Mobil Akustik Kalibrasyonlu - 280Hz-600Hz Harmonik Punch & Yumuşak Filtreleme)
   playLaser() {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -561,14 +560,15 @@ class SoundEngine {
 
       // Dinamik pitch varyasyonu (%±6 rastgele sapma - monotonlaşmayı kırar)
       const pitchVariance = 1 + (Math.random() - 0.5) * 0.12;
-      const startFreq = 640 * pitchVariance;
-      const endFreq = 120 * pitchVariance;
+      const startFreq = 580 * pitchVariance;
+      const endFreq = 160 * pitchVariance;
 
+      // Yumuşak lowpass/bandpass filtreleme: Tiz 8-bit metalik cırtlaklığı yok eder
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1400, now);
-      filter.frequency.exponentialRampToValueAtTime(320, now + 0.085);
-      filter.Q.value = 1.1;
+      filter.frequency.setValueAtTime(1100, now);
+      filter.frequency.exponentialRampToValueAtTime(280, now + 0.085);
+      filter.Q.value = 0.85;
 
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -576,8 +576,23 @@ class SoundEngine {
       osc.frequency.setValueAtTime(startFreq, now);
       osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.085);
 
-      gain.gain.setValueAtTime(0.13, now);
+      gain.gain.setValueAtTime(0.12, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+
+      // Mobil hoparlör kalibrasyonu: 280Hz–600Hz aralığında dolgun harmonik gövde (punchy saturation)
+      const punchOsc = this.ctx.createOscillator();
+      const punchGain = this.ctx.createGain();
+      const punchFilter = this.ctx.createBiquadFilter();
+      punchFilter.type = 'bandpass';
+      punchFilter.frequency.setValueAtTime(420 * pitchVariance, now);
+      punchFilter.Q.value = 1.1;
+
+      punchOsc.type = 'sine';
+      punchOsc.frequency.setValueAtTime(520 * pitchVariance, now);
+      punchOsc.frequency.exponentialRampToValueAtTime(280 * pitchVariance, now + 0.08);
+
+      punchGain.gain.setValueAtTime(0.16, now);
+      punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
       // Göğüste hissedilen 50Hz sub-bass darbesi
       const subOsc = this.ctx.createOscillator();
@@ -593,14 +608,21 @@ class SoundEngine {
       filter.connect(gain);
       gain.connect(this.sfxGain);
 
+      punchOsc.connect(punchFilter);
+      punchFilter.connect(punchGain);
+      punchGain.connect(this.sfxGain);
+
       subOsc.connect(subGain);
       subGain.connect(this.sfxGain);
 
       this._autoDisconnect(osc, gain, filter);
+      this._autoDisconnect(punchOsc, punchFilter, punchGain);
       this._autoDisconnect(subOsc, subGain);
 
       osc.start(now);
       osc.stop(now + 0.085);
+      punchOsc.start(now);
+      punchOsc.stop(now + 0.08);
       subOsc.start(now);
       subOsc.stop(now + 0.075);
     } catch (e) {}
@@ -717,7 +739,7 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // Patlama Sesi (Büyük & Küçük) - 40Hz-60Hz Sub-Bass Exponential Ramp & Distorted Noise Buffer
+  // Patlama Sesi (Mobil Akustik Kalibrasyonlu - 280Hz-600Hz Harmonik Punch & 20Hz Sub-Bass Ramp)
   playExplosion(isLarge = false) {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -729,18 +751,39 @@ class SoundEngine {
       const noise = this.ctx.createBufferSource();
       noise.buffer = this.sharedDistortedNoiseBuffer || this.sharedNoiseBuffer;
 
+      // Yumuşak lowpass filtreleme: Tiz metalik çıtırtıyı keser ve tok sönümlenme sağlar
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(isLarge ? 480 : 720, now);
+      filter.frequency.setValueAtTime(isLarge ? 440 : 580, now);
       filter.frequency.exponentialRampToValueAtTime(24, now + duration);
+      filter.Q.value = 0.9;
 
       const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(isLarge ? 0.44 : 0.26, now);
-      gain.gain.exponentialRampToValueAtTime(0.008, now + duration);
+      gain.gain.setValueAtTime(isLarge ? 0.40 : 0.24, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
       noise.connect(filter);
       filter.connect(gain);
       gain.connect(this.sfxGain);
+
+      // Mobil hoparlör akustik kalibrasyonu: 280Hz–600Hz harmonik doygunluk (telefon hoparlöründe hissedilen gövde)
+      const phonePunchOsc = this.ctx.createOscillator();
+      const phonePunchGain = this.ctx.createGain();
+      const phonePunchFilter = this.ctx.createBiquadFilter();
+      phonePunchFilter.type = 'bandpass';
+      phonePunchFilter.frequency.setValueAtTime(isLarge ? 360 : 440, now);
+      phonePunchFilter.Q.value = 1.0;
+
+      phonePunchOsc.type = 'triangle';
+      phonePunchOsc.frequency.setValueAtTime(isLarge ? 560 : 460, now);
+      phonePunchOsc.frequency.exponentialRampToValueAtTime(isLarge ? 200 : 260, now + duration * 0.75);
+
+      phonePunchGain.gain.setValueAtTime(isLarge ? 0.28 : 0.18, now);
+      phonePunchGain.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.75);
+
+      phonePunchOsc.connect(phonePunchFilter);
+      phonePunchFilter.connect(phonePunchGain);
+      phonePunchGain.connect(this.sfxGain);
 
       // 40Hz-60Hz Sinematik Sub-Bass Titremesi (60Hz / 48Hz -> 20Hz Sub Darbe Rampası)
       const subOsc = this.ctx.createOscillator();
@@ -757,10 +800,13 @@ class SoundEngine {
       subGain.connect(this.sfxGain);
 
       this._autoDisconnect(noise, filter, gain);
+      this._autoDisconnect(phonePunchOsc, phonePunchFilter, phonePunchGain);
       this._autoDisconnect(subOsc, subGain);
 
       noise.start(now);
       noise.stop(now + duration);
+      phonePunchOsc.start(now);
+      phonePunchOsc.stop(now + duration * 0.75);
       subOsc.start(now);
       subOsc.stop(now + duration);
     } catch (e) {}
