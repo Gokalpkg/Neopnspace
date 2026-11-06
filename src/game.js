@@ -4622,6 +4622,13 @@ class Game {
         sounds.playCardSelect();
         vibrate.light();
         this.inspectedSkinId = skin.id;
+        if (isUnlocked && !isEquipped) {
+          this.currentSkinId = skin.id;
+          localStorage.setItem('neon_current_skin', skin.id);
+          localStorage.setItem('neon_equipped_skin', skin.id);
+          this.showToast(t('toast_ship_on', { name: t('ship_' + skin.id + '_name') }), skin.primary || '#00f0ff');
+          this.updateMenuShipPreview();
+        }
         this.renderHangarSkins();
       });
 
@@ -12741,18 +12748,33 @@ class Game {
     }, { once: true });
 
     row.addEventListener('click', () => {
+      if (this.state !== 'LUCKY_CHEST') return;
       this.selectedChestRewardIndex = idx;
       if (luckyChestContainer) {
         const cards = luckyChestContainer.querySelectorAll('.upgrade-item-card');
         cards.forEach((c, i) => {
           c.style.animation = 'none';
-          c.style.opacity = '1';
-          if (i === idx) c.classList.add('selected');
-          else c.classList.remove('selected');
+          if (i === idx) {
+            c.classList.add('selected');
+            c.style.transform = 'scale(0.95)';
+            c.style.borderColor = '#ffd700';
+            c.style.boxShadow = '0 0 25px rgba(255, 215, 0, 0.7)';
+            c.style.opacity = '1';
+          } else {
+            c.classList.remove('selected');
+            c.style.opacity = '0.25';
+          }
         });
       }
       sounds.playCardSelect();
-      vibrate.light();
+      vibrate.medium();
+
+      // Tek Dokunuşla Seçim: Seçenek tıklandığı an doğrudan ödülü al ve oyuna dön!
+      setTimeout(() => {
+        if (this.state === 'LUCKY_CHEST') {
+          this.claimLuckyChest(false);
+        }
+      }, 90);
     });
 
     const tag = item.isEvolution ? `<span class="card-level-badge evolution-tag">${t('card_tag_evo') || 'EFSANEVİ EVRİM'}</span>` : `<span class="card-level-badge">${t('card_tag_free') || 'ÜCRETSİZ GELİŞTİRME'}</span>`;
