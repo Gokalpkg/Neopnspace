@@ -134,16 +134,16 @@ runTest('R3.3: acquireRelic eseri anında neon_discovered_relics içine kaydeder
   assert.ok(gameSrc.includes('this.recordDiscoveredRelic(relic.id)'), 'Eser alındığında kalıcı keşfe yazılmalı');
 });
 
-runTest('R3.4: Sürüm 1.8.0 ve versionCode 58 senkronizasyonu', () => {
+runTest('R3.4: Sürüm 1.8.1 ve versionCode 59 senkronizasyonu', () => {
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  assert.strictEqual(pkg.version, '1.8.0', 'package.json version 1.8.0 olmalı');
+  assert.strictEqual(pkg.version, '1.8.1', 'package.json version 1.8.1 olmalı');
 
   const gradle = fs.readFileSync('android/app/build.gradle', 'utf8');
-  assert.ok(gradle.includes('versionCode 58'), 'build.gradle versionCode 58 olmalı');
-  assert.ok(gradle.includes('versionName "1.8.0"'), 'build.gradle versionName 1.8.0 olmalı');
+  assert.ok(gradle.includes('versionCode 59'), 'build.gradle versionCode 59 olmalı');
+  assert.ok(gradle.includes('versionName "1.8.1"'), 'build.gradle versionName 1.8.1 olmalı');
 
   const html = fs.readFileSync('index.html', 'utf8');
-  assert.ok(html.includes('v1.8.0'), 'index.html v1.8.0 metni güncel olmalı');
+  assert.ok(html.includes('v1.8.1'), 'index.html v1.8.1 metni güncel olmalı');
 });
 
 runTest('R3.5: Sıfır Unicode Emoji kuralı tüm yeni özellik ve çevirilerde sağlandı', () => {
