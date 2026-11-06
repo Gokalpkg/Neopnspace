@@ -134,16 +134,16 @@ runTest('R3.3: acquireRelic eseri anında neon_discovered_relics içine kaydeder
   assert.ok(gameSrc.includes('this.recordDiscoveredRelic(relic.id)'), 'Eser alındığında kalıcı keşfe yazılmalı');
 });
 
-runTest('R3.4: Sürüm 1.8.2 ve versionCode 60 senkronizasyonu', () => {
+runTest('R3.4: Sürüm 1.8.3 ve versionCode 61 senkronizasyonu', () => {
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  assert.strictEqual(pkg.version, '1.8.2', 'package.json version 1.8.2 olmalı');
+  assert.strictEqual(pkg.version, '1.8.3', 'package.json version 1.8.3 olmalı');
 
   const gradle = fs.readFileSync('android/app/build.gradle', 'utf8');
-  assert.ok(gradle.includes('versionCode 60'), 'build.gradle versionCode 60 olmalı');
-  assert.ok(gradle.includes('versionName "1.8.2"'), 'build.gradle versionName 1.8.2 olmalı');
+  assert.ok(gradle.includes('versionCode 61'), 'build.gradle versionCode 61 olmalı');
+  assert.ok(gradle.includes('versionName "1.8.3"'), 'build.gradle versionName 1.8.3 olmalı');
 
   const html = fs.readFileSync('index.html', 'utf8');
-  assert.ok(html.includes('v1.8.2'), 'index.html v1.8.2 metni güncel olmalı');
+  assert.ok(html.includes('v1.8.3'), 'index.html v1.8.3 metni güncel olmalı');
 });
 
 runTest('R3.5: Sıfır Unicode Emoji kuralı tüm yeni özellik ve çevirilerde sağlandı', () => {
@@ -167,7 +167,8 @@ runTest('R3.5: Sıfır Unicode Emoji kuralı tüm yeni özellik ve çevirilerde 
 runTest('S2.4: Kaçan Cosmic Swarmer gezegen bariyer hasarı vermez ve komboyu bozmaz', () => {
   const gameSrc = fs.readFileSync('src/game.js', 'utf8');
   assert.ok(gameSrc.includes('!enemy.isSwarmer && enemy.type !== \'cosmic_swarmer\' && !enemy.isIndestructible'), 'Bariyer kaçış kontrolünden swarmer muaf tutulmalı');
-  assert.ok(gameSrc.includes('if (enemy && (enemy.isSwarmer || enemy.type === \'cosmic_swarmer\' || enemy.type === \'swarmer\')) return;'), 'handleEnemyEscaped içinde swarmer bariyere zarar vermemeli');
+  assert.ok(gameSrc.includes('handleEnemyEscaped(enemy)'), 'handleEnemyEscaped tanımlı olmalı');
+  assert.ok(!gameSrc.includes('this.player.shield -= breachDmg'), 'Bariyer kalkan cezası kaldırılmış olmalı');
 });
 
 runTest('S2.5: Swarmer öldüğünde/kaçtığında swarmerPool.release ile havuza döner ve kirli durum temizlenir', () => {
