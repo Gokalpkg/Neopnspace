@@ -330,9 +330,10 @@
 
     <!-- Alt Hızlı Erişim Çubuğu (5 Sekmeli Kalıcı Menü Dock'u) -->
     <div id="menu-bottom-dock" class="menu-bottom-dock">
-      <button id="btn-hangar" class="dock-btn">
+      <button id="btn-hangar" class="dock-btn relative-btn">
         <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><path d="M8 1h3v3H8zM7 3h1v1H7zM6 4h1v1H6zM5 5h1v1H5zM4 6h1v1H4zM3 7h1v1H3zM2 8h1v1H2zM1 9h2v2H1z" fill="#00f0ff"/><rect x="9" y="2" width="1" height="1" fill="#030816"/></svg></span>
         <span class="dock-label" data-i18n="dock_hangar">HANGAR</span>
+        <span id="hangar-badge-dot" class="badge-dot hidden"></span>
       </button>
       <button id="btn-missions" class="dock-btn relative-btn">
         <span class="dock-icon"><svg class="pixel-icon pixel-icon-lg" viewBox="0 0 12 12"><rect x="5" y="0" width="2" height="3" fill="#ffbe0b"/><rect x="5" y="9" width="2" height="3" fill="#ffbe0b"/><rect x="0" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="9" y="5" width="3" height="2" fill="#ffbe0b"/><rect x="4" y="4" width="4" height="4" fill="none" stroke="#ffbe0b" stroke-width="1"/></svg></span>
@@ -380,7 +381,7 @@
             </div>
             <h2 class="gameover-title" style="margin: 0; font-size: 1.25rem;" data-i18n="settings_title">AYARLAR</h2>
           </div>
-          <button id="btn-settings-close-x" class="modal-close-btn" aria-label="Close">✕</button>
+          <button id="btn-settings-close-x" class="modal-close-btn" aria-label="Close">X</button>
         </div>
 
         <!-- 1. Dil Seçimi Bölümü -->
@@ -409,6 +410,33 @@
           </div>
         </div>
 
+
+        <!-- 2.5. Kontrol ve Dokunmatik Ergonomi -->
+        <div class="settings-section" style="margin-top: 14px;">
+          <div class="settings-section-title" data-i18n="settings_controls_title">KONTROL VE DOKUNMATİK ERGONOMİ</div>
+          <div style="margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;" data-i18n="settings_touch_offset">DİKEY PARMAK OFSETİ</span>
+              <span id="touch-offset-val" style="font-size: 0.78rem; font-weight: 800; color: #00f0ff;">Dengeli (-45px)</span>
+            </div>
+            <div class="control-preset-row" id="touch-offset-presets">
+              <button type="button" class="ctrl-preset-btn" data-offset="-25" data-i18n="touch_offset_close">Yakın (-25px)</button>
+              <button type="button" class="ctrl-preset-btn active" data-offset="-45" data-i18n="touch_offset_balanced">Dengeli (-45px)</button>
+              <button type="button" class="ctrl-preset-btn" data-offset="-70" data-i18n="touch_offset_wide">Geniş (-70px)</button>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;" data-i18n="settings_touch_sens">DOKUNMATİK HASSASİYET</span>
+              <span id="touch-sens-val" style="font-size: 0.78rem; font-weight: 800; color: #05ffa1;">1.15x</span>
+            </div>
+            <div class="control-preset-row" id="touch-sens-presets">
+              <button type="button" class="ctrl-preset-btn" data-sens="0.9" data-i18n="touch_sens_precise">0.9x Hassas</button>
+              <button type="button" class="ctrl-preset-btn active" data-sens="1.15" data-i18n="touch_sens_balanced">1.15x Dengeli</button>
+              <button type="button" class="ctrl-preset-btn" data-sens="1.4" data-i18n="touch_sens_agile">1.4x Çevik</button>
+            </div>
+          </div>
+        </div>
 
         <!-- 3. Reklamları Kaldır (No-Ads / VIP Protokolü) -->
         <!-- 3. VIP Reklam Kalkanı (Google Play Merchant hesabı kurulana kadar gizlendi) -->
@@ -480,7 +508,7 @@
           </button>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <button id="btn-settings-privacy" type="button" class="privacy-link" style="padding: 4px 0;" data-i18n="settings_privacy">Gizlilik Politikası</button>
-            <span style="font-size: 0.75rem; color: #64748b;">v1.8.3</span>
+            <span style="font-size: 0.75rem; color: #64748b;">v1.8.4</span>
           </div>
         </div>
 
@@ -1014,8 +1042,9 @@
           <button id="tab-btn-boosters" class="hangar-tab-btn" role="tab" data-tab="boosters">
             <svg class="tab-icon" width="14" height="14" viewBox="0 0 16 16"><path d="M9 1L4 9h4l-2 6 7-8H9z" fill="#ffd700"/></svg> <span data-i18n="tab_boosters">MÜHİMMAT</span>
           </button>
-          <button id="tab-btn-tech" class="hangar-tab-btn" role="tab" data-tab="tech">
+          <button id="tab-btn-tech" class="hangar-tab-btn" role="tab" data-tab="tech" style="position: relative;">
             <svg class="tab-icon" width="14" height="14" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="2" fill="none" stroke="#bf5af2" stroke-width="2"/><path d="M8 1v4M8 11v4M1 8h4M11 8h4" stroke="#bf5af2" stroke-width="1.5"/></svg> <span data-i18n="tab_workshop">ATÖLYE</span>
+            <span id="tech-badge-dot" class="badge-dot hidden" style="position: absolute; top: 3px; right: 4px;"></span>
           </button>
           <button id="tab-btn-trophies" class="hangar-tab-btn" role="tab" data-tab="trophies" style="position: relative;">
             <svg class="tab-icon" width="14" height="14" viewBox="0 0 16 16"><path d="M5 2h6v5c0 2-1.5 3.5-3 3.5S5 9 5 7V2zm-2 2h2v3H3zm8 0h2v3h-2zm-3 8h2v2H8z" fill="#ffd700"/></svg> <span data-i18n="tab_badges">ROZETLER</span>

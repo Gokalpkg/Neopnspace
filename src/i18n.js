@@ -15,6 +15,16 @@ export const SUPPORTED_LANGUAGES = [
 
 export const TRANSLATIONS = {
   'en-GB': {
+    settings_controls_title: "TOUCH CONTROLS & ERGONOMICS",
+    settings_touch_offset: "VERTICAL THUMB OFFSET",
+    touch_offset_close: "Close (-25px)",
+    touch_offset_balanced: "Balanced (-45px)",
+    touch_offset_wide: "Wide (-70px)",
+    settings_touch_sens: "TOUCH SENSITIVITY",
+    touch_sens_precise: "0.9x Precise",
+    touch_sens_balanced: "1.15x Normal",
+    touch_sens_agile: "1.4x Agile",
+
     tap_to_skip: "Tap anywhere to skip",
     btn_equip: "EQUIP",
     card_tag_evo: "LEGENDARY EVOLUTION",
@@ -526,6 +536,16 @@ export const TRANSLATIONS = {
   },
 
   'tr-TR': {
+    settings_controls_title: "KONTROL VE DOKUNMATİK ERGONOMİ",
+    settings_touch_offset: "DİKEY PARMAK OFSETİ",
+    touch_offset_close: "Yakın (-25px)",
+    touch_offset_balanced: "Dengeli (-45px)",
+    touch_offset_wide: "Geniş (-70px)",
+    settings_touch_sens: "DOKUNMATİK HASSASİYET",
+    touch_sens_precise: "0.9x Hassas",
+    touch_sens_balanced: "1.15x Dengeli",
+    touch_sens_agile: "1.4x Çevik",
+
     tap_to_skip: "Geçmek için dokunun",
     btn_equip: "KUŞAN",
     card_tag_evo: "EFSANEVİ EVRİM",
@@ -1023,6 +1043,16 @@ export const TRANSLATIONS = {
   },
 
   'fr-FR': {
+    settings_controls_title: "COMMANDES TACTILES ET ERGONOMIE",
+    settings_touch_offset: "DECALAGE VERTICAL DU POUCE",
+    touch_offset_close: "Proche (-25px)",
+    touch_offset_balanced: "Equilibre (-45px)",
+    touch_offset_wide: "Large (-70px)",
+    settings_touch_sens: "SENSIBILITE TACTILE",
+    touch_sens_precise: "0.9x Precis",
+    touch_sens_balanced: "1.15x Normal",
+    touch_sens_agile: "1.4x Agile",
+
     tap_to_skip: "Touchez pour passer",
     btn_equip: "ÉQUIPER",
     card_tag_evo: "ÉVOLUTION LÉGENDAIRE",
@@ -1494,6 +1524,16 @@ export const TRANSLATIONS = {
   },
 
   'fr-CA': {
+    settings_controls_title: "COMMANDES TACTILES ET ERGONOMIE",
+    settings_touch_offset: "DECALAGE VERTICAL DU POUCE",
+    touch_offset_close: "Proche (-25px)",
+    touch_offset_balanced: "Equilibre (-45px)",
+    touch_offset_wide: "Large (-70px)",
+    settings_touch_sens: "SENSIBILITE TACTILE",
+    touch_sens_precise: "0.9x Precis",
+    touch_sens_balanced: "1.15x Normal",
+    touch_sens_agile: "1.4x Agile",
+
     tap_to_skip: "Touchez pour passer",
     btn_equip: "ÉQUIPER",
     card_tag_evo: "ÉVOLUTION LÉGENDAIRE",
@@ -1969,6 +2009,16 @@ export const TRANSLATIONS = {
   },
 
   'de-DE': {
+    settings_controls_title: "TOUCH-STEUERUNG UND ERGONOMIE",
+    settings_touch_offset: "VERTIKALER DAUMEN-OFFSET",
+    touch_offset_close: "Nah (-25px)",
+    touch_offset_balanced: "Ausgewogen (-45px)",
+    touch_offset_wide: "Weit (-70px)",
+    settings_touch_sens: "TOUCH-EMPFINDLICHKEIT",
+    touch_sens_precise: "0.9x Praezise",
+    touch_sens_balanced: "1.15x Normal",
+    touch_sens_agile: "1.4x Agil",
+
     tap_to_skip: "Tippen zum Überspringen",
     btn_equip: "AUSRÜSTEN",
     card_tag_evo: "LEGENDÄRE EVOLUTION",
@@ -2459,6 +2509,16 @@ export const TRANSLATIONS = {
   },
 
   'zh-HK': {
+    settings_controls_title: "觸控與人體工學設定",
+    settings_touch_offset: "垂直拇指偏移量",
+    touch_offset_close: "貼近 (-25px)",
+    touch_offset_balanced: "平衡 (-45px)",
+    touch_offset_wide: "寬廣 (-70px)",
+    settings_touch_sens: "觸控靈敏度",
+    touch_sens_precise: "0.9x 精準",
+    touch_sens_balanced: "1.15x 平衡",
+    touch_sens_agile: "1.4x 敏捷",
+
     tap_to_skip: "點擊任意處跳過",
     btn_equip: "裝備",
     card_tag_evo: "傳奇進化",
@@ -2953,6 +3013,16 @@ export const TRANSLATIONS = {
   },
 
   'zh-CN': {
+    settings_controls_title: "触控与人体工程学设置",
+    settings_touch_offset: "垂直拇指偏移量",
+    touch_offset_close: "贴近 (-25px)",
+    touch_offset_balanced: "平衡 (-45px)",
+    touch_offset_wide: "宽广 (-70px)",
+    settings_touch_sens: "触控灵敏度",
+    touch_sens_precise: "0.9x 精准",
+    touch_sens_balanced: "1.15x 平衡",
+    touch_sens_agile: "1.4x 敏捷",
+
     tap_to_skip: "点击任意处跳过",
     btn_equip: "装备",
     card_tag_evo: "传奇进化",
@@ -3443,6 +3513,16 @@ export const TRANSLATIONS = {
   },
 
   'zh-TW': {
+    settings_controls_title: "觸控與人體工學設定",
+    settings_touch_offset: "垂直拇指偏移量",
+    touch_offset_close: "貼近 (-25px)",
+    touch_offset_balanced: "平衡 (-45px)",
+    touch_offset_wide: "寬廣 (-70px)",
+    settings_touch_sens: "觸控靈敏度",
+    touch_sens_precise: "0.9x 精準",
+    touch_sens_balanced: "1.15x 平衡",
+    touch_sens_agile: "1.4x 敏捷",
+
     tap_to_skip: "點擊任意處跳過",
     btn_equip: "裝備",
     card_tag_evo: "傳奇進化",
@@ -3933,6 +4013,16 @@ export const TRANSLATIONS = {
   },
 
   'ja-JP': {
+    settings_controls_title: "タッチ操作と操作性設定",
+    settings_touch_offset: "垂直親指オフセット",
+    touch_offset_close: "近接 (-25px)",
+    touch_offset_balanced: "標準 (-45px)",
+    touch_offset_wide: "広域 (-70px)",
+    settings_touch_sens: "タッチ感度",
+    touch_sens_precise: "0.9x 精密",
+    touch_sens_balanced: "1.15x 標準",
+    touch_sens_agile: "1.4x アジャイル",
+
     tap_to_skip: "タップしてスキップ",
     btn_equip: "装備",
     card_tag_evo: "伝説の進化",

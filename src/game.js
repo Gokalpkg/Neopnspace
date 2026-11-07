@@ -604,7 +604,8 @@ class Game {
     this._lastGrazeCalloutTime = 0;
     this.gameTime = 0; // Saniye cinsinden
     this.frames = 0;
-    this.touchOffsetY = -38;
+    this.touchOffsetY = Number(localStorage.getItem('neon_touch_offset_y')) || -45;
+    this.touchSensitivity = Number(localStorage.getItem('neon_touch_sens')) || 1.15;
     this.isMerchantActive = false;
     this.modalTransition = null;
     this.resumeRampTimer = 0;
@@ -1239,8 +1240,9 @@ class Game {
       const scaleX = rect.width ? (this.width / rect.width) : 1;
       const scaleY = rect.height ? (this.height / rect.height) : 1;
       const slowRatio = (this.player.cryoSlowTimer > 0) ? 0.65 : 1.0;
-      const deltaX = (clientX - lastX) * scaleX * slowRatio;
-      const deltaY = (clientY - lastY) * scaleY * slowRatio;
+      const sens = this.touchSensitivity || 1.15;
+      const deltaX = (clientX - lastX) * scaleX * slowRatio * sens;
+      const deltaY = (clientY - lastY) * scaleY * slowRatio * sens;
       lastX = clientX;
       lastY = clientY;
 
@@ -3893,6 +3895,33 @@ class Game {
       totalCrystalsDisplay.classList.add('scale-punch');
     }
     if (hangarCrystalsVal) hangarCrystalsVal.textContent = displayText;
+    this.updateTechBadge();
+  }
+
+  updateTechBadge() {
+    try {
+      const catalog = this.getTechCatalog ? this.getTechCatalog() : [];
+      let canUpgrade = false;
+      for (const item of catalog) {
+        const currentLvl = (this.techUpgrades && this.techUpgrades[item.id]) || 0;
+        if (currentLvl < item.maxLevel) {
+          const nextCost = item.costs ? item.costs[currentLvl] : Math.round(item.baseCost * Math.pow(item.costMult || 1.15, currentLvl));
+          if (this.totalCrystals >= nextCost) {
+            canUpgrade = true;
+            break;
+          }
+        }
+      }
+
+      const hangarDot = document.getElementById('hangar-badge-dot');
+      if (hangarDot) hangarDot.classList.toggle('hidden', !canUpgrade);
+
+      const techDot = document.getElementById('tech-badge-dot');
+      if (techDot) techDot.classList.toggle('hidden', !canUpgrade);
+
+      const crystalPill = document.getElementById('btn-menu-crystals');
+      if (crystalPill) crystalPill.classList.toggle('glow-ready', canUpgrade);
+    } catch (_) {}
   }
 
   updateGoldDisplay() {
@@ -5584,6 +5613,7 @@ class Game {
           sounds.playCardSelect();
           setLanguage(lang.code);
           renderLanguageGrid();
+      updateControlSettingsUI();
           updateSettingsToggles();
           this.updateMenuShipPreview();
           this.showToast(t('toast_copied'), '#00f0ff');
@@ -5620,6 +5650,59 @@ class Game {
       }
     };
     this.updateDevModeUI = updateDevModeUI;
+
+    const updateControlSettingsUI = () => {
+      const currentOffset = Number(localStorage.getItem('neon_touch_offset_y')) || -45;
+      const currentSens = Number(localStorage.getItem('neon_touch_sens')) || 1.15;
+
+      const offsetValEl = document.getElementById('touch-offset-val');
+      if (offsetValEl) {
+        if (currentOffset === -25) offsetValEl.textContent = t('touch_offset_close') || 'Yakın (-25px)';
+        else if (currentOffset === -70) offsetValEl.textContent = t('touch_offset_wide') || 'Geniş (-70px)';
+        else offsetValEl.textContent = t('touch_offset_balanced') || 'Dengeli (-45px)';
+      }
+      const offsetBtns = document.querySelectorAll('#touch-offset-presets .ctrl-preset-btn');
+      offsetBtns.forEach(btn => {
+        btn.classList.toggle('active', Number(btn.getAttribute('data-offset')) === currentOffset);
+      });
+
+      const sensValEl = document.getElementById('touch-sens-val');
+      if (sensValEl) {
+        sensValEl.textContent = `${currentSens.toFixed(2)}x`;
+      }
+      const sensBtns = document.querySelectorAll('#touch-sens-presets .ctrl-preset-btn');
+      sensBtns.forEach(btn => {
+        btn.classList.toggle('active', Math.abs(Number(btn.getAttribute('data-sens')) - currentSens) < 0.05);
+      });
+    };
+
+    const offsetBtns = document.querySelectorAll('#touch-offset-presets .ctrl-preset-btn');
+    offsetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        vibrate.light();
+        const val = Number(btn.getAttribute('data-offset')) || -45;
+        this.touchOffsetY = val;
+        localStorage.setItem('neon_touch_offset_y', val.toString());
+        updateControlSettingsUI();
+      });
+    });
+
+    const sensBtns = document.querySelectorAll('#touch-sens-presets .ctrl-preset-btn');
+    sensBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sounds.init();
+        sounds.playCardSelect();
+        vibrate.light();
+        const val = Number(btn.getAttribute('data-sens')) || 1.15;
+        this.touchSensitivity = val;
+        localStorage.setItem('neon_touch_sens', val.toString());
+        updateControlSettingsUI();
+      });
+    });
+    updateControlSettingsUI();
+    this.updateControlSettingsUI = updateControlSettingsUI;
     updateDevModeUI();
 
     if (btnToggleDevMode) {
@@ -5634,6 +5717,7 @@ class Game {
     const openSettings = () => {
       if (!settingsModal) return;
       renderLanguageGrid();
+      updateControlSettingsUI();
       updateSettingsToggles();
       updateDevModeUI();
       const host = document.getElementById('app-container') || document.body;

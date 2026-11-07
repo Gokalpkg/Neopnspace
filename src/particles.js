@@ -66,6 +66,7 @@ export class ParticleSystem {
     this.floatingTexts = [];
     this.shockwaves = shockwavePool.pool;
     this.stars = [];
+    this.planets = [];
     this.nebulae = [];
     this.lightnings = [];
     this.shards = particleDebrisPool.pool;
@@ -173,6 +174,20 @@ export class ParticleSystem {
       { x: width * 0.25, y: height * 0.2, radius: Math.min(width * 0.45, 180), vy: 0.12, color: 'rgba(147, 51, 234, 0.08)' },
       { x: width * 0.8, y: height * 0.65, radius: Math.min(width * 0.5, 210), vy: 0.08, color: 'rgba(6, 182, 212, 0.07)' },
       { x: width * 0.5, y: -80, radius: Math.min(width * 0.38, 160), vy: 0.15, color: 'rgba(236, 72, 153, 0.06)' }
+    ];
+
+    this.planets = [
+      {
+        x: width * 0.82,
+        y: height * 0.22,
+        radius: Math.min(width * 0.2, 85),
+        vy: 0.035,
+        ringRadius: Math.min(width * 0.32, 135),
+        ringAngle: -0.35,
+        colorCore: 'rgba(56, 189, 248, 0.08)',
+        colorEdge: 'rgba(168, 85, 247, 0.02)',
+        ringColor: 'rgba(0, 240, 255, 0.1)'
+      }
     ];
   }
 
@@ -768,6 +783,41 @@ export class ParticleSystem {
 
     // 1.5. Kuantum Kutup Işıkları (Aurora Ribbons - Derin Uzay Parıltısı)
     this.renderAuroras(ctx);
+
+    // 1.8. Derin Uzay Kozmik Gezegenleri (Parallaks Gaz Devi & Siber Halkalar)
+    if (this.planets && this.planets.length > 0) {
+      for (const p of this.planets) {
+        p.y += (p.vy || 0.035) * (this.warpTimer > 0 ? 3.5 : 1.0);
+        if (p.y - p.radius > ctx.canvas.height + 100) {
+          p.y = -p.radius - 80;
+          p.x = Math.random() * ctx.canvas.width;
+        }
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+
+        // Gezegen Atmosferik Gövdesi
+        const radGrad = ctx.createRadialGradient(-p.radius * 0.3, -p.radius * 0.3, p.radius * 0.1, 0, 0, p.radius);
+        radGrad.addColorStop(0, p.colorCore);
+        radGrad.addColorStop(0.7, p.colorEdge);
+        radGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Siber Gezegen Halkası (Ring System)
+        if (p.ringRadius) {
+          ctx.rotate(p.ringAngle || -0.35);
+          ctx.strokeStyle = p.ringColor;
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.ringRadius, p.ringRadius * 0.28, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
 
     // 2. Retro-Pixel Yıldızlar (3 Katmanlı 8-Bit Parallaks & Çapraz Yıldız Parıltıları)
     const isWarp = this.warpTimer > 0;
