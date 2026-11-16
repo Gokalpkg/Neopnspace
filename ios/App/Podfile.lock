@@ -12,6 +12,8 @@ PODS:
     - GoogleAppMeasurementOnDeviceConversion (~> 11.7.0)
   - CapacitorHaptics (7.0.5):
     - Capacitor
+  - CapacitorLocalNotifications (7.0.7):
+    - Capacitor
   - FirebaseAnalytics (11.7.0):
     - FirebaseAnalytics/AdIdSupport (= 11.7.0)
     - FirebaseCore (~> 11.7.0)
@@ -105,6 +107,7 @@ DEPENDENCIES:
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorFirebaseAnalytics/Analytics (from `../../node_modules/@capacitor-firebase/analytics`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
+  - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
 
 SPEC REPOS:
   trunk:
@@ -131,6 +134,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor-firebase/analytics"
   CapacitorHaptics:
     :path: "../../node_modules/@capacitor/haptics"
+  CapacitorLocalNotifications:
+    :path: "../../node_modules/@capacitor/local-notifications"
 
 SPEC CHECKSUMS:
   Capacitor: 6f16b88ca74aa4989d59b02844658455bdab9af2
@@ -138,6 +143,7 @@ SPEC CHECKSUMS:
   CapacitorCordova: 33313bf8891d44741970e16534be781ff3caa00a
   CapacitorFirebaseAnalytics: 6f954f790921fcdca3256622dc34432a987c75fc
   CapacitorHaptics: ec024a10130c230743219149c76a02da5cff6aed
+  CapacitorLocalNotifications: f8ccb7e9c9056a23f415398e51825594e953af3a
   FirebaseAnalytics: bc9e565af9044ba8d6c6e4157e4edca8e5fdf7ec
   FirebaseCore: 3227e35f4197a924206fbcdc0349325baf4f5de4
   FirebaseCoreInternal: d6c17dafc8dc33614733a8b52df78fcb4394c881
@@ -150,6 +156,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
 
-PODFILE CHECKSUM: 1f8a466c272e6b1af3982baa7deb5a8eeadbec83
+PODFILE CHECKSUM: 92aab521f6a64839a179d707a6a54453be960542
 
 COCOAPODS: 1.17.0
