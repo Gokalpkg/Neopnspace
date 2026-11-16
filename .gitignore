@@ -34,3 +34,4 @@ DerivedData/
 *.xcodeproj/xcuserdata/
 *.xcarchive
 *.ipa
+ios_screenshots/
