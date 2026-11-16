@@ -28,7 +28,7 @@
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -48,9 +48,9 @@
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-9694275729123906~6102595607</string>
 	<key>GADDelayAppMeasurementInit</key>
-	<false/>
+	<true/>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to deliver personalized ads to you.</string>
+	<string>We use this identifier to deliver relevant ads and measure ad performance. You can enjoy the full game even if you decline tracking.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
